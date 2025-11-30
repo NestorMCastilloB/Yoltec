@@ -22,7 +22,7 @@ class AuthController extends Controller
                     ->orWhere('username', $request->identificador)
                     ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+      if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'identificador' => ['Las credenciales son incorrectas.'],
             ]);
