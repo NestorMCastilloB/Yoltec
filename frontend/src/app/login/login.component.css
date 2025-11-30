@@ -51,6 +51,16 @@
   font-weight: 600;
 }
 
+.error-message {
+  background-color: #FFEBEE;
+  color: #C62828;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  border-left: 4px solid #C62828;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }

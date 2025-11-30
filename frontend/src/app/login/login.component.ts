@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../services/auth.service';
+import { catchError, finalize, takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -10,27 +13,63 @@ import { CommonModule } from '@angular/common';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   activeTab: string = 'student';
+  isLoading = false;
+  errorMessage: string | null = null;
   
   studentData = {
-    controlNumber: '',
-    nip: ''
-  };
-
-  doctorData = {
-    username: '',
+    identificador: '',
     password: ''
   };
 
-  constructor(private router: Router) {}
+  doctorData = {
+    identificador: '',
+    password: ''
+  };
+
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   onStudentLogin() {
-    this.router.navigate(['/student-dashboard']);
+    this.login(this.studentData.identificador, this.studentData.password);
   }
 
   onDoctorLogin() {
-    this.router.navigate(['/doctor-dashboard']);
+    this.login(this.doctorData.identificador, this.doctorData.password);
+  }
+
+  private login(identificador: string, password: string) {
+    this.isLoading = true;
+    this.errorMessage = null;
+    
+    this.authService.login(identificador, password)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.errorMessage = error.message || 'Error en el inicio de sesión. Verifica tus credenciales.';
+          return of(null);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response) {
+            // La redirección se maneja en el servicio de autenticación
+          }
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   setActiveTab(tab: string) {
