@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Citas
     Route::get('/citas', [CitaController::class, 'index']);
+    Route::get('/citas/disponibilidad', [CitaController::class, 'availability']);
     Route::post('/citas', [CitaController::class, 'store']);
     Route::get('/citas/{id}', [CitaController::class, 'show']);
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar']);
@@ -40,4 +41,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recetas', [RecetaController::class, 'index']);
     Route::post('/recetas', [RecetaController::class, 'store']); // Solo doctor
     Route::get('/recetas/{id}', [RecetaController::class, 'show']);
+    Route::put('/recetas/{id}', [RecetaController::class, 'update']); // Solo doctor
 });

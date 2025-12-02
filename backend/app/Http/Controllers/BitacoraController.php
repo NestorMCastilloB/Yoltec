@@ -38,13 +38,13 @@ class BitacoraController extends Controller
 
         $validated = $request->validate([
             'cita_id' => 'required|exists:citas,id',
-            'diagnostico' => 'nullable|string',
-            'tratamiento' => 'nullable|string',
-            'observaciones' => 'nullable|string',
-            'peso' => 'nullable|string',
-            'altura' => 'nullable|string',
-            'temperatura' => 'nullable|string',
-            'presion_arterial' => 'nullable|string',
+            'diagnostico' => 'required|string',
+            'tratamiento' => 'required|string',
+            'observaciones' => 'required|string',
+            'peso' => 'required|string',
+            'altura' => 'required|string',
+            'temperatura' => 'required|string',
+            'presion_arterial' => 'required|string',
         ]);
 
         $cita = Cita::findOrFail($validated['cita_id']);
@@ -85,13 +85,13 @@ class BitacoraController extends Controller
         $bitacora = Bitacora::findOrFail($id);
 
         $validated = $request->validate([
-            'diagnostico' => 'nullable|string',
-            'tratamiento' => 'nullable|string',
-            'observaciones' => 'nullable|string',
-            'peso' => 'nullable|string',
-            'altura' => 'nullable|string',
-            'temperatura' => 'nullable|string',
-            'presion_arterial' => 'nullable|string',
+            'diagnostico' => 'required|string',
+            'tratamiento' => 'required|string',
+            'observaciones' => 'required|string',
+            'peso' => 'required|string',
+            'altura' => 'required|string',
+            'temperatura' => 'required|string',
+            'presion_arterial' => 'required|string',
         ]);
 
         $bitacora->update($validated);

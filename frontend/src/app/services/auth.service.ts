@@ -45,11 +45,16 @@ export class AuthService {
     }
   }
 
-  login(identificador: string, password: string): Observable<LoginResponse> {
+  login(identificador: string, password: string, expectedRole?: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { identificador, password })
       .pipe(
         tap(response => {
           if (response && response.token) {
+            // Si se indicó un rol esperado (alumno/doctor) y no coincide, lanzar error
+            if (expectedRole && response.user?.tipo !== expectedRole) {
+              throw new Error('Las credenciales corresponden a un usuario de tipo ' + response.user.tipo + '. Verifica que estés usando la pestaña correcta.');
+            }
+
             // Guardar token y datos del usuario
             this.setToken(response.token);
             this.setUser(response.user);
@@ -68,18 +73,42 @@ export class AuthService {
   
   // Método privado para manejar errores
   private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'Ocurrió un error inesperado';
-    
-    if (error.error instanceof ErrorEvent) {
-      // Error del lado del cliente
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Error del servidor
-      errorMessage = `Error: ${error.status} - ${error.message || ''}`;
+    let errorMessage = 'Ocurrió un error al procesar la solicitud.';
+
+    if (error.status === 0) {
+      errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.';
+    } else if (error.status === 401) {
+      errorMessage = 'Tu sesión ha expirado. Inicia sesión de nuevo.';
+    } else if (error.status === 422) {
+      const backendMessage = this.extractValidationMessage(error);
+      errorMessage = backendMessage ?? 'Hay datos inválidos. Revisa la información ingresada.';
+    } else if (error.status >= 500) {
+      errorMessage = 'El servidor presentó un problema. Intenta más tarde.';
+    } else if (typeof error.error === 'string') {
+      errorMessage = error.error;
+    } else if (typeof error.message === 'string' && error.message.trim() !== '') {
+      errorMessage = error.message;
     }
-    
-    console.error(errorMessage);
+
+    console.error('Error HTTP:', error);
     return throwError(() => new Error(errorMessage));
+  }
+
+  private extractValidationMessage(error: HttpErrorResponse): string | null {
+    const errores = error?.error?.errors;
+    if (errores && typeof errores === 'object') {
+      const firstKey = Object.keys(errores)[0];
+      const mensajes = errores[firstKey];
+      if (Array.isArray(mensajes) && mensajes.length > 0) {
+        return mensajes[0];
+      }
+    }
+
+    if (typeof error?.error?.message === 'string') {
+      return error.error.message;
+    }
+
+    return null;
   }
 
   logout(): void {

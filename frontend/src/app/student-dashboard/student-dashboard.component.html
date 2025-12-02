@@ -83,22 +83,85 @@
       <div *ngIf="showCreateForm" class="form-card">
         <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
           <div class="form-grid">
-            <div class="form-group">
-              <label for="fechaCita">Fecha de la cita</label>
+            <div class="form-group full-width">
+              <label>Fecha de la cita</label>
+              <div class="calendar-card">
+                <div class="calendar-header">
+                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)">‹</button>
+                  <h4>{{ calendarLabel | titlecase }}</h4>
+                  <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
+                </div>
+                <div class="calendar-legend">
+                  <span><span class="dot available"></span> Disponible</span>
+                  <span><span class="dot partial"></span> Parcial</span>
+                  <span><span class="dot full"></span> Sin lugares</span>
+                </div>
+                <div class="calendar-weekdays">
+                  <span *ngFor="let day of weekDays">{{ day }}</span>
+                </div>
+                <div class="calendar-grid">
+                  <ng-container *ngFor="let week of calendarWeeks">
+                    <button
+                      type="button"
+                      *ngFor="let day of week"
+                      class="calendar-day"
+                      [ngClass]="{
+                        outside: !day.isCurrentMonth,
+                        today: day.isToday,
+                        selected: isSelectedDate(day.date),
+                        unavailable: isDayUnavailable(day),
+                        'status-available': day.availability === 'available',
+                        'status-partial': day.availability === 'partial',
+                        'status-full': day.availability === 'full',
+                        'status-none': day.availability === 'none'
+                      }"
+                      [ngStyle]="getDayStyle(day)"
+                      [attr.aria-pressed]="isSelectedDate(day.date)"
+                      (click)="selectCalendarDay(day)"
+                    >
+                      <span class="day-number">{{ day.label }}</span>
+                      <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
+                    </button>
+                  </ng-container>
+                </div>
+              </div>
+              <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
+                <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
+              </div>
               <input
-                type="date"
-                id="fechaCita"
+                type="hidden"
                 name="fecha_cita"
                 [(ngModel)]="createFormData.fecha_cita"
                 required
-                min="{{ today }}"
               />
             </div>
-            <div class="form-group">
-              <label for="horaCita">Hora</label>
+
+            <div class="form-group full-width">
+              <label>Hora</label>
+              <div class="time-slots" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
+                <button
+                  type="button"
+                  class="slot-button"
+                  *ngFor="let slot of timeSlots"
+                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                  [class.booked]="isSlotUnavailable(slot)"
+                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                  (click)="selectTimeSlot(slot)"
+                >
+                  {{ formatTime(slot) }}
+                </button>
+              </div>
+              <small class="helper-text" *ngIf="!createFormData.fecha_cita">
+                Selecciona un día disponible en el calendario para ver las horas libres.
+              </small>
+              <small class="helper-text warning" *ngIf="createFormData.fecha_cita && !hasAvailableSlotsForSelectedDate">
+                Este día ya está lleno. Elige otra fecha.
+              </small>
+              <small class="helper-text" *ngIf="createFormData.fecha_cita && hasAvailableSlotsForSelectedDate">
+                Horario disponible de 7:00 a 21:00 hrs en bloques de 15 minutos.
+              </small>
               <input
-                type="time"
-                id="horaCita"
+                type="hidden"
                 name="hora_cita"
                 [(ngModel)]="createFormData.hora_cita"
                 required
@@ -114,6 +177,7 @@
               [(ngModel)]="createFormData.motivo"
               rows="3"
               placeholder="Describe brevemente tu motivo"
+              class="motivo-area"
             ></textarea>
           </div>
 
@@ -127,26 +191,59 @@
         <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
           <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
 
-          <div *ngIf="!citasError && citas.length === 0" class="placeholder-card">
-            <h3>Aún no tienes citas</h3>
-            <p>Puedes agendar una cita médica usando el botón "Agendar Nueva Cita".</p>
-          </div>
+          <div class="citas-layout" *ngIf="!citasError">
+            <div class="citas-column pendientes">
+              <h3>Próximas citas</h3>
 
-          <div *ngIf="citas.length > 0" class="cards-grid">
-            <div *ngFor="let cita of citas" class="cita-card" [class.cancelada]="cita.estatus === 'cancelada'">
-              <div class="cita-header">
-                <h3>{{ formatDateDisplay(cita.fecha_cita) }}</h3>
-                <span class="estatus" [class.atendida]="cita.estatus === 'atendida'" [class.cancelada]="cita.estatus === 'cancelada'">{{ cita.estatus }}</span>
-              </div>
-              <p class="hora">{{ cita.hora_cita }} hrs</p>
-              <p class="motivo" *ngIf="cita.motivo">{{ cita.motivo }}</p>
-              <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
+              <ng-container *ngIf="pendingCitas.length > 0; else noPendientes">
+                <div *ngFor="let cita of pendingCitas" class="cita-card">
+                  <div class="cita-header">
+                    <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
+                    <span class="estatus programada">Pendiente</span>
+                  </div>
+                  <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
+                  <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
+                  <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
 
-              <div class="card-actions" *ngIf="cita.estatus === 'programada'">
-                <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
-                  {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
-                </button>
-              </div>
+                  <div class="card-actions">
+                    <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
+                      {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #noPendientes>
+                <div class="placeholder-card compact">
+                  <h4>No tienes citas pendientes</h4>
+                  <p>Agenda una nueva cita para verla aquí.</p>
+                </div>
+              </ng-template>
+            </div>
+
+            <div class="citas-column historial">
+              <h3>Historial reciente</h3>
+
+              <ng-container *ngIf="handledCitas.length > 0; else noHistorial">
+                <div *ngFor="let cita of handledCitas" class="cita-card" [class.cancelada]="cita.estatus === 'cancelada'">
+                  <div class="cita-header">
+                    <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
+                    <span class="estatus"
+                          [class.atendida]="cita.estatus === 'atendida'"
+                          [class.cancelada]="cita.estatus === 'cancelada'">
+                      {{ cita.estatus === 'atendida' ? 'Atendida' : 'Cancelada' }}
+                    </span>
+                  </div>
+                  <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
+                  <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
+                  <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
+                </div>
+              </ng-container>
+              <ng-template #noHistorial>
+                <div class="placeholder-card compact">
+                  <h4>Sin registros todavía</h4>
+                  <p>Cuando atiendas o canceles citas aparecerán aquí.</p>
+                </div>
+              </ng-template>
             </div>
           </div>
         </ng-container>
@@ -177,7 +274,7 @@
                 <h3>{{ bitacora.doctor?.nombre }} {{ bitacora.doctor?.apellido }}</h3>
                 <span class="bitacora-date">{{ formatBitacoraDate(bitacora.created_at) }}</span>
               </div>
-              <p class="bitacora-detail"><strong>Cita:</strong> {{ bitacora.cita?.fecha_cita | date:'mediumDate' }} · {{ bitacora.cita?.hora_cita }} hrs</p>
+              <p class="bitacora-detail"><strong>Cita:</strong> {{ formatDateDisplay(bitacora.cita?.fecha_cita || '') }} · {{ bitacora.cita?.hora_cita }} hrs</p>
               <p class="bitacora-detail" *ngIf="bitacora.diagnostico"><strong>Diagnóstico:</strong> {{ bitacora.diagnostico }}</p>
               <p class="bitacora-detail" *ngIf="bitacora.tratamiento"><strong>Tratamiento:</strong> {{ bitacora.tratamiento }}</p>
               <p class="bitacora-detail" *ngIf="bitacora.observaciones"><strong>Observaciones:</strong> {{ bitacora.observaciones }}</p>
@@ -218,7 +315,7 @@
                 <h3>{{ receta.doctor?.nombre }} {{ receta.doctor?.apellido }}</h3>
                 <span class="receta-date">Emitida el {{ formatRecetaDate(receta.fecha_emision) }}</span>
               </div>
-              <p class="receta-detail"><strong>Cita asociada:</strong> {{ receta.cita?.fecha_cita | date:'mediumDate' }} · {{ receta.cita?.hora_cita }} hrs</p>
+              <p class="receta-detail"><strong>Cita asociada:</strong> {{ formatDateDisplay(receta.cita?.fecha_cita || '') }} · {{ receta.cita?.hora_cita }} hrs</p>
               <p class="receta-detail"><strong>Medicamentos:</strong></p>
               <p class="receta-text">{{ receta.medicamentos }}</p>
               <p class="receta-detail" *ngIf="receta.indicaciones"><strong>Indicaciones:</strong></p>

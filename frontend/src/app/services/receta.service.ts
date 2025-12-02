@@ -54,4 +54,8 @@ export class RecetaService {
   createReceta(payload: CreateRecetaPayload): Observable<{ message: string; receta: Receta }> {
     return this.http.post<{ message: string; receta: Receta }>(this.baseUrl, payload);
   }
+
+  updateReceta(id: number, payload: CreateRecetaPayload): Observable<{ message: string; receta: Receta }> {
+    return this.http.put<{ message: string; receta: Receta }>(`${this.baseUrl}/${id}`, payload);
+  }
 }

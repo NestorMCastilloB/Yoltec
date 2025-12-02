@@ -36,6 +36,27 @@ export interface CreateCitaPayload {
   numero_control?: string;
 }
 
+export type AvailabilityStatus = 'available' | 'partial' | 'full';
+
+export interface AvailabilitySpecial {
+  type: string;
+  label?: string | null;
+  status?: AvailabilityStatus;
+  color?: string;
+}
+
+export interface CitaAvailabilityDay {
+  date: string;
+  taken_slots: string[];
+  special?: AvailabilitySpecial | null;
+}
+
+export interface CitaAvailabilityResponse {
+  month: number;
+  year: number;
+  days: CitaAvailabilityDay[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -58,5 +79,18 @@ export class CitaService {
 
   markAsAttended(id: number): Observable<{ message: string; cita: Cita }> {
     return this.http.post<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/atender`, {});
+  }
+
+  getAvailability(month?: number, year?: number): Observable<CitaAvailabilityResponse> {
+    const params: Record<string, string> = {};
+    if (month) {
+      params['month'] = String(month);
+    }
+    if (year) {
+      params['year'] = String(year);
+    }
+    return this.http.get<CitaAvailabilityResponse>(`${this.baseUrl}/disponibilidad`, {
+      params
+    });
   }
 }
