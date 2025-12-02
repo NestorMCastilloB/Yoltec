@@ -22,7 +22,7 @@ class Cita extends Model
     ];
 
     protected $casts = [
-        'fecha_cita' => 'date',
+        'fecha_cita' => 'date:Y-m-d',
         'hora_cita' => 'string',
         'fecha_hora_atencion' => 'datetime',
     ];

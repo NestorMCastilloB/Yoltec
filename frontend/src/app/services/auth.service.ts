@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { API_BASE_URL } from './api-config';
 
 interface User {
   id: number;
@@ -25,7 +26,7 @@ interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = API_BASE_URL;
   private tokenKey = 'auth_token';
   private userKey = 'user_data';
   private userSubject = new BehaviorSubject<User | null>(null);
@@ -124,7 +125,7 @@ export class AuthService {
   // Verificar si el usuario actual tiene un rol específico
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
-    return user && user.tipo_usuario === role;
+    return !!user && user.tipo === role;
   }
 
   // Guardar el token en el almacenamiento local

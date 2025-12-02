@@ -29,6 +29,12 @@
         class="nav-button">
         Bitácora
       </button>
+      <button 
+        [class.active]="activeSection === 'recetas'" 
+        (click)="setActiveSection('recetas')"
+        class="nav-button">
+        Recetas
+      </button>
     </nav>
   </header>
 
@@ -44,11 +50,18 @@
         <div class="quick-stats">
           <div class="stat-card">
             <h3>Próxima Cita</h3>
-            <p>No tienes citas programadas</p>
+            <ng-container *ngIf="nextCitaInfo; else noProximaCita">
+              <p class="stat-value">{{ nextCitaInfo.fecha }}</p>
+              <p class="stat-detail">{{ nextCitaInfo.hora }} hrs</p>
+              <p class="stat-detail" *ngIf="nextCitaInfo.motivo">Motivo: {{ nextCitaInfo.motivo }}</p>
+            </ng-container>
+            <ng-template #noProximaCita>
+              <p class="stat-value">No tienes citas programadas</p>
+            </ng-template>
           </div>
           <div class="stat-card">
-            <h3>Citas Totales</h3>
-            <p>0 citas</p>
+            <h3>Citas Programadas</h3>
+            <p class="stat-value">{{ totalCitasProgramadas }} {{ totalCitasProgramadas === 1 ? 'cita' : 'citas' }}</p>
           </div>
         </div>
       </div>
@@ -58,21 +71,88 @@
     <section *ngIf="activeSection === 'citas'" class="content-section">
       <div class="section-header">
         <h2>Gestión de Citas</h2>
-        <button class="btn-primary">Agendar Nueva Cita</button>
+        <button class="btn-primary" (click)="toggleCreateForm()">
+          {{ showCreateForm ? 'Cerrar formulario' : 'Agendar Nueva Cita' }}
+        </button>
       </div>
-      
+
+      <div *ngIf="submitMessage" class="alert">
+        {{ submitMessage }}
+      </div>
+
+      <div *ngIf="showCreateForm" class="form-card">
+        <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fechaCita">Fecha de la cita</label>
+              <input
+                type="date"
+                id="fechaCita"
+                name="fecha_cita"
+                [(ngModel)]="createFormData.fecha_cita"
+                required
+                min="{{ today }}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="horaCita">Hora</label>
+              <input
+                type="time"
+                id="horaCita"
+                name="hora_cita"
+                [(ngModel)]="createFormData.hora_cita"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="motivo">Motivo</label>
+            <textarea
+              id="motivo"
+              name="motivo"
+              [(ngModel)]="createFormData.motivo"
+              rows="3"
+              placeholder="Describe brevemente tu motivo"
+            ></textarea>
+          </div>
+
+          <button class="btn-primary" type="submit" [disabled]="isSubmitting || createCitaForm.invalid">
+            {{ isSubmitting ? 'Agendando...' : 'Guardar cita' }}
+          </button>
+        </form>
+      </div>
+
       <div class="citas-container">
-        <div class="placeholder-card">
-          <h3>Módulo de Citas</h3>
-          <p>Aquí podrás agendar, ver y cancelar tus citas médicas.</p>
-          <p><strong>Funcionalidades próximas:</strong></p>
-          <ul>
-            <li>📅 Agendar nueva cita</li>
-            <li>👁️ Ver citas programadas</li>
-            <li>❌ Cancelar citas</li>
-            <li>📋 Historial de citas anteriores</li>
-          </ul>
-        </div>
+        <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
+          <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
+
+          <div *ngIf="!citasError && citas.length === 0" class="placeholder-card">
+            <h3>Aún no tienes citas</h3>
+            <p>Puedes agendar una cita médica usando el botón "Agendar Nueva Cita".</p>
+          </div>
+
+          <div *ngIf="citas.length > 0" class="cards-grid">
+            <div *ngFor="let cita of citas" class="cita-card" [class.cancelada]="cita.estatus === 'cancelada'">
+              <div class="cita-header">
+                <h3>{{ formatDateDisplay(cita.fecha_cita) }}</h3>
+                <span class="estatus" [class.atendida]="cita.estatus === 'atendida'" [class.cancelada]="cita.estatus === 'cancelada'">{{ cita.estatus }}</span>
+              </div>
+              <p class="hora">{{ cita.hora_cita }} hrs</p>
+              <p class="motivo" *ngIf="cita.motivo">{{ cita.motivo }}</p>
+              <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
+
+              <div class="card-actions" *ngIf="cita.estatus === 'programada'">
+                <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
+                  {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingCitas>
+          <div class="placeholder-card">Cargando tus citas...</div>
+        </ng-template>
       </div>
     </section>
 
@@ -83,18 +163,72 @@
       </div>
       
       <div class="bitacora-container">
-        <div class="placeholder-card">
-          <h3>Historial Médico</h3>
-          <p>Aquí podrás consultar tu información médica y registros de consultas.</p>
-          <p><strong>Información disponible:</strong></p>
-          <ul>
-            <li>📅 Fechas de consultas anteriores</li>
-            <li>⏰ Horarios de atención</li>
-            <li>👨‍⚕️ Doctores que te han atendido</li>
-            <li>💊 Recetas expedidas</li>
-            <li>📝 Diagnósticos y tratamientos</li>
-          </ul>
-        </div>
+        <ng-container *ngIf="!isLoadingBitacoras; else loadingBitacoras">
+          <div *ngIf="bitacorasError" class="alert error">{{ bitacorasError }}</div>
+
+          <div *ngIf="!bitacorasError && bitacoras.length === 0" class="placeholder-card">
+            <h3>Aún no tienes registros médicos</h3>
+            <p>Cuando el doctor registre una consulta, verás aquí el resumen de tu atención.</p>
+          </div>
+
+          <div *ngIf="bitacoras.length > 0" class="cards-grid">
+            <div *ngFor="let bitacora of bitacoras" class="bitacora-card">
+              <div class="bitacora-header">
+                <h3>{{ bitacora.doctor?.nombre }} {{ bitacora.doctor?.apellido }}</h3>
+                <span class="bitacora-date">{{ formatBitacoraDate(bitacora.created_at) }}</span>
+              </div>
+              <p class="bitacora-detail"><strong>Cita:</strong> {{ bitacora.cita?.fecha_cita | date:'mediumDate' }} · {{ bitacora.cita?.hora_cita }} hrs</p>
+              <p class="bitacora-detail" *ngIf="bitacora.diagnostico"><strong>Diagnóstico:</strong> {{ bitacora.diagnostico }}</p>
+              <p class="bitacora-detail" *ngIf="bitacora.tratamiento"><strong>Tratamiento:</strong> {{ bitacora.tratamiento }}</p>
+              <p class="bitacora-detail" *ngIf="bitacora.observaciones"><strong>Observaciones:</strong> {{ bitacora.observaciones }}</p>
+
+              <div class="bitacora-metrics">
+                <span *ngIf="bitacora.peso">⚖️ Peso: {{ bitacora.peso }}</span>
+                <span *ngIf="bitacora.altura">📏 Altura: {{ bitacora.altura }}</span>
+                <span *ngIf="bitacora.temperatura">🌡️ Temp: {{ bitacora.temperatura }}</span>
+                <span *ngIf="bitacora.presion_arterial">🩺 Presión: {{ bitacora.presion_arterial }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingBitacoras>
+          <div class="placeholder-card">Cargando tu historial médico...</div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- Sección: Recetas -->
+    <section *ngIf="activeSection === 'recetas'" class="content-section">
+      <div class="section-header">
+        <h2>Mis Recetas Médicas</h2>
+      </div>
+
+      <div class="recetas-container">
+        <ng-container *ngIf="!isLoadingRecetas; else loadingRecetas">
+          <div *ngIf="recetasError" class="alert error">{{ recetasError }}</div>
+
+          <div *ngIf="!recetasError && recetas.length === 0" class="placeholder-card">
+            <h3>No tienes recetas registradas</h3>
+            <p>Cuando el doctor expida una receta para ti aparecerá en este apartado.</p>
+          </div>
+
+          <div *ngIf="recetas.length > 0" class="cards-grid">
+            <div *ngFor="let receta of recetas" class="receta-card">
+              <div class="receta-header">
+                <h3>{{ receta.doctor?.nombre }} {{ receta.doctor?.apellido }}</h3>
+                <span class="receta-date">Emitida el {{ formatRecetaDate(receta.fecha_emision) }}</span>
+              </div>
+              <p class="receta-detail"><strong>Cita asociada:</strong> {{ receta.cita?.fecha_cita | date:'mediumDate' }} · {{ receta.cita?.hora_cita }} hrs</p>
+              <p class="receta-detail"><strong>Medicamentos:</strong></p>
+              <p class="receta-text">{{ receta.medicamentos }}</p>
+              <p class="receta-detail" *ngIf="receta.indicaciones"><strong>Indicaciones:</strong></p>
+              <p class="receta-text" *ngIf="receta.indicaciones">{{ receta.indicaciones }}</p>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingRecetas>
+          <div class="placeholder-card">Cargando tus recetas...</div>
+        </ng-template>
       </div>
     </section>
 

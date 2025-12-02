@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 
@@ -37,13 +38,21 @@ class CitaController extends Controller
             'fecha_cita' => 'required|date|after_or_equal:today',
             'hora_cita' => 'required|date_format:H:i',
             'motivo' => 'nullable|string|max:500',
+            'numero_control' => 'nullable|string|exists:users,numero_control',
         ]);
 
         $user = $request->user();
 
         // Generar clave única
         $validated['clave_cita'] = Cita::generarClaveCita();
-        $validated['alumno_id'] = $user->esAlumno() ? $user->id : $request->alumno_id;
+        if ($user->esAlumno()) {
+            $validated['alumno_id'] = $user->id;
+        } elseif ($request->filled('numero_control')) {
+            $alumno = User::where('numero_control', $request->numero_control)->firstOrFail();
+            $validated['alumno_id'] = $alumno->id;
+        } else {
+            $validated['alumno_id'] = $request->alumno_id;
+        }
         $validated['estatus'] = 'programada';
 
         $cita = Cita::create($validated);

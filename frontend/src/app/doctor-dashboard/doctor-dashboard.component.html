@@ -50,15 +50,18 @@
         <div class="quick-stats">
           <div class="stat-card">
             <h3>Citas del Día</h3>
-            <p>0 citas</p>
+            <p class="stat-value">{{ todayAppointments }}</p>
+            <p class="stat-detail">Programadas para hoy</p>
           </div>
           <div class="stat-card">
             <h3>Pacientes Atendidos</h3>
-            <p>0 pacientes</p>
+            <p class="stat-value">{{ patientsAttended }}</p>
+            <p class="stat-detail">Historial reciente</p>
           </div>
           <div class="stat-card">
-            <h3>Bitácoras Pendientes</h3>
-            <p>0 pendientes</p>
+            <h3>Citas Pendientes</h3>
+            <p class="stat-value">{{ pendingBitacoras }}</p>
+            <p class="stat-detail">Requieren atención</p>
           </div>
         </div>
       </div>
@@ -68,22 +71,102 @@
     <section *ngIf="activeSection === 'citas'" class="content-section">
       <div class="section-header">
         <h2>Gestión de Citas</h2>
-        <button class="btn-primary">Agendar Nueva Cita</button>
+        <button class="btn-primary" (click)="toggleCreateForm()">
+          {{ showCreateForm ? 'Cerrar formulario' : 'Agendar Nueva Cita' }}
+        </button>
       </div>
-      
+
+      <div *ngIf="submitMessage" class="alert">
+        {{ submitMessage }}
+      </div>
+
+      <div *ngIf="showCreateForm" class="form-card">
+        <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="numeroControl">Número de control del alumno</label>
+              <input
+                type="text"
+                id="numeroControl"
+                name="numero_control"
+                [(ngModel)]="createFormData.numero_control"
+                required
+                placeholder="Ej. A12345678"
+              />
+            </div>
+            <div class="form-group">
+              <label for="fechaCita">Fecha de la cita</label>
+              <input
+                type="date"
+                id="fechaCita"
+                name="fecha_cita"
+                [(ngModel)]="createFormData.fecha_cita"
+                required
+                min="{{ today }}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="horaCita">Hora</label>
+              <input
+                type="time"
+                id="horaCita"
+                name="hora_cita"
+                [(ngModel)]="createFormData.hora_cita"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="motivo">Motivo</label>
+            <textarea
+              id="motivo"
+              name="motivo"
+              [(ngModel)]="createFormData.motivo"
+              rows="3"
+              placeholder="Describe el motivo de la consulta"
+            ></textarea>
+          </div>
+
+          <button class="btn-primary" type="submit" [disabled]="isSubmitting || createCitaForm.invalid">
+            {{ isSubmitting ? 'Agendando...' : 'Guardar cita' }}
+          </button>
+        </form>
+      </div>
+
       <div class="citas-container">
-        <div class="placeholder-card">
-          <h3>Módulo de Citas para Doctores</h3>
-          <p>Aquí podrás gestionar tu agenda de consultas médicas.</p>
-          <p><strong>Funcionalidades próximas:</strong></p>
-          <ul>
-            <li>📅 Ver agenda semanal/diaria</li>
-            <li>👥 Agendar citas para pacientes</li>
-            <li>🔄 Reagendar consultas</li>
-            <li>❌ Cancelar citas</li>
-            <li>👀 Ver historial de consultas</li>
-          </ul>
-        </div>
+        <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
+          <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
+
+          <div *ngIf="!citasError && citas.length === 0" class="placeholder-card">
+            <h3>Aún no tienes citas programadas</h3>
+            <p>Agrega nuevas citas usando el botón "Agendar Nueva Cita".</p>
+          </div>
+
+          <div *ngIf="citas.length > 0" class="cards-grid">
+            <div *ngFor="let cita of citas" class="cita-card" [class.cancelada]="cita.estatus === 'cancelada'">
+              <div class="cita-header">
+                <h3>{{ formatDateDisplay(cita.fecha_cita) }}</h3>
+                <span class="estatus" [class.atendida]="cita.estatus === 'atendida'" [class.cancelada]="cita.estatus === 'cancelada'">{{ cita.estatus }}</span>
+              </div>
+              <p class="hora">{{ cita.hora_cita }} hrs</p>
+              <p class="motivo" *ngIf="cita.motivo">{{ cita.motivo }}</p>
+              <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
+
+              <div class="card-actions">
+                <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting || cita.estatus !== 'programada'">
+                  {{ isSubmitting ? 'Procesando...' : 'Cancelar' }}
+                </button>
+                <button class="btn-primary" (click)="onMarkAsAttended(cita)" [disabled]="isSubmitting || cita.estatus !== 'programada'">
+                  {{ isSubmitting ? 'Procesando...' : 'Marcar atendida' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingCitas>
+          <div class="placeholder-card">Cargando lista de citas...</div>
+        </ng-template>
       </div>
     </section>
 
@@ -91,22 +174,146 @@
     <section *ngIf="activeSection === 'bitacoras'" class="content-section">
       <div class="section-header">
         <h2>Bitácoras Médicas</h2>
-        <button class="btn-primary">Nueva Bitácora</button>
+        <button class="btn-primary" (click)="toggleBitacoraForm()">
+          {{ showBitacoraForm ? 'Cerrar formulario' : 'Registrar Bitácora' }}
+        </button>
       </div>
-      
+
+      <div *ngIf="bitacoraMessage" class="alert">
+        {{ bitacoraMessage }}
+      </div>
+
+      <div *ngIf="showBitacoraForm" class="form-card">
+        <form #bitacoraForm="ngForm" (ngSubmit)="onCreateBitacora(bitacoraForm)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="citaAsociada">Cita atendida</label>
+              <select
+                id="citaAsociada"
+                name="cita_id"
+                [(ngModel)]="bitacoraFormData.cita_id"
+                required
+              >
+                <option value="" disabled selected>Selecciona una cita atendida</option>
+                <option *ngFor="let cita of availableCitasForBitacora" [value]="cita.id">
+                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }})
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="diagnostico">Diagnóstico</label>
+              <textarea
+                id="diagnostico"
+                name="diagnostico"
+                [(ngModel)]="bitacoraFormData.diagnostico"
+                rows="2"
+                placeholder="Describe el diagnóstico"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="tratamiento">Tratamiento</label>
+              <textarea
+                id="tratamiento"
+                name="tratamiento"
+                [(ngModel)]="bitacoraFormData.tratamiento"
+                rows="2"
+                placeholder="Describe el tratamiento"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-grid small-grid">
+            <div class="form-group">
+              <label for="peso">Peso</label>
+              <input
+                type="text"
+                id="peso"
+                name="peso"
+                [(ngModel)]="bitacoraFormData.peso"
+                placeholder="Ej. 70 kg"
+              />
+            </div>
+            <div class="form-group">
+              <label for="altura">Altura</label>
+              <input
+                type="text"
+                id="altura"
+                name="altura"
+                [(ngModel)]="bitacoraFormData.altura"
+                placeholder="Ej. 1.70 m"
+              />
+            </div>
+            <div class="form-group">
+              <label for="temperatura">Temperatura</label>
+              <input
+                type="text"
+                id="temperatura"
+                name="temperatura"
+                [(ngModel)]="bitacoraFormData.temperatura"
+                placeholder="Ej. 36.5 °C"
+              />
+            </div>
+            <div class="form-group">
+              <label for="presion">Presión arterial</label>
+              <input
+                type="text"
+                id="presion"
+                name="presion_arterial"
+                [(ngModel)]="bitacoraFormData.presion_arterial"
+                placeholder="Ej. 120/80"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="observaciones">Observaciones adicionales</label>
+            <textarea
+              id="observaciones"
+              name="observaciones"
+              [(ngModel)]="bitacoraFormData.observaciones"
+              rows="3"
+              placeholder="Notas relevantes de la consulta"
+            ></textarea>
+          </div>
+
+          <button class="btn-primary" type="submit" [disabled]="isSubmittingBitacora || bitacoraForm.invalid">
+            {{ isSubmittingBitacora ? 'Guardando...' : 'Guardar bitácora' }}
+          </button>
+        </form>
+      </div>
+
       <div class="bitacoras-container">
-        <div class="placeholder-card">
-          <h3>Registro de Consultas Médicas</h3>
-          <p>Aquí podrás registrar y consultar las bitácoras de tus pacientes.</p>
-          <p><strong>Funcionalidades próximas:</strong></p>
-          <ul>
-            <li>📝 Crear nueva bitácora por consulta</li>
-            <li>✏️ Editar registros médicos existentes</li>
-            <li>👁️ Visualizar historial de pacientes</li>
-            <li>🔍 Buscar bitácoras por paciente</li>
-            <li>📋 Registrar síntomas y diagnósticos</li>
-          </ul>
-        </div>
+        <ng-container *ngIf="!isLoadingBitacoras; else loadingBitacoras">
+          <div *ngIf="bitacorasError" class="alert error">{{ bitacorasError }}</div>
+
+          <div *ngIf="!bitacorasError && bitacoras.length === 0" class="placeholder-card">
+            <h3>No hay bitácoras registradas aún</h3>
+            <p>Registra la información de la consulta para que el alumno pueda consultarla.</p>
+          </div>
+
+          <div *ngIf="bitacoras.length > 0" class="cards-grid">
+            <div *ngFor="let bitacora of bitacoras" class="bitacora-card">
+              <div class="bitacora-header">
+                <h3>{{ bitacora.alumno?.nombre }} {{ bitacora.alumno?.apellido }}</h3>
+                <span class="bitacora-date">{{ formatBitacoraDate(bitacora.created_at) }}</span>
+              </div>
+              <p class="bitacora-detail"><strong>Cita:</strong> {{ bitacora.cita?.fecha_cita | date:'mediumDate' }} - {{ bitacora.cita?.hora_cita }} hrs</p>
+              <p class="bitacora-detail" *ngIf="bitacora.diagnostico"><strong>Diagnóstico:</strong> {{ bitacora.diagnostico }}</p>
+              <p class="bitacora-detail" *ngIf="bitacora.tratamiento"><strong>Tratamiento:</strong> {{ bitacora.tratamiento }}</p>
+              <p class="bitacora-detail" *ngIf="bitacora.observaciones"><strong>Observaciones:</strong> {{ bitacora.observaciones }}</p>
+
+              <div class="bitacora-metrics">
+                <span *ngIf="bitacora.peso">⚖️ Peso: {{ bitacora.peso }}</span>
+                <span *ngIf="bitacora.altura">📏 Altura: {{ bitacora.altura }}</span>
+                <span *ngIf="bitacora.temperatura">🌡️ Temp: {{ bitacora.temperatura }}</span>
+                <span *ngIf="bitacora.presion_arterial">🩺 Presión: {{ bitacora.presion_arterial }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingBitacoras>
+          <div class="placeholder-card">Cargando bitácoras...</div>
+        </ng-template>
       </div>
     </section>
 
@@ -114,22 +321,99 @@
     <section *ngIf="activeSection === 'recetas'" class="content-section">
       <div class="section-header">
         <h2>Gestión de Recetas</h2>
-        <button class="btn-primary">Nueva Receta</button>
+        <button class="btn-primary" (click)="toggleRecetaForm()">
+          {{ showRecetaForm ? 'Cerrar formulario' : 'Registrar Receta' }}
+        </button>
       </div>
-      
+
+      <div *ngIf="recetaMessage" class="alert">
+        {{ recetaMessage }}
+      </div>
+
+      <div *ngIf="showRecetaForm" class="form-card">
+        <form #recetaForm="ngForm" (ngSubmit)="onCreateReceta(recetaForm)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="citaReceta">Cita atendida</label>
+              <select
+                id="citaReceta"
+                name="cita_id"
+                [(ngModel)]="recetaFormData.cita_id"
+                required
+              >
+                <option value="" disabled selected>Selecciona una cita atendida</option>
+                <option *ngFor="let cita of availableCitasForReceta" [value]="cita.id">
+                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }})
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fechaEmision">Fecha de emisión</label>
+              <input
+                type="date"
+                id="fechaEmision"
+                name="fecha_emision"
+                [(ngModel)]="recetaFormData.fecha_emision"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="medicamentos">Medicamentos recetados</label>
+            <textarea
+              id="medicamentos"
+              name="medicamentos"
+              [(ngModel)]="recetaFormData.medicamentos"
+              rows="3"
+              required
+              placeholder="Nombre comercial, presentación y dosis"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="indicaciones">Indicaciones</label>
+            <textarea
+              id="indicaciones"
+              name="indicaciones"
+              [(ngModel)]="recetaFormData.indicaciones"
+              rows="3"
+              placeholder="Instrucciones para el paciente"
+            ></textarea>
+          </div>
+
+          <button class="btn-primary" type="submit" [disabled]="isSubmittingReceta || recetaForm.invalid">
+            {{ isSubmittingReceta ? 'Guardando...' : 'Guardar receta' }}
+          </button>
+        </form>
+      </div>
+
       <div class="recetas-container">
-        <div class="placeholder-card">
-          <h3>Sistema de Recetas Médicas</h3>
-          <p>Aquí podrás generar y gestionar recetas médicas para tus pacientes.</p>
-          <p><strong>Funcionalidades próximas:</strong></p>
-          <ul>
-            <li>💊 Generar nuevas recetas</li>
-            <li>📄 Formato imprimible profesional</li>
-            <li>📋 Historial de recetas expedidas</li>
-            <li>👥 Recetas por paciente</li>
-            <li>🖨️ Impresión directa de recetas</li>
-          </ul>
-        </div>
+        <ng-container *ngIf="!isLoadingRecetas; else loadingRecetas">
+          <div *ngIf="recetasError" class="alert error">{{ recetasError }}</div>
+
+          <div *ngIf="!recetasError && recetas.length === 0" class="placeholder-card">
+            <h3>No hay recetas registradas aún</h3>
+            <p>Registra una receta para que el alumno pueda consultarla en su perfil.</p>
+          </div>
+
+          <div *ngIf="recetas.length > 0" class="cards-grid">
+            <div *ngFor="let receta of recetas" class="receta-card">
+              <div class="receta-header">
+                <h3>{{ receta.alumno?.nombre }} {{ receta.alumno?.apellido }}</h3>
+                <span class="receta-date">{{ formatRecetaDate(receta.fecha_emision) }}</span>
+              </div>
+              <p class="receta-detail"><strong>Cita:</strong> {{ receta.cita?.fecha_cita | date:'mediumDate' }} - {{ receta.cita?.hora_cita }} hrs</p>
+              <p class="receta-detail"><strong>Medicamentos:</strong></p>
+              <p class="receta-text">{{ receta.medicamentos }}</p>
+              <p class="receta-detail" *ngIf="receta.indicaciones"><strong>Indicaciones:</strong></p>
+              <p class="receta-text" *ngIf="receta.indicaciones">{{ receta.indicaciones }}</p>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingRecetas>
+          <div class="placeholder-card">Cargando recetas...</div>
+        </ng-template>
       </div>
     </section>
 
