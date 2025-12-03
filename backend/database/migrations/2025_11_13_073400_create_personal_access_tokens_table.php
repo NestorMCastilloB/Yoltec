@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
+            // Reemplazamos morphs por columnas simples sin índices compuestos
+            $table->unsignedBigInteger('tokenable_id');
+            $table->string('tokenable_type');
             $table->text('name');
-            $table->string('token', 64)->unique();
+            // Quitamos unique para evitar problemas de constraints en Neon; se puede reforzar a nivel de lógica
+            $table->string('token', 64);
             $table->text('abilities')->nullable();
             $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

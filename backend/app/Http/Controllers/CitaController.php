@@ -78,8 +78,14 @@ class CitaController extends Controller
 
         $grouped = [];
         foreach ($citas as $cita) {
+            // "fecha_cita" está casteada como Carbon en el modelo, así que
+            // la normalizamos a string (Y-m-d) para usarla como llave de arreglo.
+            $dateKey = $cita->fecha_cita instanceof Carbon
+                ? $cita->fecha_cita->toDateString()
+                : (string) $cita->fecha_cita;
+
             $normalizedHour = Carbon::parse($cita->hora_cita)->format('H:i');
-            $grouped[$cita->fecha_cita][] = $normalizedHour;
+            $grouped[$dateKey][] = $normalizedHour;
         }
 
         $specialDays = config('clinic.special_days', []);

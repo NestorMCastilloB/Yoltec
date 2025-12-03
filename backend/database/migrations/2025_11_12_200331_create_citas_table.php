@@ -10,13 +10,16 @@ return new class extends Migration
     {
         Schema::create('citas', function (Blueprint $table) {
             $table->id();
-            $table->string('clave_cita')->unique(); // Clave única de la cita
-            $table->foreignId('alumno_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('doctor_id')->nullable()->constrained('users')->onDelete('set null');
+            // Clave de la cita (única a nivel de aplicación, no en la BD para evitar errores de constraint en Neon)
+            $table->string('clave_cita');
+            // Por simplicidad en Neon, dejamos las llaves foráneas sin constraint y controlamos en la app
+            $table->foreignId('alumno_id');
+            $table->foreignId('doctor_id')->nullable();
             $table->date('fecha_cita');
             $table->time('hora_cita');
             $table->string('motivo')->nullable();
-            $table->enum('estatus', ['programada', 'atendida', 'cancelada'])->default('programada');
+            // Usamos string en lugar de enum para evitar problemas con tipos en PostgreSQL/Neon
+            $table->string('estatus')->default('programada');
             $table->dateTime('fecha_hora_atencion')->nullable(); // Cuando se atendió
             $table->text('notas')->nullable();
             $table->timestamps();

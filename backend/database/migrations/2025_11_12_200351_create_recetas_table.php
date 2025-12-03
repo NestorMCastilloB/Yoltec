@@ -10,9 +10,10 @@ return new class extends Migration
     {
         Schema::create('recetas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cita_id')->constrained('citas')->onDelete('cascade');
-            $table->foreignId('alumno_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('doctor_id')->constrained('users')->onDelete('cascade');
+            // IDs relacionados sin constraints de FK para evitar problemas en Neon; se validan en la app
+            $table->foreignId('cita_id');
+            $table->foreignId('alumno_id');
+            $table->foreignId('doctor_id');
             $table->text('medicamentos'); // Puede ser JSON o texto simple
             $table->text('indicaciones')->nullable();
             $table->date('fecha_emision');

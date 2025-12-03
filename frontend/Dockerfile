@@ -6,11 +6,13 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+# Usamos directamente el binario de Angular CLI para evitar problemas de permisos con "ng"
+RUN node ./node_modules/@angular/cli/bin/ng.js build
 
 FROM nginx:alpine
 
-COPY --from=build /app/dist/login /usr/share/nginx/html
+# Angular 17+ genera dist/login/browser, copiamos esa carpeta como root de Nginx
+COPY --from=build /app/dist/login/browser /usr/share/nginx/html
 
 EXPOSE 80
 
