@@ -324,8 +324,12 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   onCreateBitacora(form: NgForm): void {
-    if (form.invalid || !this.bitacoraFormData.cita_id) {
-      this.bitacoraMessage = 'Selecciona la cita atendida correspondiente.';
+    if (form.invalid) {
+      if (!this.bitacoraFormData.cita_id) {
+        this.bitacoraMessage = 'Selecciona la cita atendida correspondiente.';
+      } else {
+        this.bitacoraMessage = 'Por favor completa todos los campos obligatorios de la bitácora.';
+      }
       return;
     }
 
@@ -351,6 +355,16 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
+          const errores = error?.error?.errors;
+          if (errores && typeof errores === 'object') {
+            const firstKey = Object.keys(errores)[0];
+            const mensajes = (errores as any)[firstKey];
+            if (Array.isArray(mensajes) && mensajes.length > 0) {
+              this.bitacoraMessage = mensajes[0];
+              return of(null);
+            }
+          }
+
           this.bitacoraMessage = error?.error?.message || 'No se pudo registrar la bitácora.';
           return of(null);
         }),
@@ -372,14 +386,24 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   onCreateReceta(form: NgForm): void {
-    if (form.invalid || !this.recetaFormData.cita_id || !this.recetaFormData.medicamentos?.trim()) {
-      this.recetaMessage = 'Selecciona la cita atendida y captura los medicamentos.';
+    if (form.invalid) {
+      if (!this.recetaFormData.cita_id) {
+        this.recetaMessage = 'Selecciona la cita atendida correspondiente.';
+      } else if (!this.recetaFormData.medicamentos?.trim()) {
+        this.recetaMessage = 'Captura los medicamentos recetados.';
+      } else if (!this.recetaFormData.indicaciones?.trim()) {
+        this.recetaMessage = 'Captura las indicaciones para el paciente.';
+      } else if (!this.recetaFormData.fecha_emision) {
+        this.recetaMessage = 'Selecciona la fecha de emisión de la receta.';
+      } else {
+        this.recetaMessage = 'Por favor completa todos los campos obligatorios de la receta.';
+      }
       return;
     }
 
     const payload: CreateRecetaPayload = {
       cita_id: Number(this.recetaFormData.cita_id),
-      medicamentos: this.recetaFormData.medicamentos.trim(),
+      medicamentos: this.recetaFormData.medicamentos!.trim(),
       indicaciones: this.recetaFormData.indicaciones?.trim() || undefined,
       fecha_emision: this.recetaFormData.fecha_emision || this.formatDate(new Date())
     };
@@ -395,6 +419,16 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
+          const errores = error?.error?.errors;
+          if (errores && typeof errores === 'object') {
+            const firstKey = Object.keys(errores)[0];
+            const mensajes = (errores as any)[firstKey];
+            if (Array.isArray(mensajes) && mensajes.length > 0) {
+              this.recetaMessage = mensajes[0];
+              return of(null);
+            }
+          }
+
           this.recetaMessage = error?.error?.message || 'No se pudo registrar la receta.';
           return of(null);
         }),
@@ -462,7 +496,10 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(bitacoras => {
-        this.bitacoras = bitacoras;
+        // Ordenar de la más reciente a la más antigua
+        this.bitacoras = [...bitacoras].sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
         this.updateStats();
       });
   }
@@ -487,7 +524,10 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(recetas => {
-        this.recetas = recetas;
+        // Ordenar de la más reciente a la más antigua por fecha de emisión
+        this.recetas = [...recetas].sort((a, b) =>
+          new Date(b.fecha_emision).getTime() - new Date(a.fecha_emision).getTime()
+        );
         this.updateStats();
       });
   }
@@ -614,7 +654,18 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   public get availableCitasForReceta(): Cita[] {
-    return this.citas.filter(cita => cita.estatus === 'atendida');
+    // Si estamos editando una receta, mostramos todas las citas atendidas.
+    // La validación de "una receta por cita" ya está controlada por el backend
+    // y el select está deshabilitado en modo edición.
+    if (this.editingRecetaId !== null) {
+      return this.citas.filter(cita => cita.estatus === 'atendida');
+    }
+
+    // Al crear una receta nueva, solo permitir citas atendidas que aún no tengan receta.
+    const recetaCitaIds = new Set(this.recetas.map(receta => receta.cita_id));
+    return this.citas.filter(
+      cita => cita.estatus === 'atendida' && !recetaCitaIds.has(cita.id)
+    );
   }
 
   public formatTime(hora: string): string {
@@ -672,6 +723,19 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     }
 
     const normalizedSlot = this.normalizeTime(slot);
+
+    // Si la cita es para hoy, no permitir seleccionar horarios que ya pasaron
+    if (this.createFormData.fecha_cita === this.today) {
+      const [hours, minutes] = normalizedSlot.split(':').map(Number);
+      const now = new Date();
+      const slotDate = new Date();
+      slotDate.setHours(hours ?? 0, minutes ?? 0, 0, 0);
+
+      if (slotDate.getTime() <= now.getTime()) {
+        return true;
+      }
+    }
+
     const record = this.getDayRecord(this.createFormData.fecha_cita);
 
     if (record?.status === 'full') {

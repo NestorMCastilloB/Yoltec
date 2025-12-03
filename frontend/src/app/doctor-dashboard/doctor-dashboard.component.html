@@ -392,7 +392,7 @@
               ></textarea>
           </div>
 
-          <button class="btn-primary" type="submit" [disabled]="isSubmittingBitacora || bitacoraForm.invalid">
+          <button class="btn-primary" type="submit" [disabled]="isSubmittingBitacora">
             {{ isSubmittingBitacora ? 'Guardando...' : 'Guardar bitácora' }}
           </button>
         </form>
@@ -531,7 +531,7 @@
             ></textarea>
           </div>
 
-          <button class="btn-primary" type="submit" [disabled]="isSubmittingReceta || recetaForm.invalid">
+          <button class="btn-primary" type="submit" [disabled]="isSubmittingReceta">
             {{ isSubmittingReceta ? 'Guardando...' : 'Guardar receta' }}
           </button>
         </form>

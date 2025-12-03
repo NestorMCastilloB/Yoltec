@@ -245,7 +245,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(bitacoras => {
-        this.bitacoras = bitacoras;
+        // Ordenar de la más reciente a la más antigua
+        this.bitacoras = [...bitacoras].sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       });
   }
 
@@ -265,7 +268,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(recetas => {
-        this.recetas = recetas;
+        // Ordenar de la más reciente a la más antigua por fecha de emisión
+        this.recetas = [...recetas].sort((a, b) =>
+          new Date(b.fecha_emision).getTime() - new Date(a.fecha_emision).getTime()
+        );
       });
   }
 
@@ -415,6 +421,19 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
 
     const normalizedSlot = this.normalizeTime(slot);
+
+    // Si la cita es para hoy, no permitir seleccionar horarios que ya pasaron
+    if (this.createFormData.fecha_cita === this.today) {
+      const [hours, minutes] = normalizedSlot.split(':').map(Number);
+      const now = new Date();
+      const slotDate = new Date();
+      slotDate.setHours(hours ?? 0, minutes ?? 0, 0, 0);
+
+      if (slotDate.getTime() <= now.getTime()) {
+        return true;
+      }
+    }
+
     const record = this.getDayRecord(this.createFormData.fecha_cita);
 
     if (record?.status === 'full') {
@@ -497,6 +516,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         availability: 'none',
         color: this.getStatusColor('none'),
         label: null
+      };
+    }
+
+    // Domingos: día no laborable, marcado en rojo y como lleno
+    const date = this.toDate(dateStr);
+    if (date.getDay() === 0) {
+      return {
+        availability: 'full',
+        color: '#ef5350',
+        label: 'Cerrado'
       };
     }
 

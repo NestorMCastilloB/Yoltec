@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: yoltec-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env.docker
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: yoltec-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend

@@ -13,9 +13,31 @@ use Illuminate\Support\Carbon;
  */
 class CitaController extends Controller
 {
+    /**
+     * Marcar automáticamente como canceladas las citas programadas
+     * cuya fecha y hora ya quedaron en el pasado.
+     */
+    private function autoCancelPastAppointments(): void
+    {
+        $now = Carbon::now();
+
+        Cita::where('estatus', 'programada')
+            ->where(function ($query) use ($now) {
+                $query->where('fecha_cita', '<', $now->toDateString())
+                    ->orWhere(function ($sub) use ($now) {
+                        $sub->where('fecha_cita', $now->toDateString())
+                            ->where('hora_cita', '<=', $now->format('H:i'));
+                    });
+            })
+            ->update(['estatus' => 'cancelada']);
+    }
+
     // Listar citas
     public function index(Request $request)
     {
+        // Antes de devolver las citas, actualizar estatus de las que ya pasaron
+        $this->autoCancelPastAppointments();
+
         $user = $request->user();
 
         if ($user->esAlumno()) {
@@ -36,6 +58,9 @@ class CitaController extends Controller
 
     public function availability(Request $request)
     {
+        // Asegurar que citas pasadas ya no cuenten como "programadas" para la disponibilidad
+        $this->autoCancelPastAppointments();
+
         $request->validate([
             'month' => 'nullable|integer|min:1|max:12',
             'year' => 'nullable|integer|min:2000|max:2100',
@@ -112,6 +137,11 @@ class CitaController extends Controller
             'motivo' => 'nullable|string|max:500',
             'numero_control' => 'nullable|string|exists:users,numero_control',
         ], [
+            'fecha_cita.required' => 'La fecha de la cita es obligatoria.',
+            'fecha_cita.date' => 'Ingresa una fecha de cita válida.',
+            'fecha_cita.after_or_equal' => 'La fecha de la cita debe ser hoy o una fecha futura.',
+            'hora_cita.required' => 'La hora de la cita es obligatoria.',
+            'hora_cita.date_format' => 'La hora de la cita debe tener el formato HH:MM.',
             'numero_control.exists' => 'No se encontró un alumno con ese número de control. Verifica los datos ingresados.',
         ]);
 
