@@ -449,5 +449,3 @@ Si en el futuro se agregan más roles (por ejemplo, "administrador"):
   - `POST /api/recetas`
   - `GET /api/recetas/{id}`
   - `PUT /api/recetas/{id}`
-
-Con esto tienes una visión completa de la arquitectura, módulos y flujos principales del sistema Yoltec para continuar su desarrollo y mantenimiento.
