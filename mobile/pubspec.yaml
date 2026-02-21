@@ -1,0 +1,61 @@
+name: yoltec_mobile
+description: App móvil Yoltec - Consultorio médico con sistema experto de IA
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # HTTP y API
+  http: ^1.1.0
+  dio: ^5.3.0
+  
+  # Estado y navegación
+  provider: ^6.1.0
+  flutter_bloc: ^8.1.3
+  go_router: ^12.1.0
+  
+  # UI y diseño
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  intl: ^0.18.1
+  table_calendar: ^3.0.9
+  
+  # Almacenamiento local
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  
+  # Utilidades
+  uuid: ^4.2.0
+  json_annotation: ^4.8.1
+  equatable: ^2.0.5
+  
+  # Fechas y tiempo
+  date_format: ^2.0.6
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/data/medical_rules.json
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
