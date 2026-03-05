@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/widgets/custom_button.dart';
 import 'package:yoltec_mobile/widgets/custom_text_field.dart';
+import 'two_factor_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,6 +48,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (result['success']) {
+      // Si requiere 2FA, navegar a pantalla de verificación
+      if (result['requires_2fa'] == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const TwoFactorScreen()),
+        );
+        return;
+      }
+
       // Navegación automática por AuthWrapper
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('¡Bienvenido a Yoltec!')),

@@ -1,0 +1,260 @@
+<div class="container mx-auto px-4 py-6 max-w-4xl">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">📤 Subir Documento Médico</h1>
+    <p class="text-gray-600 mt-2">
+      Sube un documento médico (PDF o Word) para que el sistema de IA lo analice y sugiera un diagnóstico.
+    </p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Formulario de Subida -->
+  <div *ngIf="!isLoading && !uploadSuccess" class="bg-white rounded-lg shadow-md p-6">
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Selección de Paciente -->
+      <div class="mb-6">
+        <label for="paciente" class="block text-sm font-medium text-gray-700 mb-2">
+          👤 Paciente <span class="text-red-500">*</span>
+        </label>
+        <select 
+          id="paciente"
+          formControlName="paciente_id"
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="uploadForm.get('paciente_id')?.invalid && uploadForm.get('paciente_id')?.touched"
+        >
+          <option value="">Seleccionar paciente...</option>
+          <option *ngFor="let paciente of pacientes" [value]="paciente.id">
+            {{ paciente.nombre }} {{ paciente.apellido }} ({{ paciente.email }})
+          </option>
+        </select>
+        <div *ngIf="uploadForm.get('paciente_id')?.invalid && uploadForm.get('paciente_id')?.touched" 
+             class="text-red-500 text-sm mt-1">
+          Debes seleccionar un paciente
+        </div>
+      </div>
+
+      <!-- Tipo de Documento -->
+      <div class="mb-6">
+        <label for="tipo" class="block text-sm font-medium text-gray-700 mb-2">
+          📋 Tipo de Documento <span class="text-red-500">*</span>
+        </label>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <label 
+            *ngFor="let tipo of tiposDocumento" 
+            class="cursor-pointer"
+          >
+            <input 
+              type="radio" 
+              formControlName="tipo_documento" 
+              [value]="tipo.value"
+              class="hidden peer"
+            >
+            <div class="p-3 border-2 rounded-lg text-center transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50">
+              <div class="text-2xl mb-1">{{ tipo.icon }}</div>
+              <div class="text-sm font-medium">{{ tipo.label }}</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Archivo -->
+      <div class="mb-6">
+        <label for="documento" class="block text-sm font-medium text-gray-700 mb-2">
+          📎 Archivo <span class="text-red-500">*</span>
+        </label>
+        
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+          <input 
+            type="file" 
+            id="documento"
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            (change)="onFileSelected($event)"
+            class="hidden"
+          >
+          <label for="documento" class="cursor-pointer">
+            <div class="text-gray-400 mb-2">
+              <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4-4m4 4h-12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">
+              <span class="font-medium text-blue-600">Haz clic para seleccionar</span> o arrastra un archivo
+            </p>
+            <p class="text-xs text-gray-500">PDF o Word (.doc, .docx) - Máx. 10MB</p>
+          </label>
+          
+          <!-- Archivo seleccionado -->
+          <div *ngIf="selectedFile" class="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <span class="text-2xl mr-2">📄</span>
+                <div class="text-left">
+                  <div class="font-medium text-sm text-gray-800 truncate max-w-xs">
+                    {{ selectedFile.name }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ formatFileSize(selectedFile.size) }}
+                  </div>
+                </div>
+              </div>
+              <button 
+                type="button"
+                (click)="selectedFile = null"
+                class="text-red-500 hover:text-red-700"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="uploadError && !selectedFile" class="text-red-500 text-sm mt-2">
+          {{ uploadError }}
+        </div>
+      </div>
+
+      <!-- Botón de Subir -->
+      <div class="flex items-center justify-between">
+        <button 
+          type="submit"
+          [disabled]="uploadForm.invalid || !selectedFile || isUploading"
+          class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span *ngIf="!isUploading">🚀 Subir y Analizar con IA</span>
+          <span *ngIf="isUploading" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Analizando...
+          </span>
+        </button>
+
+        <button 
+          type="button"
+          (click)="resetForm()"
+          class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Resultado Exitoso -->
+  <div *ngIf="uploadSuccess && documentoSubido" class="bg-white rounded-lg shadow-md p-6">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800">¡Documento Procesado!</h2>
+      <p class="text-gray-600">El sistema de IA ha analizado el documento</p>
+    </div>
+
+    <!-- Info del Documento -->
+    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+      <h3 class="font-semibold text-gray-800 mb-3">📄 Documento Subido</h3>
+      <div class="grid md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="text-gray-500">Nombre:</span>
+          <span class="ml-2 font-medium">{{ documentoSubido.nombre_archivo }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Tipo:</span>
+          <span class="ml-2 font-medium">{{ getTipoDocumentoLabel(documentoSubido.tipo_documento) }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Tamaño:</span>
+          <span class="ml-2 font-medium">{{ formatFileSize(documentoSubido.tamano_bytes) }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Estatus:</span>
+          <span class="ml-2 px-2 py-1 rounded-full text-xs font-medium" 
+                [class]="getBadgeColor(documentoSubido.estatus_procesamiento)">
+            {{ documentoSubido.estatus_procesamiento }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Análisis de IA -->
+    <div *ngIf="analisisIA" class="border-2 border-blue-100 rounded-lg p-4 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-800">🤖 Análisis de IA</h3>
+        <span class="px-3 py-1 rounded-full text-sm font-medium"
+              [class]="getConfianzaClass(analisisIA.nivel_confianza)">
+          Confianza: {{ (analisisIA.nivel_confianza * 100) | number:'1.0-0' }}%
+        </span>
+      </div>
+
+      <!-- Diagnóstico Sugerido -->
+      <div class="bg-blue-50 rounded-lg p-4 mb-4">
+        <div class="text-sm text-blue-600 font-medium mb-1">DIAGNÓSTICO SUGERIDO</div>
+        <div class="text-lg font-bold text-gray-800">{{ analisisIA.diagnostico_sugerido }}</div>
+      </div>
+
+      <!-- Datos Detectados -->
+      <div *ngIf="analisisIA.datos_detectados && Object.keys(analisisIA.datos_detectados).length > 0" 
+           class="mb-4">
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">📊 Datos Clínicos Detectados:</h4>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div *ngFor="let item of analisisIA.datos_detectados | keyvalue" 
+               class="bg-gray-50 rounded p-2 text-sm">
+            <div class="text-gray-500 capitalize">{{ item.key.replace('_', ' ') }}:</div>
+            <div class="font-medium">
+              {{ item.value.valor }} {{ item.value.unidad }}
+              <span *ngIf="item.value.estado !== 'normal'" 
+                    class="ml-1 text-xs px-1.5 py-0.5 rounded"
+                    [class.bg-red-100]="item.value.estado === 'alto'"
+                    [class.text-red-700]="item.value.estado === 'alto'"
+                    [class.bg-orange-100]="item.value.estado === 'bajo'"
+                    [class.text-orange-700]="item.value.estado === 'bajo'">
+                {{ item.value.estado }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción del Análisis -->
+      <div *ngIf="analisisIA.descripcion_analisis" class="text-sm text-gray-600 bg-gray-50 rounded p-3 whitespace-pre-line">
+        {{ analisisIA.descripcion_analisis }}
+      </div>
+
+      <!-- Alerta -->
+      <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div class="flex items-start">
+          <span class="text-yellow-600 mr-2">⚠️</span>
+          <div class="text-sm text-yellow-800">
+            <strong>Importante:</strong> Este diagnóstico es una sugerencia de IA y debe ser validado por un médico profesional.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Próximos Pasos -->
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button 
+        (click)="resetForm()"
+        class="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+      >
+        📤 Subir Otro Documento
+      </button>
+      <a 
+        *ngIf="documentoSubido"
+        [routerLink]="['/documentos', documentoSubido.id]"
+        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 text-center transition-colors"
+      >
+        👁️ Ver Detalles del Documento
+      </a>
+    </div>
+  </div>
+
+</div>

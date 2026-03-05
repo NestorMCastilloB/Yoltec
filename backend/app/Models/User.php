@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'tipo',
+        'es_admin',        // Nuevo campo para rol administrador
         'telefono',
         'fecha_nacimiento',
     ];
@@ -32,6 +33,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'fecha_nacimiento' => 'date',
+        'es_admin' => 'boolean',
     ];
 
     // Relaciones
@@ -74,5 +76,33 @@ class User extends Authenticatable
     public function esDoctor()
     {
         return $this->tipo === 'doctor';
+    }
+
+    public function esAdmin()
+    {
+        return $this->es_admin === true;
+    }
+
+    public function tieneAccesoAdmin()
+    {
+        return $this->esAdmin() || $this->esDoctor();
+    }
+
+    public function puedeSubirDocumentos()
+    {
+        return $this->esAdmin() || $this->esDoctor();
+    }
+
+    public function puedeValidarDiagnosticos()
+    {
+        return $this->esAdmin() || $this->esDoctor();
+    }
+
+    public function getRolLegibleAttribute()
+    {
+        if ($this->esAdmin()) return 'Administrador';
+        if ($this->esDoctor()) return 'Doctor';
+        if ($this->esAlumno()) return 'Paciente';
+        return 'Usuario';
     }
 }

@@ -1,0 +1,64 @@
+/* Estilos para el panel de validación */
+:host {
+  display: block;
+}
+
+/* Animaciones para los cards */
+.card-enter {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para el modal */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}
+
+/* Estilos para badges de confianza */
+.badge-alta {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-media {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-baja {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-muy-baja {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Scrollbar personalizada */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -1,0 +1,344 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">✅ Panel de Validación</h1>
+    <p class="text-gray-600 mt-2">
+      Revisa y valida los diagnósticos sugeridos por el sistema de IA
+    </p>
+  </div>
+
+  <!-- Estadísticas -->
+  <div *ngIf="estadisticas" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+      <div class="text-3xl font-bold text-blue-600">{{ estadisticas.por_validar }}</div>
+      <div class="text-sm text-gray-500">Pendientes</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+      <div class="text-3xl font-bold text-green-600">{{ estadisticas.validados }}</div>
+      <div class="text-sm text-gray-500">Validados</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+      <div class="text-3xl font-bold text-red-600">{{ estadisticas.rechazados }}</div>
+      <div class="text-sm text-gray-500">Rechazados</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+      <div class="text-3xl font-bold text-gray-600">{{ estadisticas.total_documentos }}</div>
+      <div class="text-sm text-gray-500">Total Docs</div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <span class="text-red-500 mr-2">⚠️</span>
+      <span class="text-red-700">{{ error }}</span>
+    </div>
+    <button 
+      (click)="cargarPendientes()"
+      class="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+    >
+      🔄 Reintentar
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div *ngIf="!isLoading && pendientes.length > 0" class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Búsqueda -->
+      <div class="flex-1">
+        <input 
+          type="text"
+          [(ngModel)]="busqueda"
+          placeholder="🔍 Buscar por paciente, diagnóstico o palabras clave..."
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+      </div>
+      
+      <!-- Filtro de confianza -->
+      <div class="md:w-48">
+        <select 
+          [(ngModel)]="filtroConfianza"
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="todos">📊 Todas las confianzas</option>
+          <option value="alta">🟢 Alta (≥80%)</option>
+          <option value="media">🔵 Media (60-80%)</option>
+          <option value="baja">🟡 Baja (<60%)</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Contador de resultados -->
+    <div class="mt-2 text-sm text-gray-500">
+      Mostrando {{ pendientesFiltrados.length }} de {{ pendientes.length }} análisis pendientes
+    </div>
+  </div>
+
+  <!-- Lista Vacía -->
+  <div *ngIf="!isLoading && pendientesFiltrados.length === 0" class="bg-white rounded-lg shadow p-8 text-center">
+    <div class="text-6xl mb-4">🎉</div>
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">¡No hay análisis pendientes!</h3>
+    <p class="text-gray-600">
+      Todos los diagnósticos sugeridos por la IA han sido revisados.
+    </p>
+  </div>
+
+  <!-- Lista de Análisis -->
+  <div *ngIf="!isLoading && pendientesFiltrados.length > 0" class="space-y-4">
+    <div 
+      *ngFor="let analisis of pendientesFiltrados" 
+      class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+    >
+      <!-- Header del Card -->
+      <div class="p-4 border-b bg-gray-50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">{{ getDocumentTypeIcon(analisis.documento?.tipo_documento || '') }}</span>
+            <div>
+              <div class="font-semibold text-gray-800">
+                {{ analisis.documento?.paciente?.nombre }} {{ analisis.documento?.paciente?.apellido }}
+              </div>
+              <div class="text-sm text-gray-500">
+                {{ getDocumentTypeLabel(analisis.documento?.tipo_documento || '') }} • 
+                {{ formatDate(analisis.created_at) }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span 
+              class="px-3 py-1 rounded-full text-sm font-medium"
+              [class]="getConfianzaClass(analisis.nivel_confianza)"
+            >
+              🤖 {{ (analisis.nivel_confianza * 100) | number:'1.0-0' }}% confianza
+            </span>
+            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+              ⏳ Pendiente
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-4">
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <!-- Diagnóstico Sugerido -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <div class="text-sm text-blue-600 font-medium mb-1">DIAGNÓSTICO IA</div>
+            <div class="text-lg font-bold text-gray-800">{{ analisis.diagnostico_sugerido }}</div>
+          </div>
+
+          <!-- Info del Documento -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="text-sm text-gray-500 font-medium mb-1">DOCUMENTO</div>
+            <div class="font-medium text-gray-800 truncate">{{ analisis.documento?.nombre_archivo }}</div>
+            <div class="text-sm text-gray-500">
+              {{ formatFileSize(analisis.documento?.tamano_bytes || 0) }} • 
+              {{ analisis.palabras_clave_detectadas?.length || 0 }} términos detectados
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos Detectados -->
+        <div *ngIf="analisis.datos_detectados && Object.keys(analisis.datos_detectados).length > 0" class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">📊 Datos Clínicos Detectados:</h4>
+          <div class="flex flex-wrap gap-2">
+            <span 
+              *ngFor="let item of analisis.datos_detectados | keyvalue" 
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm"
+              [class.bg-green-100]="item.value.estado === 'normal'"
+              [class.text-green-800]="item.value.estado === 'normal'"
+              [class.bg-red-100]="item.value.estado === 'alto'"
+              [class.text-red-800]="item.value.estado === 'alto'"
+              [class.bg-orange-100]="item.value.estado === 'bajo'"
+              [class.text-orange-800]="item.value.estado === 'bajo'"
+              [class.bg-gray-100]="item.value.estado === 'no_evaluable'"
+              [class.text-gray-800]="item.value.estado === 'no_evaluable'"
+            >
+              {{ item.key.replace('_', ' ') }}: {{ item.value.valor }} {{ item.value.unidad }}
+              <span *ngIf="item.value.estado !== 'normal'" class="ml-1 font-medium">
+                ({{ item.value.estado }})
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Palabras Clave -->
+        <div *ngIf="analisis.palabras_clave_detectadas && analisis.palabras_clave_detectadas.length > 0" class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">🔍 Términos Médicos Encontrados:</h4>
+          <div class="flex flex-wrap gap-1">
+            <span 
+              *ngFor="let palabra of analisis.palabras_clave_detectadas" 
+              class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
+            >
+              {{ palabra }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div *ngIf="analisis.descripcion_analisis" class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">📝 Análisis Detallado:</h4>
+          <div class="bg-gray-50 rounded p-3 text-sm text-gray-600 whitespace-pre-line max-h-32 overflow-y-auto">
+            {{ analisis.descripcion_analisis }}
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+          <button 
+            (click)="abrirModalValidacion(analisis)"
+            class="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            ✅ Validar Diagnóstico
+          </button>
+          <a 
+            [href]="analisis.documento?.url"
+            target="_blank"
+            class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 text-center transition-colors"
+          >
+            📄 Ver Documento
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Validación -->
+  <div 
+    *ngIf="modalAbierto && analisisSeleccionado" 
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+  >
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="p-4 border-b flex items-center justify-between">
+        <h3 class="text-xl font-bold text-gray-800">Validar Diagnóstico</h3>
+        <button 
+          (click)="cerrarModal()"
+          class="text-gray-400 hover:text-gray-600 text-2xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-4 space-y-4">
+        <!-- Info del Análisis -->
+        <div class="bg-blue-50 rounded-lg p-3">
+          <div class="text-sm text-blue-600 font-medium mb-1">DIAGNÓSTICO SUGERIDO POR IA</div>
+          <div class="font-bold text-gray-800">{{ analisisSeleccionado.diagnostico_sugerido }}</div>
+          <div class="text-sm text-gray-600 mt-1">
+            Confianza: {{ (analisisSeleccionado.nivel_confianza * 100) | number:'1.0-0' }}%
+          </div>
+        </div>
+
+        <!-- Acción -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Acción:</label>
+          <div class="space-y-2">
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50" [class.bg-green-50]="formValidacion.accion === 'aprobar'">
+              <input 
+                type="radio" 
+                name="accion" 
+                value="aprobar"
+                [(ngModel)]="formValidacion.accion"
+                (change)="onAccionChange()"
+                class="mr-3"
+              >
+              <div>
+                <div class="font-medium text-gray-800">✅ Aprobar</div>
+                <div class="text-sm text-gray-500">El diagnóstico de IA es correcto</div>
+              </div>
+            </label>
+
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50" [class.bg-blue-50]="formValidacion.accion === 'corregir'">
+              <input 
+                type="radio" 
+                name="accion" 
+                value="corregir"
+                [(ngModel)]="formValidacion.accion"
+                (change)="onAccionChange()"
+                class="mr-3"
+              >
+              <div>
+                <div class="font-medium text-gray-800">✏️ Corregir</div>
+                <div class="text-sm text-gray-500">El diagnóstico necesita ajustes</div>
+              </div>
+            </label>
+
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50" [class.bg-red-50]="formValidacion.accion === 'rechazar'">
+              <input 
+                type="radio" 
+                name="accion" 
+                value="rechazar"
+                [(ngModel)]="formValidacion.accion"
+                (change)="onAccionChange()"
+                class="mr-3"
+              >
+              <div>
+                <div class="font-medium text-gray-800">❌ Rechazar</div>
+                <div class="text-sm text-gray-500">El diagnóstico es incorrecto</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Diagnóstico Final (si es corregir) -->
+        <div *ngIf="formValidacion.accion === 'corregir'">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Diagnóstico Corregido:
+          </label>
+          <textarea 
+            [(ngModel)]="formValidacion.diagnostico_final"
+            rows="2"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Escribe el diagnóstico correcto..."
+          ></textarea>
+        </div>
+
+        <!-- Comentario -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Comentario:
+            <span *ngIf="formValidacion.accion === 'rechazar'" class="text-red-500">*</span>
+          </label>
+          <textarea 
+            [(ngModel)]="formValidacion.comentario"
+            rows="3"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Explica tu decisión..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t flex flex-col sm:flex-row gap-2">
+        <button 
+          (click)="validarDiagnostico()"
+          [disabled]="isValidating"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        >
+          <span *ngIf="!isValidating">💾 Guardar Validación</span>
+          <span *ngIf="isValidating" class="flex items-center justify-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Guardando...
+          </span>
+        </button>
+        <button 
+          (click)="cerrarModal()"
+          class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+/* Estilos para subir documento */
+:host {
+  display: block;
+}
+
+/* Animación de upload */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Drag and drop zone */
+.drop-zone {
+  transition: all 0.3s ease;
+}
+
+.drop-zone.drag-over {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Custom scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+/* Estilos para radio buttons custom */
+input[type="radio"]:checked + div {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Transiciones suaves */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Focus visible */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
