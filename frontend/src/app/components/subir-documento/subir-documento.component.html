@@ -201,22 +201,22 @@
       </div>
 
       <!-- Datos Detectados -->
-      <div *ngIf="analisisIA.datos_detectados && Object.keys(analisisIA.datos_detectados).length > 0" 
+      <div *ngIf="analisisIA?.datos_detectados && getDatosKeys().length > 0" 
            class="mb-4">
         <h4 class="text-sm font-semibold text-gray-700 mb-2">📊 Datos Clínicos Detectados:</h4>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div *ngFor="let item of analisisIA.datos_detectados | keyvalue" 
+          <div *ngFor="let item of getDatosEntries()" 
                class="bg-gray-50 rounded p-2 text-sm">
             <div class="text-gray-500 capitalize">{{ item.key.replace('_', ' ') }}:</div>
             <div class="font-medium">
-              {{ item.value.valor }} {{ item.value.unidad }}
-              <span *ngIf="item.value.estado !== 'normal'" 
+              {{ item.value?.valor }} {{ item.value?.unidad }}
+              <span *ngIf="item.value?.estado !== 'normal'" 
                     class="ml-1 text-xs px-1.5 py-0.5 rounded"
-                    [class.bg-red-100]="item.value.estado === 'alto'"
-                    [class.text-red-700]="item.value.estado === 'alto'"
-                    [class.bg-orange-100]="item.value.estado === 'bajo'"
-                    [class.text-orange-700]="item.value.estado === 'bajo'">
-                {{ item.value.estado }}
+                    [class.bg-red-100]="item.value?.estado === 'alto'"
+                    [class.text-red-700]="item.value?.estado === 'alto'"
+                    [class.bg-orange-100]="item.value?.estado === 'bajo'"
+                    [class.text-orange-700]="item.value?.estado === 'bajo'">
+                {{ item.value?.estado }}
               </span>
             </div>
           </div>

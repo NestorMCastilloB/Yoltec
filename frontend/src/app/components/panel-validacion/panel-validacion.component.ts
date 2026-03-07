@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DocumentoMedicoService, AnalisisIA, ValidacionRequest } from '../../services/documento-medico.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -6,7 +8,8 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-panel-validacion',
   templateUrl: './panel-validacion.component.html',
   styleUrls: ['./panel-validacion.component.css'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class PanelValidacionComponent implements OnInit {
   pendientes: AnalisisIA[] = [];
@@ -180,6 +183,12 @@ export class PanelValidacionComponent implements OnInit {
     if (confianza >= 0.7) return 'bg-blue-100 text-blue-800';
     if (confianza >= 0.5) return 'bg-yellow-100 text-yellow-800';
     return 'bg-red-100 text-red-800';
+  }
+
+  // Helper para obtener keys de datos_detectados de forma segura
+  getDatosKeys(datos: any): string[] {
+    if (!datos) return [];
+    return Object.keys(datos);
   }
 
   formatDate(dateString: string): string {

@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DocumentoMedicoService, DocumentoMedico } from '../../services/documento-medico.service';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { DocumentoMedicoService, DocumentoMedico, AnalisisIA } from '../../services/documento-medico.service';
 import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-subir-documento',
   templateUrl: './subir-documento.component.html',
   styleUrls: ['./subir-documento.component.css'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class SubirDocumentoComponent implements OnInit {
   uploadForm!: FormGroup;
@@ -22,7 +25,7 @@ export class SubirDocumentoComponent implements OnInit {
   uploadSuccess = false;
   uploadError: string | null = null;
   documentoSubido: DocumentoMedico | null = null;
-  analisisIA: any | null = null;
+  analisisIA: AnalisisIA | null = null;
 
   // Tipos de documentos disponibles
   tiposDocumento = [
@@ -62,7 +65,7 @@ export class SubirDocumentoComponent implements OnInit {
         this.pacientes = response.alumnos || [];
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error cargando pacientes:', error);
         this.isLoading = false;
         // Datos de ejemplo para desarrollo
@@ -163,6 +166,31 @@ export class SubirDocumentoComponent implements OnInit {
     if (confianza >= 0.7) return 'bg-yellow-100 text-yellow-800';
     if (confianza >= 0.5) return 'bg-orange-100 text-orange-800';
     return 'bg-red-100 text-red-800';
+  }
+
+  getBadgeColor(estatus: string): string {
+    const colores: { [key: string]: string } = {
+      'pendiente': 'bg-yellow-100 text-yellow-800',
+      'procesando': 'bg-blue-100 text-blue-800',
+      'completado': 'bg-green-100 text-green-800',
+      'error': 'bg-red-100 text-red-800',
+    };
+    return colores[estatus] || 'bg-gray-100 text-gray-800';
+  }
+
+  // Helper para obtener keys de datos_detectados de forma segura
+  getDatosKeys(): string[] {
+    if (!this.analisisIA?.datos_detectados) return [];
+    return Object.keys(this.analisisIA.datos_detectados);
+  }
+
+  // Helper para obtener entries de datos_detectados
+  getDatosEntries(): { key: string; value: any }[] {
+    if (!this.analisisIA?.datos_detectados) return [];
+    return Object.entries(this.analisisIA.datos_detectados).map(([key, value]) => ({
+      key,
+      value
+    }));
   }
 
   formatFileSize(bytes: number): string {

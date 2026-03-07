@@ -37,6 +37,20 @@ export interface DocumentoMedico {
 export interface AnalisisIA {
   id: number;
   documento_id: number;
+  documento?: {
+    id: number;
+    paciente_id: number;
+    paciente?: {
+      id: number;
+      nombre: string;
+      apellido: string;
+      email: string;
+    };
+    nombre_archivo: string;
+    tipo_documento: string;
+    tamano_bytes?: number;
+    url?: string;
+  };
   estatus: string;
   datos_detectados: {
     [key: string]: {
