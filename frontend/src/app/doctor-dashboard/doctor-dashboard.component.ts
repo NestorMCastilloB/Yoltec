@@ -36,6 +36,7 @@ interface CalendarDay {
   templateUrl: './doctor-dashboard.component.html',
   styleUrls: ['./doctor-dashboard.component.css']
 })
+
 export class DoctorDashboardComponent implements OnInit, OnDestroy {
   activeSection: string = 'inicio';
   doctorName: string = 'Doctor';
@@ -216,6 +217,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     this.submitMessage = null;
   }
 
+  
   onCreateCita(form: NgForm): void {
     if (form.invalid || !this.createFormData.numero_control?.trim()) {
       this.submitMessage = 'Ingresa el número de control del alumno.';
