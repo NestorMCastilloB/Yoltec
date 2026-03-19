@@ -1,0 +1,116 @@
+{
+  "enfermedades": [
+    {
+      "nombre": "Gripe",
+      "sintomas": ["fiebre", "tos", "dolor_garganta", "congestion_nasal", "dolor_cabeza", "dolor_cuerpo"],
+      "preguntas_clave": ["fiebre", "tos", "dolor_garganta"]
+    },
+    {
+      "nombre": "Resfriado Común",
+      "sintomas": ["congestion_nasal", "estornudos", "dolor_garganta_leve", "tos_leve", "malestar_general"],
+      "preguntas_clave": ["congestion_nasal", "estornudos"]
+    },
+    {
+      "nombre": "COVID-19",
+      "sintomas": ["fiebre", "tos_seca", "cansancio", "perdida_olfato", "perdida_gusto", "dolor_cabeza"],
+      "preguntas_clave": ["fiebre", "tos_seca", "perdida_olfato"]
+    },
+    {
+      "nombre": "Infección Gastrointestinal",
+      "sintomas": ["dolor_abdominal", "nauseas", "vomito", "diarrea", "fiebre_leve"],
+      "preguntas_clave": ["dolor_abdominal", "nauseas", "diarrea"]
+    },
+    {
+      "nombre": "Migraña",
+      "sintomas": ["dolor_cabeza_intenso", "sensibilidad_luz", "sensibilidad_sonido", "nauseas", "vision_borrosa"],
+      "preguntas_clave": ["dolor_cabeza_intenso", "sensibilidad_luz"]
+    },
+    {
+      "nombre": "Alergias",
+      "sintomas": ["estornudos", "ojos_llorosos", "congestion_nasal", "picazon_nariz", "picazon_ojos"],
+      "preguntas_clave": ["estornudos", "ojos_llorosos", "picazon_nariz"]
+    },
+    {
+      "nombre": "Dengue",
+      "sintomas": ["fiebre_alta", "dolor_cabeza_intenso", "dolor_retroocular", "dolor_cuerpo_intenso", "erupcion_cutanea", "nauseas"],
+      "preguntas_clave": ["fiebre_alta", "dolor_retroocular", "dolor_cuerpo_intenso"]
+    },
+    {
+      "nombre": "Infección Urinaria",
+      "sintomas": ["dolor_orinar", "frecuencia_orinar", "urgencia_orinar", "dolor_abdominal_bajo", "orina_turbia"],
+      "preguntas_clave": ["dolor_orinar", "frecuencia_orinar"]
+    },
+    {
+      "nombre": "Hipertensión",
+      "sintomas": ["dolor_cabeza", "mareos", "vision_borrosa", "palpitaciones", "fatiga"],
+      "preguntas_clave": ["dolor_cabeza", "mareos", "palpitaciones"]
+    },
+    {
+      "nombre": "Hipoglucemia",
+      "sintomas": ["mareos", "sudoracion", "temblores", "hambre_intensa", "confusion", "palidez"],
+      "preguntas_clave": ["mareos", "sudoracion", "hambre_intensa"]
+    }
+  ],
+  "preguntas": [
+    {
+      "id": "fiebre",
+      "texto": "¿Tienes fiebre?",
+      "opciones": ["No", "Fiebre leve (37-38°C)", "Fiebre moderada (38-39°C)", "Fiebre alta (>39°C)"],
+      "peso": 3
+    },
+    {
+      "id": "tos",
+      "texto": "¿Tienes tos?",
+      "opciones": ["No", "Tos leve", "Tos moderada", "Tos severa"],
+      "peso": 2
+    },
+    {
+      "id": "dolor_cabeza",
+      "texto": "¿Tienes dolor de cabeza?",
+      "opciones": ["No", "Leve", "Moderado", "Intenso"],
+      "peso": 2
+    },
+    {
+      "id": "congestion_nasal",
+      "texto": "¿Tienes congestión nasal?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "peso": 2
+    },
+    {
+      "id": "dolor_garganta",
+      "texto": "¿Tienes dolor de garganta?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "peso": 2
+    },
+    {
+      "id": "nauseas",
+      "texto": "¿Tienes náuseas?",
+      "opciones": ["No", "Leves", "Moderadas", "Severas (con vómito)"],
+      "peso": 2
+    },
+    {
+      "id": "dolor_abdominal",
+      "texto": "¿Tienes dolor abdominal?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "peso": 3
+    },
+    {
+      "id": "cansancio",
+      "texto": "¿Sientes cansancio o fatiga?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "peso": 1
+    },
+    {
+      "id": "perdida_olfato",
+      "texto": "¿Has perdido el sentido del olfato?",
+      "opciones": ["No", "Disminuido", "Perdido completamente"],
+      "peso": 3
+    },
+    {
+      "id": "estornudos",
+      "texto": "¿Tienes estornudos frecuentes?",
+      "opciones": ["No", "Ocasionalmente", "Frecuentemente", "Constantemente"],
+      "peso": 1
+    }
+  ]
+}

@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'numero_control',
+        'nip',                      // NIP para alumnos
         'username',
         'nombre',
         'apellido',
@@ -84,11 +85,6 @@ class User extends Authenticatable
     }
 
     public function tieneAccesoAdmin()
-    {
-        return $this->esAdmin() || $this->esDoctor();
-    }
-
-    public function puedeSubirDocumentos()
     {
         return $this->esAdmin() || $this->esDoctor();
     }

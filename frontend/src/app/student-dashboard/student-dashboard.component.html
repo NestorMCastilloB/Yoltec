@@ -209,6 +209,13 @@
                     <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
                       {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
                     </button>
+                    <button 
+                      class="btn-ia" 
+                      (click)="togglePreEvaluacionForm(cita)"
+                      [disabled]="tienePreEvaluacion(cita.id)">
+                      <span *ngIf="!tienePreEvaluacion(cita.id)">🤖 Pre-evaluación IA</span>
+                      <span *ngIf="tienePreEvaluacion(cita.id)">✓ Pre-evaluación completada</span>
+                    </button>
                   </div>
                 </div>
               </ng-container>
@@ -330,4 +337,111 @@
     </section>
 
   </main>
+</div>
+
+<!-- Modal: Pre-evaluación IA -->
+<div *ngIf="showPreEvaluacionForm" class="modal-overlay" (click)="togglePreEvaluacionForm()">
+  <div class="modal-content pre-evaluacion-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🤖 Pre-evaluación IA</h2>
+      <button class="close-btn" (click)="togglePreEvaluacionForm()">×</button>
+    </div>
+
+    <!-- Formulario de preguntas -->
+    <div *ngIf="!resultadoPreEvaluacion" class="modal-body">
+      <div class="cita-info" *ngIf="selectedCitaForEvaluacion">
+        <p><strong>Cita:</strong> {{ formatDateDisplay(selectedCitaForEvaluacion.fecha_cita) }} · {{ formatTime(selectedCitaForEvaluacion.hora_cita) }} hrs</p>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progresoEvaluacion"></div>
+      </div>
+      <p class="progress-text">Pregunta {{ preguntaActualIndex + 1 }} de {{ preguntasIA.length }}</p>
+
+      <div *ngIf="preguntaActual" class="pregunta-container">
+        <h3 class="pregunta-text">{{ preguntaActual.texto }}</h3>
+        <div class="opciones-grid">
+          <button
+            *ngFor="let opcion of preguntaActual.opciones"
+            class="opcion-btn"
+            [class.selected]="respuestaActualSeleccionada === opcion"
+            (click)="seleccionarRespuesta(opcion)">
+            {{ opcion }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="preEvaluacionError" class="alert error">
+        {{ preEvaluacionError }}
+      </div>
+
+      <div class="modal-actions">
+        <button 
+          class="btn-secondary" 
+          (click)="preguntaAnterior()"
+          [disabled]="preguntaActualIndex === 0">
+          Anterior
+        </button>
+        <button 
+          *ngIf="!esUltimaPregunta"
+          class="btn-primary" 
+          (click)="siguientePregunta()"
+          [disabled]="!puedeAvanzar()">
+          Siguiente
+        </button>
+        <button 
+          *ngIf="esUltimaPregunta"
+          class="btn-primary btn-ia-submit" 
+          (click)="submitPreEvaluacion()"
+          [disabled]="!puedeAvanzar() || isSubmittingPreEvaluacion">
+          {{ isSubmittingPreEvaluacion ? 'Analizando...' : 'Obtener diagnóstico IA' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Resultado de la evaluación -->
+    <div *ngIf="resultadoPreEvaluacion" class="modal-body resultado-container">
+      <div class="resultado-header">
+        <h3>Diagnóstico Preliminar</h3>
+        <div class="confianza-badge" [class]="getConfianzaClass(resultadoPreEvaluacion.confianza)">
+          Confianza: {{ (resultadoPreEvaluacion.confianza * 100).toFixed(0) }}%
+        </div>
+      </div>
+
+      <div class="diagnostico-principal">
+        <h4>{{ resultadoPreEvaluacion.diagnostico_principal }}</h4>
+      </div>
+
+      <div class="sintomas-detectados" *ngIf="resultadoPreEvaluacion.sintomas_detectados.length > 0">
+        <h5>Síntomas detectados:</h5>
+        <div class="tags">
+          <span *ngFor="let sintoma of resultadoPreEvaluacion.sintomas_detectados" class="tag">
+            {{ sintoma }}
+          </span>
+        </div>
+      </div>
+
+      <div class="posibles-enfermedades" *ngIf="resultadoPreEvaluacion.posibles_enfermedades.length > 1">
+        <h5>Otras posibilidades:</h5>
+        <ul>
+          <li *ngFor="let enfermedad of resultadoPreEvaluacion.posibles_enfermedades.slice(1, 4)">
+            {{ enfermedad.enfermedad }} ({{ (enfermedad.confianza * 100).toFixed(0) }}%)
+          </li>
+        </ul>
+      </div>
+
+      <div class="recomendacion">
+        <h5>Recomendación:</h5>
+        <p>{{ resultadoPreEvaluacion.recomendacion }}</p>
+      </div>
+
+      <div class="alert info">
+        <strong>Nota:</strong> Este diagnóstico es preliminar y será validado por el doctor durante tu cita.
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="togglePreEvaluacionForm()">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>

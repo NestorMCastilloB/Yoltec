@@ -1,58 +1,157 @@
-# 🚀 Yoltec - Paquete de Instalación para Desarrollador
+# 🚀 Yoltec - Guía para Colaboradores
 
-## 📋 Contenido del Paquete
+## 📋 Estructura del Proyecto (3 Bloques Docker)
 
-- `yoltec_db_completa.sql` - Base de datos completa con todas las tablas
-- `.env.companero` - Archivo de configuración con credenciales de base de datos
-- `yoltec/` - Código fuente del proyecto Laravel
+```
+yoltec/
+├── backend/          # Laravel 10 + PostgreSQL (Neon)
+├── frontend/         # Angular 17+
+├── IA/               # Python (Rule-based)
+└── mobile/           # (Futuro)
+```
 
 ## ⚡ Instalación Rápida
 
-### 1. Requisitos
-- PHP 8.2+
-- Composer
-- PostgreSQL (o conexión a Neon)
+### Requisitos
+- Docker & Docker Compose
+- Git
 
-### 2. Configuración del Proyecto
-
+### 1. Clonar repositorio
 ```bash
-# 1. Copiar el código fuente
-cp -r yoltec /var/www/
-cd /var/www/yoltec/backend
-
-# 2. Instalar dependencias
-composer install
-
-# 3. Copiar archivo de entorno
-cp .env.companero .env
-
-# 4. La base de datos ya está configurada en Neon (no necesitas crearla)
-# Solo verifica que puedes conectarte:
-php artisan migrate:status
+git clone <repo>
+cd yoltec
 ```
 
-### 3. Iniciar Servidor
-
+### 2. Iniciar con Docker
 ```bash
-php artisan serve
-# Accede a: http://localhost:8000
+docker-compose up -d
 ```
 
-## 🔐 Credenciales de Base de Datos
+### 3. Migraciones (primera vez)
+```bash
+docker-compose exec backend php artisan migrate
+```
 
-La base de datos está alojada en **Neon** (PostgreSQL en la nube):
+### 4. Acceder
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:8000/api
 
-- **URL**: postgresql://neondb_owner:npg_mP8gE1UpSOwW@ep-noisy-darkness-a49s74zs-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+## 🔐 Configuración Local (NO subir a Git)
 
-⚠️ **IMPORTANTE**: No compartas estas credenciales públicamente ni las subas a GitHub.
+Crea estos archivos localmente:
+
+### backend/.env
+```
+DB_CONNECTION=pgsql
+DB_URL=postgresql://...
+```
+
+### frontend/.env.local
+```
+# Variables de entorno Angular (si aplica)
+```
+
+## 🤝 Flujo de Trabajo Git
+
+### 1. Crear rama para tu feature
+```bash
+git checkout -b feature/nombre-descriptivo
+```
+
+### 2. Hacer cambios
+- Backend: `backend/`
+- Frontend: `frontend/`
+- IA: `IA/`
+
+### 3. Commit y push
+```bash
+git add .
+git commit -m "feat: descripción clara del cambio"
+git push origin feature/nombre-descriptivo
+```
+
+### 4. Pull Request
+Crea PR en GitHub para revisión antes de merge a `main`.
+
+## 📁 Qué NO subir a Git
+
+```gitignore
+# Archivos de entorno
+.env
+.env.local
+.env.companero
+
+# Dependencias
+node_modules/
+vendor/
+venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs y temporales
+*.log
+*.tmp
+.DS_Store
+```
+
+## 🏗️ Arquitectura por Bloques
+
+### Bloque 1: Backend (Laravel)
+```
+backend/
+├── app/Models/           # User, Cita, Bitacora, Receta, PreEvaluacionIA
+├── app/Http/Controllers/ # AuthController, CitaController, etc.
+├── database/migrations/   # Esquema de BD
+└── routes/api.php       # Endpoints REST
+```
+
+### Bloque 2: Frontend (Angular)
+```
+frontend/src/app/
+├── login/                 # Login diferenciado (NIP/password)
+├── student-dashboard/     # Panel alumno + pre-evaluación IA
+├── doctor-dashboard/      # Panel doctor + validación IA
+└── services/              # Auth, Cita, Bitacora, PreEvaluacionIA
+```
+
+### Bloque 3: IA (Python)
+```
+IA/
+├── enfermedades_config.json    # Reglas de diagnóstico
+└── pre_evaluacion_ia.py        # Motor IA (rule-based)
+```
+
+## 📝 Comandos Útiles
+
+```bash
+# Backend
+docker-compose exec backend php artisan migrate
+docker-compose exec backend php artisan db:seed
+
+# Frontend (desarrollo local)
+cd frontend && npm install && ng serve
+
+# Ver logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+## 🎓 Información Académica
+
+- **Proyecto**: Sistema de Consultorio Médico con IA
+- **IA**: Rule-based (no ML), 100% propio
+- **Funcionalidades**: Citas, bitácoras, recetas, pre-evaluación IA
+- **Stack**: Laravel + Angular + PostgreSQL + Docker
 
 ## 📞 Soporte
 
-Si tienes problemas de conexión a la base de datos, contacta al administrador del proyecto.
+Si tienes problemas de conexión o configuración, revisa:
+1. `README.md` en raíz del proyecto
+2. Logs de Docker: `docker-compose logs`
+3. Variables de entorno en `backend/.env`
 
-## 🔧 Notas Técnicas
+---
 
-- El proyecto usa Laravel 10+
-- La base de datos es PostgreSQL en Neon (serverless)
-- El frontend está en Angular (carpeta `frontend/`)
-- La app móvil está en Flutter (carpeta `app/`)
+**Nota**: Este proyecto usa IA basada en reglas (no requiere entrenamiento con datasets). Para mejorar la IA, edita `IA/enfermedades_config.json`.

@@ -35,8 +35,12 @@
         class="nav-button">
         Recetas
       </button>
-    <a routerLink="/documentos/subir" class="nav-button">📤 Subir Doc</a>
-      <a routerLink="/documentos/validar" class="nav-button">✅ Validar IA</a>
+      <button 
+        [class.active]="activeSection === 'pre-evaluaciones'" 
+        (click)="setActiveSection('pre-evaluaciones')"
+        class="nav-button">
+        🤖 Pre-evaluaciones <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
+      </button>
     </nav>
   </header>
 
@@ -584,6 +588,135 @@
         </ng-template>
       </div>
     </section>
+
+    <!-- Sección: Pre-evaluaciones IA -->
+    <section *ngIf="activeSection === 'pre-evaluaciones'" class="content-section">
+      <div class="section-header">
+        <h2>🤖 Pre-evaluaciones IA Pendientes</h2>
+        <span *ngIf="totalPendientes > 0" class="badge badge-primary">{{ totalPendientes }} pendientes</span>
+      </div>
+
+      <div class="pre-evaluaciones-container">
+        <ng-container *ngIf="!isLoadingPreEvaluaciones; else loadingPreEvaluaciones">
+          <div *ngIf="preEvaluacionesError" class="alert error">{{ preEvaluacionesError }}</div>
+
+          <div *ngIf="!preEvaluacionesError && preEvaluaciones.length === 0" class="placeholder-card">
+            <h3>No hay pre-evaluaciones pendientes</h3>
+            <p>Cuando los alumnos completen sus evaluaciones IA, aparecerán aquí para su revisión.</p>
+          </div>
+
+          <div *ngIf="preEvaluaciones.length > 0" class="pre-evaluaciones-grid">
+            <article *ngFor="let preEval of preEvaluaciones" class="data-card pre-evaluacion-card">
+              <header class="card-header">
+                <div class="card-title">
+                  <h4>{{ preEval.cita?.alumno?.nombre }} {{ preEval.cita?.alumno?.apellido }}</h4>
+                  <p class="card-caption" *ngIf="preEval.cita">
+                    {{ formatDateDisplay(preEval.cita.fecha_cita) }} · {{ formatTime(preEval.cita.hora_cita) }} hrs
+                  </p>
+                </div>
+                <span class="badge-pill" [class]="getConfianzaClass(preEval.confianza)">
+                  {{ (preEval.confianza * 100).toFixed(0) }}% confianza
+                </span>
+              </header>
+
+              <div class="card-body">
+                <div class="diagnostico-sugerido">
+                  <strong>Diagnóstico IA:</strong> {{ preEval.diagnostico_sugerido }}
+                </div>
+                <div class="sintomas-tags" *ngIf="preEval.sintomas_detectados.length > 0">
+                  <span *ngFor="let sintoma of preEval.sintomas_detectados" class="tag">{{ sintoma }}</span>
+                </div>
+
+                <div class="card-actions">
+                  <button class="btn-primary" (click)="openPreEvaluacionModal(preEval)">
+                    Revisar y validar
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </ng-container>
+        <ng-template #loadingPreEvaluaciones>
+          <div class="placeholder-card">Cargando pre-evaluaciones...</div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- Modal: Validar Pre-evaluación -->
+    <div *ngIf="showPreEvaluacionModal" class="modal-overlay" (click)="closePreEvaluacionModal()">
+      <div class="modal-content pre-evaluacion-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>🤖 Validar Pre-evaluación IA</h2>
+          <button class="close-btn" (click)="closePreEvaluacionModal()">×</button>
+        </div>
+
+        <div class="modal-body" *ngIf="selectedPreEvaluacion">
+          <div class="alumno-info">
+            <h4>{{ selectedPreEvaluacion.cita?.alumno?.nombre }} {{ selectedPreEvaluacion.cita?.alumno?.apellido }}</h4>
+            <p>No. Control: {{ selectedPreEvaluacion.cita?.alumno?.numero_control }}</p>
+            <p>Cita: {{ formatDateDisplay(selectedPreEvaluacion.cita?.fecha_cita || '') }} · {{ formatTime(selectedPreEvaluacion.cita?.hora_cita || '') }} hrs</p>
+          </div>
+
+          <div class="diagnostico-ia-section">
+            <h3>Diagnóstico sugerido por IA</h3>
+            <div class="confianza-badge" [class]="getConfianzaClass(selectedPreEvaluacion.confianza)">
+              Confianza: {{ (selectedPreEvaluacion.confianza * 100).toFixed(0) }}%
+            </div>
+            <p class="diagnostico-text">{{ selectedPreEvaluacion.diagnostico_sugerido }}</p>
+
+            <div class="sintomas-section" *ngIf="selectedPreEvaluacion.sintomas_detectados.length > 0">
+              <h4>Síntomas detectados:</h4>
+              <div class="tags">
+                <span *ngFor="let sintoma of selectedPreEvaluacion.sintomas_detectados" class="tag">{{ sintoma }}</span>
+              </div>
+            </div>
+
+            <div class="respuestas-section">
+              <h4>Respuestas del alumno:</h4>
+              <div class="respuestas-list">
+                <div *ngFor="let item of selectedPreEvaluacion.respuestas | keyvalue" class="respuesta-item">
+                  <span class="respuesta-key">{{ item.key }}:</span>
+                  <span class="respuesta-value">{{ item.value }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="validacion-form">
+            <h3>Validación del Doctor</h3>
+            <div class="form-group">
+              <label for="comentario">Comentario (opcional):</label>
+              <textarea
+                id="comentario"
+                [(ngModel)]="comentarioValidacion"
+                rows="3"
+                placeholder="Agrega observaciones sobre la evaluación...">
+              </textarea>
+            </div>
+          </div>
+
+          <div *ngIf="preEvaluacionesError" class="alert error">
+            {{ preEvaluacionesError }}
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closePreEvaluacionModal()">Cancelar</button>
+            <button 
+              class="btn-danger" 
+              (click)="validarPreEvaluacion('descartar')"
+              [disabled]="isSubmittingValidacion">
+              {{ isSubmittingValidacion ? 'Procesando...' : 'Descartar' }}
+            </button>
+            <button 
+              class="btn-success" 
+              (click)="validarPreEvaluacion('validar')"
+              [disabled]="isSubmittingValidacion">
+              {{ isSubmittingValidacion ? 'Procesando...' : 'Validar diagnóstico' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </main>
 </div>

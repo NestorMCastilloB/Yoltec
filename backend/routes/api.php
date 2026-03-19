@@ -7,7 +7,7 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\RecetaController;
 use App\Http\Controllers\PerfilController;
-use App\Http\Controllers\DocumentoMedicoController;
+use App\Http\Controllers\PreEvaluacionIAController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -46,16 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recetas/{id}', [RecetaController::class, 'show']);
     Route::put('/recetas/{id}', [RecetaController::class, 'update']); // Solo doctor
 
-    // Documentos Médicos con IA
-    Route::get('/documentos', [DocumentoMedicoController::class, 'index']);
-    Route::post('/documentos', [DocumentoMedicoController::class, 'store']); // Solo doctor/admin
-    Route::get('/documentos/{id}', [DocumentoMedicoController::class, 'show']);
-    Route::get('/documentos/{id}/download', [DocumentoMedicoController::class, 'download']);
-    Route::post('/documentos/{id}/reprocesar', [DocumentoMedicoController::class, 'reprocesar']);
-    Route::delete('/documentos/{id}', [DocumentoMedicoController::class, 'destroy']);
-    
-    // Análisis de IA y validación por doctores
-    Route::get('/analisis-ia/pendientes', [DocumentoMedicoController::class, 'pendientesValidacion']);
-    Route::post('/analisis-ia/{analisisId}/validar', [DocumentoMedicoController::class, 'validarDiagnostico']);
-    Route::get('/analisis-ia/estadisticas', [DocumentoMedicoController::class, 'estadisticas']);
+    // Pre-evaluaciones IA
+    Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
+    Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);
+    Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
+    Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
+    Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
+    Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
 });
+

@@ -18,24 +18,44 @@ class AuthController extends Controller
     const CODE_DURATION = 10;
 
     /**
-     * Paso 1: Login inicial - Verifica credenciales y envía código 2FA
+     * Paso 1: Login inicial - Verifica credenciales según tipo de usuario
      */
     public function login(Request $request)
     {
         $request->validate([
             'identificador' => 'required|string',
             'password' => 'required|string',
+            'tipo_usuario' => 'required|in:alumno,doctor',
         ]);
 
-        // Buscar usuario
-        $user = User::where('numero_control', $request->identificador)
-                    ->orWhere('username', $request->identificador)
-                    ->first();
+        $tipoUsuario = $request->tipo_usuario;
+        $identificador = $request->identificador;
+        $password = $request->password;
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'identificador' => ['Las credenciales son incorrectas.'],
-            ]);
+        // Buscar usuario según tipo
+        if ($tipoUsuario === 'alumno') {
+            // Alumno: busca por numero_control y verifica NIP
+            $user = User::where('numero_control', $identificador)
+                        ->where('tipo', 'alumno')
+                        ->first();
+
+            // Verificar que exista y que el NIP coincida (sin hash, es un PIN numérico)
+            if (!$user || $user->nip !== $password) {
+                throw ValidationException::withMessages([
+                    'identificador' => ['Las credenciales son incorrectas.'],
+                ]);
+            }
+        } else {
+            // Doctor: busca por username y verifica password (con hash)
+            $user = User::where('username', $identificador)
+                        ->where('tipo', 'doctor')
+                        ->first();
+
+            if (!$user || !Hash::check($password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'identificador' => ['Las credenciales son incorrectas.'],
+                ]);
+            }
         }
 
         // Generar código 2FA de 6 dígitos

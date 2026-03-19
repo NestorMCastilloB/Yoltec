@@ -42,10 +42,11 @@ class DatabaseSeeder extends Seeder
                 'nombre' => 'Nestor Moises',
                 'apellido' => 'Castillo Bautista',
                 'email' => 'nestor.castillo@alumno.com',
-                'password' => Hash::make('22690495_740270'),
+                'password' => Hash::make('password123'),
                 'tipo' => 'alumno',
                 'telefono' => '4441111111',
                 'fecha_nacimiento' => '2004-03-02',
+                'nip' => '740270',
             ]
         );
 
@@ -55,10 +56,11 @@ class DatabaseSeeder extends Seeder
                 'nombre' => 'Ana',
                 'apellido' => 'López',
                 'email' => 'ana.lopez@alumno.com',
-                'password' => Hash::make('22690496_123456'),
+                'password' => Hash::make('password123'),
                 'tipo' => 'alumno',
                 'telefono' => '4442222222',
                 'fecha_nacimiento' => '2004-08-20',
+                'nip' => '123456',
             ]
         );
 
@@ -68,10 +70,11 @@ class DatabaseSeeder extends Seeder
                 'nombre' => 'Pedro',
                 'apellido' => 'Martínez',
                 'email' => 'pedro.martinez@alumno.com',
-                'password' => Hash::make('22690497_789012'),
+                'password' => Hash::make('password123'),
                 'tipo' => 'alumno',
                 'telefono' => '4443333333',
                 'fecha_nacimiento' => '2004-03-10',
+                'nip' => '789012',
             ]
         );
     }

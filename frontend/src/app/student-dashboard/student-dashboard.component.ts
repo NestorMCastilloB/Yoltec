@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth.service';
 import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabilityDay } from '../services/cita.service';
 import { Bitacora, BitacoraService } from '../services/bitacora.service';
 import { Receta, RecetaService } from '../services/receta.service';
+import { PreEvaluacionIAService, Pregunta, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -76,6 +77,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   submitMessage: string | null = null;
 
+  // Pre-evaluación IA
+  preguntasIA: Pregunta[] = [];
+  respuestasIA: Record<string, string> = {};
+  showPreEvaluacionForm = false;
+  selectedCitaForEvaluacion: Cita | null = null;
+  resultadoPreEvaluacion: PreEvaluacionResult | null = null;
+  isSubmittingPreEvaluacion = false;
+  preEvaluaciones: PreEvaluacion[] = [];
+  isLoadingPreEvaluaciones = false;
+  preEvaluacionError: string | null = null;
+  preguntaActualIndex = 0;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -83,7 +96,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private citaService: CitaService,
     private bitacoraService: BitacoraService,
-    private recetaService: RecetaService
+    private recetaService: RecetaService,
+    private preEvaluacionIAService: PreEvaluacionIAService
   ) {}
 
   ngOnInit(): void {
@@ -401,12 +415,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private generateTimeSlots(): string[] {
     const slots: string[] = [];
-    for (let hour = 7; hour <= 20; hour++) {
+    // Horario 8am a 5pm con intervalos de 15 minutos
+    for (let hour = 8; hour <= 17; hour++) {
       ['00', '15', '30', '45'].forEach(minute => {
         slots.push(`${String(hour).padStart(2, '0')}:${minute}`);
       });
     }
-    slots.push('21:00');
     return slots;
   }
 
@@ -698,5 +712,132 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       minute: '2-digit',
       hour12: false
     }).format(date);
+  }
+
+  // ===== MÉTODOS DE PRE-EVALUACIÓN IA =====
+
+  togglePreEvaluacionForm(cita?: Cita): void {
+    if (cita) {
+      this.selectedCitaForEvaluacion = cita;
+    }
+    this.showPreEvaluacionForm = !this.showPreEvaluacionForm;
+    
+    if (this.showPreEvaluacionForm) {
+      this.loadPreguntasIA();
+      this.respuestasIA = {};
+      this.preguntaActualIndex = 0;
+      this.resultadoPreEvaluacion = null;
+      this.preEvaluacionError = null;
+    } else {
+      this.selectedCitaForEvaluacion = null;
+      this.respuestasIA = {};
+      this.resultadoPreEvaluacion = null;
+    }
+  }
+
+  private loadPreguntasIA(): void {
+    this.preEvaluacionIAService.getPreguntas()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of({ preguntas: [] }))
+      )
+      .subscribe(response => {
+        this.preguntasIA = response.preguntas;
+      });
+  }
+
+  get preguntaActual(): Pregunta | null {
+    return this.preguntasIA[this.preguntaActualIndex] || null;
+  }
+
+  get esUltimaPregunta(): boolean {
+    return this.preguntaActualIndex === this.preguntasIA.length - 1;
+  }
+
+  get progresoEvaluacion(): number {
+    if (this.preguntasIA.length === 0) return 0;
+    return ((this.preguntaActualIndex + 1) / this.preguntasIA.length) * 100;
+  }
+
+  seleccionarRespuesta(respuesta: string): void {
+    if (this.preguntaActual) {
+      this.respuestasIA[this.preguntaActual.id] = respuesta;
+    }
+  }
+
+  get respuestaActualSeleccionada(): string | undefined {
+    if (!this.preguntaActual) return undefined;
+    return this.respuestasIA[this.preguntaActual.id];
+  }
+
+  siguientePregunta(): void {
+    if (this.preguntaActualIndex < this.preguntasIA.length - 1) {
+      this.preguntaActualIndex++;
+    }
+  }
+
+  preguntaAnterior(): void {
+    if (this.preguntaActualIndex > 0) {
+      this.preguntaActualIndex--;
+    }
+  }
+
+  puedeAvanzar(): boolean {
+    if (!this.preguntaActual) return false;
+    return !!this.respuestasIA[this.preguntaActual.id];
+  }
+
+  submitPreEvaluacion(): void {
+    if (!this.selectedCitaForEvaluacion) {
+      this.preEvaluacionError = 'No se ha seleccionado una cita';
+      return;
+    }
+
+    // Verificar que todas las preguntas tengan respuesta
+    const preguntasSinRespuesta = this.preguntasIA.filter(p => !this.respuestasIA[p.id]);
+    if (preguntasSinRespuesta.length > 0) {
+      this.preEvaluacionError = `Faltan ${preguntasSinRespuesta.length} preguntas por responder`;
+      return;
+    }
+
+    this.isSubmittingPreEvaluacion = true;
+    this.preEvaluacionError = null;
+
+    this.preEvaluacionIAService.createPreEvaluacion({
+      cita_id: this.selectedCitaForEvaluacion.id,
+      respuestas: this.respuestasIA
+    })
+    .pipe(
+      takeUntil(this.destroy$),
+      catchError(error => {
+        this.preEvaluacionError = error?.error?.message || 'Error al procesar la evaluación';
+        return of(null);
+      }),
+      finalize(() => {
+        this.isSubmittingPreEvaluacion = false;
+      })
+    )
+    .subscribe(response => {
+      if (response) {
+        this.resultadoPreEvaluacion = response.resultado_ia;
+        this.preEvaluaciones.unshift(response.pre_evaluacion);
+      }
+    });
+  }
+
+  getEstatusPreEvaluacion(citaId: number): string | null {
+    const evaluacion = this.preEvaluaciones.find(e => e.cita_id === citaId);
+    return evaluacion ? evaluacion.estatus_validacion : null;
+  }
+
+  tienePreEvaluacion(citaId: number): boolean {
+    return this.preEvaluaciones.some(e => e.cita_id === citaId);
+  }
+
+  getConfianzaClass(confianza: number): string {
+    if (confianza >= 0.8) return 'confianza-alta';
+    if (confianza >= 0.6) return 'confianza-media';
+    if (confianza >= 0.4) return 'confianza-baja';
+    return 'confianza-muy-baja';
   }
 }

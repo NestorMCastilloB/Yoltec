@@ -26,5 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(\App\Http\Middleware\CorsMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Para rutas API, retornar siempre JSON en lugar de páginas HTML
+        $exceptions->shouldRenderJsonWhen(function (\Illuminate\Http\Request $request) {
+            return $request->is('api/*') || $request->expectsJson();
+        });
     })->create();

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { SplashScreenComponent } from './splash-screen/splash-screen.component';
 import { LoginComponent } from './login/login.component';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { DoctorDashboardComponent } from './doctor-dashboard/doctor-dashboard.component';
@@ -7,8 +8,8 @@ import { AuthGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { 
     path: '', 
-    redirectTo: '/login', 
-    pathMatch: 'full' 
+    component: SplashScreenComponent,
+    pathMatch: 'full'
   },
   { 
     path: 'login', 
@@ -28,6 +29,6 @@ export const routes: Routes = [
   },
   { 
     path: '**', 
-    redirectTo: '/login' 
+    redirectTo: '/' 
   }
 ];

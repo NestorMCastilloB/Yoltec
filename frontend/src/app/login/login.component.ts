@@ -43,11 +43,11 @@ export class LoginComponent implements OnDestroy {
     this.login(this.doctorData.identificador, this.doctorData.password, 'doctor');
   }
 
-  private login(identificador: string, password: string, expectedRole: 'alumno' | 'doctor') {
+  private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor') {
     this.isLoading = true;
     this.errorMessage = null;
     
-    this.authService.login(identificador, password, expectedRole)
+    this.authService.login(identificador, password, tipoUsuario)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {

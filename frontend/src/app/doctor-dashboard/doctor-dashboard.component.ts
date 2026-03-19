@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth.service';
 import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabilityDay } from '../services/cita.service';
 import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../services/bitacora.service';
 import { Receta, RecetaService, CreateRecetaPayload } from '../services/receta.service';
+import { PreEvaluacionIAService, PreEvaluacion } from '../services/pre-evaluacion-ia.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -103,6 +104,15 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     fecha_emision: this.formatDate(new Date())
   };
 
+  preEvaluaciones: PreEvaluacion[] = [];
+  isLoadingPreEvaluaciones = false;
+  preEvaluacionesError: string | null = null;
+  showPreEvaluacionModal = false;
+  selectedPreEvaluacion: PreEvaluacion | null = null;
+  isSubmittingValidacion = false;
+  comentarioValidacion: string = '';
+  totalPendientes = 0;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -110,7 +120,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private citaService: CitaService,
     private bitacoraService: BitacoraService,
-    private recetaService: RecetaService
+    private recetaService: RecetaService,
+    private preEvaluacionIAService: PreEvaluacionIAService
   ) {}
 
   ngOnInit(): void {
@@ -139,6 +150,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     }
     if (section === 'recetas') {
       this.loadRecetas();
+    }
+    if (section === 'pre-evaluaciones') {
+      this.loadPreEvaluaciones();
     }
   }
 
@@ -790,12 +804,12 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
   private generateTimeSlots(): string[] {
     const slots: string[] = [];
-    for (let hour = 7; hour <= 20; hour++) {
+    // Horario 8am a 5pm con intervalos de 15 minutos
+    for (let hour = 8; hour <= 17; hour++) {
       ['00', '15', '30', '45'].forEach(minute => {
         slots.push(`${String(hour).padStart(2, '0')}:${minute}`);
       });
     }
-    slots.push('21:00');
     return slots;
   }
 
@@ -987,5 +1001,89 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     });
 
     this.availabilityMap = map;
+  }
+
+  // ===== MÉTODOS DE PRE-EVALUACIÓN IA =====
+
+  loadPreEvaluaciones(): void {
+    this.isLoadingPreEvaluaciones = true;
+    this.preEvaluacionesError = null;
+
+    this.preEvaluacionIAService.getPendientes()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.preEvaluacionesError = error?.error?.message || 'No se pudieron cargar las pre-evaluaciones';
+          return of({ pendientes: [], total: 0 });
+        }),
+        finalize(() => {
+          this.isLoadingPreEvaluaciones = false;
+        })
+      )
+      .subscribe(response => {
+        this.preEvaluaciones = response.pendientes;
+        this.totalPendientes = response.total;
+      });
+  }
+
+  openPreEvaluacionModal(preEvaluacion: PreEvaluacion): void {
+    this.selectedPreEvaluacion = preEvaluacion;
+    this.showPreEvaluacionModal = true;
+    this.comentarioValidacion = '';
+  }
+
+  closePreEvaluacionModal(): void {
+    this.showPreEvaluacionModal = false;
+    this.selectedPreEvaluacion = null;
+    this.comentarioValidacion = '';
+    this.isSubmittingValidacion = false;
+  }
+
+  validarPreEvaluacion(accion: 'validar' | 'descartar'): void {
+    if (!this.selectedPreEvaluacion) return;
+
+    this.isSubmittingValidacion = true;
+
+    this.preEvaluacionIAService.validarPreEvaluacion(
+      this.selectedPreEvaluacion.id,
+      accion,
+      this.comentarioValidacion
+    )
+    .pipe(
+      takeUntil(this.destroy$),
+      catchError(error => {
+        this.preEvaluacionesError = error?.error?.message || 'Error al validar la pre-evaluación';
+        return of(null);
+      }),
+      finalize(() => {
+        this.isSubmittingValidacion = false;
+      })
+    )
+    .subscribe(response => {
+      if (response) {
+        // Actualizar la lista de pre-evaluaciones
+        this.preEvaluaciones = this.preEvaluaciones.filter(
+          p => p.id !== this.selectedPreEvaluacion?.id
+        );
+        this.totalPendientes--;
+        this.closePreEvaluacionModal();
+      }
+    });
+  }
+
+  getEstatusClass(estatus: string): string {
+    switch (estatus) {
+      case 'pendiente': return 'estatus-pendiente';
+      case 'validado': return 'estatus-validado';
+      case 'descartado': return 'estatus-descartado';
+      default: return '';
+    }
+  }
+
+  getConfianzaClass(confianza: number): string {
+    if (confianza >= 0.8) return 'confianza-alta';
+    if (confianza >= 0.6) return 'confianza-media';
+    if (confianza >= 0.4) return 'confianza-baja';
+    return 'confianza-muy-baja';
   }
 }

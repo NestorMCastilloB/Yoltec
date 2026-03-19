@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('numero_control')->nullable(); // Para alumnos (no forzamos unique en DB por ahora)
+            $table->string('numero_control')->nullable()->unique(); // Para alumnos
             $table->string('username')->nullable(); // Para doctores (unique se controla a nivel de aplicación)
             $table->string('nombre');
             $table->string('apellido');
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('tipo')->default('alumno');
             $table->string('telefono')->nullable();
             $table->date('fecha_nacimiento')->nullable();
+            $table->string('nip', 6)->nullable(); // NIP de 6 dígitos para alumnos
             $table->timestamps();
         });
     }

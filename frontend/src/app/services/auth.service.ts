@@ -45,16 +45,15 @@ export class AuthService {
     }
   }
 
-  login(identificador: string, password: string, expectedRole?: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { identificador, password })
+  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor'): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { 
+      identificador, 
+      password,
+      tipo_usuario: tipoUsuario
+    })
       .pipe(
         tap(response => {
           if (response && response.token) {
-            // Si se indicó un rol esperado (alumno/doctor) y no coincide, lanzar error
-            if (expectedRole && response.user?.tipo !== expectedRole) {
-              throw new Error('Las credenciales corresponden a un usuario de tipo ' + response.user.tipo + '. Verifica que estés usando la pestaña correcta.');
-            }
-
             // Guardar token y datos del usuario
             this.setToken(response.token);
             this.setUser(response.user);
@@ -155,6 +154,12 @@ export class AuthService {
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
     return !!user && user.tipo === role;
+  }
+
+  // Obtener el tipo de usuario actual (alumno/doctor)
+  getUserType(): string | null {
+    const user = this.getCurrentUser();
+    return user ? user.tipo : null;
   }
 
   // Guardar el token en el almacenamiento local
