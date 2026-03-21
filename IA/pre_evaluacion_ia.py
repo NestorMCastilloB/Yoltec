@@ -1,170 +1,167 @@
 #!/usr/bin/env python3
 """
 Servicio de IA para pre-evaluación médica de Yoltec.
-Analiza respuestas de síntomas y sugiere diagnósticos preliminares.
+Usa modelo Gradient Boosting entrenado con dataset real + datos sintéticos.
+Lee JSON de stdin, escribe JSON a stdout.
 """
 
 import sys
 import json
 import os
-from typing import Dict, List, Tuple
+import pickle
+import numpy as np
 
-# Cargar configuración de enfermedades
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'enfermedades_config.json')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
-    CONFIG = json.load(f)
+FEATURE_NAMES = [
+    'fiebre', 'tos', 'tos_seca', 'dolor_garganta', 'congestion_nasal',
+    'estornudos', 'dolor_cabeza', 'dolor_cuerpo', 'cansancio', 'nauseas',
+    'vomito', 'diarrea', 'dolor_abdominal', 'perdida_apetito', 'perdida_olfato',
+    'erupcion_piel', 'picazon', 'ojos_rojos', 'lagrimeo', 'dolor_orinar',
+    'frecuencia_orinar', 'mareos', 'palpitaciones', 'sensibilidad_luz',
+    'dolor_articulaciones', 'sudoracion', 'escalofrios', 'dolor_espalda',
+    'dificultad_respirar', 'fiebre_alta', 'sangre_orina', 'orina_turbia',
+    'confusion', 'rigidez_cuello',
+]
 
-ENFERMEDADES = CONFIG['enfermedades']
-PREGUNTAS = {p['id']: p for p in CONFIG['preguntas']}
+FEATURE_LABELS = {
+    'fiebre': 'Fiebre', 'tos': 'Tos', 'tos_seca': 'Tos seca',
+    'dolor_garganta': 'Dolor de garganta', 'congestion_nasal': 'Congestión nasal',
+    'estornudos': 'Estornudos frecuentes', 'dolor_cabeza': 'Dolor de cabeza',
+    'dolor_cuerpo': 'Dolor en el cuerpo', 'cansancio': 'Cansancio / fatiga',
+    'nauseas': 'Náuseas', 'vomito': 'Vómito', 'diarrea': 'Diarrea',
+    'dolor_abdominal': 'Dolor abdominal', 'perdida_apetito': 'Pérdida de apetito',
+    'perdida_olfato': 'Pérdida del olfato o gusto', 'erupcion_piel': 'Erupción en la piel',
+    'picazon': 'Picazón', 'ojos_rojos': 'Ojos rojos', 'lagrimeo': 'Lagrimeo excesivo',
+    'dolor_orinar': 'Dolor al orinar', 'frecuencia_orinar': 'Frecuencia urinaria aumentada',
+    'mareos': 'Mareos', 'palpitaciones': 'Palpitaciones', 'sensibilidad_luz': 'Sensibilidad a la luz',
+    'dolor_articulaciones': 'Dolor en articulaciones', 'sudoracion': 'Sudoración excesiva',
+    'escalofrios': 'Escalofríos', 'dolor_espalda': 'Dolor de espalda',
+    'dificultad_respirar': 'Dificultad para respirar', 'fiebre_alta': 'Fiebre alta',
+    'sangre_orina': 'Sangre en la orina', 'orina_turbia': 'Orina turbia',
+    'confusion': 'Confusión o desorientación', 'rigidez_cuello': 'Rigidez de cuello',
+}
 
-
-def calcular_puntuacion(respuestas: Dict[str, str]) -> List[Dict]:
-    """
-    Calcula la puntuación de coincidencia para cada enfermedad.
-    
-    Args:
-        respuestas: Diccionario con respuestas del usuario {pregunta_id: respuesta}
-    
-    Returns:
-        Lista de enfermedades ordenadas por puntuación
-    """
-    resultados = []
-    
-    for enfermedad in ENFERMEDADES:
-        puntuacion = 0
-        sintomas_detectados = []
-        peso_total = 0
-        
-        for sintoma in enfermedad['sintomas']:
-            if sintoma in respuestas:
-                respuesta = respuestas[sintoma]
-                peso = PREGUNTAS.get(sintoma, {}).get('peso', 1)
-                peso_total += peso
-                
-                # Asignar puntuación según la severidad de la respuesta
-                if isinstance(respuesta, str):
-                    if 'No' in respuesta or respuesta == '0':
-                        pass  # No suma puntos
-                    elif 'leve' in respuesta.lower() or 'disminuido' in respuesta.lower():
-                        puntuacion += peso * 0.5
-                        sintomas_detectados.append(f"{sintoma} (leve)")
-                    elif 'moderado' in respuesta.lower() or 'frecuentemente' in respuesta.lower():
-                        puntuacion += peso * 0.75
-                        sintomas_detectados.append(f"{sintoma} (moderado)")
-                    elif 'severo' in respuesta.lower() or 'intenso' in respuesta.lower() or 'constante' in respuesta.lower():
-                        puntuacion += peso * 1.0
-                        sintomas_detectados.append(f"{sintoma} (severo)")
-                    elif 'alta' in respuesta.lower() or 'completamente' in respuesta.lower():
-                        puntuacion += peso * 1.0
-                        sintomas_detectados.append(f"{sintoma} (alta)")
-                    else:
-                        # Respuesta positiva genérica
-                        puntuacion += peso * 0.75
-                        sintomas_detectados.append(sintoma)
-        
-        # Calcular confianza como porcentaje de síntomas detectados
-        if peso_total > 0:
-            confianza = min(puntuacion / (peso_total * 0.6), 1.0)  # Normalizar a 60% de síntomas
-        else:
-            confianza = 0
-        
-        # Bonus por síntomas clave
-        sintomas_clave_detectados = sum(1 for s in enfermedad['preguntas_clave'] 
-                                       if s in respuestas and 'No' not in str(respuestas[s]))
-        if sintomas_clave_detectados >= len(enfermedad['preguntas_clave']) * 0.7:
-            confianza = min(confianza * 1.2, 1.0)  # Bonus del 20%
-        
-        if confianza > 0.15:  # Umbral mínimo para considerar
-            resultados.append({
-                'enfermedad': enfermedad['nombre'],
-                'confianza': round(confianza, 2),
-                'sintomas_detectados': sintomas_detectados,
-                'sintomas_esperados': len(enfermedad['sintomas']),
-                'sintomas_presentes': len(sintomas_detectados)
-            })
-    
-    # Ordenar por confianza descendente
-    resultados.sort(key=lambda x: x['confianza'], reverse=True)
-    
-    return resultados
+PALABRAS_POSITIVAS = ['sí', 'si', 'leve', 'moderado', 'severo', 'alta', 'intenso', 'frecuente', 'yes']
+PALABRAS_NEGATIVAS = ['no', 'ninguno', 'ninguna', 'ausente', 'nada']
 
 
-def generar_diagnostico(respuestas: Dict[str, str]) -> Dict:
-    """
-    Genera un diagnóstico preliminar basado en las respuestas.
-    
-    Args:
-        respuestas: Diccionario con respuestas del usuario
-    
-    Returns:
-        Diccionario con el diagnóstico y recomendaciones
-    """
-    resultados = calcular_puntuacion(respuestas)
-    
-    if not resultados:
-        return {
-            'diagnostico_principal': 'Sin diagnóstico claro',
-            'confianza': 0,
-            'sintomas_detectados': [],
-            'posibles_enfermedades': [],
-            'recomendacion': 'Los síntomas no son concluyentes. Se recomienda consulta médica para evaluación más detallada.'
-        }
-    
-    top_resultado = resultados[0]
-    
-    # Generar recomendación basada en la confianza
-    confianza = top_resultado['confianza']
-    if confianza >= 0.8:
-        recomendacion = f"Alta probabilidad de {top_resultado['enfermedad']}. Se recomienda atención médica prioritaria."
-    elif confianza >= 0.6:
-        recomendacion = f"Probabilidad moderada de {top_resultado['enfermedad']}. Se recomienda consulta médica."
-    elif confianza >= 0.4:
-        recomendacion = f"Posible {top_resultado['enfermedad']}. Monitorear síntomas y considerar consulta médica."
+def _load_model():
+    model_path = os.path.join(BASE_DIR, 'model.pkl')
+    le_path = os.path.join(BASE_DIR, 'label_encoder.pkl')
+    feat_path = os.path.join(BASE_DIR, 'feature_names.json')
+    if not all(os.path.exists(p) for p in [model_path, le_path]):
+        return None, None, None
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    with open(le_path, 'rb') as f:
+        le = pickle.load(f)
+    feature_names = FEATURE_NAMES
+    if os.path.exists(feat_path):
+        with open(feat_path) as f:
+            feature_names = json.load(f)
+    return model, le, feature_names
+
+
+def respuesta_a_binario(respuesta):
+    if not respuesta:
+        return 0
+    r = str(respuesta).lower().strip()
+    for neg in PALABRAS_NEGATIVAS:
+        if r.startswith(neg):
+            return 0
+    for pos in PALABRAS_POSITIVAS:
+        if pos in r:
+            return 1
+    return 0
+
+
+def respuesta_a_severidad(respuesta):
+    if not respuesta:
+        return ''
+    r = str(respuesta).lower()
+    if 'severo' in r or 'intenso' in r or 'alta' in r or 'alto' in r:
+        return 'severo'
+    if 'moderado' in r or 'frecuente' in r:
+        return 'moderado'
+    if 'leve' in r or 'sí' in r or 'si' in r:
+        return 'leve'
+    return ''
+
+
+def construir_vector(respuestas, feature_names):
+    return np.array([respuesta_a_binario(respuestas.get(f, 'No')) for f in feature_names]).reshape(1, -1)
+
+
+def obtener_sintomas_detectados(respuestas):
+    detectados = []
+    for feat, label in FEATURE_LABELS.items():
+        respuesta = respuestas.get(feat, 'No')
+        if respuesta_a_binario(respuesta) == 1:
+            sev = respuesta_a_severidad(respuesta)
+            detectados.append(f"{label} ({sev})" if sev else label)
+    return detectados
+
+
+def generar_recomendacion(diagnostico, confianza):
+    if confianza >= 0.75:
+        return f"Los síntomas sugieren con alta probabilidad {diagnostico}. Se recomienda atención médica prioritaria. Este análisis es solo orientativo."
+    elif confianza >= 0.50:
+        return f"Los síntomas son compatibles con {diagnostico}. Se recomienda consulta médica para confirmar el diagnóstico."
+    elif confianza >= 0.30:
+        return f"Los síntomas podrían estar relacionados con {diagnostico}. Monitorea la evolución y consulta al médico si persisten."
     else:
-        recomendacion = "Síntomas no concluyentes. Se recomienda consulta médica para evaluación más detallada."
-    
+        return "Los síntomas no son concluyentes. Se recomienda consulta médica para evaluación más detallada."
+
+
+def predecir(respuestas):
+    model, le, feature_names = _load_model()
+    if model is None:
+        return {'success': False, 'error': 'Modelo no encontrado. Ejecuta train_model.py primero.'}
+
+    X = construir_vector(respuestas, feature_names)
+    probs = model.predict_proba(X)[0]
+    top_indices = np.argsort(probs)[::-1][:3]
+
+    posibles = [
+        {'enfermedad': le.classes_[i], 'confianza': min(round(float(probs[i]), 3), 0.95)}
+        for i in top_indices if probs[i] > 0.05
+    ]
+
+    if not posibles:
+        return {
+            'success': True,
+            'diagnostico_principal': 'Sin diagnóstico claro',
+            'confianza': 0.0,
+            'sintomas_detectados': obtener_sintomas_detectados(respuestas),
+            'posibles_enfermedades': [],
+            'recomendacion': 'Los síntomas no son concluyentes. Se recomienda consulta médica.',
+        }
+
+    principal = posibles[0]
     return {
-        'diagnostico_principal': top_resultado['enfermedad'],
-        'confianza': top_resultado['confianza'],
-        'sintomas_detectados': top_resultado['sintomas_detectados'],
-        'posibles_enfermedades': resultados[:3],  # Top 3
-        'recomendacion': recomendacion
+        'success': True,
+        'diagnostico_principal': principal['enfermedad'],
+        'confianza': principal['confianza'],
+        'sintomas_detectados': obtener_sintomas_detectados(respuestas),
+        'posibles_enfermedades': posibles,
+        'recomendacion': generar_recomendacion(principal['enfermedad'], principal['confianza']),
     }
 
 
 def main():
-    """Función principal que procesa entrada JSON desde stdin."""
     try:
-        # Leer JSON de stdin
-        input_data = sys.stdin.read()
-        data = json.loads(input_data)
-        
+        data = json.loads(sys.stdin.read().strip())
         respuestas = data.get('respuestas', {})
-        
         if not respuestas:
-            print(json.dumps({
-                'error': 'No se proporcionaron respuestas',
-                'success': False
-            }))
+            print(json.dumps({'error': 'No se proporcionaron respuestas', 'success': False}))
             sys.exit(1)
-        
-        resultado = generar_diagnostico(respuestas)
-        resultado['success'] = True
-        
-        print(json.dumps(resultado, ensure_ascii=False))
-        
+        print(json.dumps(predecir(respuestas), ensure_ascii=False))
     except json.JSONDecodeError as e:
-        print(json.dumps({
-            'error': f'Error al parsear JSON: {str(e)}',
-            'success': False
-        }))
+        print(json.dumps({'error': f'JSON inválido: {str(e)}', 'success': False}))
         sys.exit(1)
     except Exception as e:
-        print(json.dumps({
-            'error': f'Error inesperado: {str(e)}',
-            'success': False
-        }))
+        print(json.dumps({'error': f'Error: {str(e)}', 'success': False}))
         sys.exit(1)
 
 

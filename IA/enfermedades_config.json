@@ -2,115 +2,649 @@
   "enfermedades": [
     {
       "nombre": "Gripe",
-      "sintomas": ["fiebre", "tos", "dolor_garganta", "congestion_nasal", "dolor_cabeza", "dolor_cuerpo"],
-      "preguntas_clave": ["fiebre", "tos", "dolor_garganta"]
+      "sintomas": ["fiebre", "tos", "dolor_garganta", "congestion_nasal", "dolor_cabeza", "dolor_cuerpo", "cansancio", "escalofrios"],
+      "pesos_sintomas": {
+        "fiebre": 3,
+        "tos": 2,
+        "dolor_garganta": 2,
+        "congestion_nasal": 2,
+        "dolor_cabeza": 2,
+        "dolor_cuerpo": 2,
+        "cansancio": 1,
+        "escalofrios": 2
+      },
+      "preguntas_clave": ["fiebre", "dolor_cuerpo", "escalofrios"]
     },
     {
       "nombre": "Resfriado Común",
-      "sintomas": ["congestion_nasal", "estornudos", "dolor_garganta_leve", "tos_leve", "malestar_general"],
+      "sintomas": ["congestion_nasal", "estornudos", "dolor_garganta", "tos", "cansancio"],
+      "pesos_sintomas": {
+        "congestion_nasal": 3,
+        "estornudos": 3,
+        "dolor_garganta": 2,
+        "tos": 1,
+        "cansancio": 1
+      },
       "preguntas_clave": ["congestion_nasal", "estornudos"]
     },
     {
       "nombre": "COVID-19",
-      "sintomas": ["fiebre", "tos_seca", "cansancio", "perdida_olfato", "perdida_gusto", "dolor_cabeza"],
-      "preguntas_clave": ["fiebre", "tos_seca", "perdida_olfato"]
+      "sintomas": ["fiebre", "tos", "cansancio", "perdida_olfato", "perdida_gusto", "dolor_cabeza", "dolor_cuerpo", "dificultad_respirar"],
+      "pesos_sintomas": {
+        "fiebre": 2,
+        "tos": 2,
+        "cansancio": 1,
+        "perdida_olfato": 3,
+        "perdida_gusto": 3,
+        "dolor_cabeza": 1,
+        "dolor_cuerpo": 1,
+        "dificultad_respirar": 3
+      },
+      "preguntas_clave": ["perdida_olfato", "perdida_gusto", "dificultad_respirar"]
     },
     {
-      "nombre": "Infección Gastrointestinal",
-      "sintomas": ["dolor_abdominal", "nauseas", "vomito", "diarrea", "fiebre_leve"],
-      "preguntas_clave": ["dolor_abdominal", "nauseas", "diarrea"]
+      "nombre": "Bronquitis Aguda",
+      "sintomas": ["tos", "flema", "dificultad_respirar", "fiebre", "cansancio", "dolor_pecho"],
+      "pesos_sintomas": {
+        "tos": 3,
+        "flema": 3,
+        "dificultad_respirar": 2,
+        "fiebre": 1,
+        "cansancio": 1,
+        "dolor_pecho": 2
+      },
+      "preguntas_clave": ["tos", "flema", "dificultad_respirar"]
     },
     {
-      "nombre": "Migraña",
-      "sintomas": ["dolor_cabeza_intenso", "sensibilidad_luz", "sensibilidad_sonido", "nauseas", "vision_borrosa"],
-      "preguntas_clave": ["dolor_cabeza_intenso", "sensibilidad_luz"]
+      "nombre": "Faringitis",
+      "sintomas": ["dolor_garganta", "fiebre", "dificultad_tragar", "ganglios_inflamados", "dolor_cabeza"],
+      "pesos_sintomas": {
+        "dolor_garganta": 3,
+        "fiebre": 2,
+        "dificultad_tragar": 3,
+        "ganglios_inflamados": 2,
+        "dolor_cabeza": 1
+      },
+      "preguntas_clave": ["dolor_garganta", "dificultad_tragar"]
     },
     {
-      "nombre": "Alergias",
-      "sintomas": ["estornudos", "ojos_llorosos", "congestion_nasal", "picazon_nariz", "picazon_ojos"],
-      "preguntas_clave": ["estornudos", "ojos_llorosos", "picazon_nariz"]
+      "nombre": "Amigdalitis",
+      "sintomas": ["dolor_garganta", "fiebre", "dificultad_tragar", "ganglios_inflamados", "mal_aliento", "cansancio"],
+      "pesos_sintomas": {
+        "dolor_garganta": 3,
+        "fiebre": 2,
+        "dificultad_tragar": 3,
+        "ganglios_inflamados": 3,
+        "mal_aliento": 2,
+        "cansancio": 1
+      },
+      "preguntas_clave": ["dolor_garganta", "ganglios_inflamados", "dificultad_tragar"]
+    },
+    {
+      "nombre": "Sinusitis",
+      "sintomas": ["congestion_nasal", "dolor_cabeza", "dolor_facial", "flema", "perdida_olfato", "fiebre"],
+      "pesos_sintomas": {
+        "congestion_nasal": 3,
+        "dolor_cabeza": 2,
+        "dolor_facial": 3,
+        "flema": 2,
+        "perdida_olfato": 2,
+        "fiebre": 1
+      },
+      "preguntas_clave": ["congestion_nasal", "dolor_facial"]
+    },
+    {
+      "nombre": "Gastroenteritis",
+      "sintomas": ["nauseas", "vomito", "diarrea", "dolor_abdominal", "fiebre", "cansancio"],
+      "pesos_sintomas": {
+        "nauseas": 2,
+        "vomito": 3,
+        "diarrea": 3,
+        "dolor_abdominal": 2,
+        "fiebre": 1,
+        "cansancio": 1
+      },
+      "preguntas_clave": ["vomito", "diarrea", "dolor_abdominal"]
+    },
+    {
+      "nombre": "Colitis",
+      "sintomas": ["dolor_abdominal", "diarrea", "nauseas", "gases", "sangre_heces", "cansancio"],
+      "pesos_sintomas": {
+        "dolor_abdominal": 3,
+        "diarrea": 2,
+        "nauseas": 1,
+        "gases": 2,
+        "sangre_heces": 3,
+        "cansancio": 1
+      },
+      "preguntas_clave": ["dolor_abdominal", "sangre_heces"]
+    },
+    {
+      "nombre": "Reflujo Gástrico",
+      "sintomas": ["ardor_estomago", "nauseas", "dolor_pecho", "regurgitacion", "dolor_garganta"],
+      "pesos_sintomas": {
+        "ardor_estomago": 3,
+        "nauseas": 1,
+        "dolor_pecho": 2,
+        "regurgitacion": 3,
+        "dolor_garganta": 1
+      },
+      "preguntas_clave": ["ardor_estomago", "regurgitacion"]
+    },
+    {
+      "nombre": "Intoxicación Alimentaria",
+      "sintomas": ["nauseas", "vomito", "diarrea", "dolor_abdominal", "fiebre", "escalofrios"],
+      "pesos_sintomas": {
+        "nauseas": 2,
+        "vomito": 3,
+        "diarrea": 3,
+        "dolor_abdominal": 2,
+        "fiebre": 2,
+        "escalofrios": 2
+      },
+      "preguntas_clave": ["vomito", "diarrea", "fiebre"]
     },
     {
       "nombre": "Dengue",
-      "sintomas": ["fiebre_alta", "dolor_cabeza_intenso", "dolor_retroocular", "dolor_cuerpo_intenso", "erupcion_cutanea", "nauseas"],
-      "preguntas_clave": ["fiebre_alta", "dolor_retroocular", "dolor_cuerpo_intenso"]
+      "sintomas": ["fiebre", "dolor_cabeza", "dolor_retroocular", "dolor_cuerpo", "erupcion_cutanea", "nauseas", "sangrado"],
+      "pesos_sintomas": {
+        "fiebre": 3,
+        "dolor_cabeza": 2,
+        "dolor_retroocular": 3,
+        "dolor_cuerpo": 3,
+        "erupcion_cutanea": 2,
+        "nauseas": 1,
+        "sangrado": 3
+      },
+      "preguntas_clave": ["fiebre", "dolor_retroocular", "dolor_cuerpo"]
+    },
+    {
+      "nombre": "Chikungunya",
+      "sintomas": ["fiebre", "dolor_articulaciones", "erupcion_cutanea", "dolor_cabeza", "dolor_cuerpo", "cansancio"],
+      "pesos_sintomas": {
+        "fiebre": 3,
+        "dolor_articulaciones": 3,
+        "erupcion_cutanea": 2,
+        "dolor_cabeza": 1,
+        "dolor_cuerpo": 2,
+        "cansancio": 1
+      },
+      "preguntas_clave": ["fiebre", "dolor_articulaciones", "erupcion_cutanea"]
+    },
+    {
+      "nombre": "Zika",
+      "sintomas": ["fiebre", "erupcion_cutanea", "picazon_piel", "dolor_articulaciones", "conjuntivitis", "dolor_cabeza"],
+      "pesos_sintomas": {
+        "fiebre": 2,
+        "erupcion_cutanea": 3,
+        "picazon_piel": 2,
+        "dolor_articulaciones": 2,
+        "conjuntivitis": 3,
+        "dolor_cabeza": 1
+      },
+      "preguntas_clave": ["erupcion_cutanea", "conjuntivitis", "picazon_piel"]
+    },
+    {
+      "nombre": "Paludismo",
+      "sintomas": ["fiebre", "escalofrios", "sudoracion", "dolor_cabeza", "dolor_cuerpo", "nauseas", "cansancio"],
+      "pesos_sintomas": {
+        "fiebre": 3,
+        "escalofrios": 3,
+        "sudoracion": 3,
+        "dolor_cabeza": 2,
+        "dolor_cuerpo": 2,
+        "nauseas": 1,
+        "cansancio": 1
+      },
+      "preguntas_clave": ["fiebre", "escalofrios", "sudoracion"]
+    },
+    {
+      "nombre": "Migraña",
+      "sintomas": ["dolor_cabeza", "nauseas", "sensibilidad_luz", "sensibilidad_sonido", "vomito"],
+      "pesos_sintomas": {
+        "dolor_cabeza": 3,
+        "nauseas": 2,
+        "sensibilidad_luz": 3,
+        "sensibilidad_sonido": 2,
+        "vomito": 1
+      },
+      "preguntas_clave": ["dolor_cabeza", "sensibilidad_luz", "sensibilidad_sonido"]
     },
     {
       "nombre": "Infección Urinaria",
-      "sintomas": ["dolor_orinar", "frecuencia_orinar", "urgencia_orinar", "dolor_abdominal_bajo", "orina_turbia"],
-      "preguntas_clave": ["dolor_orinar", "frecuencia_orinar"]
+      "sintomas": ["ardor_orinar", "frecuencia_orinar", "urgencia_orinar", "dolor_abdominal", "orina_turbia", "fiebre"],
+      "pesos_sintomas": {
+        "ardor_orinar": 3,
+        "frecuencia_orinar": 3,
+        "urgencia_orinar": 2,
+        "dolor_abdominal": 1,
+        "orina_turbia": 2,
+        "fiebre": 1
+      },
+      "preguntas_clave": ["ardor_orinar", "frecuencia_orinar", "orina_turbia"]
+    },
+    {
+      "nombre": "Conjuntivitis",
+      "sintomas": ["conjuntivitis", "picazon_ojos", "ojos_rojos", "secrecion_ocular", "sensibilidad_luz"],
+      "pesos_sintomas": {
+        "conjuntivitis": 3,
+        "picazon_ojos": 2,
+        "ojos_rojos": 3,
+        "secrecion_ocular": 3,
+        "sensibilidad_luz": 1
+      },
+      "preguntas_clave": ["ojos_rojos", "secrecion_ocular", "conjuntivitis"]
+    },
+    {
+      "nombre": "Dermatitis Alérgica",
+      "sintomas": ["picazon_piel", "erupcion_cutanea", "piel_enrojecida", "descamacion_piel", "estornudos", "picazon_ojos"],
+      "pesos_sintomas": {
+        "picazon_piel": 3,
+        "erupcion_cutanea": 3,
+        "piel_enrojecida": 2,
+        "descamacion_piel": 2,
+        "estornudos": 1,
+        "picazon_ojos": 1
+      },
+      "preguntas_clave": ["picazon_piel", "erupcion_cutanea", "piel_enrojecida"]
+    },
+    {
+      "nombre": "Anemia",
+      "sintomas": ["cansancio", "palidez", "dolor_cabeza", "mareos", "dificultad_respirar", "palpitaciones"],
+      "pesos_sintomas": {
+        "cansancio": 3,
+        "palidez": 3,
+        "dolor_cabeza": 1,
+        "mareos": 2,
+        "dificultad_respirar": 2,
+        "palpitaciones": 2
+      },
+      "preguntas_clave": ["cansancio", "palidez", "mareos"]
     },
     {
       "nombre": "Hipertensión",
-      "sintomas": ["dolor_cabeza", "mareos", "vision_borrosa", "palpitaciones", "fatiga"],
-      "preguntas_clave": ["dolor_cabeza", "mareos", "palpitaciones"]
+      "sintomas": ["dolor_cabeza", "mareos", "palpitaciones", "dificultad_respirar", "dolor_pecho", "vision_borrosa"],
+      "pesos_sintomas": {
+        "dolor_cabeza": 2,
+        "mareos": 2,
+        "palpitaciones": 3,
+        "dificultad_respirar": 2,
+        "dolor_pecho": 3,
+        "vision_borrosa": 2
+      },
+      "preguntas_clave": ["palpitaciones", "dolor_pecho", "vision_borrosa"]
     },
     {
       "nombre": "Hipoglucemia",
-      "sintomas": ["mareos", "sudoracion", "temblores", "hambre_intensa", "confusion", "palidez"],
-      "preguntas_clave": ["mareos", "sudoracion", "hambre_intensa"]
+      "sintomas": ["mareos", "sudoracion", "temblores", "hambre_intensa", "cansancio", "palidez"],
+      "pesos_sintomas": {
+        "mareos": 2,
+        "sudoracion": 2,
+        "temblores": 3,
+        "hambre_intensa": 3,
+        "cansancio": 1,
+        "palidez": 1
+      },
+      "preguntas_clave": ["temblores", "hambre_intensa", "sudoracion"]
+    },
+    {
+      "nombre": "Golpe de Calor",
+      "sintomas": ["fiebre", "sudoracion", "mareos", "dolor_cabeza", "nauseas", "confusion", "piel_enrojecida"],
+      "pesos_sintomas": {
+        "fiebre": 3,
+        "sudoracion": 2,
+        "mareos": 2,
+        "dolor_cabeza": 2,
+        "nauseas": 1,
+        "confusion": 3,
+        "piel_enrojecida": 2
+      },
+      "preguntas_clave": ["fiebre", "confusion", "piel_enrojecida"]
+    },
+    {
+      "nombre": "Varicela",
+      "sintomas": ["fiebre", "erupcion_cutanea", "picazon_piel", "cansancio", "dolor_cabeza", "mal_apetito"],
+      "pesos_sintomas": {
+        "fiebre": 2,
+        "erupcion_cutanea": 3,
+        "picazon_piel": 3,
+        "cansancio": 1,
+        "dolor_cabeza": 1,
+        "mal_apetito": 1
+      },
+      "preguntas_clave": ["erupcion_cutanea", "picazon_piel", "fiebre"]
+    },
+    {
+      "nombre": "Escabiosis",
+      "sintomas": ["picazon_piel", "erupcion_cutanea", "picazon_nocturna", "piel_enrojecida", "descamacion_piel"],
+      "pesos_sintomas": {
+        "picazon_piel": 3,
+        "erupcion_cutanea": 2,
+        "picazon_nocturna": 3,
+        "piel_enrojecida": 2,
+        "descamacion_piel": 1
+      },
+      "preguntas_clave": ["picazon_piel", "picazon_nocturna"]
     }
   ],
   "preguntas": [
     {
       "id": "fiebre",
-      "texto": "¿Tienes fiebre?",
-      "opciones": ["No", "Fiebre leve (37-38°C)", "Fiebre moderada (38-39°C)", "Fiebre alta (>39°C)"],
-      "peso": 3
+      "texto": "¿Tienes fiebre o sensación de calentura?",
+      "opciones": ["No", "Leve (37-38°C)", "Moderada (38-39°C)", "Alta (más de 39°C)"],
+      "tipo": "escala"
     },
     {
       "id": "tos",
       "texto": "¿Tienes tos?",
-      "opciones": ["No", "Tos leve", "Tos moderada", "Tos severa"],
-      "peso": 2
-    },
-    {
-      "id": "dolor_cabeza",
-      "texto": "¿Tienes dolor de cabeza?",
-      "opciones": ["No", "Leve", "Moderado", "Intenso"],
-      "peso": 2
-    },
-    {
-      "id": "congestion_nasal",
-      "texto": "¿Tienes congestión nasal?",
       "opciones": ["No", "Leve", "Moderada", "Severa"],
-      "peso": 2
+      "tipo": "escala"
     },
     {
       "id": "dolor_garganta",
       "texto": "¿Tienes dolor de garganta?",
       "opciones": ["No", "Leve", "Moderado", "Severo"],
-      "peso": 2
+      "tipo": "escala"
     },
     {
-      "id": "nauseas",
-      "texto": "¿Tienes náuseas?",
-      "opciones": ["No", "Leves", "Moderadas", "Severas (con vómito)"],
-      "peso": 2
+      "id": "congestion_nasal",
+      "texto": "¿Tienes nariz tapada o congestionada?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
     },
     {
-      "id": "dolor_abdominal",
-      "texto": "¿Tienes dolor abdominal?",
+      "id": "dolor_cabeza",
+      "texto": "¿Tienes dolor de cabeza?",
       "opciones": ["No", "Leve", "Moderado", "Severo"],
-      "peso": 3
+      "tipo": "escala"
+    },
+    {
+      "id": "dolor_cuerpo",
+      "texto": "¿Tienes dolor en el cuerpo, músculos o huesos?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
     },
     {
       "id": "cansancio",
-      "texto": "¿Sientes cansancio o fatiga?",
+      "texto": "¿Te sientes cansado o con fatiga inusual?",
       "opciones": ["No", "Leve", "Moderado", "Severo"],
-      "peso": 1
+      "tipo": "escala"
     },
     {
-      "id": "perdida_olfato",
-      "texto": "¿Has perdido el sentido del olfato?",
-      "opciones": ["No", "Disminuido", "Perdido completamente"],
-      "peso": 3
+      "id": "escalofrios",
+      "texto": "¿Tienes escalofríos o temblores de frío?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
     },
     {
       "id": "estornudos",
       "texto": "¿Tienes estornudos frecuentes?",
       "opciones": ["No", "Ocasionalmente", "Frecuentemente", "Constantemente"],
-      "peso": 1
+      "tipo": "escala"
+    },
+    {
+      "id": "perdida_olfato",
+      "texto": "¿Has perdido el sentido del olfato?",
+      "opciones": ["No", "Disminuido", "Perdido completamente"],
+      "tipo": "binaria_gradual"
+    },
+    {
+      "id": "perdida_gusto",
+      "texto": "¿Has perdido el sentido del gusto?",
+      "opciones": ["No", "Disminuido", "Perdido completamente"],
+      "tipo": "binaria_gradual"
+    },
+    {
+      "id": "dificultad_respirar",
+      "texto": "¿Tienes dificultad para respirar o sensación de falta de aire?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "flema",
+      "texto": "¿Tienes flema o mucosidad al toser?",
+      "opciones": ["No", "Poca (transparente)", "Moderada (amarilla/verde)", "Mucha"],
+      "tipo": "escala"
+    },
+    {
+      "id": "dolor_pecho",
+      "texto": "¿Sientes dolor o presión en el pecho?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "dificultad_tragar",
+      "texto": "¿Te duele o te cuesta trabajo tragar?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "ganglios_inflamados",
+      "texto": "¿Tienes los ganglios del cuello inflamados o sensibles?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "mal_aliento",
+      "texto": "¿Has notado mal aliento inusual?",
+      "opciones": ["No", "Sí"],
+      "tipo": "binaria"
+    },
+    {
+      "id": "nauseas",
+      "texto": "¿Tienes náuseas?",
+      "opciones": ["No", "Leves", "Moderadas", "Severas"],
+      "tipo": "escala"
+    },
+    {
+      "id": "vomito",
+      "texto": "¿Has vomitado?",
+      "opciones": ["No", "Una vez", "Varias veces", "Muchas veces (no puedo retener nada)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "diarrea",
+      "texto": "¿Tienes diarrea?",
+      "opciones": ["No", "Leve (1-2 veces)", "Moderada (3-5 veces)", "Severa (más de 5 veces)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "dolor_abdominal",
+      "texto": "¿Tienes dolor de estómago o abdomen?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "gases",
+      "texto": "¿Tienes gases, inflamación o distensión abdominal?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "sangre_heces",
+      "texto": "¿Has notado sangre en las heces?",
+      "opciones": ["No", "Sí (poca)", "Sí (bastante)"],
+      "tipo": "binaria_gradual"
+    },
+    {
+      "id": "ardor_estomago",
+      "texto": "¿Sientes ardor o acidez en el estómago o el pecho?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "regurgitacion",
+      "texto": "¿Sientes que el ácido o la comida sube hacia la garganta?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "dolor_retroocular",
+      "texto": "¿Sientes dolor detrás de los ojos?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "erupcion_cutanea",
+      "texto": "¿Tienes sarpullido, ronchas o manchas en la piel?",
+      "opciones": ["No", "Sí (pocas zonas)", "Sí (varias zonas)", "Sí (generalizado)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "sangrado",
+      "texto": "¿Has tenido sangrado inusual (encías, nariz, piel)?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "dolor_articulaciones",
+      "texto": "¿Tienes dolor en las articulaciones (rodillas, muñecas, tobillos)?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "picazon_piel",
+      "texto": "¿Tienes picazón o comezón en la piel?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "picazon_nocturna",
+      "texto": "¿La picazón en la piel empeora por las noches?",
+      "opciones": ["No", "Sí (un poco)", "Sí (bastante)", "Sí (no me deja dormir)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "conjuntivitis",
+      "texto": "¿Tienes los ojos irritados, pegados o con lagañas?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "picazon_ojos",
+      "texto": "¿Tienes picazón en los ojos?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "ojos_rojos",
+      "texto": "¿Tienes los ojos rojos o irritados?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "secrecion_ocular",
+      "texto": "¿Tienes secreción o líquido saliendo de los ojos?",
+      "opciones": ["No", "Sí (transparente)", "Sí (amarilla/verde)"],
+      "tipo": "binaria_gradual"
+    },
+    {
+      "id": "piel_enrojecida",
+      "texto": "¿Tienes zonas de la piel enrojecidas o calientes?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "descamacion_piel",
+      "texto": "¿Tienes piel reseca, descamada o con costras?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "palidez",
+      "texto": "¿Has notado que te ves o te sientes pálido?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "mareos",
+      "texto": "¿Tienes mareos o sensación de inestabilidad?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "palpitaciones",
+      "texto": "¿Sientes que tu corazón late muy rápido o de forma irregular?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "vision_borrosa",
+      "texto": "¿Tienes visión borrosa o dificultad para ver bien?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "sudoracion",
+      "texto": "¿Tienes sudoración excesiva o sudor frío?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "temblores",
+      "texto": "¿Tienes temblores en las manos u otras partes del cuerpo?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "hambre_intensa",
+      "texto": "¿Sientes hambre muy intensa o urgente?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderada)", "Sí (muy intensa)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "confusion",
+      "texto": "¿Te sientes confundido, desorientado o con dificultad para pensar?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "sensibilidad_luz",
+      "texto": "¿La luz te molesta o te lastima los ojos?",
+      "opciones": ["No", "Leve", "Moderada", "Severa"],
+      "tipo": "escala"
+    },
+    {
+      "id": "sensibilidad_sonido",
+      "texto": "¿Los ruidos te molestan o te generan malestar?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "ardor_orinar",
+      "texto": "¿Sientes ardor o dolor al orinar?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "frecuencia_orinar",
+      "texto": "¿Orinas con más frecuencia de lo normal?",
+      "opciones": ["No", "Un poco más", "Bastante más", "Muy frecuentemente (urge mucho)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "urgencia_orinar",
+      "texto": "¿Sientes ganas urgentes de orinar que no puedes controlar?",
+      "opciones": ["No", "Sí (leve)", "Sí (moderado)", "Sí (severo)"],
+      "tipo": "escala"
+    },
+    {
+      "id": "orina_turbia",
+      "texto": "¿Notas que tu orina está turbia, oscura o con mal olor inusual?",
+      "opciones": ["No", "Sí"],
+      "tipo": "binaria"
+    },
+    {
+      "id": "dolor_facial",
+      "texto": "¿Sientes dolor o presión en la cara, especialmente en los pómulos o frente?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
+    },
+    {
+      "id": "mal_apetito",
+      "texto": "¿Has perdido el apetito o no tienes ganas de comer?",
+      "opciones": ["No", "Leve", "Moderado", "Severo"],
+      "tipo": "escala"
     }
   ]
 }

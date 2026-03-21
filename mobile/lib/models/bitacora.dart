@@ -1,47 +1,75 @@
-import 'package:json_annotation/json_annotation.dart';
-import 'package:yoltec_mobile/models/cita.dart';
-import 'package:yoltec_mobile/models/user.dart';
-
-part 'bitacora.g.dart';
-
-@JsonSerializable()
 class Bitacora {
   final int id;
-  final int citaId;
+  final String fechaConsulta;
   final String? diagnostico;
   final String? tratamiento;
   final String? observaciones;
   final String? peso;
-  final String? altura;
-  final String? temperatura;
+  final String? talla;
   final String? presionArterial;
-  final User? alumno;
-  final User? doctor;
-  final Cita? cita;
-  final DateTime createdAt;
+  final String? temperatura;
+  final Map<String, dynamic>? alumno;
+  final Map<String, dynamic>? doctor;
 
-  Bitacora({
+  const Bitacora({
     required this.id,
-    required this.citaId,
+    required this.fechaConsulta,
     this.diagnostico,
     this.tratamiento,
     this.observaciones,
     this.peso,
-    this.altura,
-    this.temperatura,
+    this.talla,
     this.presionArterial,
+    this.temperatura,
     this.alumno,
     this.doctor,
-    this.cita,
-    required this.createdAt,
   });
 
-  factory Bitacora.fromJson(Map<String, dynamic> json) => _$BitacoraFromJson(json);
-  Map<String, dynamic> toJson() => _$BitacoraToJson(this);
-
   String get fechaFormateada {
-    return '${createdAt.day.toString().padLeft(2, '0')}/'
-           '${createdAt.month.toString().padLeft(2, '0')}/'
-           '${createdAt.year}';
+    final parts = fechaConsulta.split('-');
+    if (parts.length == 3) {
+      return '${parts[2]}/${parts[1]}/${parts[0]}';
+    }
+    return fechaConsulta;
+  }
+
+  String get nombreDoctor {
+    if (doctor == null) return 'Sin asignar';
+    final nombre = doctor!['nombre'] as String? ?? '';
+    final apellido = doctor!['apellido'] as String? ?? '';
+    return '$nombre $apellido'.trim();
+  }
+
+  factory Bitacora.fromJson(Map<String, dynamic> json) {
+    return Bitacora(
+      id: json['id'] as int,
+      fechaConsulta: json['fecha_consulta'] as String? ??
+          json['created_at'] as String? ?? '',
+      diagnostico: json['diagnostico'] as String?,
+      tratamiento: json['tratamiento'] as String?,
+      observaciones: json['observaciones'] as String?,
+      peso: json['peso']?.toString(),
+      talla: json['talla']?.toString(),
+      presionArterial: json['presion_arterial'] as String?,
+      temperatura: json['temperatura']?.toString(),
+      alumno: json['alumno'] as Map<String, dynamic>?,
+      doctor: json['doctor'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'fecha_consulta': fechaConsulta,
+      'diagnostico': diagnostico,
+      'tratamiento': tratamiento,
+      'observaciones': observaciones,
+      'peso': peso,
+      'talla': talla,
+      'presion_arterial': presionArterial,
+      'temperatura': temperatura,
+      'alumno': alumno,
+      'doctor': doctor,
+    };
   }
 }

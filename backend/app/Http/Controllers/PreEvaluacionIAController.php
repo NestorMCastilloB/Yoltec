@@ -6,7 +6,7 @@ use App\Models\PreEvaluacionIA;
 use App\Models\Cita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Http;
 
 class PreEvaluacionIAController extends Controller
 {
@@ -202,58 +202,26 @@ class PreEvaluacionIAController extends Controller
     }
 
     /**
-     * Procesar respuestas con IA
+     * Procesar respuestas con IA via microservicio HTTP
      */
     private function procesarConIA(array $respuestas): array
     {
         try {
-            $scriptPath = base_path('../IA/pre_evaluacion_ia.py');
-            
-            if (!file_exists($scriptPath)) {
-                // Fallback si no existe el script: simular respuesta
-                return $this->simularRespuestaIA($respuestas);
+            $iaUrl = env('IA_SERVICE_URL', 'http://ia:5000');
+
+            $response = Http::timeout(15)->post("{$iaUrl}/predict", [
+                'respuestas' => $respuestas,
+            ]);
+
+            if ($response->successful()) {
+                return $response->json();
             }
-            
-            $input = json_encode(['respuestas' => $respuestas]);
-            
-            // Ejecutar script de Python
-            $process = proc_open(
-                ['python3', $scriptPath],
-                [
-                    0 => ['pipe', 'r'],  // stdin
-                    1 => ['pipe', 'w'],  // stdout
-                    2 => ['pipe', 'w'],  // stderr
-                ],
-                $pipes
-            );
-            
-            if (!is_resource($process)) {
-                return $this->simularRespuestaIA($respuestas);
-            }
-            
-            // Enviar datos al script
-            fwrite($pipes[0], $input);
-            fclose($pipes[0]);
-            
-            // Leer respuesta
-            $output = stream_get_contents($pipes[1]);
-            $errors = stream_get_contents($pipes[2]);
-            
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            
-            proc_close($process);
-            
-            $resultado = json_decode($output, true);
-            
-            if (!$resultado || isset($resultado['error'])) {
-                return $this->simularRespuestaIA($respuestas);
-            }
-            
-            return $resultado;
-            
+
+            \Log::error('IA service error: ' . $response->body());
+            return $this->simularRespuestaIA($respuestas);
+
         } catch (\Exception $e) {
-            \Log::error('Error en IA: ' . $e->getMessage());
+            \Log::warning('IA service no disponible, usando fallback: ' . $e->getMessage());
             return $this->simularRespuestaIA($respuestas);
         }
     }

@@ -53,7 +53,7 @@ class CitaController extends Controller
                         ->get();
         }
 
-        return response()->json($citas, 200);
+        return response()->json(['citas' => $citas], 200);
     }
 
     public function availability(Request $request)

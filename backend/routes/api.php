@@ -8,6 +8,8 @@ use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\RecetaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PreEvaluacionIAController;
+use App\Http\Controllers\IAPriorityController;
+use App\Http\Controllers\IASymptomController;
 
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -46,12 +48,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recetas/{id}', [RecetaController::class, 'show']);
     Route::put('/recetas/{id}', [RecetaController::class, 'update']); // Solo doctor
 
-    // Pre-evaluaciones IA
+    // Pre-evaluaciones IA (sistema anterior - mantener compatibilidad)
     Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
+    Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
     Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);
     Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
     Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
-    Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
     Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
+
+    // ===== IA 1: Clasificador de Prioridad (solo doctores) =====
+    Route::prefix('ia/priority')->group(function () {
+        Route::get('/info', [IAPriorityController::class, 'infoModelos']);
+        Route::get('/pendientes', [IAPriorityController::class, 'listarPendientesPorPrioridad']);
+        Route::post('/clasificar/{citaId}', [IAPriorityController::class, 'clasificar']);
+    });
+
+    // ===== IA 2: Pre-evaluación de Síntomas (alumnos y doctores) =====
+    Route::prefix('ia/symptoms')->group(function () {
+        Route::get('/listado', [IASymptomController::class, 'listado']); // Solo doctores
+        Route::post('/iniciar/{citaId}', [IASymptomController::class, 'iniciar']);
+        Route::post('/evaluar/{citaId}', [IASymptomController::class, 'evaluar']);
+        Route::get('/resultado/{citaId}', [IASymptomController::class, 'obtenerResultado']);
+        Route::post('/validar/{preEvaluacionId}', [IASymptomController::class, 'validar']); // Solo doctores
+        Route::delete('/{citaId}', [IASymptomController::class, 'cancelar']);
+    });
 });
 

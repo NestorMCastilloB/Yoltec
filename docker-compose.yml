@@ -1,6 +1,16 @@
 version: "3.9"
 
+# ─────────────────────────────────────────────────────────────
+# Yoltec - Sistema de Consultorio Médico
+#
+# Bloque 1: backend (Laravel) + frontend (Angular)
+# Bloque 2: ia (Python FastAPI)
+# Nota: La app móvil Flutter se distribuye como APK, no como contenedor.
+# ─────────────────────────────────────────────────────────────
+
 services:
+
+  # ── Bloque 1a: Backend Laravel ─────────────────────────────
   backend:
     build:
       context: ./backend
@@ -8,16 +18,19 @@ services:
     container_name: yoltec-backend
     ports:
       - "8000:8000"
-    environment:
-      - DB_CONNECTION=sqlite
-      - DB_DATABASE=/var/www/html/database/database.sqlite
-      - DB_URL=
-      - APP_KEY=base64:LhZf2UjVXJSmr5ea03bnNlyjTFyYuD+YTt/T9fHe4DA=
-      - APP_DEBUG=true
-      - APP_ENV=local
     env_file:
       - ./backend/.env.docker
+    environment:
+      - IA_SERVICE_URL=http://ia:5000
+    volumes:
+      - sqlite_data:/var/www/html/database
+    networks:
+      - yoltec-net
+    depends_on:
+      ia:
+        condition: service_healthy
 
+  # ── Bloque 1b: Frontend Angular ────────────────────────────
   frontend:
     build:
       context: ./frontend
@@ -27,3 +40,29 @@ services:
       - "4200:80"
     depends_on:
       - backend
+    networks:
+      - yoltec-net
+
+  # ── Bloque 2: IA Python (FastAPI) ──────────────────────────
+  ia:
+    build:
+      context: ./IA
+      dockerfile: Dockerfile
+    container_name: yoltec-ia
+    ports:
+      - "5000:5000"
+    networks:
+      - yoltec-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+networks:
+  yoltec-net:
+    driver: bridge
+
+volumes:
+  sqlite_data:

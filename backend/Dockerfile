@@ -5,8 +5,8 @@ FROM php:8.2-fpm-alpine
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apk add --no-cache \
-    bash git curl libpq-dev \
-  && docker-php-ext-install pdo pdo_pgsql
+    bash git curl libpq-dev sqlite-dev \
+  && docker-php-ext-install pdo pdo_pgsql pdo_sqlite
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
@@ -19,6 +19,10 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+# Script de inicio: corre migraciones + seed y levanta el servidor
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+ENTRYPOINT ["docker-entrypoint.sh"]

@@ -58,6 +58,26 @@ class AuthController extends Controller
             }
         }
 
+        // En entorno local: saltamos 2FA y devolvemos token directo
+        if (config('app.env') === 'local') {
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Inicio de sesión exitoso',
+                'user' => [
+                    'id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'apellido' => $user->apellido,
+                    'email' => $user->email,
+                    'tipo' => $user->tipo,
+                    'numero_control' => $user->numero_control,
+                    'username' => $user->username,
+                ],
+                'token' => $token,
+                'tipo' => $user->tipo,
+            ], 200);
+        }
+
         // Generar código 2FA de 6 dígitos
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
@@ -71,15 +91,12 @@ class AuthController extends Controller
 
         // En producción: Enviar email con el código
         // Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user));
-        
-        // Para desarrollo/demo: Devolver código en respuesta (NO hacer esto en producción)
+
         return response()->json([
             'message' => 'Código de verificación enviado',
             'requires_2fa' => true,
             'user_id' => $user->id,
             'email_masked' => $this->maskEmail($user->email),
-            // Solo para desarrollo:
-            'dev_code' => $code,
         ], 200);
     }
 

@@ -1,40 +1,47 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'user.g.dart';
-
-@JsonSerializable()
 class User {
   final int id;
   final String nombre;
   final String apellido;
   final String email;
-  final String numeroControl;
-  final String rol;
-  final String? telefono;
-  final String? carrera;
-  final String? semestre;
-  final String? especialidad;
-  final String? cedulaProfesional;
+  final String tipo;
+  final String? numeroControl;
+  final String? username;
 
-  User({
+  const User({
     required this.id,
     required this.nombre,
     required this.apellido,
     required this.email,
-    required this.numeroControl,
-    required this.rol,
-    this.telefono,
-    this.carrera,
-    this.semestre,
-    this.especialidad,
-    this.cedulaProfesional,
+    required this.tipo,
+    this.numeroControl,
+    this.username,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  Map<String, dynamic> toJson() => _$UserToJson(this);
-
+  bool get esAlumno => tipo == 'alumno';
+  bool get esDoctor => tipo == 'doctor';
   String get nombreCompleto => '$nombre $apellido';
-  
-  bool get esDoctor => rol == 'doctor';
-  bool get esAlumno => rol == 'alumno';
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as int,
+      nombre: json['nombre'] as String? ?? '',
+      apellido: json['apellido'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      tipo: json['tipo'] as String? ?? 'alumno',
+      numeroControl: json['numero_control'] as String?,
+      username: json['username'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'apellido': apellido,
+      'email': email,
+      'tipo': tipo,
+      'numero_control': numeroControl,
+      'username': username,
+    };
+  }
 }

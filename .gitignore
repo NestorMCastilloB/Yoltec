@@ -1,2 +1,44 @@
-venv/
+# ─── Python / IA ───────────────────────────────────
+IA/venv/
+IA/__pycache__/
+IA/*.pyc
+archive/
+*.csv
+
+# ─── Laravel / Backend ─────────────────────────────
+backend/vendor/
+backend/.env
+backend/storage/logs/
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+backend/bootstrap/cache/
+backend/database/database.sqlite
+backend/database/database.sqlite-shm
+backend/database/database.sqlite-wal
+
+# ─── Angular / Frontend ────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# ─── Flutter / Mobile ──────────────────────────────
+mobile/.dart_tool/
+mobile/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/debug/
+mobile/android/app/profile/
+mobile/android/app/release/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# ─── General ───────────────────────────────────────
+.DS_Store
+*.log
+*.zip
+*.rar
 .aider*
+IA/model.pkl
+IA/label_encoder.pkl
+IA/*.pkl
