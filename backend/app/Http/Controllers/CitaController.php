@@ -21,6 +21,7 @@ class CitaController extends Controller
     {
         $now = Carbon::now();
 
+        // Citas programadas cuyo tiempo ya pasó = no asistió (distinto de cancelada por el usuario)
         Cita::where('estatus', 'programada')
             ->where(function ($query) use ($now) {
                 $query->where('fecha_cita', '<', $now->toDateString())
@@ -29,7 +30,7 @@ class CitaController extends Controller
                             ->where('hora_cita', '<=', $now->format('H:i'));
                     });
             })
-            ->update(['estatus' => 'cancelada']);
+            ->update(['estatus' => 'no_asistio']);
     }
 
     // Listar citas
@@ -151,6 +152,22 @@ class CitaController extends Controller
             'numero_control.exists' => 'No se encontró un alumno con ese número de control. Verifica los datos ingresados.',
         ]);
 
+        // Validar que no sea domingo
+        $diaSemana = Carbon::parse($validated['fecha_cita'])->dayOfWeek;
+        if ($diaSemana === 0) {
+            return response()->json([
+                'message' => 'No se pueden agendar citas los domingos.',
+            ], 422);
+        }
+
+        // Validar horario de atención: 08:00 a 16:45 (último slot antes de las 17:00)
+        $hora = $validated['hora_cita'];
+        if ($hora < '08:00' || $hora > '16:45') {
+            return response()->json([
+                'message' => 'El horario de atención es de 08:00 a 16:45.',
+            ], 422);
+        }
+
         $slotOcupado = Cita::where('fecha_cita', $validated['fecha_cita'])
             ->where('hora_cita', $validated['hora_cita'])
             ->where('estatus', 'programada')
@@ -209,9 +226,9 @@ class CitaController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        if ($cita->estatus === 'atendida') {
+        if (in_array($cita->estatus, ['atendida', 'no_asistio'])) {
             return response()->json([
-                'message' => 'No se puede cancelar una cita ya atendida'
+                'message' => 'No se puede cancelar una cita que ya fue procesada.'
             ], 400);
         }
 

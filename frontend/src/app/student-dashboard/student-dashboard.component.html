@@ -87,7 +87,7 @@
               <label>Fecha de la cita</label>
               <div class="calendar-card">
                 <div class="calendar-header">
-                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)">‹</button>
+                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
                   <h4>{{ calendarLabel | titlecase }}</h4>
                   <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
                 </div>
@@ -231,13 +231,16 @@
               <h3>Historial reciente</h3>
 
               <ng-container *ngIf="handledCitas.length > 0; else noHistorial">
-                <div *ngFor="let cita of handledCitas" class="cita-card" [class.cancelada]="cita.estatus === 'cancelada'">
+                <div *ngFor="let cita of handledCitas" class="cita-card"
+                     [class.cancelada]="cita.estatus === 'cancelada'"
+                     [class.no-asistio]="cita.estatus === 'no_asistio'">
                   <div class="cita-header">
                     <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
                     <span class="estatus"
                           [class.atendida]="cita.estatus === 'atendida'"
-                          [class.cancelada]="cita.estatus === 'cancelada'">
-                      {{ cita.estatus === 'atendida' ? 'Atendida' : 'Cancelada' }}
+                          [class.cancelada]="cita.estatus === 'cancelada'"
+                          [class.no-asistio]="cita.estatus === 'no_asistio'">
+                      {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' : 'Cancelada' }}
                     </span>
                   </div>
                   <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>

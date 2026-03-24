@@ -9,6 +9,7 @@ import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabil
 import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../services/bitacora.service';
 import { Receta, RecetaService, CreateRecetaPayload } from '../services/receta.service';
 import { PreEvaluacionIAService, PreEvaluacion } from '../services/pre-evaluacion-ia.service';
+import { IaPriorityService, ClasificacionPrioridad, ResumenPrioridad } from '../services/ia-priority.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -71,6 +72,12 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   todayAppointments = 0;
   patientsAttended = 0;
   pendingBitacoras = 0;
+  proximaCita: Cita | null = null;
+
+  // IA Prioridad
+  prioridadResumen: ResumenPrioridad | null = null;
+  isLoadingPrioridad = false;
+  prioridadError: string | null = null;
 
   bitacoras: Bitacora[] = [];
   isLoadingBitacoras = false;
@@ -121,7 +128,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private citaService: CitaService,
     private bitacoraService: BitacoraService,
     private recetaService: RecetaService,
-    private preEvaluacionIAService: PreEvaluacionIAService
+    private preEvaluacionIAService: PreEvaluacionIAService,
+    private iaPriorityService: IaPriorityService
   ) {}
 
   ngOnInit(): void {
@@ -153,6 +161,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     }
     if (section === 'pre-evaluaciones') {
       this.loadPreEvaluaciones();
+    }
+    if (section === 'ia-prioridad') {
+      this.loadPrioridad();
     }
   }
 
@@ -189,6 +200,12 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       month: 'long',
       year: 'numeric'
     }).format(this.currentMonth);
+  }
+
+  get isCurrentMonth(): boolean {
+    const now = new Date();
+    return this.currentMonth.getFullYear() === now.getFullYear() &&
+           this.currentMonth.getMonth() === now.getMonth();
   }
 
   get hasAvailableSlotsForSelectedDate(): boolean {
@@ -622,6 +639,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateCitaGroups(): void {
+    const ahora = new Date();
     this.pendingCitas = this.citas
       .filter(cita => cita.estatus === 'programada')
       .sort(
@@ -629,6 +647,11 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
           this.toDate(a.fecha_cita, a.hora_cita).getTime() -
           this.toDate(b.fecha_cita, b.hora_cita).getTime()
       );
+
+    // Próxima cita: la más cercana en el futuro
+    this.proximaCita = this.pendingCitas.find(
+      cita => this.toDate(cita.fecha_cita, cita.hora_cita) >= ahora
+    ) ?? this.pendingCitas[0] ?? null;
 
     this.handledCitas = this.citas
       .filter(cita => cita.estatus !== 'programada')
@@ -804,8 +827,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
   private generateTimeSlots(): string[] {
     const slots: string[] = [];
-    // Horario 8am a 5pm con intervalos de 15 minutos
-    for (let hour = 8; hour <= 17; hour++) {
+    // Horario 8am a 5pm — último slot inicia a las 16:45 (termina a las 17:00)
+    for (let hour = 8; hour < 17; hour++) {
       ['00', '15', '30', '45'].forEach(minute => {
         slots.push(`${String(hour).padStart(2, '0')}:${minute}`);
       });
@@ -1023,6 +1046,26 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         this.preEvaluaciones = response.pendientes;
         this.totalPendientes = response.total;
+      });
+  }
+
+  // ===== MÉTODOS DE IA PRIORIDAD =====
+
+  loadPrioridad(): void {
+    this.isLoadingPrioridad = true;
+    this.prioridadError = null;
+
+    this.iaPriorityService.getPendientesPorPrioridad()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.prioridadError = error?.error?.message || 'No se pudo cargar la clasificación de prioridad.';
+          return of(null);
+        }),
+        finalize(() => { this.isLoadingPrioridad = false; })
+      )
+      .subscribe(res => {
+        this.prioridadResumen = res;
       });
   }
 

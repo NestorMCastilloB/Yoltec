@@ -35,11 +35,17 @@
         class="nav-button">
         Recetas
       </button>
-      <button 
-        [class.active]="activeSection === 'pre-evaluaciones'" 
+      <button
+        [class.active]="activeSection === 'pre-evaluaciones'"
         (click)="setActiveSection('pre-evaluaciones')"
         class="nav-button">
         🤖 Pre-evaluaciones <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
+      </button>
+      <button
+        [class.active]="activeSection === 'ia-prioridad'"
+        (click)="setActiveSection('ia-prioridad')"
+        class="nav-button">
+        ⚡ Prioridad IA
       </button>
     </nav>
   </header>
@@ -70,6 +76,103 @@
             <p class="stat-detail">Requieren atención</p>
           </div>
         </div>
+
+        <!-- Próxima cita -->
+        <div class="proxima-cita-card" *ngIf="proximaCita; else sinProxima">
+          <h3>📅 Próxima Cita</h3>
+          <div class="proxima-cita-info">
+            <div class="proxima-dato">
+              <span class="proxima-label">Paciente</span>
+              <span class="proxima-valor">{{ proximaCita.alumno?.nombre }} {{ proximaCita.alumno?.apellido }}</span>
+            </div>
+            <div class="proxima-dato">
+              <span class="proxima-label">Fecha</span>
+              <span class="proxima-valor">{{ proximaCita.fecha_cita }}</span>
+            </div>
+            <div class="proxima-dato">
+              <span class="proxima-label">Hora</span>
+              <span class="proxima-valor">{{ proximaCita.hora_cita }}</span>
+            </div>
+            <div class="proxima-dato">
+              <span class="proxima-label">Motivo</span>
+              <span class="proxima-valor">{{ proximaCita.motivo }}</span>
+            </div>
+            <div class="proxima-dato">
+              <span class="proxima-label">Clave</span>
+              <span class="proxima-valor">{{ proximaCita.clave_cita }}</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #sinProxima>
+          <div class="proxima-cita-card empty">
+            <h3>📅 Próxima Cita</h3>
+            <p>No hay citas programadas próximamente.</p>
+          </div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- Sección: IA Prioridad -->
+    <section *ngIf="activeSection === 'ia-prioridad'" class="content-section">
+      <div class="section-header">
+        <h2>⚡ Clasificación de Prioridad IA</h2>
+        <button class="btn-primary" (click)="loadPrioridad()">Actualizar</button>
+      </div>
+      <p class="ia-disclaimer">Esta clasificación es una herramienta de apoyo basada en el historial del alumno. La decisión final siempre es del doctor.</p>
+
+      <div *ngIf="isLoadingPrioridad" class="loading">Analizando citas...</div>
+      <div *ngIf="prioridadError" class="alert alert-error">{{ prioridadError }}</div>
+
+      <div *ngIf="prioridadResumen && !isLoadingPrioridad">
+        <!-- Resumen -->
+        <div class="prioridad-resumen">
+          <div class="prioridad-badge alta">
+            <span class="badge-num">{{ prioridadResumen.resumen.alta }}</span>
+            <span class="badge-label">Alta</span>
+          </div>
+          <div class="prioridad-badge media">
+            <span class="badge-num">{{ prioridadResumen.resumen.media }}</span>
+            <span class="badge-label">Media</span>
+          </div>
+          <div class="prioridad-badge baja">
+            <span class="badge-num">{{ prioridadResumen.resumen.baja }}</span>
+            <span class="badge-label">Baja</span>
+          </div>
+          <div class="prioridad-badge total">
+            <span class="badge-num">{{ prioridadResumen.total_citas }}</span>
+            <span class="badge-label">Total</span>
+          </div>
+        </div>
+
+        <!-- Lista de citas clasificadas -->
+        <div *ngIf="prioridadResumen.citas.length === 0" class="empty-state">
+          No hay citas pendientes para clasificar.
+        </div>
+
+        <div class="citas-prioridad-lista" *ngIf="prioridadResumen.citas.length > 0">
+          <div
+            *ngFor="let item of prioridadResumen.citas"
+            class="cita-prioridad-card"
+            [ngClass]="'prioridad-' + item.prioridad">
+            <div class="cita-prioridad-header">
+              <span class="prioridad-tag" [ngClass]="'tag-' + item.prioridad">
+                {{ item.prioridad | uppercase }}
+              </span>
+              <span class="prioridad-score">Puntuación: {{ item.puntuacion }}</span>
+            </div>
+            <div class="cita-prioridad-body">
+              <p><strong>Paciente:</strong> {{ item.cita.alumno.nombre }} ({{ item.cita.alumno.numero_control }})</p>
+              <p><strong>Fecha:</strong> {{ item.cita.fecha_cita | date:'dd/MM/yyyy' }} a las {{ item.cita.hora_cita }}</p>
+              <p><strong>Motivo:</strong> {{ item.cita.motivo }}</p>
+              <p class="justificacion"><strong>Análisis IA:</strong> {{ item.justificacion_resumida }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!prioridadResumen && !isLoadingPrioridad && !prioridadError" class="empty-state">
+        <p>Presiona "Actualizar" para clasificar las citas pendientes.</p>
+        <button class="btn-primary" (click)="loadPrioridad()">Clasificar ahora</button>
       </div>
     </section>
 
@@ -104,7 +207,7 @@
               <label>Fecha de la cita</label>
               <div class="calendar-card">
                 <div class="calendar-header">
-                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)">‹</button>
+                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
                   <h4>{{ calendarLabel | titlecase }}</h4>
                   <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
                 </div>
@@ -253,6 +356,7 @@
                   *ngFor="let cita of handledCitas"
                   class="cita-card"
                   [class.cancelada]="cita.estatus === 'cancelada'"
+                  [class.no-asistio]="cita.estatus === 'no_asistio'"
                 >
                   <div class="cita-header">
                     <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
@@ -260,8 +364,9 @@
                       class="estatus"
                       [class.atendida]="cita.estatus === 'atendida'"
                       [class.cancelada]="cita.estatus === 'cancelada'"
+                      [class.no-asistio]="cita.estatus === 'no_asistio'"
                     >
-                      {{ cita.estatus === 'atendida' ? 'Atendida' : 'Cancelada' }}
+                      {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' : 'Cancelada' }}
                     </span>
                   </div>
                   <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>

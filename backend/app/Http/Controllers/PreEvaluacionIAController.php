@@ -193,11 +193,11 @@ class PreEvaluacionIAController extends Controller
         $pendientes = PreEvaluacionIA::with(['cita.alumno', 'alumno'])
             ->where('estatus_validacion', 'pendiente')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
-        
+            ->get();
+
         return response()->json([
             'pendientes' => $pendientes,
-            'total' => $pendientes->total(),
+            'total' => $pendientes->count(),
         ]);
     }
 

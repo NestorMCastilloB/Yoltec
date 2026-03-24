@@ -12,7 +12,7 @@ use App\Http\Controllers\IAPriorityController;
 use App\Http\Controllers\IASymptomController;
 
 // Rutas públicas
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
 Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
 Route::post('/resend-2fa', [AuthController::class, 'resendTwoFactor']);
 

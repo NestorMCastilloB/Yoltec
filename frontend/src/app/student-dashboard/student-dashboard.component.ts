@@ -382,6 +382,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }).format(this.currentMonth);
   }
 
+  get isCurrentMonth(): boolean {
+    const now = new Date();
+    return this.currentMonth.getFullYear() === now.getFullYear() &&
+           this.currentMonth.getMonth() === now.getMonth();
+  }
+
   get hasAvailableSlotsForSelectedDate(): boolean {
     if (!this.createFormData.fecha_cita) {
       return false;
@@ -415,8 +421,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private generateTimeSlots(): string[] {
     const slots: string[] = [];
-    // Horario 8am a 5pm con intervalos de 15 minutos
-    for (let hour = 8; hour <= 17; hour++) {
+    // Horario 8am a 5pm — último slot inicia a las 16:45 (termina a las 17:00)
+    for (let hour = 8; hour < 17; hour++) {
       ['00', '15', '30', '45'].forEach(minute => {
         slots.push(`${String(hour).padStart(2, '0')}:${minute}`);
       });

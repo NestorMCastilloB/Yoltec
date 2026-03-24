@@ -335,6 +335,16 @@
   color: #c62828;
 }
 
+.estatus.no-asistio {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.cita-card.no-asistio {
+  border-color: #ffe0b2;
+  background: #fffaf5;
+}
+
 .cita-card p {
   margin: 0;
   color: #455a64;
@@ -567,6 +577,12 @@
 
 .calendar-nav:hover {
   background: #c8e6c9;
+}
+
+.calendar-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: #e8f5e9;
 }
 
 .calendar-legend {
@@ -1009,3 +1025,80 @@
     flex-direction: column;
   }
 }
+
+/* ===== Próxima Cita ===== */
+.proxima-cita-card {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+.proxima-cita-card.empty {
+  background: #f5f5f5;
+  color: #666;
+}
+.proxima-cita-card h3 { margin: 0 0 1rem 0; font-size: 1.1rem; }
+.proxima-cita-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; }
+.proxima-dato { display: flex; flex-direction: column; gap: 2px; }
+.proxima-label { font-size: 0.75rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px; }
+.proxima-valor { font-size: 0.95rem; font-weight: 600; }
+
+/* ===== IA Prioridad ===== */
+.ia-disclaimer {
+  background: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  color: #5d4037;
+  margin-bottom: 1.5rem;
+}
+.prioridad-resumen {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.prioridad-badge {
+  flex: 1;
+  min-width: 100px;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  color: white;
+}
+.prioridad-badge.alta { background: #c62828; }
+.prioridad-badge.media { background: #f57f17; }
+.prioridad-badge.baja { background: #2e7d32; }
+.prioridad-badge.total { background: #1565c0; }
+.badge-num { display: block; font-size: 2rem; font-weight: 700; line-height: 1; }
+.badge-label { font-size: 0.8rem; text-transform: uppercase; opacity: 0.9; }
+
+.citas-prioridad-lista { display: flex; flex-direction: column; gap: 1rem; }
+.cita-prioridad-card {
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  border-left: 5px solid #ccc;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.cita-prioridad-card.prioridad-alta { border-left-color: #c62828; }
+.cita-prioridad-card.prioridad-media { border-left-color: #f57f17; }
+.cita-prioridad-card.prioridad-baja { border-left-color: #2e7d32; }
+.cita-prioridad-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.prioridad-tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+}
+.tag-alta { background: #c62828; }
+.tag-media { background: #f57f17; }
+.tag-baja { background: #2e7d32; }
+.prioridad-score { font-size: 0.85rem; color: #666; }
+.cita-prioridad-body p { margin: 0.25rem 0; font-size: 0.9rem; }
+.justificacion { color: #555; font-style: italic; margin-top: 0.5rem !important; }
+.empty-state { text-align: center; padding: 2rem; color: #888; }
+.loading { text-align: center; padding: 2rem; color: #666; }

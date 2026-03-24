@@ -30,4 +30,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(function (\Illuminate\Http\Request $request) {
             return $request->is('api/*') || $request->expectsJson();
         });
+
+        // Fix hallazgo #3 y #5: retornar 401 limpio en lugar de 500 o "Route not defined"
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['message' => 'No autenticado.'], 401);
+            }
+        });
+
+        $exceptions->render(function (\InvalidArgumentException $e, \Illuminate\Http\Request $request) {
+            if (($request->is('api/*') || $request->expectsJson()) && str_contains($e->getMessage(), 'Route')) {
+                return response()->json(['message' => 'No autenticado.'], 401);
+            }
+        });
     })->create();

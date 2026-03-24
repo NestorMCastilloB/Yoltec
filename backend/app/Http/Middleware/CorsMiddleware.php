@@ -38,6 +38,12 @@ class CorsMiddleware
             return response('', 200);
         }
 
-        return $next($request);
+        // Fix hallazgo #4: ocultar versión PHP en headers
+        header_remove('X-Powered-By');
+
+        $response = $next($request);
+        $response->headers->remove('X-Powered-By');
+
+        return $response;
     }
 }
