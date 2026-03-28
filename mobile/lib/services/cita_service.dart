@@ -107,6 +107,36 @@ class CitaService extends ChangeNotifier {
     }
   }
 
+  Future<bool> atenderCita(String token, int citaId) async {
+    try {
+      await ApiService.post('/citas/$citaId/atender', {}, token: token);
+      final idx = _citas.indexWhere((c) => c.id == citaId);
+      if (idx != -1) {
+        final original = _citas[idx];
+        _citas[idx] = Cita(
+          id: original.id,
+          claveCita: original.claveCita,
+          fechaCita: original.fechaCita,
+          horaCita: original.horaCita,
+          motivo: original.motivo,
+          estatus: 'atendida',
+          alumnoId: original.alumnoId,
+          alumno: original.alumno,
+        );
+        notifyListeners();
+      }
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Error al marcar la cita como atendida.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

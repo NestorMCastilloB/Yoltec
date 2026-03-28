@@ -24,7 +24,7 @@ class BitacoraController extends Controller
                                 ->get();
         }
 
-        return response()->json($bitacoras, 200);
+        return response()->json(['bitacoras' => $bitacoras], 200);
     }
 
     // Crear bitácora (solo doctor)

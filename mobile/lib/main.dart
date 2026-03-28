@@ -6,6 +6,7 @@ import 'package:yoltec_mobile/screens/login_screen.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
+import 'package:yoltec_mobile/services/ia_priority_service.dart';
 import 'package:yoltec_mobile/services/pre_evaluacion_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
@@ -26,6 +27,7 @@ class YoltecApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BitacoraService()),
         ChangeNotifierProvider(create: (_) => RecetaService()),
         ChangeNotifierProvider(create: (_) => PreEvaluacionService()),
+        ChangeNotifierProvider(create: (_) => IAPriorityService()),
       ],
       child: MaterialApp(
         title: 'Yoltec - Consultorio Medico',

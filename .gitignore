@@ -42,3 +42,9 @@ mobile/.flutter-plugins-dependencies
 IA/model.pkl
 IA/label_encoder.pkl
 IA/*.pkl
+
+# ─── Documentos binarios (usar .md en su lugar) ─────
+manual/*.pdf
+manual/*.odt
+manual/*.docx
+manual/*.html

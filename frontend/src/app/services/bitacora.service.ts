@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { API_BASE_URL } from './api-config';
 
 export interface Bitacora {
@@ -57,7 +58,9 @@ export class BitacoraService {
   constructor(private http: HttpClient) {}
 
   getBitacoras(): Observable<Bitacora[]> {
-    return this.http.get<Bitacora[]>(this.baseUrl);
+    return this.http.get<{ bitacoras: Bitacora[] }>(this.baseUrl).pipe(
+      map(res => res.bitacoras ?? [])
+    );
   }
 
   createBitacora(payload: CreateBitacoraPayload): Observable<{ message: string; bitacora: Bitacora }> {

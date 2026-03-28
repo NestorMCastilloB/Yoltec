@@ -1,226 +1,194 @@
-# 🏥 Yoltec - Sistema de Consultorio Médico con IA
+# Yoltec — Sistema de Consultorio Médico con IA
 
-Sistema integral para gestión de consultorio médico con pre-evaluación IA para alumnos y validación por doctores.
-
-## 📋 ¿Qué incluye Yoltec?
-
-- **Gestión de Citas**: Calendario con horario 8am-5pm, intervalos 15 min
-- **Bitácoras Médicas**: Registro de consultas con métricas vitales
-- **Recetas**: Generación y consulta de recetas médicas
-- **Pre-evaluación IA**: Diagnóstico preliminar basado en síntomas (validado por doctor)
-- **Login diferenciado**: Alumnos (NIP) vs Doctores (password)
-
-## 🏗️ Arquitectura (3 Bloques Docker)
-
-```
-yoltec/
-├── backend/          # Laravel 10 + PostgreSQL (Neon)
-│   ├── app/Models/
-│   │   ├── User.php
-│   │   ├── Cita.php
-│   │   ├── Bitacora.php
-│   │   ├── Receta.php
-│   │   └── PreEvaluacionIA.php      ← IA integrada
-│   ├── app/Http/Controllers/
-│   │   ├── AuthController.php        ← Login diferenciado
-│   │   ├── PreEvaluacionIAController.php
-│   │   └── ...
-│   └── routes/api.php
-│
-├── frontend/         # Angular 17+
-│   ├── src/app/
-│   │   ├── login/                    ← NIP para alumnos
-│   │   ├── student-dashboard/      ← Pre-evaluación IA
-│   │   ├── doctor-dashboard/       ← Validación IA
-│   │   └── services/
-│   │       ├── auth.service.ts
-│   │       ├── pre-evaluacion-ia.service.ts
-│   │       └── ...
-│   └── src/assets/
-│
-├── IA/               # Python (Rule-based, no ML)
-│   ├── enfermedades_config.json     ← Configuración de reglas
-│   └── pre_evaluacion_ia.py         ← Motor de diagnóstico
-│
-└── mobile/           # (Futuro: Flutter/React Native)
-```
-
-## 🤖 Sistema de IA (Rule-Based)
-
-**Tipo**: Inteligencia Artificial Simbólica basada en reglas  
-**NO usa**: Machine Learning, Deep Learning, ni APIs externas  
-
-### Cómo funciona:
-1. Alumno responde preguntas sobre síntomas en el frontend
-2. Backend envía respuestas al script Python (`pre_evaluacion_ia.py`)
-3. Script calcula coincidencias con enfermedades configuradas en `enfermedades_config.json`
-4. Retorna diagnóstico preliminar con nivel de confianza (0-100%)
-5. Doctor valida o descarta el diagnóstico desde su panel
-
-### Para mejorar la IA:
-Edita `IA/enfermedades_config.json`:
-```json
-{
-  "enfermedades": {
-    "gripe": {
-      "sintomas": ["fiebre", "dolor_cabeza", "dolor_cuerpo"],
-      "pesos": {"fiebre": 3, "dolor_cabeza": 2},
-      "recomendacion": "Reposo, líquidos..."
-    }
-  }
-}
-```
-
-## 🚀 Instalación Rápida
-
-### Requisitos
-- Docker & Docker Compose
-- Git
-
-### 1. Clonar y configurar
-```bash
-git clone <repo>
-cd yoltec
-```
-
-### 2. Configurar variables de entorno
-```bash
-# Backend
-cp backend/.env.example backend/.env
-# Editar backend/.env con credenciales de base de datos
-
-# Frontend (si aplica)
-cp frontend/.env.example frontend/.env.local
-```
-
-### 3. Iniciar con Docker
-```bash
-docker-compose up -d
-```
-
-### 4. Migraciones (primera vez)
-```bash
-docker-compose exec backend php artisan migrate
-```
-
-### 5. Acceder
-- **Frontend**: http://localhost:4200
-- **Backend API**: http://localhost:8000/api
-
-## 🔐 Login
-
-| Rol | Identificador | Contraseña |
-|-----|---------------|------------|
-| Alumno | Número de control (8 dígitos) | NIP (6 dígitos) |
-| Doctor | Username | Password |
-
-## 👥 Flujo de Usuarios
-
-### Alumno:
-1. Login con número de control + NIP
-2. Agenda cita médica (calendario 8am-5pm)
-3. Completa **pre-evaluación IA** antes de la cita
-4. Recibe diagnóstico preliminar (confianza XX%)
-5. Doctor valida durante la consulta
-
-### Doctor:
-1. Login con username + password
-2. Ve citas programadas del día
-3. Revisa **pre-evaluaciones IA pendientes**
-4. Valida o descarta diagnóstico sugerido
-5. Registra bitácora y receta
-
-## 📁 Estructura de Carpetas (para desarrolladores)
-
-```
-yoltec/
-├── backend/
-│   ├── app/
-│   │   ├── Models/           # Eloquent models
-│   │   ├── Http/Controllers/ # API controllers
-│   │   └── Services/         # Lógica de negocio
-│   ├── database/
-│   │   └── migrations/       # Esquema de BD
-│   └── routes/
-│       └── api.php           # Endpoints REST
-│
-├── frontend/
-│   ├── src/app/
-│   │   ├── login/           # Login diferenciado
-│   │   ├── student-dashboard/ # Panel alumno
-│   │   ├── doctor-dashboard/  # Panel doctor
-│   │   └── services/        # HTTP services
-│   └── src/assets/          # Logo, imágenes
-│
-├── IA/
-│   ├── enfermedades_config.json
-│   └── pre_evaluacion_ia.py
-│
-├── manual/                  # Documentación útil
-│   └── README_COMPANERO.md  # Guía para colaboradores
-│
-└── docker-compose.yml       # Orquestación de contenedores
-```
-
-## 🛠️ Comandos Útiles
-
-```bash
-# Backend (Laravel)
-docker-compose exec backend php artisan migrate
-docker-compose exec backend php artisan db:seed
-docker-compose exec backend php artisan optimize
-
-# Frontend (Angular)
-cd frontend && npm install && ng serve
-
-# IA (Python)
-cd IA && python pre_evaluacion_ia.py
-```
-
-## 📚 Documentación
-
-- `manual/README_COMPANERO.md` - Guía para colaboradores Git
-- `backend/README.md` - Documentación API Laravel
-- `frontend/README.md` - Documentación Angular
-
-## 📝 Notas para Colaboradores
-
-### No subir a Git:
-- Archivos `.env` con credenciales
-- Carpetas `node_modules/`, `vendor/`, `venv/`
-- Archivos de IDE (`.vscode/`, `.idea/`)
-- Logs y archivos temporales
-
-### Flujo de trabajo Git:
-```bash
-# 1. Crear rama para feature
-git checkout -b feature/nueva-funcionalidad
-
-# 2. Hacer cambios y commit
-git add .
-git commit -m "feat: descripción clara"
-
-# 3. Push y Pull Request
-git push origin feature/nueva-funcionalidad
-# Crear PR en GitHub para revisión
-```
-
-## 🎓 Estado Actual
-
-✅ **Implementado**:
-- Login diferenciado (alumno/doctor)
-- Splash screen con logo Yoltec
-- Calendario 8am-5pm con intervalos 15 min
-- Pre-evaluación IA rule-based
-- Validación de diagnósticos por doctores
-- Gestión de citas, bitácoras y recetas
-
-⏳ **Pendiente**:
-- IA de prioridad (clasificación de urgencia)
-- App móvil
-- Notificaciones push/email
+Sistema integral de gestión de consultorio médico universitario con inteligencia artificial integrada. Desarrollado como proyecto académico con stack moderno y aplicación móvil multiplataforma.
 
 ---
 
-**Proyecto académico** - Instituto Tecnológico
+## Stack tecnológico
 
+| Capa | Tecnología |
+|------|-----------|
+| Backend | Laravel 12 + Sanctum |
+| Frontend web | Angular 20 |
+| App móvil | Flutter / Dart (Android, iOS, Linux, Windows) |
+| Base de datos | SQLite (local) → PostgreSQL/Neon (producción) |
+| IA | Python 3 + scikit-learn (modelo propio, sin APIs de pago) |
+| Contenedores | Docker + Docker Compose |
+
+---
+
+## Funcionalidades
+
+### Alumno
+- Login con número de control + NIP
+- Calendario de citas (Lun–Sáb, 8:00–16:45, intervalos de 15 min)
+- Pre-evaluación de síntomas con IA (diagnóstico preliminar + % de confianza)
+- Historial de citas, bitácoras y recetas
+
+### Doctor
+- Login con usuario + contraseña
+- Dashboard con citas del día, próxima cita y totales en tiempo real
+- Clasificación de prioridad de pacientes por IA (alta / media / baja)
+- Validar o descartar diagnósticos de pre-evaluación
+- Crear bitácoras y recetas por consulta
+- Agendar y cancelar citas a nombre de alumnos
+
+### Seguridad
+- Rate limiting en login (5 intentos/min)
+- 2FA por correo (activo en producción, desactivado en local)
+- Tokens Sanctum con expiración
+- Headers de seguridad (X-Powered-By oculto, APP_DEBUG=false en producción)
+- Validación de domingos y días festivos en backend y frontend
+
+---
+
+## Modelo de IA
+
+- **Tipo**: Machine Learning supervisado (clasificación multiclase)
+- **Algoritmo**: VotingClassifier — Random Forest + HistGradientBoosting + ExtraTrees
+- **Precisión**: ~86% en test set
+- **Entrenamiento**: Dataset de Kaggle + datos sintéticos generados (~200k registros)
+- **Sin APIs externas**: todo corre localmente con scikit-learn
+
+---
+
+## Correr en local
+
+### Requisitos
+- PHP 8.2+, Composer
+- Node.js 20+, Angular CLI
+- Python 3.12+
+- Flutter SDK
+- Docker (opcional)
+
+### Backend Laravel
+```bash
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+### Frontend Angular
+```bash
+cd frontend
+npm install
+ng serve --host=0.0.0.0 --port=4200
+```
+
+### Servicio IA (Python)
+```bash
+cd IA
+python -m venv venv
+source venv/bin/activate       # Linux/Mac
+# venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+python train_model.py          # genera model.pkl (~1.3 GB, no incluido en repo)
+python app.py                  # inicia en puerto 5000
+```
+
+### App Flutter
+```bash
+cd mobile
+flutter pub get
+flutter run                    # emulador o dispositivo conectado
+```
+
+### Docker (todo junto)
+```bash
+docker-compose up --build
+# Frontend: http://localhost:4200
+# Backend:  http://localhost:8000
+# IA:       http://localhost:5000
+```
+
+> **Nota**: `model.pkl` no está en el repositorio por su tamaño (1.3 GB).
+> Genéralo ejecutando `python train_model.py` dentro de la carpeta `/IA`.
+
+---
+
+## Credenciales de prueba
+
+| Rol | Usuario | Contraseña |
+|-----|---------|-----------|
+| Alumno | `22690495` | `740270` |
+| Doctor | `doctorOmar` | `doctor123` |
+| Doctor 2 | `doctorCarlos` | `doctor123` |
+
+---
+
+## Estructura del proyecto
+
+```
+yoltec/
+├── backend/          # Laravel 12 — API REST
+│   ├── app/Http/Controllers/
+│   ├── app/Models/
+│   ├── database/migrations/
+│   └── routes/api.php
+├── frontend/         # Angular 20 — SPA web
+│   └── src/app/
+│       ├── login/
+│       ├── student-dashboard/
+│       └── doctor-dashboard/
+├── mobile/           # Flutter — Android / iOS / Desktop
+│   └── lib/
+│       ├── screens/
+│       └── services/
+├── IA/               # Python + scikit-learn
+│   ├── train_model.py
+│   ├── app.py
+│   └── enfermedades_config.json
+├── manual/           # Documentación técnica y de usuario
+└── docker-compose.yml
+```
+
+---
+
+## Endpoints principales (API REST)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/login` | Login alumno o doctor |
+| GET | `/api/citas` | Listar citas del usuario |
+| POST | `/api/citas` | Agendar cita |
+| POST | `/api/citas/{id}/cancelar` | Cancelar cita |
+| POST | `/api/citas/{id}/atender` | Marcar cita como atendida (doctor) |
+| GET | `/api/pre-evaluacion/preguntas` | Obtener cuestionario IA |
+| POST | `/api/pre-evaluacion` | Enviar respuestas y obtener diagnóstico |
+| POST | `/api/pre-evaluacion/{id}/validar` | Validar/descartar diagnóstico (doctor) |
+| GET | `/api/ia/priority/pendientes` | Citas clasificadas por prioridad (doctor) |
+| GET | `/api/bitacoras` | Historial de consultas |
+| POST | `/api/bitacoras` | Crear bitácora (doctor) |
+| GET | `/api/recetas` | Listar recetas |
+| POST | `/api/recetas` | Crear receta (doctor) |
+
+---
+
+## Documentación adicional
+
+- [`manual/MANUAL_TECNICO.md`](manual/MANUAL_TECNICO.md) — Arquitectura, base de datos, despliegue
+- [`manual/MANUAL_USUARIO.md`](manual/MANUAL_USUARIO.md) — Guía de uso por rol
+- [`manual/informe-pentesting.md`](manual/informe-pentesting.md) — Informe de seguridad (OWASP)
+
+---
+
+## Estado del proyecto
+
+| Módulo | Web | Móvil |
+|--------|-----|-------|
+| Login (alumno + doctor) | ✅ | ✅ |
+| Calendario de citas | ✅ | ✅ |
+| Pre-evaluación IA | ✅ | ✅ |
+| Dashboard doctor | ✅ | ✅ |
+| Clasificación prioridad IA | ✅ | ✅ |
+| Bitácora | ✅ | ✅ |
+| Recetas | ✅ | ✅ |
+| 2FA | ✅ producción | ✅ producción |
+| Deploy en la nube | pendiente | — |
+
+---
+
+Proyecto académico — Instituto Tecnológico, 2026

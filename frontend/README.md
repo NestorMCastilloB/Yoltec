@@ -1,59 +1,40 @@
-# Login
+# Yoltec — Frontend (Angular 20)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
+Aplicación web SPA del sistema de consultorio médico universitario.
 
-## Development server
+## Tecnologías
+- Angular 20
+- TypeScript
+- Comunicación con backend vía HTTP (API REST)
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Correr en local
 
 ```bash
-ng generate component component-name
+npm install
+ng serve --host=0.0.0.0 --port=4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Acceder en: `http://localhost:4200`
+
+## Build para producción
 
 ```bash
-ng generate --help
+ng build --configuration production
+# Output en: dist/
 ```
 
-## Building
+## Estructura
 
-To build the project run:
-
-```bash
-ng build
+```
+src/app/
+├── login/                  # Pantalla de login (alumno y doctor)
+├── splash-screen/          # Pantalla de carga inicial
+├── student-dashboard/      # Panel del alumno (citas, IA, bitácora, recetas)
+├── doctor-dashboard/       # Panel del doctor (dashboard, pre-eval, prioridad)
+├── components/             # Componentes reutilizables
+└── services/               # Servicios HTTP (auth, citas, IA, bitácora, recetas)
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Variables de entorno
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Configurar la URL del backend en `src/app/services/api-config.ts`.

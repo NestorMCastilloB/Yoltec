@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { API_BASE_URL } from './api-config';
 
 export interface Cita {
@@ -66,7 +67,9 @@ export class CitaService {
   constructor(private http: HttpClient) {}
 
   getCitas(): Observable<Cita[]> {
-    return this.http.get<Cita[]>(this.baseUrl);
+    return this.http.get<{ citas: Cita[] }>(this.baseUrl).pipe(
+      map(response => response.citas ?? [])
+    );
   }
 
   createCita(payload: CreateCitaPayload): Observable<{ message: string; cita: Cita }> {

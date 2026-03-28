@@ -22,7 +22,25 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarPreguntas());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarDatos());
+  }
+
+  Future<void> _cargarDatos() async {
+    final token =
+        Provider.of<AuthService>(context, listen: false).token ?? '';
+    final service =
+        Provider.of<PreEvaluacionService>(context, listen: false);
+
+    // Si ya existe una pre-evaluación para esta cita, mostrar resultado
+    final existente =
+        await service.buscarPreEvaluacionDeCita(token, widget.citaId);
+    if (existente != null && mounted) {
+      setState(() => _resultado = existente);
+      return;
+    }
+
+    // Si no existe, cargar preguntas para nuevo cuestionario
+    await service.cargarPreguntas(token);
   }
 
   Future<void> _cargarPreguntas() async {
@@ -321,14 +339,22 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
   }
 
   Widget _buildResultado(Map<String, dynamic> resultado) {
-    final diagnostico =
-        resultado['diagnostico_principal'] as String? ?? 'Sin diagnostico';
-    final confianza = resultado['confianza'];
-    final posibles =
-        resultado['posibles_enfermedades'] as List<dynamic>? ?? [];
-    final recomendaciones =
-        resultado['recomendaciones'] as String? ??
-            resultado['mensaje'] as String? ?? '';
+    // La respuesta puede venir del endpoint POST (tiene resultado_ia anidado)
+    // o del endpoint GET (tiene diagnostico_sugerido directo)
+    final ia = resultado['resultado_ia'] as Map<String, dynamic>?;
+    final diagnostico = (ia?['diagnostico_principal'] as String?)
+        ?? resultado['diagnostico_principal'] as String?
+        ?? resultado['diagnostico_sugerido'] as String?
+        ?? 'Sin diagnostico';
+    final confianza = ia?['confianza'] ?? resultado['confianza'];
+    final posibles = ia?['posibles_enfermedades'] as List<dynamic>?
+        ?? resultado['posibles_enfermedades'] as List<dynamic>?
+        ?? [];
+    final recomendaciones = ia?['recomendacion'] as String?
+        ?? resultado['recomendaciones'] as String?
+        ?? resultado['recomendacion'] as String?
+        ?? resultado['mensaje'] as String?
+        ?? '';
 
     return SafeArea(
       child: SingleChildScrollView(
