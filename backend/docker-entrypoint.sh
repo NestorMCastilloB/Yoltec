@@ -1,6 +1,16 @@
 #!/bin/sh
 set -e
 
+# Debug: mostrar variables DB en logs
+echo "=== DEBUG ENV ===" >&2
+echo "DB_CONNECTION=${DB_CONNECTION:-NOT_SET}" >&2
+echo "DB_HOST=${DB_HOST:-NOT_SET}" >&2
+echo "DB_PORT=${DB_PORT:-NOT_SET}" >&2
+echo "DB_DATABASE=${DB_DATABASE:-NOT_SET}" >&2
+echo "DB_USERNAME=${DB_USERNAME:-NOT_SET}" >&2
+echo "DB_PASSWORD_SET=${DB_PASSWORD:+YES}" >&2
+echo "=================" >&2
+
 # Generar .env desde las variables de entorno de Railway
 cat > /var/www/html/.env << EOF
 APP_NAME=Yoltec
@@ -36,9 +46,9 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 
-# Migraciones y seeder automáticos
-php artisan migrate --force
-php artisan db:seed --force
+# Migraciones y seeder (sin set -e para no crashear en loop)
+php artisan migrate --force || echo "WARN: migrate falló, continuando..." >&2
+php artisan db:seed --force || echo "WARN: seed falló, continuando..." >&2
 
 # Arrancar servidor (Railway inyecta $PORT, default 8080)
 PORT=${PORT:-8080}
