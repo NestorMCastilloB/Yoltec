@@ -5,10 +5,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar modelo entrenado y código
-COPY model.pkl label_encoder.pkl feature_names.json enfermedades_config.json ./
-COPY app.py .
+COPY app.py train_model_light.py enfermedades_config.json ./
+
+# Entrenar modelo ligero durante el build
+RUN python train_model_light.py
 
 EXPOSE 5000
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-5000}"]
