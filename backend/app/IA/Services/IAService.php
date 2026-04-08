@@ -72,9 +72,11 @@ class IAService
             'factores' => $resultado['factores'],
             'recomendacion_atencion' => $this->getRecomendacionAtencion($resultado['prioridad']),
             'historial_resumen' => [
-                'visitas_ultimo_mes' => $historial['visitas_ultimo_mes'],
-                'condiciones_cronicas' => $historial['condiciones_cronicas'],
-                'ultimo_diagnostico' => $historial['ultimo_diagnostico'],
+                'visitas_ultimo_mes'      => $historial['visitas_ultimo_mes'],
+                'condiciones_cronicas'    => $historial['condiciones_cronicas'],
+                'ultimo_diagnostico'      => $historial['ultimo_diagnostico'],
+                'inasistencias_recientes' => $historial['inasistencias_recientes'],
+                'cancelaciones_recientes' => $historial['cancelaciones_recientes'],
             ],
         ];
     }
@@ -266,12 +268,26 @@ class IAService
             }
         }
 
+        // Inasistencias y cancelaciones (últimos 3 meses)
+        $tresMesesAtras = now()->subMonths(3);
+        $inasistencias = Cita::where('alumno_id', $alumnoId)
+            ->where('estatus', 'no_asistio')
+            ->where('updated_at', '>=', $tresMesesAtras)
+            ->count();
+
+        $cancelaciones = Cita::where('alumno_id', $alumnoId)
+            ->where('estatus', 'cancelada')
+            ->where('updated_at', '>=', $tresMesesAtras)
+            ->count();
+
         return [
-            'visitas_ultimo_mes' => $visitasMes,
-            'condiciones_cronicas' => array_unique($condicionesCronicas),
-            'medicamentos_activos' => array_unique($medicamentosActivos),
-            'ultimo_diagnostico' => $ultimoDiagnostico,
-            'total_historial' => Bitacora::where('alumno_id', $alumnoId)->count(),
+            'visitas_ultimo_mes'      => $visitasMes,
+            'condiciones_cronicas'    => array_unique($condicionesCronicas),
+            'medicamentos_activos'    => array_unique($medicamentosActivos),
+            'ultimo_diagnostico'      => $ultimoDiagnostico,
+            'total_historial'         => Bitacora::where('alumno_id', $alumnoId)->count(),
+            'inasistencias_recientes' => $inasistencias,
+            'cancelaciones_recientes' => $cancelaciones,
         ];
     }
 

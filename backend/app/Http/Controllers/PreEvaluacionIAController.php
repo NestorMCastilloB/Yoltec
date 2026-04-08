@@ -202,6 +202,82 @@ class PreEvaluacionIAController extends Controller
     }
 
     /**
+     * Chat conversacional con IA para pre-evaluación (Ollama)
+     */
+    public function chat(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->esAlumno()) {
+            return response()->json(['message' => 'Solo alumnos pueden usar la pre-evaluación'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'cita_id'          => 'required|exists:citas,id',
+            'messages'         => 'required|array|min:1',
+            'messages.*.role'  => 'required|in:user,assistant',
+            'messages.*.content' => 'required|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $cita = Cita::where('id', $request->cita_id)
+                    ->where('alumno_id', $user->id)
+                    ->first();
+
+        if (!$cita) {
+            return response()->json(['message' => 'Cita no encontrada o no pertenece al alumno'], 404);
+        }
+
+        try {
+            $iaUrl = env('IA_SERVICE_URL', 'http://ia:5000');
+
+            $response = Http::timeout(120)->post("{$iaUrl}/chat", [
+                'messages' => $request->messages,
+            ]);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'message' => 'Error del servicio IA',
+                    'detail'  => $response->json('detail') ?? $response->body()
+                ], 502);
+            }
+
+            $data = $response->json();
+
+            // Si terminó con diagnóstico, guardar pre-evaluación automáticamente
+            if (!empty($data['finished']) && !empty($data['diagnostico'])) {
+                $existe = PreEvaluacionIA::where('cita_id', $request->cita_id)->first();
+
+                if (!$existe) {
+                    $diagnostico = $data['diagnostico'];
+                    $preEvaluacion = PreEvaluacionIA::create([
+                        'cita_id'              => $request->cita_id,
+                        'alumno_id'            => $user->id,
+                        'respuestas'           => ['chat_messages' => $request->messages],
+                        'diagnostico_sugerido' => $diagnostico['diagnostico_principal'] ?? 'Sin diagnóstico claro',
+                        'confianza'            => $diagnostico['confianza'] ?? 0.5,
+                        'sintomas_detectados'  => $diagnostico['sintomas_detectados'] ?? [],
+                        'estatus_validacion'   => 'pendiente',
+                    ]);
+                    $data['pre_evaluacion'] = $preEvaluacion;
+                } else {
+                    $data['pre_evaluacion'] = $existe;
+                }
+            }
+
+            return response()->json($data);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Servicio IA no disponible: ' . $e->getMessage()
+            ], 503);
+        }
+    }
+
+    /**
      * Procesar respuestas con IA via microservicio HTTP
      */
     private function procesarConIA(array $respuestas): array

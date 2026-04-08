@@ -15,13 +15,15 @@ use App\IA\Data\MedicalDataset;
 class PriorityClassifier
 {
     private array $pesos = [
-        'sintomas_alta' => 10,
-        'sintomas_media' => 5,
-        'sintomas_baja' => 1,
-        'condicion_cronica' => 3,
+        'sintomas_alta'      => 10,
+        'sintomas_media'     => 5,
+        'sintomas_baja'      => 1,
+        'condicion_cronica'  => 3,
         'visitas_frecuentes' => 2,
         'medicamento_activo' => 2,
-        'edad_factor' => 1, // Peso por edad (mayores = más prioridad)
+        'edad_factor'        => 1,
+        'inasistencia'       => -3, // Penalización por no asistir
+        'cancelacion'        => -1, // Penalización leve por cancelar
     ];
 
     private array $umbrales = [
@@ -85,7 +87,25 @@ class PriorityClassifier
             }
         }
 
-        // 5. Factor edad (si está disponible)
+        // 5. Penalizar por inasistencias y cancelaciones recientes
+        $inasistencias = $historialAlumno['inasistencias_recientes'] ?? 0;
+        if ($inasistencias > 0) {
+            $penalizacion = $inasistencias * $this->pesos['inasistencia'];
+            $puntuacion += $penalizacion;
+            $factores[] = ['tipo' => 'inasistencias', 'valor' => $inasistencias];
+        }
+
+        $cancelaciones = $historialAlumno['cancelaciones_recientes'] ?? 0;
+        if ($cancelaciones >= 2) {
+            $penalizacion = $cancelaciones * $this->pesos['cancelacion'];
+            $puntuacion += $penalizacion;
+            $factores[] = ['tipo' => 'cancelaciones', 'valor' => $cancelaciones];
+        }
+
+        // Asegurar que la puntuación no sea negativa
+        $puntuacion = max(0, $puntuacion);
+
+        // 6. Factor edad (si está disponible)
         if ($datosDemograficos && isset($datosDemograficos['edad'])) {
             $edad = $datosDemograficos['edad'];
             // Mayor prioridad para mayores de 30 en universidad (personal/docentes)
@@ -150,6 +170,12 @@ class PriorityClassifier
                     break;
                 case 'edad':
                     $descripcionFactores[] = "factor edad";
+                    break;
+                case 'inasistencias':
+                    $descripcionFactores[] = "inasistencias recientes ({$factor['valor']})";
+                    break;
+                case 'cancelaciones':
+                    $descripcionFactores[] = "cancelaciones recientes ({$factor['valor']})";
                     break;
             }
         }

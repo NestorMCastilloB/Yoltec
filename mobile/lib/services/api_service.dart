@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Para emulador Android: 10.0.2.2 apunta al localhost de la PC
-  // Para celular físico (WiFi): usar IP local de la PC (ej: 192.168.1.73)
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  // Para celular físico (WiFi): usar IP local de la PC
+  static const String baseUrl = 'http://192.168.1.73:8000/api';
 
   static Map<String, String> _headers({String? token}) {
     final headers = <String, String>{
@@ -45,6 +45,7 @@ class ApiService {
     String endpoint,
     Map<String, dynamic> body, {
     String? token,
+    Duration timeout = const Duration(seconds: 15),
   }) async {
     try {
       final response = await http
@@ -53,7 +54,7 @@ class ApiService {
             headers: _headers(token: token),
             body: json.encode(body),
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(timeout);
 
       return _handleResponse(response);
     } on SocketException {

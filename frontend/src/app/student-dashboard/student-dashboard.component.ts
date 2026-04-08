@@ -8,7 +8,7 @@ import { AuthService } from '../services/auth.service';
 import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabilityDay } from '../services/cita.service';
 import { Bitacora, BitacoraService } from '../services/bitacora.service';
 import { Receta, RecetaService } from '../services/receta.service';
-import { PreEvaluacionIAService, Pregunta, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
+import { PreEvaluacionIAService, ChatMessage, ChatResponse, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -77,17 +77,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   submitMessage: string | null = null;
 
-  // Pre-evaluación IA
-  preguntasIA: Pregunta[] = [];
-  respuestasIA: Record<string, string> = {};
+  // Chat IA - Pre-evaluación
+  chatMensajes: ChatMessage[] = [];
+  chatInput = '';
+  isChatLoading = false;
   showPreEvaluacionForm = false;
   selectedCitaForEvaluacion: Cita | null = null;
   resultadoPreEvaluacion: PreEvaluacionResult | null = null;
-  isSubmittingPreEvaluacion = false;
   preEvaluaciones: PreEvaluacion[] = [];
   isLoadingPreEvaluaciones = false;
   preEvaluacionError: string | null = null;
-  preguntaActualIndex = 0;
 
   private destroy$ = new Subject<void>();
 
@@ -108,6 +107,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.loadCitas();
     this.loadBitacoras();
     this.loadRecetas();
+    this.loadPreEvaluaciones();
   }
 
   ngOnDestroy(): void {
@@ -218,6 +218,21 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  private loadPreEvaluaciones(): void {
+    this.preEvaluacionIAService.getPreEvaluaciones()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of({ pre_evaluaciones: [] as PreEvaluacion[] }))
+      )
+      .subscribe(response => {
+        this.preEvaluaciones = response.pre_evaluaciones;
+      });
+  }
+
+  get citasPendientesSinEvaluacion(): number {
+    return this.pendingCitas.filter(c => !this.tienePreEvaluacion(c.id)).length;
   }
 
   private loadCitas(): void {
@@ -720,115 +735,119 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }).format(date);
   }
 
-  // ===== MÉTODOS DE PRE-EVALUACIÓN IA =====
+  // ===== MÉTODOS DE PRE-EVALUACIÓN IA (CHAT) =====
 
   togglePreEvaluacionForm(cita?: Cita): void {
     if (cita) {
       this.selectedCitaForEvaluacion = cita;
     }
     this.showPreEvaluacionForm = !this.showPreEvaluacionForm;
-    
+
     if (this.showPreEvaluacionForm) {
-      this.loadPreguntasIA();
-      this.respuestasIA = {};
-      this.preguntaActualIndex = 0;
+      this.chatMensajes = [{
+        role: 'assistant',
+        content: '¡Hola! Soy tu asistente médico de pre-evaluación. ¿Cuál es tu principal molestia o síntoma hoy?'
+      }];
+      this.chatInput = '';
+      this.isChatLoading = false;
       this.resultadoPreEvaluacion = null;
       this.preEvaluacionError = null;
     } else {
       this.selectedCitaForEvaluacion = null;
-      this.respuestasIA = {};
+      this.chatMensajes = [];
       this.resultadoPreEvaluacion = null;
     }
   }
 
-  private loadPreguntasIA(): void {
-    this.preEvaluacionIAService.getPreguntas()
-      .pipe(
-        takeUntil(this.destroy$),
-        catchError(() => of({ preguntas: [] }))
-      )
-      .subscribe(response => {
-        this.preguntasIA = response.preguntas;
-      });
-  }
+  enviarMensajeChat(): void {
+    if (!this.chatInput.trim() || this.isChatLoading || !this.selectedCitaForEvaluacion) return;
 
-  get preguntaActual(): Pregunta | null {
-    return this.preguntasIA[this.preguntaActualIndex] || null;
-  }
-
-  get esUltimaPregunta(): boolean {
-    return this.preguntaActualIndex === this.preguntasIA.length - 1;
-  }
-
-  get progresoEvaluacion(): number {
-    if (this.preguntasIA.length === 0) return 0;
-    return ((this.preguntaActualIndex + 1) / this.preguntasIA.length) * 100;
-  }
-
-  seleccionarRespuesta(respuesta: string): void {
-    if (this.preguntaActual) {
-      this.respuestasIA[this.preguntaActual.id] = respuesta;
-    }
-  }
-
-  get respuestaActualSeleccionada(): string | undefined {
-    if (!this.preguntaActual) return undefined;
-    return this.respuestasIA[this.preguntaActual.id];
-  }
-
-  siguientePregunta(): void {
-    if (this.preguntaActualIndex < this.preguntasIA.length - 1) {
-      this.preguntaActualIndex++;
-    }
-  }
-
-  preguntaAnterior(): void {
-    if (this.preguntaActualIndex > 0) {
-      this.preguntaActualIndex--;
-    }
-  }
-
-  puedeAvanzar(): boolean {
-    if (!this.preguntaActual) return false;
-    return !!this.respuestasIA[this.preguntaActual.id];
-  }
-
-  submitPreEvaluacion(): void {
-    if (!this.selectedCitaForEvaluacion) {
-      this.preEvaluacionError = 'No se ha seleccionado una cita';
-      return;
-    }
-
-    // Verificar que todas las preguntas tengan respuesta
-    const preguntasSinRespuesta = this.preguntasIA.filter(p => !this.respuestasIA[p.id]);
-    if (preguntasSinRespuesta.length > 0) {
-      this.preEvaluacionError = `Faltan ${preguntasSinRespuesta.length} preguntas por responder`;
-      return;
-    }
-
-    this.isSubmittingPreEvaluacion = true;
+    const userMessage = this.chatInput.trim();
+    this.chatInput = '';
+    this.chatMensajes.push({ role: 'user', content: userMessage });
+    this.isChatLoading = true;
     this.preEvaluacionError = null;
+    this.scrollChat();
 
-    this.preEvaluacionIAService.createPreEvaluacion({
-      cita_id: this.selectedCitaForEvaluacion.id,
-      respuestas: this.respuestasIA
-    })
-    .pipe(
+    this.preEvaluacionIAService.chat(
+      this.selectedCitaForEvaluacion.id,
+      this.chatMensajes
+    ).pipe(
       takeUntil(this.destroy$),
       catchError(error => {
-        this.preEvaluacionError = error?.error?.message || 'Error al procesar la evaluación';
+        this.preEvaluacionError = error?.error?.message || error?.error?.detail || 'Error al conectar con la IA. Verifica que Ollama esté corriendo.';
         return of(null);
       }),
       finalize(() => {
-        this.isSubmittingPreEvaluacion = false;
+        this.isChatLoading = false;
+        this.scrollChat();
       })
-    )
-    .subscribe(response => {
+    ).subscribe((response: ChatResponse | null) => {
       if (response) {
-        this.resultadoPreEvaluacion = response.resultado_ia;
-        this.preEvaluaciones.unshift(response.pre_evaluacion);
+        this.chatMensajes.push({ role: 'assistant', content: response.message });
+        if (response.finished && response.diagnostico) {
+          this.resultadoPreEvaluacion = response.diagnostico;
+          if (response.pre_evaluacion) {
+            this.preEvaluaciones.unshift(response.pre_evaluacion);
+          }
+        }
       }
     });
+  }
+
+  get mensajesUsuario(): number {
+    return this.chatMensajes.filter(m => m.role === 'user').length;
+  }
+
+  forzarDiagnostico(): void {
+    if (!this.selectedCitaForEvaluacion || this.isChatLoading) return;
+
+    this.chatMensajes.push({
+      role: 'user',
+      content: 'Por favor genera el diagnóstico final con la información que tienes.'
+    });
+    this.isChatLoading = true;
+    this.preEvaluacionError = null;
+    this.scrollChat();
+
+    this.preEvaluacionIAService.chat(
+      this.selectedCitaForEvaluacion.id,
+      this.chatMensajes
+    ).pipe(
+      takeUntil(this.destroy$),
+      catchError(error => {
+        this.preEvaluacionError = error?.error?.message || error?.error?.detail || 'Error al generar diagnóstico.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.isChatLoading = false;
+        this.scrollChat();
+      })
+    ).subscribe((response: ChatResponse | null) => {
+      if (response) {
+        this.chatMensajes.push({ role: 'assistant', content: response.message });
+        if (response.finished && response.diagnostico) {
+          this.resultadoPreEvaluacion = response.diagnostico;
+          if (response.pre_evaluacion) {
+            this.preEvaluaciones.unshift(response.pre_evaluacion);
+          }
+        }
+      }
+    });
+  }
+
+  onChatEnter(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.enviarMensajeChat();
+    }
+  }
+
+  private scrollChat(): void {
+    setTimeout(() => {
+      const el = document.querySelector('.chat-messages');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 60);
   }
 
   getEstatusPreEvaluacion(citaId: number): string | null {

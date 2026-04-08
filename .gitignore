@@ -2,6 +2,7 @@
 IA/venv/
 IA/__pycache__/
 IA/*.pyc
+IA/.env
 archive/
 *.csv
 

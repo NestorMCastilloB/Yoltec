@@ -127,6 +127,30 @@ class PreEvaluacionService extends ChangeNotifier {
     }
   }
 
+  /// Chat conversacional con Ollama para pre-evaluación
+  Future<Map<String, dynamic>?> enviarMensajeChat(
+    String token,
+    int citaId,
+    List<Map<String, dynamic>> messages,
+  ) async {
+    try {
+      final data = await ApiService.post(
+        '/pre-evaluacion/chat',
+        {
+          'cita_id': citaId,
+          'messages': messages,
+        },
+        token: token,
+        timeout: const Duration(seconds: 120),
+      );
+      return data;
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Error al conectar con la IA.');
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

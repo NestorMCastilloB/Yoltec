@@ -48,7 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/recetas/{id}', [RecetaController::class, 'show']);
     Route::put('/recetas/{id}', [RecetaController::class, 'update']); // Solo doctor
 
-    // Pre-evaluaciones IA (sistema anterior - mantener compatibilidad)
+    // Pre-evaluaciones IA
+    Route::post('/pre-evaluacion/chat', [PreEvaluacionIAController::class, 'chat']);
     Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
     Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
     Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);

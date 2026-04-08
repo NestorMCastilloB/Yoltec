@@ -501,28 +501,6 @@ class _NuevaCitaFormState extends State<_NuevaCitaForm> {
       '${d.day.toString().padLeft(2, '0')}/'
       '${d.month.toString().padLeft(2, '0')}/${d.year}';
 
-  Future<void> _seleccionarFecha() async {
-    final hoy = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: hoy.add(const Duration(days: 1)),
-      firstDate: hoy,
-      lastDate: hoy.add(const Duration(days: 60)),
-      locale: const Locale('es', 'MX'),
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppTheme.primaryColor,
-          ),
-        ),
-        child: child!,
-      ),
-    );
-    if (picked != null) {
-      setState(() => _fechaSeleccionada = picked);
-    }
-  }
-
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
     if (_fechaSeleccionada == null) {
@@ -583,61 +561,55 @@ class _NuevaCitaFormState extends State<_NuevaCitaForm> {
       ),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Text(
-                  'Nueva Cita',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.gray900,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'Nueva Cita',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.gray900,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Calendario de disponibilidad
+              _CalendarioDisponibilidad(
+                selectedDate: _fechaSeleccionada,
+                onDateSelected: (d) => setState(() => _fechaSeleccionada = d),
+              ),
+              if (_fechaSeleccionada != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6, bottom: 2),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline,
+                          size: 16, color: AppTheme.primaryColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Fecha: ${_formatFechaDisplay(_fechaSeleccionada!)}',
+                        style: const TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Selector de fecha
-            GestureDetector(
-              onTap: _seleccionarFecha,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppTheme.gray300),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined,
-                        color: AppTheme.primaryColor, size: 20),
-                    const SizedBox(width: 12),
-                    Text(
-                      _fechaSeleccionada == null
-                          ? 'Seleccionar fecha'
-                          : _formatFechaDisplay(_fechaSeleccionada!),
-                      style: TextStyle(
-                        color: _fechaSeleccionada == null
-                            ? AppTheme.gray400
-                            : AppTheme.gray900,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
+              const SizedBox(height: 14),
 
             // Selector de hora
             DropdownButtonFormField<String>(
@@ -692,7 +664,8 @@ class _NuevaCitaFormState extends State<_NuevaCitaForm> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -1021,6 +994,10 @@ class _EstatusChip extends StatelessWidget {
         color = AppTheme.error;
         texto = 'Cancelada';
         break;
+      case 'no_asistio':
+        color = AppTheme.warning;
+        texto = 'No asistio';
+        break;
       default:
         color = AppTheme.gray500;
         texto = estatus;
@@ -1084,6 +1061,298 @@ class _VitalChip extends StatelessWidget {
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.w500),
       ),
+    );
+  }
+}
+
+// ─── Calendario de Disponibilidad ────────────────────────────────────────────
+
+class _CalendarioDisponibilidad extends StatefulWidget {
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  const _CalendarioDisponibilidad({
+    required this.selectedDate,
+    required this.onDateSelected,
+  });
+
+  @override
+  State<_CalendarioDisponibilidad> createState() =>
+      _CalendarioDisponibilidadState();
+}
+
+class _CalendarioDisponibilidadState
+    extends State<_CalendarioDisponibilidad> {
+  late DateTime _mes;
+  Map<String, List<String>> _slotsTomados = {};
+  Map<String, Map<String, dynamic>> _diasEspeciales = {};
+  bool _cargando = false;
+
+  // 8:00 a 16:45 cada 15 min = 36 slots totales
+  static const int _totalSlots = 36;
+
+  static const List<String> _nombresMes = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final hoy = DateTime.now();
+    _mes = DateTime(hoy.year, hoy.month, 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarDisponibilidad());
+  }
+
+  Future<void> _cargarDisponibilidad() async {
+    setState(() => _cargando = true);
+    try {
+      final token =
+          Provider.of<AuthService>(context, listen: false).token ?? '';
+      final data = await Provider.of<CitaService>(context, listen: false)
+          .obtenerDisponibilidad(token, _mes.month, _mes.year);
+
+      final days = data['days'] as List<dynamic>? ?? [];
+      final slots = <String, List<String>>{};
+      final especiales = <String, Map<String, dynamic>>{};
+
+      for (final day in days) {
+        final d = day as Map<String, dynamic>;
+        final date = d['date'] as String;
+        slots[date] = List<String>.from(d['taken_slots'] as List? ?? []);
+        if (d['special'] != null) {
+          especiales[date] = d['special'] as Map<String, dynamic>;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _slotsTomados = slots;
+          _diasEspeciales = especiales;
+        });
+      }
+    } catch (_) {
+      // Sin disponibilidad: todo verde por defecto
+    } finally {
+      if (mounted) setState(() => _cargando = false);
+    }
+  }
+
+  void _cambiarMes(int delta) {
+    setState(() {
+      _mes = DateTime(_mes.year, _mes.month + delta, 1);
+      _slotsTomados = {};
+      _diasEspeciales = {};
+    });
+    _cargarDisponibilidad();
+  }
+
+  String _dateKey(int year, int month, int day) =>
+      '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+
+  bool _esSeleccionable(DateTime date) {
+    final hoy = DateTime.now();
+    final today = DateTime(hoy.year, hoy.month, hoy.day);
+    final d = DateTime(date.year, date.month, date.day);
+
+    if (date.month != _mes.month) return false;
+    if (d.isBefore(today)) return false;
+    if (date.weekday == 7) return false; // domingo
+
+    final key = _dateKey(date.year, date.month, date.day);
+    final especial = _diasEspeciales[key];
+    if (especial != null && especial['status'] == 'full') return false;
+
+    final tomados = _slotsTomados[key]?.length ?? 0;
+    return tomados < _totalSlots;
+  }
+
+  Color _colorDia(DateTime date) {
+    final hoy = DateTime.now();
+    final today = DateTime(hoy.year, hoy.month, hoy.day);
+    final d = DateTime(date.year, date.month, date.day);
+
+    if (date.month != _mes.month || d.isBefore(today) || date.weekday == 7) {
+      return AppTheme.gray300;
+    }
+
+    final key = _dateKey(date.year, date.month, date.day);
+
+    if (_diasEspeciales.containsKey(key)) return AppTheme.error;
+
+    final tomados = _slotsTomados[key]?.length ?? 0;
+    if (tomados == 0) return AppTheme.primaryColor;
+    if (tomados >= _totalSlots) return AppTheme.error;
+    return AppTheme.warning;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final diasEnMes = DateTime(_mes.year, _mes.month + 1, 0).day;
+    // Primer día de la semana: 1=Lun...7=Dom. Para Dom-Sáb: offset = weekday % 7
+    final primerDiaSemana = DateTime(_mes.year, _mes.month, 1).weekday % 7;
+    final totalCeldas = primerDiaSemana + diasEnMes;
+    final filas = (totalCeldas / 7).ceil();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Navegación mes
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left, size: 20),
+              onPressed: () => _cambiarMes(-1),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+            Expanded(
+              child: Text(
+                '${_nombresMes[_mes.month - 1]} ${_mes.year}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: AppTheme.gray900),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right, size: 20),
+              onPressed: () => _cambiarMes(1),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Cabecera días
+        Row(
+          children: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+              .map((d) => Expanded(
+                    child: Text(d,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.gray500,
+                            fontWeight: FontWeight.w600)),
+                  ))
+              .toList(),
+        ),
+        const SizedBox(height: 4),
+        // Grid de días
+        if (_cargando)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppTheme.primaryColor)),
+            ),
+          )
+        else
+          ...List.generate(filas, (fila) {
+            return Row(
+              children: List.generate(7, (col) {
+                final idx = fila * 7 + col;
+                final diaNum = idx - primerDiaSemana + 1;
+
+                if (diaNum < 1 || diaNum > diasEnMes) {
+                  return const Expanded(child: SizedBox(height: 40));
+                }
+
+                final date = DateTime(_mes.year, _mes.month, diaNum);
+                final seleccionable = _esSeleccionable(date);
+                final color = _colorDia(date);
+                final isSelected = widget.selectedDate != null &&
+                    widget.selectedDate!.year == date.year &&
+                    widget.selectedDate!.month == date.month &&
+                    widget.selectedDate!.day == date.day;
+
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: seleccionable
+                        ? () => widget.onDateSelected(date)
+                        : null,
+                    child: Container(
+                      margin: const EdgeInsets.all(2),
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? color
+                            : color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: color.withValues(
+                              alpha: isSelected ? 1.0 : 0.5),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$diaNum',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.white
+                                : seleccionable
+                                    ? color
+                                    : AppTheme.gray400,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            );
+          }),
+        const SizedBox(height: 8),
+        // Leyenda
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            _LeyendaItem(color: AppTheme.primaryColor, label: 'Disponible'),
+            SizedBox(width: 12),
+            _LeyendaItem(color: AppTheme.warning, label: 'Pocos slots'),
+            SizedBox(width: 12),
+            _LeyendaItem(color: AppTheme.error, label: 'Lleno'),
+          ],
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
+
+class _LeyendaItem extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LeyendaItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label,
+            style:
+                const TextStyle(fontSize: 10, color: AppTheme.gray600)),
+      ],
     );
   }
 }

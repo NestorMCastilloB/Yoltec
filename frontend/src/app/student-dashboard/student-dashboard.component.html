@@ -63,6 +63,16 @@
             <h3>Citas Programadas</h3>
             <p class="stat-value">{{ totalCitasProgramadas }} {{ totalCitasProgramadas === 1 ? 'cita' : 'citas' }}</p>
           </div>
+          <div class="stat-card" [class.stat-card-alert]="citasPendientesSinEvaluacion > 0">
+            <h3>Pre-evaluación IA</h3>
+            <ng-container *ngIf="citasPendientesSinEvaluacion > 0; else evalAlDia">
+              <p class="stat-value">{{ citasPendientesSinEvaluacion }} pendiente{{ citasPendientesSinEvaluacion > 1 ? 's' : '' }}</p>
+              <button class="btn-ia-inicio" (click)="setActiveSection('citas')">Completar ahora →</button>
+            </ng-container>
+            <ng-template #evalAlDia>
+              <p class="stat-value">✓ Al día</p>
+            </ng-template>
+          </div>
         </div>
       </div>
     </section>
@@ -342,67 +352,65 @@
   </main>
 </div>
 
-<!-- Modal: Pre-evaluación IA -->
+<!-- Modal: Pre-evaluación IA (Chat con Ollama) -->
 <div *ngIf="showPreEvaluacionForm" class="modal-overlay" (click)="togglePreEvaluacionForm()">
-  <div class="modal-content pre-evaluacion-modal" (click)="$event.stopPropagation()">
+  <div class="modal-content pre-evaluacion-modal chat-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>🤖 Pre-evaluación IA</h2>
+      <div>
+        <h2>🤖 Pre-evaluación IA</h2>
+        <p class="modal-subtitle" *ngIf="selectedCitaForEvaluacion">
+          Cita: {{ formatDateDisplay(selectedCitaForEvaluacion.fecha_cita) }} · {{ formatTime(selectedCitaForEvaluacion.hora_cita) }} hrs
+        </p>
+      </div>
       <button class="close-btn" (click)="togglePreEvaluacionForm()">×</button>
     </div>
 
-    <!-- Formulario de preguntas -->
-    <div *ngIf="!resultadoPreEvaluacion" class="modal-body">
-      <div class="cita-info" *ngIf="selectedCitaForEvaluacion">
-        <p><strong>Cita:</strong> {{ formatDateDisplay(selectedCitaForEvaluacion.fecha_cita) }} · {{ formatTime(selectedCitaForEvaluacion.hora_cita) }} hrs</p>
-      </div>
-
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="progresoEvaluacion"></div>
-      </div>
-      <p class="progress-text">Pregunta {{ preguntaActualIndex + 1 }} de {{ preguntasIA.length }}</p>
-
-      <div *ngIf="preguntaActual" class="pregunta-container">
-        <h3 class="pregunta-text">{{ preguntaActual.texto }}</h3>
-        <div class="opciones-grid">
-          <button
-            *ngFor="let opcion of preguntaActual.opciones"
-            class="opcion-btn"
-            [class.selected]="respuestaActualSeleccionada === opcion"
-            (click)="seleccionarRespuesta(opcion)">
-            {{ opcion }}
-          </button>
+    <!-- Chat activo -->
+    <ng-container *ngIf="!resultadoPreEvaluacion">
+      <div class="chat-messages">
+        <div *ngFor="let msg of chatMensajes"
+             class="chat-bubble"
+             [class.user]="msg.role === 'user'"
+             [class.assistant]="msg.role === 'assistant'">
+          <span class="bubble-avatar" *ngIf="msg.role === 'assistant'">🤖</span>
+          <div class="bubble-content">{{ msg.content }}</div>
+          <span class="bubble-avatar user-icon" *ngIf="msg.role === 'user'">👤</span>
+        </div>
+        <div *ngIf="isChatLoading" class="chat-bubble assistant">
+          <span class="bubble-avatar">🤖</span>
+          <div class="bubble-content typing-dots">
+            <span></span><span></span><span></span>
+          </div>
         </div>
       </div>
 
-      <div *ngIf="preEvaluacionError" class="alert error">
-        {{ preEvaluacionError }}
+      <div *ngIf="preEvaluacionError" class="chat-error">⚠️ {{ preEvaluacionError }}</div>
+
+      <div *ngIf="mensajesUsuario >= 4 && !isChatLoading" class="chat-finalizar-hint">
+        <button class="btn-finalizar" (click)="forzarDiagnostico()">
+          📋 Generar diagnóstico ahora
+        </button>
       </div>
 
-      <div class="modal-actions">
-        <button 
-          class="btn-secondary" 
-          (click)="preguntaAnterior()"
-          [disabled]="preguntaActualIndex === 0">
-          Anterior
-        </button>
-        <button 
-          *ngIf="!esUltimaPregunta"
-          class="btn-primary" 
-          (click)="siguientePregunta()"
-          [disabled]="!puedeAvanzar()">
-          Siguiente
-        </button>
-        <button 
-          *ngIf="esUltimaPregunta"
-          class="btn-primary btn-ia-submit" 
-          (click)="submitPreEvaluacion()"
-          [disabled]="!puedeAvanzar() || isSubmittingPreEvaluacion">
-          {{ isSubmittingPreEvaluacion ? 'Analizando...' : 'Obtener diagnóstico IA' }}
+      <div class="chat-input-area">
+        <input
+          type="text"
+          class="chat-input"
+          [(ngModel)]="chatInput"
+          (keydown)="onChatEnter($event)"
+          placeholder="Escribe tu respuesta..."
+          [disabled]="isChatLoading">
+        <button
+          class="btn-send"
+          (click)="enviarMensajeChat()"
+          [disabled]="!chatInput.trim() || isChatLoading"
+          title="Enviar">
+          ➤
         </button>
       </div>
-    </div>
+    </ng-container>
 
-    <!-- Resultado de la evaluación -->
+    <!-- Resultado del diagnóstico -->
     <div *ngIf="resultadoPreEvaluacion" class="modal-body resultado-container">
       <div class="resultado-header">
         <h3>Diagnóstico Preliminar</h3>

@@ -46,12 +46,24 @@ export interface CreatePreEvaluacionPayload {
 }
 
 export interface PreEvaluacionResult {
-  success: boolean;
+  success?: boolean;
   diagnostico_principal: string;
   confianza: number;
   sintomas_detectados: string[];
   posibles_enfermedades: PosibleEnfermedad[];
   recomendacion: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatResponse {
+  message: string;
+  finished: boolean;
+  diagnostico: PreEvaluacionResult | null;
+  pre_evaluacion?: PreEvaluacion;
 }
 
 @Injectable({
@@ -103,6 +115,16 @@ export class PreEvaluacionIAService {
    */
   getPendientes(): Observable<{ pendientes: PreEvaluacion[]; total: number }> {
     return this.http.get<{ pendientes: PreEvaluacion[]; total: number }>(`${this.apiUrl}/pre-evaluacion/pendientes`);
+  }
+
+  /**
+   * Chat conversacional con IA para pre-evaluación (Ollama)
+   */
+  chat(citaId: number, messages: ChatMessage[]): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>(`${this.apiUrl}/pre-evaluacion/chat`, {
+      cita_id: citaId,
+      messages
+    });
   }
 
   /**

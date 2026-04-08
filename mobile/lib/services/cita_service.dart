@@ -137,6 +137,14 @@ class CitaService extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> obtenerDisponibilidad(
+      String token, int month, int year) async {
+    return ApiService.get(
+      '/citas/disponibilidad?month=$month&year=$year',
+      token: token,
+    );
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

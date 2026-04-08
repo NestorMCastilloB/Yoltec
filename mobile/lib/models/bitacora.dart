@@ -26,7 +26,9 @@ class Bitacora {
   });
 
   String get fechaFormateada {
-    final parts = fechaConsulta.split('-');
+    // Tomar solo los primeros 10 caracteres (YYYY-MM-DD) para manejar ISO timestamps
+    final dateOnly = fechaConsulta.length >= 10 ? fechaConsulta.substring(0, 10) : fechaConsulta;
+    final parts = dateOnly.split('-');
     if (parts.length == 3) {
       return '${parts[2]}/${parts[1]}/${parts[0]}';
     }

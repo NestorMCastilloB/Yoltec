@@ -14,24 +14,34 @@ class PreEvaluacionScreen extends StatefulWidget {
 }
 
 class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
-  int _currentIndex = 0;
-  final Map<String, dynamic> _respuestas = {};
-  bool _enviando = false;
+  final List<Map<String, dynamic>> _mensajes = [];
+  final TextEditingController _inputController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _isChatLoading = false;
+  bool _chatFinished = false;
   Map<String, dynamic>? _resultado;
+  String? _errorMsg;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarDatos());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _iniciarChat());
   }
 
-  Future<void> _cargarDatos() async {
+  @override
+  void dispose() {
+    _inputController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _iniciarChat() async {
     final token =
         Provider.of<AuthService>(context, listen: false).token ?? '';
     final service =
         Provider.of<PreEvaluacionService>(context, listen: false);
 
-    // Si ya existe una pre-evaluación para esta cita, mostrar resultado
+    // Si ya existe pre-evaluación, mostrar resultado
     final existente =
         await service.buscarPreEvaluacionDeCita(token, widget.citaId);
     if (existente != null && mounted) {
@@ -39,55 +49,81 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
       return;
     }
 
-    // Si no existe, cargar preguntas para nuevo cuestionario
-    await service.cargarPreguntas(token);
+    // Mensaje inicial del asistente
+    if (mounted) {
+      setState(() {
+        _mensajes.add({
+          'role': 'assistant',
+          'content':
+              '¡Hola! Soy tu asistente médico de pre-evaluación. ¿Cuál es tu principal molestia o síntoma hoy?'
+        });
+      });
+    }
   }
 
-  Future<void> _cargarPreguntas() async {
+  Future<void> _enviarMensaje() async {
+    final texto = _inputController.text.trim();
+    if (texto.isEmpty || _isChatLoading) return;
+
+    _inputController.clear();
+    setState(() {
+      _mensajes.add({'role': 'user', 'content': texto});
+      _isChatLoading = true;
+      _errorMsg = null;
+    });
+    _scrollToBottom();
+
     final token =
         Provider.of<AuthService>(context, listen: false).token ?? '';
-    await Provider.of<PreEvaluacionService>(context, listen: false)
-        .cargarPreguntas(token);
-  }
-
-  void _responder(String preguntaId, dynamic respuesta) {
-    setState(() {
-      _respuestas[preguntaId] = respuesta;
-    });
-  }
-
-  void _siguiente(List<Map<String, dynamic>> preguntas) {
-    if (_currentIndex < preguntas.length - 1) {
-      setState(() => _currentIndex++);
-    } else {
-      _enviar(preguntas);
-    }
-  }
-
-  void _anterior() {
-    if (_currentIndex > 0) {
-      setState(() => _currentIndex--);
-    }
-  }
-
-  Future<void> _enviar(List<Map<String, dynamic>> preguntas) async {
-    setState(() => _enviando = true);
-
     final service =
         Provider.of<PreEvaluacionService>(context, listen: false);
-    final token =
-        Provider.of<AuthService>(context, listen: false).token ?? '';
 
-    final resultado = await service.enviarRespuestas(
-      token,
-      widget.citaId,
-      _respuestas,
-    );
+    try {
+      final response = await service.enviarMensajeChat(
+        token,
+        widget.citaId,
+        _mensajes,
+      );
 
-    if (!mounted) return;
-    setState(() {
-      _enviando = false;
-      _resultado = resultado;
+      if (!mounted) return;
+
+      if (response == null) {
+        setState(() {
+          _isChatLoading = false;
+          _errorMsg = 'Sin respuesta del servidor.';
+        });
+        return;
+      }
+
+      setState(() {
+        _isChatLoading = false;
+        _mensajes
+            .add({'role': 'assistant', 'content': response['message'] ?? ''});
+
+        if (response['finished'] == true && response['diagnostico'] != null) {
+          _chatFinished = true;
+          _resultado = response['diagnostico'] as Map<String, dynamic>;
+        }
+      });
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isChatLoading = false;
+        _errorMsg = e.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -95,274 +131,257 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pre-evaluacion'),
+        title: const Text('Pre-evaluación IA'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Consumer<PreEvaluacionService>(
-        builder: (context, service, _) {
-          if (service.isLoading || _enviando) {
-            return const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: AppTheme.primaryColor),
-                  SizedBox(height: 16),
-                  Text('Procesando...'),
+      body: _resultado != null ? _buildResultado(_resultado!) : _buildChat(),
+    );
+  }
+
+  // ─── Chat ──────────────────────────────────────────────────────────────────
+
+  Widget _buildChat() {
+    return Column(
+      children: [
+        // Lista de mensajes
+        Expanded(
+          child: _mensajes.isEmpty
+              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+              : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _mensajes.length + (_isChatLoading ? 1 : 0),
+                  itemBuilder: (context, i) {
+                    if (_isChatLoading && i == _mensajes.length) {
+                      return _buildTypingIndicator();
+                    }
+                    final msg = _mensajes[i];
+                    return _buildBubble(
+                      msg['content'] as String,
+                      msg['role'] == 'user',
+                    );
+                  },
+                ),
+        ),
+
+        // Error
+        if (_errorMsg != null)
+          Container(
+            width: double.infinity,
+            color: const Color(0xFFFFEBEE),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              '⚠️ $_errorMsg',
+              style: const TextStyle(color: Color(0xFFC62828), fontSize: 13),
+            ),
+          ),
+
+        // Input
+        _buildInputArea(),
+      ],
+    );
+  }
+
+  Widget _buildBubble(String content, bool isUser) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isUser) ...[
+            const Text('🤖', style: TextStyle(fontSize: 22)),
+            const SizedBox(width: 6),
+          ],
+          Flexible(
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isUser ? AppTheme.primaryColor : Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  bottomLeft: Radius.circular(isUser ? 18 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 18),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  )
                 ],
               ),
-            );
-          }
-
-          if (service.error != null) {
-            return _buildError(service.error!);
-          }
-
-          if (_resultado != null) {
-            return _buildResultado(_resultado!);
-          }
-
-          if (service.preguntas.isEmpty) {
-            return const Center(
-              child: Text('No hay preguntas disponibles.'),
-            );
-          }
-
-          return _buildPregunta(service.preguntas);
-        },
+              child: Text(
+                content,
+                style: TextStyle(
+                  color: isUser ? Colors.white : AppTheme.gray900,
+                  fontSize: 14.5,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ),
+          if (isUser) ...[
+            const SizedBox(width: 6),
+            const Text('👤', style: TextStyle(fontSize: 20)),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildError(String error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline,
-                color: AppTheme.error, size: 60),
-            const SizedBox(height: 16),
-            Text(error, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _cargarPreguntas,
-              child: const Text('Reintentar'),
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text('🤖', style: TextStyle(fontSize: 22)),
+          const SizedBox(width: 6),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+                bottomRight: Radius.circular(18),
+                bottomLeft: Radius.circular(4),
+              ),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1))
+              ],
             ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                3,
+                (i) => _TypingDot(delay: Duration(milliseconds: i * 200)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppTheme.gray200)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _inputController,
+                enabled: !_isChatLoading,
+                textCapitalization: TextCapitalization.sentences,
+                onSubmitted: (_) => _enviarMensaje(),
+                decoration: InputDecoration(
+                  hintText: 'Escribe tu respuesta...',
+                  hintStyle: TextStyle(color: AppTheme.gray400),
+                  filled: true,
+                  fillColor: AppTheme.gray100,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _isChatLoading
+                ? const SizedBox(
+                    width: 42,
+                    height: 42,
+                    child: Center(
+                        child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: AppTheme.primaryColor),
+                    )),
+                  )
+                : Material(
+                    color: AppTheme.primaryColor,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _enviarMensaje,
+                      child: const SizedBox(
+                        width: 42,
+                        height: 42,
+                        child: Icon(Icons.send_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPregunta(List<Map<String, dynamic>> preguntas) {
-    final pregunta = preguntas[_currentIndex];
-    final preguntaId = pregunta['id'].toString();
-    final texto = pregunta['texto'] as String? ?? '';
-    final opciones = pregunta['opciones'] as List<dynamic>? ?? [];
-    final respuestaActual = _respuestas[preguntaId];
-    final progreso = (_currentIndex + 1) / preguntas.length;
+  // ─── Resultado ─────────────────────────────────────────────────────────────
+
+  Widget _buildResultado(Map<String, dynamic> resultado) {
+    final ia = resultado['resultado_ia'] as Map<String, dynamic>?;
+    final diagnostico = (ia?['diagnostico_principal'] as String?) ??
+        resultado['diagnostico_principal'] as String? ??
+        resultado['diagnostico_sugerido'] as String? ??
+        'Sin diagnóstico';
+
+    dynamic rawConfianza = ia?['confianza'] ?? resultado['confianza'];
+    double confianza = 0.0;
+    if (rawConfianza is double) {
+      confianza = rawConfianza;
+    } else if (rawConfianza is int) {
+      confianza = rawConfianza.toDouble();
+    } else {
+      confianza = double.tryParse(rawConfianza?.toString() ?? '') ?? 0.0;
+    }
+    if (confianza > 1) confianza = confianza / 100;
+
+    final posibles =
+        (ia?['posibles_enfermedades'] ?? resultado['posibles_enfermedades'])
+                as List<dynamic>? ??
+            [];
+    final recomendacion = (ia?['recomendacion'] as String?) ??
+        resultado['recomendacion'] as String? ??
+        resultado['recomendaciones'] as String? ??
+        '';
+
+    final porcentaje = (confianza * 100).round();
+    final color = confianza >= 0.7
+        ? AppTheme.success
+        : confianza >= 0.4
+            ? AppTheme.warning
+            : AppTheme.error;
 
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Progreso
-            Row(
-              children: [
-                Text(
-                  'Pregunta ${_currentIndex + 1} de ${preguntas.length}',
-                  style: const TextStyle(
-                    color: AppTheme.gray600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${(progreso * 100).round()}%',
-                  style: const TextStyle(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progreso,
-              backgroundColor: AppTheme.gray200,
-              valueColor:
-                  const AlwaysStoppedAnimation(AppTheme.primaryColor),
-              minHeight: 6,
-              borderRadius: BorderRadius.circular(3),
-            ),
-            const SizedBox(height: 28),
-
-            // Icono de salud
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primarySurface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.healing,
-                  color: AppTheme.primaryColor, size: 28),
-            ),
-            const SizedBox(height: 16),
-
-            // Texto de pregunta
-            Text(
-              texto,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.gray900,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Opciones
-            Expanded(
-              child: ListView.separated(
-                itemCount: opciones.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (context, i) {
-                  final opcion = opciones[i].toString();
-                  final seleccionada = respuestaActual == opcion;
-                  return Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () => _responder(preguntaId, opcion),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: seleccionada
-                              ? AppTheme.primarySurface
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: seleccionada
-                                ? AppTheme.primaryColor
-                                : AppTheme.gray300,
-                            width: seleccionada ? 2 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: seleccionada
-                                    ? AppTheme.primaryColor
-                                    : Colors.transparent,
-                                border: Border.all(
-                                  color: seleccionada
-                                      ? AppTheme.primaryColor
-                                      : AppTheme.gray400,
-                                  width: 2,
-                                ),
-                              ),
-                              child: seleccionada
-                                  ? const Icon(Icons.check,
-                                      color: Colors.white, size: 14)
-                                  : null,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                opcion,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: seleccionada
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                  color: seleccionada
-                                      ? AppTheme.primaryColor
-                                      : AppTheme.gray800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Botones de navegacion
-            Row(
-              children: [
-                if (_currentIndex > 0)
-                  OutlinedButton.icon(
-                    onPressed: _anterior,
-                    icon: const Icon(Icons.arrow_back, size: 18),
-                    label: const Text('Anterior'),
-                  ),
-                const Spacer(),
-                ElevatedButton.icon(
-                  onPressed: respuestaActual == null
-                      ? null
-                      : () => _siguiente(preguntas),
-                  icon: Icon(
-                    _currentIndex == preguntas.length - 1
-                        ? Icons.send
-                        : Icons.arrow_forward,
-                    size: 18,
-                  ),
-                  label: Text(
-                    _currentIndex == preguntas.length - 1
-                        ? 'Enviar'
-                        : 'Siguiente',
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultado(Map<String, dynamic> resultado) {
-    // La respuesta puede venir del endpoint POST (tiene resultado_ia anidado)
-    // o del endpoint GET (tiene diagnostico_sugerido directo)
-    final ia = resultado['resultado_ia'] as Map<String, dynamic>?;
-    final diagnostico = (ia?['diagnostico_principal'] as String?)
-        ?? resultado['diagnostico_principal'] as String?
-        ?? resultado['diagnostico_sugerido'] as String?
-        ?? 'Sin diagnostico';
-    final confianza = ia?['confianza'] ?? resultado['confianza'];
-    final posibles = ia?['posibles_enfermedades'] as List<dynamic>?
-        ?? resultado['posibles_enfermedades'] as List<dynamic>?
-        ?? [];
-    final recomendaciones = ia?['recomendacion'] as String?
-        ?? resultado['recomendaciones'] as String?
-        ?? resultado['recomendacion'] as String?
-        ?? resultado['mensaje'] as String?
-        ?? '';
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Encabezado de exito
             Center(
               child: Column(
                 children: [
@@ -372,101 +391,114 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
                       color: AppTheme.primarySurface,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.check_circle_outline,
-                      color: AppTheme.primaryColor,
-                      size: 60,
-                    ),
+                    child: const Icon(Icons.check_circle_outline,
+                        color: AppTheme.primaryColor, size: 60),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  const Text('Pre-evaluación completada',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.gray900)),
+                  const SizedBox(height: 6),
                   const Text(
-                    'Pre-evaluacion completada',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.gray900,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'El medico revisara tu evaluacion antes de la consulta.',
+                    'El médico revisará tu evaluación antes de la consulta.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppTheme.gray600),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
 
-            // Diagnostico principal
-            _buildResultCard(
+            // Diagnóstico
+            _resultCard(
               icon: Icons.medical_information_outlined,
-              title: 'Diagnostico preliminar',
+              title: 'Diagnóstico preliminar',
               content: diagnostico,
               color: AppTheme.primaryColor,
             ),
 
-            if (confianza != null) ...[
-              const SizedBox(height: 16),
-              _buildConfianzaCard(confianza),
-            ],
+            const SizedBox(height: 12),
 
-            if (posibles.isNotEmpty) ...[
-              const SizedBox(height: 16),
+            // Confianza
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Icon(Icons.analytics_outlined, color: color, size: 20),
+                      const SizedBox(width: 8),
+                      const Text('Nivel de confianza',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Spacer(),
+                      Text('$porcentaje%',
+                          style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16)),
+                    ]),
+                    const SizedBox(height: 10),
+                    LinearProgressIndicator(
+                      value: confianza,
+                      backgroundColor: AppTheme.gray200,
+                      valueColor: AlwaysStoppedAnimation(color),
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            if (posibles.length > 1) ...[
+              const SizedBox(height: 12),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.list_alt,
-                              color: AppTheme.info, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Posibles enfermedades',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.gray800,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ...posibles.map((e) => Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.circle,
-                                    size: 6,
-                                    color: AppTheme.primaryColor),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                    child: Text(e.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 14))),
-                              ],
-                            ),
-                          )),
+                      Row(children: const [
+                        Icon(Icons.list_alt,
+                            color: AppTheme.info, size: 20),
+                        SizedBox(width: 8),
+                        Text('Otras posibilidades',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                      ]),
+                      const SizedBox(height: 10),
+                      ...posibles.skip(1).take(3).map((e) {
+                        final map = e as Map<String, dynamic>;
+                        final c = double.tryParse(
+                                map['confianza']?.toString() ?? '') ??
+                            0.0;
+                        final pct = (c > 1 ? c : c * 100).round();
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                              '• ${map['enfermedad']} ($pct%)',
+                              style: const TextStyle(fontSize: 14)),
+                        );
+                      }),
                     ],
                   ),
                 ),
               ),
             ],
 
-            if (recomendaciones.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _buildResultCard(
+            if (recomendacion.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _resultCard(
                 icon: Icons.tips_and_updates_outlined,
-                title: 'Recomendaciones',
-                content: recomendaciones,
+                title: 'Recomendación',
+                content: recomendacion,
                 color: AppTheme.warning,
               ),
             ],
 
-            const SizedBox(height: 28),
-
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -481,7 +513,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
     );
   }
 
-  Widget _buildResultCard({
+  Widget _resultCard({
     required IconData icon,
     required String title,
     required String content,
@@ -493,87 +525,74 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  title,
+            Row(children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 8),
+              Text(title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.gray800,
-                  ),
-                ),
-              ],
-            ),
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.gray800)),
+            ]),
             const SizedBox(height: 10),
-            Text(
-              content,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppTheme.gray700,
-                height: 1.5,
-              ),
-            ),
+            Text(content,
+                style: const TextStyle(
+                    fontSize: 15,
+                    color: AppTheme.gray700,
+                    height: 1.5)),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildConfianzaCard(dynamic confianza) {
-    double valor;
-    if (confianza is double) {
-      valor = confianza;
-    } else if (confianza is int) {
-      valor = confianza.toDouble();
-    } else {
-      valor = double.tryParse(confianza.toString()) ?? 0.0;
-    }
-    // Normalizar si viene como porcentaje mayor a 1
-    if (valor > 1) valor = valor / 100;
+/// Punto animado para indicador de escritura
+class _TypingDot extends StatefulWidget {
+  final Duration delay;
+  const _TypingDot({required this.delay});
 
-    final porcentaje = (valor * 100).round();
-    final color = valor >= 0.7
-        ? AppTheme.success
-        : valor >= 0.4
-            ? AppTheme.warning
-            : AppTheme.error;
+  @override
+  State<_TypingDot> createState() => _TypingDotState();
+}
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.analytics_outlined, color: color, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Nivel de confianza',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const Spacer(),
-                Text(
-                  '$porcentaje%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            LinearProgressIndicator(
-              value: valor,
-              backgroundColor: AppTheme.gray200,
-              valueColor: AlwaysStoppedAnimation(color),
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ],
+class _TypingDotState extends State<_TypingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        duration: const Duration(milliseconds: 1300), vsync: this)
+      ..repeat();
+    _anim = TweenSequence([
+      TweenSequenceItem(tween: Tween(begin: 0.4, end: 1.0), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.4), weight: 60),
+    ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+
+    Future.delayed(widget.delay, () {
+      if (mounted) _ctrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, __) => Container(
+        width: 8,
+        height: 8,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: AppTheme.gray400.withOpacity(_anim.value),
+          shape: BoxShape.circle,
         ),
       ),
     );
