@@ -3,12 +3,9 @@ set -e
 
 # Debug: mostrar variables DB en logs
 echo "=== DEBUG ENV ===" >&2
-echo "DB_CONNECTION=${DB_CONNECTION:-NOT_SET}" >&2
-echo "DB_HOST=${DB_HOST:-NOT_SET}" >&2
-echo "DB_PORT=${DB_PORT:-NOT_SET}" >&2
-echo "DB_DATABASE=${DB_DATABASE:-NOT_SET}" >&2
-echo "DB_USERNAME=${DB_USERNAME:-NOT_SET}" >&2
-echo "DB_PASSWORD_SET=${DB_PASSWORD:+YES}" >&2
+echo "NEON_URL_SET=${NEON_URL:+YES}" >&2
+echo "DB_HOST_raw=${DB_HOST:-empty}" >&2
+echo "DB_USERNAME_raw=${DB_USERNAME:-empty}" >&2
 echo "=================" >&2
 
 # Generar .env desde las variables de entorno de Railway
@@ -22,13 +19,8 @@ APP_URL=${APP_URL:-http://localhost}
 LOG_CHANNEL=stack
 LOG_LEVEL=error
 
-DB_CONNECTION=${DB_CONNECTION:-pgsql}
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT:-5432}
-DB_DATABASE=${DB_DATABASE}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-DB_SSLMODE=${DB_SSLMODE:-require}
+DB_CONNECTION=pgsql
+DB_URL=${NEON_URL}
 
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
