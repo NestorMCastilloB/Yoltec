@@ -1,0 +1,39 @@
+<div class="verify-container">
+  <div class="verify-card">
+    <div class="icon">🔐</div>
+    <h2>Verificación en dos pasos</h2>
+    <p class="subtitle">
+      Ingresa el código de 6 dígitos enviado a<br>
+      <strong>{{ emailMasked }}</strong>
+    </p>
+
+    <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+    <form (ngSubmit)="onSubmit()">
+      <input
+        type="text"
+        [(ngModel)]="code"
+        name="code"
+        class="code-input"
+        maxlength="6"
+        placeholder="000000"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+      />
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Verificando...' : 'Verificar' }}
+      </button>
+    </form>
+
+    <div class="actions">
+      <button class="btn-link" (click)="onResend()" [disabled]="isResending">
+        {{ isResending ? 'Enviando...' : 'Reenviar código' }}
+      </button>
+      <button class="btn-link secondary" (click)="goBack()">Volver al login</button>
+    </div>
+
+    <p class="hint">El código expira en 10 minutos. Este dispositivo será recordado por 30 días.</p>
+  </div>
+</div>

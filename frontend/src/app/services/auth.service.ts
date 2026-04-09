@@ -46,24 +46,26 @@ export class AuthService {
   }
 
   login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor'): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { 
-      identificador, 
-      password,
-      tipo_usuario: tipoUsuario
-    })
+    const body: any = { identificador, password, tipo_usuario: tipoUsuario };
+    if (tipoUsuario === 'doctor') {
+      const deviceToken = localStorage.getItem('doctor_device_token');
+      if (deviceToken) body.device_token = deviceToken;
+    }
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, body)
       .pipe(
-        tap(response => {
+        tap((response: any) => {
           if (response && response.token) {
-            // Guardar token y datos del usuario
             this.setToken(response.token);
             this.setUser(response.user);
-            
-            // Actualizar estado de autenticación
             this.isAuthenticatedSubject.next(true);
             this.userSubject.next(response.user);
-            
-            // Redirigir según el tipo de usuario
             this.redirectUser(response.user.tipo);
+          } else if (response && response.requires_2fa) {
+            sessionStorage.setItem('pending_2fa', JSON.stringify({
+              user_id: response.user_id,
+              email_masked: response.email_masked
+            }));
+            this.router.navigate(['/verify-2fa']);
           }
         }),
         catchError(error => this.handleError(error))
