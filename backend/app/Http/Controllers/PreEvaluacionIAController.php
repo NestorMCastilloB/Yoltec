@@ -232,7 +232,7 @@ class PreEvaluacionIAController extends Controller
         }
 
         try {
-            $iaUrl = env('IA_SERVICE_URL', 'http://ia:5000');
+            $iaUrl = getenv('IA_SERVICE_URL') ?: env('IA_SERVICE_URL', 'https://yoltec-production.up.railway.app');
 
             $response = Http::timeout(120)->post("{$iaUrl}/chat", [
                 'messages' => $request->messages,
@@ -283,7 +283,7 @@ class PreEvaluacionIAController extends Controller
     private function procesarConIA(array $respuestas): array
     {
         try {
-            $iaUrl = env('IA_SERVICE_URL', 'http://ia:5000');
+            $iaUrl = getenv('IA_SERVICE_URL') ?: env('IA_SERVICE_URL', 'https://yoltec-production.up.railway.app');
 
             $response = Http::timeout(15)->post("{$iaUrl}/predict", [
                 'respuestas' => $respuestas,
