@@ -16,8 +16,8 @@ APP_KEY=${APP_KEY}
 APP_DEBUG=${APP_DEBUG:-false}
 APP_URL=${APP_URL:-http://localhost}
 
-LOG_CHANNEL=stack
-LOG_LEVEL=error
+LOG_CHANNEL=stderr
+LOG_LEVEL=debug
 
 DB_CONNECTION=pgsql
 DB_URL=${NEON_URL}

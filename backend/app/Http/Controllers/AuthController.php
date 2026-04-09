@@ -78,8 +78,10 @@ class AuthController extends Controller
 
         try {
             Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
+            \Log::info('Email 2FA enviado a: ' . $user->email);
         } catch (\Exception $e) {
-            \Log::error('Error enviando email 2FA: ' . $e->getMessage());
+            \Log::error('SMTP ERROR 2FA: ' . $e->getMessage());
+            error_log('SMTP ERROR 2FA: ' . $e->getMessage());
         }
 
         return response()->json([
