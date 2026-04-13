@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Para emulador Android: 10.0.2.2 apunta al localhost de la PC
-  // Para celular físico (WiFi): usar IP local de la PC
-  static const String baseUrl = 'http://192.168.1.73:8000/api';
+  // Producción: Railway
+  // Para desarrollo local con celular físico (WiFi), cambiar a: http://192.168.1.73:8000/api
+  static const String baseUrl = 'https://lucid-motivation-production.up.railway.app/api';
 
   static Map<String, String> _headers({String? token}) {
     final headers = <String, String>{
