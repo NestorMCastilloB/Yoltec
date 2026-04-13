@@ -8,8 +8,10 @@ echo "DB_HOST_raw=${DB_HOST:-empty}" >&2
 echo "IA_SERVICE_URL_raw=${IA_SERVICE_URL:-empty}" >&2
 echo "=================" >&2
 
-# Generar .env desde las variables de entorno de Railway
-cat > /var/www/html/.env << EOF
+# Solo generar .env si estamos en Railway (NEON_URL disponible)
+if [ -n "${NEON_URL}" ]; then
+  echo "==> Modo Railway: generando .env con Neon PostgreSQL" >&2
+  cat > /var/www/html/.env << EOF
 APP_NAME=Yoltec
 APP_ENV=${APP_ENV:-production}
 APP_KEY=${APP_KEY}
@@ -37,6 +39,9 @@ RESEND_API_KEY=${RESEND_API_KEY:-${RESEND_KEY}}
 
 IA_SERVICE_URL=${IA_SERVICE_URL:-https://yoltec-production.up.railway.app}
 EOF
+else
+  echo "==> Modo local Docker: usando variables de entorno del contenedor" >&2
+fi
 
 # Limpiar caches para que tome el nuevo .env
 php artisan config:clear
