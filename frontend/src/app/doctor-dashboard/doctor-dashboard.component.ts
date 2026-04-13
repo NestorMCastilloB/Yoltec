@@ -82,6 +82,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   bitacoras: Bitacora[] = [];
   isLoadingBitacoras = false;
   bitacorasError: string | null = null;
+  filtrosBitacora: { fecha_desde: string; fecha_hasta: string; alumno: string } = { fecha_desde: '', fecha_hasta: '', alumno: '' };
   showBitacoraForm = false;
   isSubmittingBitacora = false;
   bitacoraMessage: string | null = null;
@@ -112,6 +113,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   };
 
   preEvaluaciones: PreEvaluacion[] = [];
+  preEvaluacionesHistorial: PreEvaluacion[] = [];
   isLoadingPreEvaluaciones = false;
   preEvaluacionesError: string | null = null;
   showPreEvaluacionModal = false;
@@ -534,6 +536,15 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  aplicarFiltrosBitacora(): void {
+    this.loadBitacoras();
+  }
+
+  limpiarFiltrosBitacora(): void {
+    this.filtrosBitacora = { fecha_desde: '', fecha_hasta: '', alumno: '' };
+    this.loadBitacoras();
+  }
+
   private loadBitacoras(): void {
     if (this.isLoadingBitacoras) {
       return;
@@ -542,7 +553,13 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     this.isLoadingBitacoras = true;
     this.bitacorasError = null;
 
-    this.bitacoraService.getBitacoras()
+    const filtros = {
+      fecha_desde: this.filtrosBitacora.fecha_desde || undefined,
+      fecha_hasta: this.filtrosBitacora.fecha_hasta || undefined,
+      alumno: this.filtrosBitacora.alumno || undefined,
+    };
+
+    this.bitacoraService.getBitacoras(filtros)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
@@ -1071,6 +1088,13 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         this.preEvaluaciones = response.pendientes;
         this.totalPendientes = response.total;
+      });
+
+    this.preEvaluacionIAService.getPreEvaluaciones()
+      .pipe(takeUntil(this.destroy$), catchError(() => of({ pre_evaluaciones: [] })))
+      .subscribe(response => {
+        this.preEvaluacionesHistorial = (response.pre_evaluaciones ?? [])
+          .filter((p: PreEvaluacion) => p.estatus_validacion !== 'pendiente');
       });
   }
 

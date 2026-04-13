@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Middleware CORS personalizado para ngrok
         $middleware->api(\App\Http\Middleware\CorsMiddleware::class);
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        // Notificar alumnos con cita en las próximas 24h — corre cada hora
+        $schedule->command('citas:notificar-proximas')->hourly();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Para rutas API, retornar siempre JSON en lugar de páginas HTML

@@ -8,21 +8,31 @@ use App\Models\Cita;
 use Illuminate\Http\Request;
 class BitacoraController extends Controller
 {
-    // Listar bitácoras
+    // Listar bitácoras (soporta filtros: fecha_desde, fecha_hasta, alumno)
     public function index(Request $request)
     {
         $user = $request->user();
 
-        if ($user->esAlumno()) {
-            $bitacoras = Bitacora::where('alumno_id', $user->id)
-                                ->with(['cita', 'doctor'])
-                                ->orderBy('created_at', 'desc')
-                                ->get();
-        } else {
-            $bitacoras = Bitacora::with(['cita', 'alumno'])
-                                ->orderBy('created_at', 'desc')
-                                ->get();
+        $query = $user->esAlumno()
+            ? Bitacora::where('alumno_id', $user->id)->with(['cita', 'doctor'])
+            : Bitacora::with(['cita', 'alumno']);
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
         }
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
+        // Solo para doctor: filtrar por número de control del alumno
+        if (!$user->esAlumno() && $request->filled('alumno')) {
+            $query->whereHas('alumno', function ($q) use ($request) {
+                $q->where('numero_control', 'like', '%' . $request->alumno . '%')
+                  ->orWhere('nombre', 'like', '%' . $request->alumno . '%')
+                  ->orWhere('apellido', 'like', '%' . $request->alumno . '%');
+            });
+        }
+
+        $bitacoras = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json(['bitacoras' => $bitacoras], 200);
     }

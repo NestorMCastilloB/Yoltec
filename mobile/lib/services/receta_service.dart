@@ -29,6 +29,36 @@ class RecetaService extends ChangeNotifier {
     }
   }
 
+  Future<bool> crearReceta(String token, {
+    required int citaId,
+    required List<Map<String, dynamic>> medicamentos,
+    required String indicaciones,
+    required String fechaEmision,
+  }) async {
+    try {
+      final data = await ApiService.post('/recetas', {
+        'cita_id': citaId,
+        'medicamentos': medicamentos,
+        'indicaciones': indicaciones,
+        'fecha_emision': fechaEmision,
+      }, token: token);
+      final nueva = data['receta'] as Map<String, dynamic>?;
+      if (nueva != null) {
+        _recetas.insert(0, nueva);
+        notifyListeners();
+      }
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Error al crear la receta.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

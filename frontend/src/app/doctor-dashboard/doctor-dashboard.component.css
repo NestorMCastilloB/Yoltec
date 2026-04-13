@@ -451,9 +451,24 @@
   color: #1B5E20;
 }
 
+.badge-error {
+  background: #fce4ec;
+  color: #b71c1c;
+}
+
 .badge-info {
   background: #e3f2fd;
   color: #0d47a1;
+}
+
+.historial-card {
+  opacity: 0.85;
+}
+
+.comentario-doctor {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #555;
 }
 
 .card-meta {
@@ -1119,3 +1134,24 @@
 .justificacion { color: #555; font-style: italic; margin-top: 0.5rem !important; }
 .empty-state { text-align: center; padding: 2rem; color: #888; }
 .loading { text-align: center; padding: 2rem; color: #666; }
+
+.filtros-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+.filtro-input {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+.btn-sm {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+}

@@ -4,12 +4,14 @@ import 'package:yoltec_mobile/services/api_service.dart';
 class PreEvaluacionService extends ChangeNotifier {
   List<Map<String, dynamic>> _preguntas = [];
   List<Map<String, dynamic>> _pendientes = [];
+  List<Map<String, dynamic>> _historial = [];
   Map<int, Map<String, dynamic>> _porCita = {};
   bool _isLoading = false;
   String? _error;
 
   List<Map<String, dynamic>> get preguntas => _preguntas;
   List<Map<String, dynamic>> get pendientes => _pendientes;
+  List<Map<String, dynamic>> get historial => _historial;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -54,6 +56,18 @@ class PreEvaluacionService extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> cargarHistorial(String token) async {
+    try {
+      final data = await ApiService.get('/pre-evaluacion', token: token);
+      final lista = data['pre_evaluaciones'] as List<dynamic>? ?? [];
+      _historial = lista
+          .cast<Map<String, dynamic>>()
+          .where((p) => p['estatus_validacion'] != 'pendiente')
+          .toList();
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<Map<String, dynamic>?> buscarPreEvaluacionDeCita(

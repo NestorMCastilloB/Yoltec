@@ -11,13 +11,23 @@ class BitacoraService extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> cargarBitacoras(String token) async {
+  Future<void> cargarBitacoras(String token,
+      {String? fechaDesde, String? fechaHasta, String? alumno}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final data = await ApiService.get('/bitacoras', token: token);
+      final params = <String, String>{};
+      if (fechaDesde != null && fechaDesde.isNotEmpty) params['fecha_desde'] = fechaDesde;
+      if (fechaHasta != null && fechaHasta.isNotEmpty) params['fecha_hasta'] = fechaHasta;
+      if (alumno != null && alumno.isNotEmpty) params['alumno'] = alumno;
+
+      final query = params.isEmpty
+          ? '/bitacoras'
+          : '/bitacoras?${params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&')}';
+
+      final data = await ApiService.get(query, token: token);
       final lista = data['bitacoras'] as List<dynamic>? ?? [];
       _bitacoras = lista
           .map((e) => Bitacora.fromJson(e as Map<String, dynamic>))

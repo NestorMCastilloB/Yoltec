@@ -409,6 +409,15 @@
         {{ bitacoraMessage }}
       </div>
 
+      <!-- Filtros -->
+      <div class="filtros-bar">
+        <input type="date" [(ngModel)]="filtrosBitacora.fecha_desde" placeholder="Desde" class="filtro-input" />
+        <input type="date" [(ngModel)]="filtrosBitacora.fecha_hasta" placeholder="Hasta" class="filtro-input" />
+        <input type="text" [(ngModel)]="filtrosBitacora.alumno" placeholder="Buscar alumno..." class="filtro-input" />
+        <button class="btn-primary btn-sm" (click)="aplicarFiltrosBitacora()">Filtrar</button>
+        <button class="btn-secondary btn-sm" (click)="limpiarFiltrosBitacora()">Limpiar</button>
+      </div>
+
       <div *ngIf="showBitacoraForm" class="form-card">
         <form #bitacoraForm="ngForm" (ngSubmit)="onCreateBitacora(bitacoraForm)">
           <div class="form-grid">
@@ -751,6 +760,34 @@
         <ng-template #loadingPreEvaluaciones>
           <div class="placeholder-card">Cargando pre-evaluaciones...</div>
         </ng-template>
+
+        <!-- Historial validadas/descartadas -->
+        <div *ngIf="preEvaluacionesHistorial.length > 0" class="historial-preevaluaciones">
+          <h3 style="margin: 2rem 0 1rem; color: #555;">Historial revisadas</h3>
+          <div class="pre-evaluaciones-grid">
+            <article *ngFor="let preEval of preEvaluacionesHistorial" class="data-card pre-evaluacion-card historial-card">
+              <header class="card-header">
+                <div class="card-title">
+                  <h4>{{ preEval.cita?.alumno?.nombre }} {{ preEval.cita?.alumno?.apellido }}</h4>
+                  <p class="card-caption" *ngIf="preEval.cita">
+                    {{ formatDateDisplay(preEval.cita.fecha_cita) }} · {{ formatTime(preEval.cita.hora_cita) }} hrs
+                  </p>
+                </div>
+                <span class="badge-pill" [class]="preEval.estatus_validacion === 'validado' ? 'badge-success' : 'badge-error'">
+                  {{ preEval.estatus_validacion === 'validado' ? '✓ Validado' : '✗ Descartado' }}
+                </span>
+              </header>
+              <div class="card-body">
+                <div class="diagnostico-sugerido">
+                  <strong>Diagnóstico IA:</strong> {{ preEval.diagnostico_sugerido }}
+                </div>
+                <div *ngIf="preEval.comentario_doctor" class="comentario-doctor">
+                  <strong>Comentario:</strong> {{ preEval.comentario_doctor }}
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
     </section>
 

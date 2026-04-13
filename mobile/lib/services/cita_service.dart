@@ -51,17 +51,18 @@ class CitaService extends ChangeNotifier {
     required String fechaCita,
     required String horaCita,
     required String motivo,
+    String? numeroControl,
   }) async {
     try {
-      final data = await ApiService.post(
-        '/citas',
-        {
-          'fecha_cita': fechaCita,
-          'hora_cita': horaCita,
-          'motivo': motivo,
-        },
-        token: token,
-      );
+      final body = <String, dynamic>{
+        'fecha_cita': fechaCita,
+        'hora_cita': horaCita,
+        'motivo': motivo,
+      };
+      if (numeroControl != null && numeroControl.isNotEmpty) {
+        body['numero_control'] = numeroControl;
+      }
+      final data = await ApiService.post('/citas', body, token: token);
       final cita = Cita.fromJson(data['cita'] as Map<String, dynamic>);
       _citas.add(cita);
       notifyListeners();

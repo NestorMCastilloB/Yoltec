@@ -57,8 +57,12 @@ export class BitacoraService {
 
   constructor(private http: HttpClient) {}
 
-  getBitacoras(): Observable<Bitacora[]> {
-    return this.http.get<{ bitacoras: Bitacora[] }>(this.baseUrl).pipe(
+  getBitacoras(filtros?: { fecha_desde?: string; fecha_hasta?: string; alumno?: string }): Observable<Bitacora[]> {
+    let params: Record<string, string> = {};
+    if (filtros?.fecha_desde) params['fecha_desde'] = filtros.fecha_desde;
+    if (filtros?.fecha_hasta) params['fecha_hasta'] = filtros.fecha_hasta;
+    if (filtros?.alumno) params['alumno'] = filtros.alumno;
+    return this.http.get<{ bitacoras: Bitacora[] }>(this.baseUrl, { params }).pipe(
       map(res => res.bitacoras ?? [])
     );
   }

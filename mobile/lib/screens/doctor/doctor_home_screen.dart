@@ -7,6 +7,7 @@ import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/services/ia_priority_service.dart';
 import 'package:yoltec_mobile/services/pre_evaluacion_service.dart';
+import 'package:yoltec_mobile/services/receta_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
 class DoctorHomeScreen extends StatefulWidget {
@@ -33,6 +34,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       Provider.of<BitacoraService>(context, listen: false).cargarBitacoras(token),
       Provider.of<IAPriorityService>(context, listen: false).cargarPrioridades(token),
       Provider.of<PreEvaluacionService>(context, listen: false).cargarPendientes(token),
+      Provider.of<PreEvaluacionService>(context, listen: false).cargarHistorial(token),
+      Provider.of<RecetaService>(context, listen: false).cargarRecetas(token),
     ]);
   }
 
@@ -42,6 +45,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       const _DoctorInicioTab(),
       const _DoctorCitasTab(),
       const _DoctorBitacorasTab(),
+      const _DoctorRecetasTab(),
       const _DoctorPreEvaluacionesTab(),
       const _DoctorPrioridadTab(),
     ];
@@ -77,6 +81,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               icon: Icon(Icons.folder_open_outlined),
               activeIcon: Icon(Icons.folder_open),
               label: 'Bitacoras'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long_outlined),
+              activeIcon: Icon(Icons.receipt_long),
+              label: 'Recetas'),
           BottomNavigationBarItem(
               icon: Icon(Icons.psychology_outlined),
               activeIcon: Icon(Icons.psychology),
@@ -216,40 +224,125 @@ class _DoctorInicioTab extends StatelessWidget {
 
 // ─── Tab Citas Doctor ─────────────────────────────────────────────────────────
 
-class _DoctorCitasTab extends StatelessWidget {
+class _DoctorCitasTab extends StatefulWidget {
   const _DoctorCitasTab();
 
   @override
+  State<_DoctorCitasTab> createState() => _DoctorCitasTabState();
+}
+
+class _DoctorCitasTabState extends State<_DoctorCitasTab> {
+  bool _showForm = false;
+  final _numControlCtrl = TextEditingController();
+  final _fechaCtrl = TextEditingController();
+  final _horaCtrl = TextEditingController();
+  final _motivoCtrl = TextEditingController();
+  String? _formError;
+
+  Future<void> _agendarCita() async {
+    if (_numControlCtrl.text.isEmpty || _fechaCtrl.text.isEmpty ||
+        _horaCtrl.text.isEmpty || _motivoCtrl.text.isEmpty) {
+      setState(() => _formError = 'Todos los campos son obligatorios.');
+      return;
+    }
+    final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+    final cita = await Provider.of<CitaService>(context, listen: false).crearCita(
+      token,
+      fechaCita: _fechaCtrl.text,
+      horaCita: _horaCtrl.text,
+      motivo: _motivoCtrl.text,
+      numeroControl: _numControlCtrl.text,
+    );
+    if (cita != null && mounted) {
+      setState(() { _showForm = false; _formError = null; });
+      _numControlCtrl.clear(); _fechaCtrl.clear(); _horaCtrl.clear(); _motivoCtrl.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cita agendada correctamente.'), backgroundColor: AppTheme.success),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      color: AppTheme.primaryColor,
-      onRefresh: () async {
-        final token =
-            Provider.of<AuthService>(context, listen: false).token ?? '';
-        await Provider.of<CitaService>(context, listen: false)
-            .cargarCitas(token);
-      },
-      child: Consumer<CitaService>(
-        builder: (context, service, _) {
-          if (service.isLoading) {
-            return const Center(
-                child:
-                    CircularProgressIndicator(color: AppTheme.primaryColor));
-          }
-          if (service.citas.isEmpty) {
-            return const Center(
-              child: Text('No hay citas registradas.'),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: service.citas.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) =>
-                _DoctorCitaCard(cita: service.citas[i]),
-          );
-        },
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Citas', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+              TextButton.icon(
+                onPressed: () => setState(() => _showForm = !_showForm),
+                icon: Icon(_showForm ? Icons.close : Icons.add),
+                label: Text(_showForm ? 'Cancelar' : 'Agendar cita'),
+              ),
+            ],
+          ),
+        ),
+        if (_showForm)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_formError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(_formError!, style: const TextStyle(color: AppTheme.error, fontSize: 13)),
+                      ),
+                    TextField(controller: _numControlCtrl, keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Número de control del alumno', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _fechaCtrl,
+                        decoration: const InputDecoration(labelText: 'Fecha (YYYY-MM-DD)', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _horaCtrl,
+                        decoration: const InputDecoration(labelText: 'Hora (HH:MM)', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _motivoCtrl, maxLines: 2,
+                        decoration: const InputDecoration(labelText: 'Motivo', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: _agendarCita,
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
+                      child: const Text('Agendar'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            color: AppTheme.primaryColor,
+            onRefresh: () async {
+              final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+              await Provider.of<CitaService>(context, listen: false).cargarCitas(token);
+            },
+            child: Consumer<CitaService>(
+              builder: (context, service, _) {
+                if (service.isLoading) {
+                  return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+                }
+                if (service.citas.isEmpty) {
+                  return const Center(child: Text('No hay citas registradas.'));
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: service.citas.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) =>
+                      _DoctorCitaCard(cita: service.citas[i]),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -456,45 +549,134 @@ class _DoctorCitaCard extends StatelessWidget {
 
 // ─── Tab Bitacoras Doctor ─────────────────────────────────────────────────────
 
-class _DoctorBitacorasTab extends StatelessWidget {
+class _DoctorBitacorasTab extends StatefulWidget {
   const _DoctorBitacorasTab();
 
   @override
+  State<_DoctorBitacorasTab> createState() => _DoctorBitacorasTabState();
+}
+
+class _DoctorBitacorasTabState extends State<_DoctorBitacorasTab> {
+  final _fechaDesdeCtrl = TextEditingController();
+  final _fechaHastaCtrl = TextEditingController();
+  final _alumnoCtrl = TextEditingController();
+
+  Future<void> _aplicarFiltros() async {
+    final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+    await Provider.of<BitacoraService>(context, listen: false).cargarBitacoras(
+      token,
+      fechaDesde: _fechaDesdeCtrl.text,
+      fechaHasta: _fechaHastaCtrl.text,
+      alumno: _alumnoCtrl.text,
+    );
+  }
+
+  void _limpiar() {
+    _fechaDesdeCtrl.clear();
+    _fechaHastaCtrl.clear();
+    _alumnoCtrl.clear();
+    _aplicarFiltros();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      color: AppTheme.primaryColor,
-      onRefresh: () async {
-        final token =
-            Provider.of<AuthService>(context, listen: false).token ?? '';
-        await Provider.of<BitacoraService>(context, listen: false)
-            .cargarBitacoras(token);
-      },
-      child: Consumer<BitacoraService>(
-        builder: (context, service, _) {
-          if (service.isLoading) {
-            return const Center(
-                child:
-                    CircularProgressIndicator(color: AppTheme.primaryColor));
-          }
-          if (service.bitacoras.isEmpty) {
-            return ListView(
-              children: const [
-                SizedBox(height: 80),
-                Center(child: Text('No hay bitacoras registradas.')),
-              ],
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: service.bitacoras.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) {
-              final b = service.bitacoras[i];
-              return _DoctorBitacoraCard(bitacora: b);
-            },
-          );
-        },
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _fechaDesdeCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Desde',
+                        hintText: 'YYYY-MM-DD',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _fechaHastaCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Hasta',
+                        hintText: 'YYYY-MM-DD',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _alumnoCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Buscar alumno',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _aplicarFiltros,
+                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
+                    child: const Text('Filtrar'),
+                  ),
+                  const SizedBox(width: 4),
+                  OutlinedButton(
+                    onPressed: _limpiar,
+                    child: const Text('Limpiar'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            color: AppTheme.primaryColor,
+            onRefresh: _aplicarFiltros,
+            child: Consumer<BitacoraService>(
+              builder: (context, service, _) {
+                if (service.isLoading) {
+                  return const Center(
+                      child: CircularProgressIndicator(color: AppTheme.primaryColor));
+                }
+                if (service.bitacoras.isEmpty) {
+                  return ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      Center(child: Text('No hay bitacoras registradas.')),
+                    ],
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: service.bitacoras.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) {
+                    final b = service.bitacoras[i];
+                    return _DoctorBitacoraCard(bitacora: b);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -554,6 +736,160 @@ class _DoctorBitacoraCard extends StatelessWidget {
   }
 }
 
+// ─── Tab Recetas Doctor ────────────────────────────────────────────────────────
+
+class _DoctorRecetasTab extends StatefulWidget {
+  const _DoctorRecetasTab();
+
+  @override
+  State<_DoctorRecetasTab> createState() => _DoctorRecetasTabState();
+}
+
+class _DoctorRecetasTabState extends State<_DoctorRecetasTab> {
+  bool _showForm = false;
+  final _citaIdCtrl = TextEditingController();
+  final _medicamentosCtrl = TextEditingController();
+  final _indicacionesCtrl = TextEditingController();
+  final _fechaCtrl = TextEditingController();
+  String? _formError;
+
+  Future<void> _guardar() async {
+    if (_citaIdCtrl.text.isEmpty || _medicamentosCtrl.text.isEmpty || _indicacionesCtrl.text.isEmpty || _fechaCtrl.text.isEmpty) {
+      setState(() => _formError = 'Todos los campos son obligatorios.');
+      return;
+    }
+    final citaId = int.tryParse(_citaIdCtrl.text);
+    if (citaId == null) {
+      setState(() => _formError = 'ID de cita inválido.');
+      return;
+    }
+    final medicamentos = _medicamentosCtrl.text
+        .split('\n')
+        .where((l) => l.trim().isNotEmpty)
+        .map((l) => {'nombre': l.trim()})
+        .toList();
+
+    final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+    final ok = await Provider.of<RecetaService>(context, listen: false).crearReceta(
+      token,
+      citaId: citaId,
+      medicamentos: medicamentos,
+      indicaciones: _indicacionesCtrl.text,
+      fechaEmision: _fechaCtrl.text,
+    );
+    if (ok && mounted) {
+      setState(() { _showForm = false; _formError = null; });
+      _citaIdCtrl.clear(); _medicamentosCtrl.clear(); _indicacionesCtrl.clear(); _fechaCtrl.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Receta creada correctamente.'), backgroundColor: AppTheme.success),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Recetas', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+              TextButton.icon(
+                onPressed: () => setState(() => _showForm = !_showForm),
+                icon: Icon(_showForm ? Icons.close : Icons.add),
+                label: Text(_showForm ? 'Cancelar' : 'Nueva receta'),
+              ),
+            ],
+          ),
+        ),
+        if (_showForm)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_formError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(_formError!, style: const TextStyle(color: AppTheme.error, fontSize: 13)),
+                      ),
+                    TextField(controller: _citaIdCtrl, keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'ID de cita', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _fechaCtrl,
+                        decoration: const InputDecoration(labelText: 'Fecha (YYYY-MM-DD)', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _medicamentosCtrl, maxLines: 3,
+                        decoration: const InputDecoration(labelText: 'Medicamentos (uno por línea)', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 10),
+                    TextField(controller: _indicacionesCtrl, maxLines: 3,
+                        decoration: const InputDecoration(labelText: 'Indicaciones', isDense: true, border: OutlineInputBorder())),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: _guardar,
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
+                      child: const Text('Guardar receta'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            color: AppTheme.primaryColor,
+            onRefresh: () async {
+              final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+              await Provider.of<RecetaService>(context, listen: false).cargarRecetas(token);
+            },
+            child: Consumer<RecetaService>(
+              builder: (context, service, _) {
+                if (service.isLoading) {
+                  return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+                }
+                if (service.recetas.isEmpty) {
+                  return ListView(children: const [SizedBox(height: 80), Center(child: Text('No hay recetas registradas.'))]);
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: service.recetas.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) {
+                    final r = service.recetas[i];
+                    final alumno = r['alumno'] as Map<String, dynamic>?;
+                    final nombre = alumno != null
+                        ? '${alumno['nombre'] ?? ''} ${alumno['apellido'] ?? ''}'.trim()
+                        : 'Paciente';
+                    final medicamentos = (r['medicamentos'] as List<dynamic>? ?? [])
+                        .map((m) => m is Map ? m['nombre']?.toString() ?? '' : m.toString())
+                        .where((s) => s.isNotEmpty)
+                        .join(', ');
+                    return Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.receipt_long, color: AppTheme.primaryColor),
+                        title: Text(nombre, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                        subtitle: Text(medicamentos, maxLines: 2, overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12)),
+                        trailing: Text(r['fecha_emision']?.toString().substring(0, 10) ?? '',
+                            style: const TextStyle(fontSize: 11, color: AppTheme.gray500)),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Tab Pre-evaluaciones Doctor ──────────────────────────────────────────────
 
 class _DoctorPreEvaluacionesTab extends StatelessWidget {
@@ -566,8 +902,11 @@ class _DoctorPreEvaluacionesTab extends StatelessWidget {
       onRefresh: () async {
         final token =
             Provider.of<AuthService>(context, listen: false).token ?? '';
-        await Provider.of<PreEvaluacionService>(context, listen: false)
-            .cargarPendientes(token);
+        final service = Provider.of<PreEvaluacionService>(context, listen: false);
+        await Future.wait([
+          service.cargarPendientes(token),
+          service.cargarHistorial(token),
+        ]);
       },
       child: Consumer<PreEvaluacionService>(
         builder: (context, service, _) {
@@ -597,12 +936,69 @@ class _DoctorPreEvaluacionesTab extends StatelessWidget {
             );
           }
 
+          final pendientes = service.pendientes;
+          final historial = service.historial;
+          // items = pendientes + (historial header + historial items)
+          final totalItems = pendientes.length +
+              (historial.isNotEmpty ? historial.length + 1 : 0);
+
           return ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: service.pendientes.length,
+            itemCount: totalItems,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (_, i) {
-              final pe = service.pendientes[i];
+              // Sección historial
+              if (i == pendientes.length && historial.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text('Historial revisadas',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: AppTheme.gray600)),
+                );
+              }
+              if (i > pendientes.length && historial.isNotEmpty) {
+                final h = historial[i - pendientes.length - 1];
+                final alumnoH = h['alumno'] is Map ? h['alumno'] as Map<String, dynamic> : null;
+                final nombreH = alumnoH != null
+                    ? '${alumnoH['nombre'] ?? ''} ${alumnoH['apellido'] ?? ''}'.trim()
+                    : 'Paciente';
+                final estatusH = h['estatus_validacion']?.toString() ?? '';
+                final esValidado = estatusH == 'validado';
+                return Card(
+                  color: Colors.grey.shade50,
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: esValidado
+                          ? AppTheme.success.withAlpha(30)
+                          : AppTheme.error.withAlpha(30),
+                      child: Icon(
+                        esValidado ? Icons.check_circle_outline : Icons.cancel_outlined,
+                        color: esValidado ? AppTheme.success : AppTheme.error,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(nombreH,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                    subtitle: Text(
+                      h['diagnostico_sugerido']?.toString() ?? 'Sin diagnóstico',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: Chip(
+                      label: Text(esValidado ? 'Validado' : 'Descartado',
+                          style: const TextStyle(fontSize: 11)),
+                      backgroundColor: esValidado
+                          ? AppTheme.success.withAlpha(25)
+                          : AppTheme.error.withAlpha(25),
+                    ),
+                  ),
+                );
+              }
+
+              final pe = pendientes[i];
               final alumno = pe['alumno'] is Map ? pe['alumno'] as Map<String, dynamic> : null;
               final nombre = alumno != null
                   ? '${alumno['nombre'] ?? ''} ${alumno['apellido'] ?? ''}'.trim()
