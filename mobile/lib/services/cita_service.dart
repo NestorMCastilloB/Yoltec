@@ -137,6 +137,36 @@ class CitaService extends ChangeNotifier {
     }
   }
 
+  Future<bool> noAsistioACita(String token, int citaId) async {
+    try {
+      await ApiService.post('/citas/$citaId/no-asistio', {}, token: token);
+      final idx = _citas.indexWhere((c) => c.id == citaId);
+      if (idx != -1) {
+        final original = _citas[idx];
+        _citas[idx] = Cita(
+          id: original.id,
+          claveCita: original.claveCita,
+          fechaCita: original.fechaCita,
+          horaCita: original.horaCita,
+          motivo: original.motivo,
+          estatus: 'no_asistio',
+          alumnoId: original.alumnoId,
+          alumno: original.alumno,
+        );
+        notifyListeners();
+      }
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Error al marcar la cita como no asistida.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>> obtenerDisponibilidad(
       String token, int month, int year) async {
     return ApiService.get(

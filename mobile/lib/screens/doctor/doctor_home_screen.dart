@@ -319,7 +319,20 @@ class _DoctorCitaCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _marcarNoAsistio(context, cita),
+                      icon: const Icon(Icons.person_off_outlined, size: 16),
+                      label: const Text('No asistió'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFE65100),
+                        side: const BorderSide(color: Color(0xFFE65100)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _marcarAtendida(context, cita),
@@ -365,6 +378,41 @@ class _DoctorCitaCard extends StatelessWidget {
                   .cancelarCita(token, cita.id);
             },
             child: const Text('Si, cancelar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _marcarNoAsistio(BuildContext context, Cita cita) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Marcar como no asistida'),
+        content: Text('¿Confirmar que ${cita.nombreAlumno} no asistió a la cita?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE65100)),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+              final ok = await Provider.of<CitaService>(context, listen: false)
+                  .noAsistioACita(token, cita.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(ok ? 'Cita marcada como no asistida.' : 'Error al actualizar la cita.'),
+                    backgroundColor: ok ? const Color(0xFFE65100) : AppTheme.error,
+                  ),
+                );
+              }
+            },
+            child: const Text('Confirmar'),
           ),
         ],
       ),

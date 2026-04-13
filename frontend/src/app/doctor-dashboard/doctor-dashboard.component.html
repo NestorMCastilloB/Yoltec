@@ -331,6 +331,13 @@
                       {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
                     </button>
                     <button
+                      class="btn-warning"
+                      (click)="onMarkAsNoShow(cita)"
+                      [disabled]="isSubmitting"
+                    >
+                      {{ isSubmitting ? 'Procesando...' : 'No asistió' }}
+                    </button>
+                    <button
                       class="btn-primary"
                       (click)="onMarkAsAttended(cita)"
                       [disabled]="isSubmitting"

@@ -262,5 +262,28 @@ class CitaController extends Controller
             'cita' => $cita
         ], 200);
     }
+
+    // Marcar como no asistió (solo doctor, manual)
+    public function noAsistio(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$user->esDoctor()) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $cita = Cita::findOrFail($id);
+
+        if ($cita->estatus !== 'programada') {
+            return response()->json(['message' => 'Solo se pueden marcar como no asistidas las citas programadas'], 422);
+        }
+
+        $cita->update(['estatus' => 'no_asistio']);
+
+        return response()->json([
+            'message' => 'Cita marcada como no asistida',
+            'cita' => $cita
+        ], 200);
+    }
 }
 

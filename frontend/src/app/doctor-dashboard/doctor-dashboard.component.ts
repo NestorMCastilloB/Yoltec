@@ -356,6 +356,31 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  onMarkAsNoShow(cita: Cita): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.citaService.markAsNoShow(cita.id)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.submitMessage = error?.error?.message || 'No se pudo marcar como no asistida.';
+          return of(null);
+        }),
+        finalize(() => {
+          this.isSubmitting = false;
+        })
+      )
+      .subscribe(response => {
+        if (response?.cita) {
+          this.submitMessage = 'Cita marcada como no asistida.';
+          this.loadCitas();
+        }
+      });
+  }
+
   onCreateBitacora(form: NgForm): void {
     if (form.invalid) {
       if (!this.bitacoraFormData.cita_id) {

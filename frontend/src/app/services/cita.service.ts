@@ -84,6 +84,10 @@ export class CitaService {
     return this.http.post<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/atender`, {});
   }
 
+  markAsNoShow(id: number): Observable<{ message: string; cita: Cita }> {
+    return this.http.post<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/no-asistio`, {});
+  }
+
   getAvailability(month?: number, year?: number): Observable<CitaAvailabilityResponse> {
     const params: Record<string, string> = {};
     if (month) {
