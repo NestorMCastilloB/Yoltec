@@ -3,6 +3,7 @@ IA/venv/
 IA/__pycache__/
 IA/*.pyc
 IA/.env
+IA/data/
 archive/
 *.csv
 
@@ -45,7 +46,9 @@ IA/label_encoder.pkl
 IA/*.pkl
 
 # ─── Documentos binarios (usar .md en su lugar) ─────
-manual/*.pdf
-manual/*.odt
-manual/*.docx
-manual/*.html
+docs/*.pdf
+docs/*.odt
+docs/*.docx
+docs/*.html
+tester/
+.env.companero
