@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\User;
+use App\Models\DiaEspecial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -89,7 +90,6 @@ class CitaController extends Controller
             $grouped[$dateKey][] = $normalizedHour;
         }
 
-        $specialDays = config('clinic.special_days', []);
         $types = config('clinic.types', []);
 
         $days = [];
@@ -102,17 +102,14 @@ class CitaController extends Controller
             ];
         }
 
-        foreach ($specialDays as $day) {
-            if (!isset($day['date'], $day['type'])) {
-                continue;
-            }
-            $date = $day['date'];
-            $type = $day['type'];
+        // Leer días especiales de la BD (en lugar del config estático)
+        $diasEspeciales = DiaEspecial::whereYear('fecha', $year)
+            ->whereMonth('fecha', $month)
+            ->get();
 
-            $dateCarbon = Carbon::parse($date);
-            if ($dateCarbon->month !== $month || $dateCarbon->year !== $year) {
-                continue;
-            }
+        foreach ($diasEspeciales as $dia) {
+            $date = $dia->fecha->toDateString();
+            $type = $dia->tipo;
 
             $days[$date] = array_merge($days[$date] ?? [
                 'date' => $date,
@@ -121,7 +118,7 @@ class CitaController extends Controller
             ], [
                 'special' => [
                     'type' => $type,
-                    'label' => $day['label'] ?? null,
+                    'label' => $dia->etiqueta,
                     'status' => $types[$type]['status'] ?? 'full',
                     'color' => $types[$type]['color'] ?? '#ef5350',
                 ],

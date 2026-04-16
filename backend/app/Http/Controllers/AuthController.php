@@ -25,7 +25,7 @@ class AuthController extends Controller
         $request->validate([
             'identificador' => 'required|string',
             'password'      => 'required|string',
-            'tipo_usuario'  => 'required|in:alumno,doctor',
+            'tipo_usuario'  => 'required|in:alumno,doctor,admin',
             'device_token'  => 'nullable|string',
         ]);
 
@@ -39,6 +39,11 @@ class AuthController extends Controller
             if (!$user || $user->nip !== $password) {
                 throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
             }
+        } elseif ($tipoUsuario === 'admin') {
+            $user = User::where('username', $identificador)->where('tipo', 'admin')->first();
+            if (!$user || !Hash::check($password, $user->password)) {
+                throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
+            }
         } else {
             $user = User::where('username', $identificador)->where('tipo', 'doctor')->first();
             if (!$user || !Hash::check($password, $user->password)) {
@@ -46,8 +51,8 @@ class AuthController extends Controller
             }
         }
 
-        // Alumnos: nunca requieren 2FA
-        if ($tipoUsuario === 'alumno' || config('app.env') === 'local') {
+        // Alumnos y admins: nunca requieren 2FA
+        if ($tipoUsuario === 'alumno' || $tipoUsuario === 'admin' || config('app.env') === 'local') {
             return $this->successResponse($user);
         }
 

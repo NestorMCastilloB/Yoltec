@@ -10,9 +10,15 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PreEvaluacionIAController;
 use App\Http\Controllers\IAPriorityController;
 use App\Http\Controllers\IASymptomController;
+use App\Http\Controllers\EstadisticasController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\CalendarioAdminController;
 
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
+Route::middleware('throttle:5,10')->post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
 Route::post('/resend-2fa', [AuthController::class, 'resendTwoFactor']);
 
@@ -57,6 +63,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
     Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
     Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
+
+    // Estadísticas (solo doctores)
+    Route::get('/estadisticas', [EstadisticasController::class, 'index']);
+
+    // Admin - CRUD alumnos y doctores
+    Route::prefix('admin')->group(function () {
+        Route::get('/calendario',        [CalendarioAdminController::class, 'index']);
+        Route::post('/calendario',       [CalendarioAdminController::class, 'store']);
+        Route::delete('/calendario/{id}', [CalendarioAdminController::class, 'destroy']);
+        Route::get('/alumnos',           [AdminController::class, 'indexAlumnos']);
+        Route::post('/alumnos',          [AdminController::class, 'storeAlumno']);
+        Route::put('/alumnos/{id}',      [AdminController::class, 'updateAlumno']);
+        Route::delete('/alumnos/{id}',   [AdminController::class, 'destroyAlumno']);
+        Route::get('/doctores',          [AdminController::class, 'indexDoctores']);
+        Route::post('/doctores',         [AdminController::class, 'storeDoctor']);
+        Route::put('/doctores/{id}',     [AdminController::class, 'updateDoctor']);
+        Route::delete('/doctores/{id}',  [AdminController::class, 'destroyDoctor']);
+    });
 
     // ===== IA 1: Clasificador de Prioridad (solo doctores) =====
     Route::prefix('ia/priority')->group(function () {

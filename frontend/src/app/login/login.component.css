@@ -128,3 +128,13 @@
 .login-card:hover {
   transform: translateY(-5px);
 }
+.forgot-link-wrapper {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+.forgot-link {
+  color: #1565C0;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.forgot-link:hover { text-decoration: underline; }

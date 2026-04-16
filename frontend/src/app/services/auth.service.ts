@@ -45,7 +45,7 @@ export class AuthService {
     }
   }
 
-  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor'): Observable<LoginResponse> {
+  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {
     const body: any = { identificador, password, tipo_usuario: tipoUsuario };
     if (tipoUsuario === 'doctor') {
       const deviceToken = localStorage.getItem('doctor_device_token');
@@ -188,6 +188,9 @@ export class AuthService {
         break;
       case 'doctor':
         this.router.navigate(['/doctor-dashboard']);
+        break;
+      case 'admin':
+        this.router.navigate(['/admin-dashboard']);
         break;
       default:
         this.router.navigate(['/login']);

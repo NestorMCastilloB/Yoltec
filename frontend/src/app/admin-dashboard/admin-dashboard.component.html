@@ -1,0 +1,308 @@
+<div class="admin-dashboard">
+  <header class="admin-header">
+    <div class="header-content">
+      <h1>Panel de Administración</h1>
+      <div class="user-info">
+        <span>{{ adminName }}</span>
+        <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <button class="nav-btn" [class.active]="activeSection === 'alumnos'" (click)="setSection('alumnos')">
+        👨‍🎓 Alumnos
+      </button>
+      <button class="nav-btn" [class.active]="activeSection === 'doctores'" (click)="setSection('doctores')">
+        👨‍⚕️ Doctores
+      </button>
+      <button class="nav-btn" [class.active]="activeSection === 'calendario'" (click)="setSection('calendario')">
+        📅 Calendario
+      </button>
+    </nav>
+  </header>
+
+  <main class="admin-content">
+
+    <!-- ===== ALUMNOS ===== -->
+    <section *ngIf="activeSection === 'alumnos'" class="content-section">
+      <div class="section-header">
+        <h2>👨‍🎓 Gestión de Alumnos</h2>
+        <button class="btn-primary" (click)="openAlumnoForm()">+ Nuevo Alumno</button>
+      </div>
+
+      <div *ngIf="isLoadingAlumnos" class="loading">Cargando alumnos...</div>
+      <div *ngIf="alumnosError" class="alert-error">{{ alumnosError }}</div>
+
+      <!-- Tabla de alumnos -->
+      <div *ngIf="!isLoadingAlumnos && alumnos.length === 0 && !alumnosError" class="empty-state">
+        No hay alumnos registrados.
+      </div>
+
+      <div class="table-wrapper" *ngIf="alumnos.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>N° Control</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of alumnos">
+              <td>{{ a.numero_control }}</td>
+              <td>{{ a.nombre }} {{ a.apellido }}</td>
+              <td>{{ a.email }}</td>
+              <td>{{ a.telefono || '—' }}</td>
+              <td class="actions">
+                <button class="btn-edit" (click)="openAlumnoForm(a)">Editar</button>
+                <button class="btn-delete" (click)="confirmDelete(a.id, 'alumno')">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal formulario alumno -->
+      <div class="modal-overlay" *ngIf="showAlumnoForm" (click)="closeAlumnoForm()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ editingAlumnoId ? 'Editar Alumno' : 'Nuevo Alumno' }}</h3>
+          <div *ngIf="alumnoMsg" class="form-msg" [class.success]="alumnoMsg.includes('actualizado') || alumnoMsg.includes('creado')">
+            {{ alumnoMsg }}
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Número de Control *</label>
+              <input type="text" [(ngModel)]="alumnoForm.numero_control" placeholder="Ej: 22690495">
+            </div>
+            <div class="form-group">
+              <label>NIP {{ editingAlumnoId ? '(dejar vacío para no cambiar)' : '*' }}</label>
+              <input type="text" [(ngModel)]="alumnoForm.nip" placeholder="6 dígitos" maxlength="6">
+            </div>
+            <div class="form-group">
+              <label>Nombre *</label>
+              <input type="text" [(ngModel)]="alumnoForm.nombre">
+            </div>
+            <div class="form-group">
+              <label>Apellido *</label>
+              <input type="text" [(ngModel)]="alumnoForm.apellido">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="alumnoForm.email">
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" [(ngModel)]="alumnoForm.telefono">
+            </div>
+            <div class="form-group">
+              <label>Fecha de Nacimiento</label>
+              <input type="date" [(ngModel)]="alumnoForm.fecha_nacimiento">
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeAlumnoForm()">Cancelar</button>
+            <button class="btn-primary" (click)="submitAlumno()" [disabled]="isSubmittingAlumno">
+              {{ isSubmittingAlumno ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DOCTORES ===== -->
+    <section *ngIf="activeSection === 'doctores'" class="content-section">
+      <div class="section-header">
+        <h2>👨‍⚕️ Gestión de Doctores</h2>
+        <button class="btn-primary" (click)="openDoctorForm()">+ Nuevo Doctor</button>
+      </div>
+
+      <div *ngIf="isLoadingDoctores" class="loading">Cargando doctores...</div>
+      <div *ngIf="doctoresError" class="alert-error">{{ doctoresError }}</div>
+
+      <div *ngIf="!isLoadingDoctores && doctores.length === 0 && !doctoresError" class="empty-state">
+        No hay doctores registrados.
+      </div>
+
+      <div class="table-wrapper" *ngIf="doctores.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of doctores">
+              <td>{{ d.username }}</td>
+              <td>{{ d.nombre }} {{ d.apellido }}</td>
+              <td>{{ d.email }}</td>
+              <td>{{ d.telefono || '—' }}</td>
+              <td class="actions">
+                <button class="btn-edit" (click)="openDoctorForm(d)">Editar</button>
+                <button class="btn-delete" (click)="confirmDelete(d.id, 'doctor')">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal formulario doctor -->
+      <div class="modal-overlay" *ngIf="showDoctorForm" (click)="closeDoctorForm()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ editingDoctorId ? 'Editar Doctor' : 'Nuevo Doctor' }}</h3>
+          <div *ngIf="doctorMsg" class="form-msg" [class.success]="doctorMsg.includes('actualizado') || doctorMsg.includes('creado')">
+            {{ doctorMsg }}
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Usuario *</label>
+              <input type="text" [(ngModel)]="doctorForm.username" placeholder="Ej: doctorGarcia">
+            </div>
+            <div class="form-group">
+              <label>Contraseña {{ editingDoctorId ? '(dejar vacío para no cambiar)' : '*' }}</label>
+              <input type="password" [(ngModel)]="doctorForm.password">
+            </div>
+            <div class="form-group">
+              <label>Nombre *</label>
+              <input type="text" [(ngModel)]="doctorForm.nombre">
+            </div>
+            <div class="form-group">
+              <label>Apellido *</label>
+              <input type="text" [(ngModel)]="doctorForm.apellido">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="doctorForm.email">
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" [(ngModel)]="doctorForm.telefono">
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeDoctorForm()">Cancelar</button>
+            <button class="btn-primary" (click)="submitDoctor()" [disabled]="isSubmittingDoctor">
+              {{ isSubmittingDoctor ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== CALENDARIO ===== -->
+  <section *ngIf="activeSection === 'calendario'" class="content-section">
+    <div class="section-header">
+      <h2>📅 Gestión de Calendario</h2>
+      <button class="btn-primary" (click)="openDiaForm()">+ Agregar día especial</button>
+    </div>
+    <p class="cal-hint">Haz clic en cualquier día para marcarlo como festivo, vacaciones o día reducido. Los alumnos y doctores verán estos días como no disponibles o con horario reducido.</p>
+
+    <!-- Navegación de mes -->
+    <div class="cal-nav">
+      <button class="cal-nav-btn" (click)="changeCalMonth(-1)">‹</button>
+      <span class="cal-month-label">{{ calLabel | titlecase }}</span>
+      <button class="cal-nav-btn" (click)="changeCalMonth(1)">›</button>
+    </div>
+
+    <div *ngIf="isLoadingCal" class="loading">Cargando...</div>
+
+    <!-- Calendario visual -->
+    <div class="cal-grid-wrapper" *ngIf="!isLoadingCal">
+      <div class="cal-weekdays">
+        <span *ngFor="let d of weekDays">{{ d }}</span>
+      </div>
+      <div class="cal-weeks">
+        <ng-container *ngFor="let week of calWeeks">
+          <div
+            *ngFor="let day of week"
+            class="cal-day"
+            [class.other-month]="!day.isCurrentMonth"
+            [class.has-special]="day.diaEspecial"
+            [class.holiday]="day.diaEspecial?.tipo === 'holiday'"
+            [class.vacation]="day.diaEspecial?.tipo === 'vacation'"
+            [class.reduced]="day.diaEspecial?.tipo === 'reduced'"
+            (click)="day.isCurrentMonth && openDiaForm(day.date)"
+            [title]="day.diaEspecial?.etiqueta ?? (day.isCurrentMonth ? 'Clic para marcar' : '')"
+          >
+            <span class="day-num">{{ day.label }}</span>
+            <span class="day-tag" *ngIf="day.diaEspecial">{{ day.diaEspecial.etiqueta || tipoLabels[day.diaEspecial.tipo].label }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="cal-legend">
+      <span class="leg-item holiday">Festivo / Inhábil</span>
+      <span class="leg-item vacation">Vacaciones</span>
+      <span class="leg-item reduced">Día reducido</span>
+    </div>
+
+    <!-- Lista de días especiales del mes -->
+    <div class="dias-lista" *ngIf="diasEspeciales.length > 0">
+      <h3>Días especiales este mes</h3>
+      <div class="dia-item" *ngFor="let dia of diasEspeciales">
+        <span class="dia-fecha">{{ dia.fecha }}</span>
+        <span class="dia-tipo" [ngClass]="dia.tipo">{{ tipoLabels[dia.tipo].label }}</span>
+        <span class="dia-etiqueta">{{ dia.etiqueta || '—' }}</span>
+        <div class="dia-actions">
+          <button class="btn-edit" (click)="openDiaForm(dia.fecha)">Editar</button>
+          <button class="btn-delete" (click)="deleteDia(dia.id)">Eliminar</button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="diasEspeciales.length === 0 && !isLoadingCal" class="empty-state">
+      No hay días especiales este mes.
+    </div>
+
+    <!-- Modal formulario día especial -->
+    <div class="modal-overlay" *ngIf="showDiaForm" (click)="closeDiaForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Día especial</h3>
+        <div *ngIf="diaMsg" class="form-msg success">{{ diaMsg }}</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fecha *</label>
+            <input type="date" [(ngModel)]="diaForm.fecha">
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select [(ngModel)]="diaForm.tipo" class="form-select">
+              <option value="holiday">Festivo / Inhábil</option>
+              <option value="vacation">Vacaciones</option>
+              <option value="reduced">Día reducido (horario parcial)</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: 1/-1">
+            <label>Etiqueta (descripción)</label>
+            <input type="text" [(ngModel)]="diaForm.etiqueta" placeholder="Ej: Semana Santa, Puente, etc.">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeDiaForm()">Cancelar</button>
+          <button class="btn-primary" (click)="submitDia()" [disabled]="isSubmittingDia">
+            {{ isSubmittingDia ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal confirmación de borrado -->
+  <div class="modal-overlay" *ngIf="confirmDeleteId !== null" (click)="cancelDelete()">
+    <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+      <h3>¿Confirmar eliminación?</h3>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-delete-confirm" (click)="executeDelete()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>

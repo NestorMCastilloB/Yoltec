@@ -47,6 +47,12 @@
         class="nav-button">
         ⚡ Prioridad IA
       </button>
+      <button
+        [class.active]="activeSection === 'estadisticas'"
+        (click)="setActiveSection('estadisticas')"
+        class="nav-button">
+        📊 Estadísticas
+      </button>
     </nav>
   </header>
 
@@ -109,6 +115,57 @@
             <p>No hay citas programadas próximamente.</p>
           </div>
         </ng-template>
+      </div>
+    </section>
+
+    <!-- Sección: Estadísticas -->
+    <section *ngIf="activeSection === 'estadisticas'" class="content-section">
+      <div class="section-header">
+        <h2>📊 Estadísticas Generales</h2>
+        <button class="btn-primary" (click)="loadEstadisticas()">Actualizar</button>
+      </div>
+
+      <div *ngIf="isLoadingEstadisticas" class="loading">Cargando estadísticas...</div>
+      <div *ngIf="estadisticasError" class="alert alert-error">{{ estadisticasError }}</div>
+
+      <div *ngIf="estadisticas && !isLoadingEstadisticas" class="estadisticas-container">
+
+        <!-- Tarjetas resumen -->
+        <div class="estadisticas-resumen">
+          <div class="estat-card total">
+            <span class="estat-num">{{ estadisticas.total_citas }}</span>
+            <span class="estat-label">Total de citas</span>
+          </div>
+          <div class="estat-card atendida">
+            <span class="estat-num">{{ estadisticas.resumen_estados.atendida }}</span>
+            <span class="estat-label">Atendidas</span>
+          </div>
+          <div class="estat-card cancelada">
+            <span class="estat-num">{{ estadisticas.resumen_estados.cancelada }}</span>
+            <span class="estat-label">Canceladas</span>
+          </div>
+          <div class="estat-card no-asistio">
+            <span class="estat-num">{{ estadisticas.resumen_estados.no_asistio }}</span>
+            <span class="estat-label">No asistieron</span>
+          </div>
+          <div class="estat-card tasa">
+            <span class="estat-num">{{ estadisticas.tasa_asistencia }}%</span>
+            <span class="estat-label">Tasa de asistencia</span>
+          </div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="estadisticas-charts">
+          <div class="chart-box">
+            <h3>Citas por mes (últimos 6 meses)</h3>
+            <canvas #barCanvas></canvas>
+          </div>
+          <div class="chart-box">
+            <h3>Distribución por estado</h3>
+            <canvas #doughnutCanvas></canvas>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -258,18 +315,38 @@
             </div>
             <div class="form-group full-width">
               <label>Hora</label>
-              <div class="time-slots" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
-                <button
-                  type="button"
-                  class="slot-button"
-                  *ngFor="let slot of timeSlots"
-                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
-                  [class.booked]="isSlotUnavailable(slot)"
-                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
-                  (click)="selectTimeSlot(slot)"
-                >
-                  {{ formatTime(slot) }}
-                </button>
+              <div class="slots-wrapper" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
+                <div class="slots-legend">
+                  <span class="leg-dot free"></span> Libre
+                  <span class="leg-dot selected-dot"></span> Seleccionado
+                  <span class="leg-dot booked-dot"></span> Ocupado
+                </div>
+                <div class="slots-group">
+                  <span class="slots-period">🌅 Mañana</span>
+                  <div class="time-slots">
+                    <button type="button" class="slot-button"
+                      *ngFor="let slot of timeSlots.slice(0, 16)"
+                      [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                      [class.booked]="isSlotUnavailable(slot)"
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                      (click)="selectTimeSlot(slot)">
+                      {{ formatTime(slot) }}
+                    </button>
+                  </div>
+                </div>
+                <div class="slots-group">
+                  <span class="slots-period">🌇 Tarde</span>
+                  <div class="time-slots">
+                    <button type="button" class="slot-button"
+                      *ngFor="let slot of timeSlots.slice(16)"
+                      [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                      [class.booked]="isSlotUnavailable(slot)"
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                      (click)="selectTimeSlot(slot)">
+                      {{ formatTime(slot) }}
+                    </button>
+                  </div>
+                </div>
               </div>
               <small class="helper-text" *ngIf="!createFormData.fecha_cita">
                 Selecciona un día disponible para ver las horas libres.
@@ -304,6 +381,17 @@
         </form>
       </div>
 
+      <!-- Buscador de citas -->
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="searchCitas"
+          placeholder="Buscar por alumno, número de control o motivo..."
+          class="search-input"
+        >
+        <button *ngIf="searchCitas" class="search-clear" (click)="searchCitas = ''">✕</button>
+      </div>
+
       <div class="citas-container">
         <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
           <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
@@ -312,8 +400,8 @@
             <div class="citas-column pendientes">
               <h3>Próximas citas</h3>
 
-              <ng-container *ngIf="pendingCitas.length > 0; else noPendientesDoctor">
-                <div *ngFor="let cita of pendingCitas" class="cita-card">
+              <ng-container *ngIf="filteredPendingCitas.length > 0; else noPendientesDoctor">
+                <div *ngFor="let cita of filteredPendingCitas" class="cita-card">
                   <div class="cita-header">
                     <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
                     <span class="estatus programada">Programada</span>
@@ -358,9 +446,9 @@
             <div class="citas-column historial">
               <h3>Historial reciente</h3>
 
-              <ng-container *ngIf="handledCitas.length > 0; else noHistorialDoctor">
+              <ng-container *ngIf="filteredHandledCitas.length > 0; else noHistorialDoctor">
                 <div
-                  *ngFor="let cita of handledCitas"
+                  *ngFor="let cita of filteredHandledCitas"
                   class="cita-card"
                   [class.cancelada]="cita.estatus === 'cancelada'"
                   [class.no-asistio]="cita.estatus === 'no_asistio'"
@@ -400,9 +488,14 @@
     <section *ngIf="activeSection === 'bitacoras'" class="content-section">
       <div class="section-header">
         <h2>Bitácoras Médicas</h2>
-        <button class="btn-primary" (click)="toggleBitacoraForm()">
-          {{ showBitacoraForm ? 'Cerrar formulario' : 'Registrar Bitácora' }}
-        </button>
+        <div class="section-header-actions">
+          <button class="btn-csv" (click)="exportBitacorasCSV()" [disabled]="bitacoras.length === 0" title="Exportar a CSV">
+            ⬇ CSV
+          </button>
+          <button class="btn-primary" (click)="toggleBitacoraForm()">
+            {{ showBitacoraForm ? 'Cerrar formulario' : 'Registrar Bitácora' }}
+          </button>
+        </div>
       </div>
 
       <div *ngIf="bitacoraMessage" class="alert">
@@ -535,7 +628,7 @@
           </div>
 
           <div *ngIf="bitacoras.length > 0" class="bitacoras-layout">
-            <article *ngFor="let bitacora of bitacoras" class="data-card bitacora-card">
+            <article *ngFor="let bitacora of pagedBitacoras" class="data-card bitacora-card">
               <header class="card-header">
                 <div class="card-title">
                   <h4>{{ bitacora.alumno?.nombre }} {{ bitacora.alumno?.apellido }}</h4>
@@ -582,6 +675,12 @@
               </div>
             </div>
           </article>
+          <!-- Paginación bitácoras -->
+          <div class="pagination" *ngIf="totalPagesBitacoras > 1">
+            <button class="page-btn" (click)="prevPageBitacoras()" [disabled]="currentPageBitacoras === 1">‹</button>
+            <span class="page-info">{{ currentPageBitacoras }} / {{ totalPagesBitacoras }}</span>
+            <button class="page-btn" (click)="nextPageBitacoras()" [disabled]="currentPageBitacoras === totalPagesBitacoras">›</button>
+          </div>
           </div>
         </ng-container>
         <ng-template #loadingBitacoras>
@@ -674,7 +773,7 @@
           </div>
 
           <div *ngIf="recetas.length > 0" class="recetas-layout">
-            <article *ngFor="let receta of recetas" class="data-card receta-card">
+            <article *ngFor="let receta of pagedRecetas" class="data-card receta-card">
               <header class="card-header">
                 <div class="card-title">
                   <h4>{{ receta.alumno?.nombre }} {{ receta.alumno?.apellido }}</h4>
@@ -702,6 +801,12 @@
                 </div>
               </div>
             </article>
+          <!-- Paginación recetas -->
+          <div class="pagination" *ngIf="totalPagesRecetas > 1">
+            <button class="page-btn" (click)="prevPageRecetas()" [disabled]="currentPageRecetas === 1">‹</button>
+            <span class="page-info">{{ currentPageRecetas }} / {{ totalPagesRecetas }}</span>
+            <button class="page-btn" (click)="nextPageRecetas()" [disabled]="currentPageRecetas === totalPagesRecetas">›</button>
+          </div>
           </div>
         </ng-container>
         <ng-template #loadingRecetas>

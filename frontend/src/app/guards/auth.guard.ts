@@ -54,6 +54,8 @@ export class AuthGuard implements CanActivate {
         return this.router.createUrlTree(['/student-dashboard']);
       } else if (user.tipo === 'doctor') {
         return this.router.createUrlTree(['/doctor-dashboard']);
+      } else if (user.tipo === 'admin') {
+        return this.router.createUrlTree(['/admin-dashboard']);
       }
       
       // Por defecto, redirigir al login

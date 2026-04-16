@@ -148,27 +148,44 @@
 
             <div class="form-group full-width">
               <label>Hora</label>
-              <div class="time-slots" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
-                <button
-                  type="button"
-                  class="slot-button"
-                  *ngFor="let slot of timeSlots"
-                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
-                  [class.booked]="isSlotUnavailable(slot)"
-                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
-                  (click)="selectTimeSlot(slot)"
-                >
-                  {{ formatTime(slot) }}
-                </button>
+              <div class="slots-wrapper" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
+                <div class="slots-legend">
+                  <span class="leg-dot free"></span> Libre
+                  <span class="leg-dot selected-dot"></span> Seleccionado
+                  <span class="leg-dot booked-dot"></span> Ocupado
+                </div>
+                <div class="slots-group">
+                  <span class="slots-period">🌅 Mañana</span>
+                  <div class="time-slots">
+                    <button type="button" class="slot-button"
+                      *ngFor="let slot of timeSlots.slice(0, 16)"
+                      [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                      [class.booked]="isSlotUnavailable(slot)"
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                      (click)="selectTimeSlot(slot)">
+                      {{ formatTime(slot) }}
+                    </button>
+                  </div>
+                </div>
+                <div class="slots-group">
+                  <span class="slots-period">🌇 Tarde</span>
+                  <div class="time-slots">
+                    <button type="button" class="slot-button"
+                      *ngFor="let slot of timeSlots.slice(16)"
+                      [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                      [class.booked]="isSlotUnavailable(slot)"
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                      (click)="selectTimeSlot(slot)">
+                      {{ formatTime(slot) }}
+                    </button>
+                  </div>
+                </div>
               </div>
               <small class="helper-text" *ngIf="!createFormData.fecha_cita">
                 Selecciona un día disponible en el calendario para ver las horas libres.
               </small>
               <small class="helper-text warning" *ngIf="createFormData.fecha_cita && !hasAvailableSlotsForSelectedDate">
                 Este día ya está lleno. Elige otra fecha.
-              </small>
-              <small class="helper-text" *ngIf="createFormData.fecha_cita && hasAvailableSlotsForSelectedDate">
-                Horario disponible de 7:00 a 21:00 hrs en bloques de 15 minutos.
               </small>
               <input
                 type="hidden"

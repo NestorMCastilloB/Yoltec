@@ -1,15 +1,19 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
+import { Chart, registerables } from 'chart.js';
 import { AuthService } from '../services/auth.service';
 import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabilityDay } from '../services/cita.service';
 import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../services/bitacora.service';
 import { Receta, RecetaService, CreateRecetaPayload } from '../services/receta.service';
 import { PreEvaluacionIAService, PreEvaluacion } from '../services/pre-evaluacion-ia.service';
 import { IaPriorityService, ClasificacionPrioridad, ResumenPrioridad } from '../services/ia-priority.service';
+import { EstadisticasService, Estadisticas } from '../services/estadisticas.service';
+
+Chart.register(...registerables);
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -39,7 +43,9 @@ interface CalendarDay {
   styleUrls: ['./doctor-dashboard.component.css']
 })
 
-export class DoctorDashboardComponent implements OnInit, OnDestroy {
+export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('doughnutCanvas') doughnutCanvas!: ElementRef<HTMLCanvasElement>;
   activeSection: string = 'inicio';
   doctorName: string = 'Doctor';
   today: string = this.formatDate(new Date());
@@ -50,6 +56,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
   pendingCitas: Cita[] = [];
   handledCitas: Cita[] = [];
+  searchCitas = '';
 
   showCreateForm = false;
   isSubmitting = false;
@@ -78,6 +85,31 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   prioridadResumen: ResumenPrioridad | null = null;
   isLoadingPrioridad = false;
   prioridadError: string | null = null;
+
+  // Paginación
+  readonly PAGE_SIZE = 10;
+  currentPageBitacoras = 1;
+  currentPageRecetas = 1;
+
+  get pagedBitacoras(): Bitacora[] {
+    const start = (this.currentPageBitacoras - 1) * this.PAGE_SIZE;
+    return this.bitacoras.slice(start, start + this.PAGE_SIZE);
+  }
+  get totalPagesBitacoras(): number { return Math.ceil(this.bitacoras.length / this.PAGE_SIZE) || 1; }
+
+  get pagedRecetas(): Receta[] {
+    const start = (this.currentPageRecetas - 1) * this.PAGE_SIZE;
+    return this.recetas.slice(start, start + this.PAGE_SIZE);
+  }
+  get totalPagesRecetas(): number { return Math.ceil(this.recetas.length / this.PAGE_SIZE) || 1; }
+
+  // Estadísticas
+  estadisticas: Estadisticas | null = null;
+  isLoadingEstadisticas = false;
+  estadisticasError: string | null = null;
+  private barChart: Chart | null = null;
+  private doughnutChart: Chart | null = null;
+  private chartsRendered = false;
 
   bitacoras: Bitacora[] = [];
   isLoadingBitacoras = false;
@@ -131,7 +163,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private bitacoraService: BitacoraService,
     private recetaService: RecetaService,
     private preEvaluacionIAService: PreEvaluacionIAService,
-    private iaPriorityService: IaPriorityService
+    private iaPriorityService: IaPriorityService,
+    private estadisticasService: EstadisticasService
   ) {}
 
   ngOnInit(): void {
@@ -147,6 +180,36 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.barChart?.destroy();
+    this.doughnutChart?.destroy();
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.activeSection === 'estadisticas' && this.estadisticas && !this.chartsRendered) {
+      if (this.barCanvas && this.doughnutCanvas) {
+        this.renderCharts();
+        this.chartsRendered = true;
+      }
+    }
+  }
+
+  get filteredPendingCitas(): Cita[] {
+    return this.filterCitas(this.pendingCitas);
+  }
+
+  get filteredHandledCitas(): Cita[] {
+    return this.filterCitas(this.handledCitas);
+  }
+
+  private filterCitas(citas: Cita[]): Cita[] {
+    const q = this.searchCitas.trim().toLowerCase();
+    if (!q) return citas;
+    return citas.filter(c => {
+      const nombre = `${c.alumno?.nombre ?? ''} ${c.alumno?.apellido ?? ''}`.toLowerCase();
+      const nc = (c.alumno?.numero_control ?? '').toLowerCase();
+      const motivo = (c.motivo ?? '').toLowerCase();
+      return nombre.includes(q) || nc.includes(q) || motivo.includes(q);
+    });
   }
 
   setActiveSection(section: string) {
@@ -166,6 +229,10 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     }
     if (section === 'ia-prioridad') {
       this.loadPrioridad();
+    }
+    if (section === 'estadisticas') {
+      this.chartsRendered = false;
+      this.loadEstadisticas();
     }
   }
 
@@ -537,12 +604,44 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   aplicarFiltrosBitacora(): void {
+    this.currentPageBitacoras = 1;
     this.loadBitacoras();
   }
 
   limpiarFiltrosBitacora(): void {
     this.filtrosBitacora = { fecha_desde: '', fecha_hasta: '', alumno: '' };
+    this.currentPageBitacoras = 1;
     this.loadBitacoras();
+  }
+
+  prevPageBitacoras(): void { if (this.currentPageBitacoras > 1) this.currentPageBitacoras--; }
+  nextPageBitacoras(): void { if (this.currentPageBitacoras < this.totalPagesBitacoras) this.currentPageBitacoras++; }
+  prevPageRecetas(): void { if (this.currentPageRecetas > 1) this.currentPageRecetas--; }
+  nextPageRecetas(): void { if (this.currentPageRecetas < this.totalPagesRecetas) this.currentPageRecetas++; }
+
+  exportBitacorasCSV(): void {
+    const headers = ['Fecha Cita', 'Alumno', 'Diagnóstico', 'Tratamiento', 'Observaciones', 'Peso', 'Altura', 'Temperatura', 'Presión Arterial', 'Registrada'];
+    const rows = this.bitacoras.map(b => [
+      b.cita?.fecha_cita ?? '',
+      `${b.alumno?.nombre ?? ''} ${b.alumno?.apellido ?? ''}`.trim(),
+      b.diagnostico ?? '',
+      b.tratamiento ?? '',
+      b.observaciones ?? '',
+      b.peso ?? '',
+      b.altura ?? '',
+      b.temperatura ?? '',
+      b.presion_arterial ?? '',
+      b.created_at ? new Date(b.created_at).toLocaleDateString('es-MX') : ''
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`));
+
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bitacoras_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   private loadBitacoras(): void {
@@ -599,10 +698,10 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(recetas => {
-        // Ordenar de la más reciente a la más antigua por fecha de emisión
         this.recetas = [...recetas].sort((a, b) =>
           new Date(b.fecha_emision).getTime() - new Date(a.fecha_emision).getTime()
         );
+        this.currentPageRecetas = 1;
         this.updateStats();
       });
   }
@@ -1177,5 +1276,103 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     if (confianza >= 0.6) return 'confianza-media';
     if (confianza >= 0.4) return 'confianza-baja';
     return 'confianza-muy-baja';
+  }
+
+  // ===== ESTADÍSTICAS =====
+
+  loadEstadisticas(): void {
+    this.isLoadingEstadisticas = true;
+    this.estadisticasError = null;
+    this.chartsRendered = false;
+
+    this.estadisticasService.getEstadisticas()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.estadisticasError = error?.error?.message || 'No se pudieron cargar las estadísticas.';
+          return of(null);
+        }),
+        finalize(() => { this.isLoadingEstadisticas = false; })
+      )
+      .subscribe(data => {
+        this.estadisticas = data;
+      });
+  }
+
+  private renderCharts(): void {
+    if (!this.estadisticas) return;
+
+    const meses = this.estadisticas.citas_por_mes;
+
+    // Destruir instancias anteriores
+    this.barChart?.destroy();
+    this.doughnutChart?.destroy();
+
+    // Gráfica de barras: citas por mes
+    this.barChart = new Chart(this.barCanvas.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: meses.map(m => m.label),
+        datasets: [
+          {
+            label: 'Atendidas',
+            data: meses.map(m => m.atendidas),
+            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+            borderColor: '#388E3C',
+            borderWidth: 1
+          },
+          {
+            label: 'Canceladas',
+            data: meses.map(m => m.canceladas),
+            backgroundColor: 'rgba(239, 83, 80, 0.7)',
+            borderColor: '#C62828',
+            borderWidth: 1
+          },
+          {
+            label: 'No asistió',
+            data: meses.map(m => m.no_asistio),
+            backgroundColor: 'rgba(255, 179, 0, 0.7)',
+            borderColor: '#F57F17',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    // Gráfica donut: distribución total de estados
+    const r = this.estadisticas.resumen_estados;
+    this.doughnutChart = new Chart(this.doughnutCanvas.nativeElement, {
+      type: 'doughnut',
+      data: {
+        labels: ['Atendidas', 'Canceladas', 'No asistió', 'Programadas'],
+        datasets: [{
+          data: [r.atendida, r.cancelada, r.no_asistio, r.programada],
+          backgroundColor: [
+            'rgba(76, 175, 80, 0.8)',
+            'rgba(239, 83, 80, 0.8)',
+            'rgba(255, 179, 0, 0.8)',
+            'rgba(33, 150, 243, 0.8)'
+          ],
+          borderColor: ['#388E3C', '#C62828', '#F57F17', '#1565C0'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
   }
 }

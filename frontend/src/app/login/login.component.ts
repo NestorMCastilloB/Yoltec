@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { Subject, of } from 'rxjs';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -30,6 +30,11 @@ export class LoginComponent implements OnDestroy {
     password: ''
   };
 
+  adminData = {
+    identificador: '',
+    password: ''
+  };
+
   constructor(
     private router: Router,
     private authService: AuthService
@@ -43,7 +48,11 @@ export class LoginComponent implements OnDestroy {
     this.login(this.doctorData.identificador, this.doctorData.password, 'doctor');
   }
 
-  private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor') {
+  onAdminLogin() {
+    this.login(this.adminData.identificador, this.adminData.password, 'admin');
+  }
+
+  private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin') {
     this.isLoading = true;
     this.errorMessage = null;
     

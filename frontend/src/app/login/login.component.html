@@ -9,11 +9,17 @@
         class="tab-button">
         Estudiante
       </button>
-      <button 
-        [class.active]="activeTab === 'doctor'" 
+      <button
+        [class.active]="activeTab === 'doctor'"
         (click)="setActiveTab('doctor')"
         class="tab-button">
         Doctor
+      </button>
+      <button
+        [class.active]="activeTab === 'admin'"
+        (click)="setActiveTab('admin')"
+        class="tab-button">
+        Admin
       </button>
     </div>
 
@@ -82,6 +88,41 @@
             required>
         </div>
         
+        <button type="submit" class="login-btn" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Iniciar Sesión</span>
+          <span *ngIf="isLoading">Cargando...</span>
+        </button>
+      </form>
+      <div class="forgot-link-wrapper">
+        <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+      </div>
+    </div>
+    <div *ngIf="activeTab === 'admin'" class="form-container">
+      <h3>Acceso Administrador</h3>
+      <form (ngSubmit)="onAdminLogin()" #adminForm="ngForm">
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+        <div class="form-group">
+          <label for="adminIdentificador">Usuario:</label>
+          <input
+            type="text"
+            id="adminIdentificador"
+            [(ngModel)]="adminData.identificador"
+            name="identificador"
+            placeholder="admin"
+            required>
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">Contraseña:</label>
+          <input
+            type="password"
+            id="adminPassword"
+            [(ngModel)]="adminData.password"
+            name="password"
+            placeholder="Contraseña"
+            required>
+        </div>
         <button type="submit" class="login-btn" [disabled]="isLoading">
           <span *ngIf="!isLoading">Iniciar Sesión</span>
           <span *ngIf="isLoading">Cargando...</span>
