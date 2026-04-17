@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/citas', [CitaController::class, 'store']);
     Route::get('/citas/{id}', [CitaController::class, 'show']);
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar']);
+    Route::put('/citas/{id}/reprogramar', [CitaController::class, 'reprogramar']);  // Solo doctor
     Route::post('/citas/{id}/atender', [CitaController::class, 'atender']);       // Solo doctor
     Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']); // Solo doctor
     Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);   // Solo doctor

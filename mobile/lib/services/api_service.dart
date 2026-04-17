@@ -67,6 +67,66 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> put(
+    String endpoint,
+    Map<String, dynamic> body, {
+    String? token,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    try {
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl$endpoint'),
+            headers: _headers(token: token),
+            body: json.encode(body),
+          )
+          .timeout(timeout);
+
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('Sin conexión a internet. Verifica tu red.');
+    } on HttpException {
+      throw ApiException('Error de servidor. Intenta más tarde.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Error inesperado: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> postMultipart(
+    String endpoint,
+    File file,
+    String fieldName, {
+    String? token,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+        request.headers['Accept'] = 'application/json';
+      }
+
+      request.files.add(await http.MultipartFile.fromPath(
+        fieldName,
+        file.path,
+      ));
+
+      final streamed = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamed);
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('Sin conexión a internet. Verifica tu red.');
+    } on HttpException {
+      throw ApiException('Error de servidor. Intenta más tarde.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Error inesperado: $e');
+    }
+  }
+
   static Map<String, dynamic> _handleResponse(http.Response response) {
     final body = utf8.decode(response.bodyBytes);
     Map<String, dynamic> data;

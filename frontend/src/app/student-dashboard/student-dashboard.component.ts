@@ -104,6 +104,17 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   isUploadingFoto = false;
   fotoMsg: string | null = null;
 
+  // Datos personales (edición)
+  personalForm = { nombre: '', apellido: '', email: '', telefono: '', fecha_nacimiento: '' };
+  isSubmittingPersonal = false;
+  personalMsg: string | null = null;
+  editandoPersonal = false;
+
+  // Cambiar contraseña
+  passwordForm = { password_actual: '', password_nuevo: '', password_nuevo_confirmation: '' };
+  isSubmittingPassword = false;
+  passwordMsg: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -178,6 +189,57 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       }), finalize(() => this.isSubmittingPerfil = false))
       .subscribe(res => {
         if (res) { this.perfilMsg = 'Perfil médico actualizado.'; this.loadPerfil(); }
+      });
+  }
+
+  startEditPersonal(): void {
+    if (!this.perfilMedico) return;
+    this.personalForm = {
+      nombre: this.perfilMedico.nombre,
+      apellido: this.perfilMedico.apellido,
+      email: this.perfilMedico.email,
+      telefono: this.perfilMedico.telefono ?? '',
+      fecha_nacimiento: this.perfilMedico.fecha_nacimiento ?? ''
+    };
+    this.editandoPersonal = true;
+    this.personalMsg = null;
+  }
+
+  cancelEditPersonal(): void {
+    this.editandoPersonal = false;
+    this.personalMsg = null;
+  }
+
+  submitDatosPersonales(): void {
+    this.isSubmittingPersonal = true;
+    this.personalMsg = null;
+    this.perfilMedicoService.updateDatosPersonales(this.personalForm)
+      .pipe(takeUntil(this.destroy$), catchError(err => {
+        this.personalMsg = err?.error?.message || 'Error al guardar.';
+        return of(null);
+      }), finalize(() => this.isSubmittingPersonal = false))
+      .subscribe(res => {
+        if (res) {
+          this.personalMsg = 'Datos actualizados correctamente.';
+          this.editandoPersonal = false;
+          this.loadPerfil();
+        }
+      });
+  }
+
+  submitCambiarPassword(): void {
+    this.isSubmittingPassword = true;
+    this.passwordMsg = null;
+    this.perfilMedicoService.cambiarPassword(this.passwordForm)
+      .pipe(takeUntil(this.destroy$), catchError(err => {
+        this.passwordMsg = err?.error?.message || 'Error al cambiar contraseña.';
+        return of(null);
+      }), finalize(() => this.isSubmittingPassword = false))
+      .subscribe(res => {
+        if (res) {
+          this.passwordMsg = 'Contraseña actualizada correctamente.';
+          this.passwordForm = { password_actual: '', password_nuevo: '', password_nuevo_confirmation: '' };
+        }
       });
   }
 
