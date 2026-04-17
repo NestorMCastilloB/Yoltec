@@ -973,4 +973,37 @@
     </div>
 
   </main>
+
+  <!-- Modal formulario de consulta -->
+  <div class="modal-overlay" *ngIf="showConsultaForm" (click)="closeConsultaForm()">
+    <div class="modal modal-consulta" (click)="$event.stopPropagation()">
+      <h3>Registrar consulta</h3>
+      <p class="consulta-cita-label">{{ consultaCitaLabel }}</p>
+
+      <div *ngIf="consultaMsg" class="form-msg" [class.success]="consultaMsg.includes('guardada')">
+        {{ consultaMsg }}
+      </div>
+
+      <div class="form-group">
+        <label>Diagnóstico *</label>
+        <textarea [(ngModel)]="consultaForm.diagnostico" rows="3" placeholder="Diagnóstico del paciente..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tratamiento *</label>
+        <textarea [(ngModel)]="consultaForm.tratamiento" rows="3" placeholder="Tratamiento indicado..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="consultaForm.observaciones" rows="2" placeholder="Notas adicionales (opcional)..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeConsultaForm()">Cancelar</button>
+        <button class="btn-primary" (click)="submitConsulta()" [disabled]="isSubmittingConsulta">
+          {{ isSubmittingConsulta ? 'Guardando...' : 'Guardar y marcar atendida' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

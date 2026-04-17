@@ -12,6 +12,7 @@ import { Receta, RecetaService, CreateRecetaPayload } from '../services/receta.s
 import { PreEvaluacionIAService, PreEvaluacion } from '../services/pre-evaluacion-ia.service';
 import { IaPriorityService, ClasificacionPrioridad, ResumenPrioridad } from '../services/ia-priority.service';
 import { EstadisticasService, Estadisticas } from '../services/estadisticas.service';
+import { ConsultaService } from '../services/consulta.service';
 
 Chart.register(...registerables);
 
@@ -85,6 +86,14 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
   prioridadResumen: ResumenPrioridad | null = null;
   isLoadingPrioridad = false;
   prioridadError: string | null = null;
+
+  // Formulario de consulta
+  showConsultaForm = false;
+  consultaCitaId: number | null = null;
+  consultaCitaLabel = '';
+  consultaForm = { diagnostico: '', tratamiento: '', observaciones: '' };
+  consultaMsg: string | null = null;
+  isSubmittingConsulta = false;
 
   // Paginación
   readonly PAGE_SIZE = 10;
@@ -164,7 +173,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
     private recetaService: RecetaService,
     private preEvaluacionIAService: PreEvaluacionIAService,
     private iaPriorityService: IaPriorityService,
-    private estadisticasService: EstadisticasService
+    private estadisticasService: EstadisticasService,
+    private consultaService: ConsultaService
   ) {}
 
   ngOnInit(): void {
@@ -399,28 +409,43 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
   }
 
   onMarkAsAttended(cita: Cita): void {
-    if (this.isSubmitting) {
+    // Abrir formulario de consulta antes de marcar como atendida
+    this.consultaCitaId = cita.id;
+    this.consultaCitaLabel = `${cita.alumno?.nombre ?? ''} ${cita.alumno?.apellido ?? ''} — ${cita.fecha_cita}`;
+    this.consultaForm = { diagnostico: '', tratamiento: '', observaciones: '' };
+    this.consultaMsg = null;
+    this.showConsultaForm = true;
+  }
+
+  closeConsultaForm(): void {
+    this.showConsultaForm = false;
+    this.consultaCitaId = null;
+    this.consultaMsg = null;
+  }
+
+  submitConsulta(): void {
+    if (!this.consultaCitaId) return;
+    if (!this.consultaForm.diagnostico.trim() || !this.consultaForm.tratamiento.trim()) {
+      this.consultaMsg = 'Diagnóstico y tratamiento son obligatorios.';
       return;
     }
-
-    this.isSubmitting = true;
-    this.citaService.markAsAttended(cita.id)
+    this.isSubmittingConsulta = true;
+    this.consultaMsg = null;
+    this.consultaService.guardar(this.consultaCitaId, this.consultaForm)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
-          this.submitMessage = error?.error?.message || 'No se pudo marcar como atendida.';
+          this.consultaMsg = error?.error?.message || 'Error al guardar la consulta.';
           return of(null);
         }),
-        finalize(() => {
-          this.isSubmitting = false;
-        })
+        finalize(() => { this.isSubmittingConsulta = false; })
       )
       .subscribe(response => {
-        if (response?.cita) {
-          this.submitMessage = 'Cita marcada como atendida.';
+        if (response) {
+          this.consultaMsg = 'Consulta guardada y cita marcada como atendida.';
           this.loadCitas();
           this.loadBitacoras();
-          this.loadRecetas();
+          setTimeout(() => this.closeConsultaForm(), 1200);
         }
       });
   }

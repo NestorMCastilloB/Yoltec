@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yoltec_mobile/models/user.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
+import 'package:yoltec_mobile/services/notification_service.dart';
 
 class AuthService extends ChangeNotifier {
   String? _token;
@@ -69,6 +70,14 @@ class AuthService extends ChangeNotifier {
         await prefs.setString('auth_token', _token!);
         await prefs.setString(
             'user_data', json.encode(_currentUser!.toJson()));
+
+        // Registrar token FCM en el backend
+        final fcmToken = await NotificationService.getToken();
+        if (fcmToken != null) {
+          try {
+            await ApiService.post('/fcm-token', {'fcm_token': fcmToken});
+          } catch (_) {}
+        }
 
         _isLoading = false;
         notifyListeners();

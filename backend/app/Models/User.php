@@ -23,6 +23,11 @@ class User extends Authenticatable
         'es_admin',        // Nuevo campo para rol administrador
         'telefono',
         'fecha_nacimiento',
+        'fcm_token',
+        'tipo_sangre',
+        'alergias',
+        'enfermedades_cronicas',
+        'foto_perfil',
     ];
 
     protected $hidden = [

@@ -9,6 +9,7 @@ import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabil
 import { Bitacora, BitacoraService } from '../services/bitacora.service';
 import { Receta, RecetaService } from '../services/receta.service';
 import { PreEvaluacionIAService, ChatMessage, ChatResponse, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
+import { PerfilMedicoService, PerfilMedico, ConsultaHistorial } from '../services/perfil-medico.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -88,6 +89,21 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   isLoadingPreEvaluaciones = false;
   preEvaluacionError: string | null = null;
 
+  // Perfil médico e historial
+  perfilMedico: PerfilMedico | null = null;
+  isLoadingPerfil = false;
+  perfilMsg: string | null = null;
+  perfilForm = { tipo_sangre: '', alergias: '', enfermedades_cronicas: '' };
+  isSubmittingPerfil = false;
+  historial: ConsultaHistorial[] = [];
+  isLoadingHistorial = false;
+  historialExpandido: number | null = null;
+
+  // Foto de perfil
+  fotoPreview: string | null = null;
+  isUploadingFoto = false;
+  fotoMsg: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -96,7 +112,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     private citaService: CitaService,
     private bitacoraService: BitacoraService,
     private recetaService: RecetaService,
-    private preEvaluacionIAService: PreEvaluacionIAService
+    private preEvaluacionIAService: PreEvaluacionIAService,
+    private perfilMedicoService: PerfilMedicoService
   ) {}
 
   ngOnInit(): void {
@@ -127,6 +144,83 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     if (section === 'recetas') {
       this.loadRecetas();
     }
+    if (section === 'perfil') {
+      this.loadPerfil();
+    }
+    if (section === 'historial') {
+      this.loadHistorial();
+    }
+  }
+
+  loadPerfil(): void {
+    this.isLoadingPerfil = true;
+    this.perfilMedicoService.getPerfil()
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)), finalize(() => this.isLoadingPerfil = false))
+      .subscribe(res => {
+        if (res) {
+          this.perfilMedico = res.perfil;
+          this.perfilForm = {
+            tipo_sangre: res.perfil.tipo_sangre ?? '',
+            alergias: res.perfil.alergias ?? '',
+            enfermedades_cronicas: res.perfil.enfermedades_cronicas ?? ''
+          };
+        }
+      });
+  }
+
+  submitPerfil(): void {
+    this.isSubmittingPerfil = true;
+    this.perfilMsg = null;
+    this.perfilMedicoService.updatePerfil(this.perfilForm)
+      .pipe(takeUntil(this.destroy$), catchError(err => {
+        this.perfilMsg = err?.error?.message || 'Error al guardar.';
+        return of(null);
+      }), finalize(() => this.isSubmittingPerfil = false))
+      .subscribe(res => {
+        if (res) { this.perfilMsg = 'Perfil médico actualizado.'; this.loadPerfil(); }
+      });
+  }
+
+  loadHistorial(): void {
+    this.isLoadingHistorial = true;
+    this.perfilMedicoService.getHistorial()
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)), finalize(() => this.isLoadingHistorial = false))
+      .subscribe(res => { if (res) this.historial = res.historial; });
+  }
+
+  toggleHistorialItem(id: number): void {
+    this.historialExpandido = this.historialExpandido === id ? null : id;
+  }
+
+  onFotoChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => { this.fotoPreview = reader.result as string; };
+    reader.readAsDataURL(file);
+
+    this.isUploadingFoto = true;
+    this.fotoMsg = null;
+    this.perfilMedicoService.subirFoto(file)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(err => {
+          this.fotoMsg = err?.error?.message || 'Error al subir foto.';
+          this.fotoPreview = null;
+          return of(null);
+        }),
+        finalize(() => { this.isUploadingFoto = false; })
+      )
+      .subscribe(res => {
+        if (res) {
+          this.fotoMsg = 'Foto actualizada.';
+          if (this.perfilMedico) {
+            this.perfilMedico = { ...this.perfilMedico, foto_perfil: res.foto_url };
+          }
+        }
+      });
   }
 
   toggleCreateForm(): void {

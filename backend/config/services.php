@@ -28,6 +28,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'firebase' => [
+        'credentials' => env('FIREBASE_CREDENTIALS', 'storage/app/firebase-adminsdk.json'),
+        'project_id'  => env('FIREBASE_PROJECT_ID', 'yoltec'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

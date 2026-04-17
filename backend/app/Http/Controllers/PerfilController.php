@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class PerfilController extends Controller
 
@@ -36,6 +37,29 @@ class PerfilController extends Controller
             'message' => 'Perfil actualizado exitosamente',
             'perfil' => $user
         ], 200);
+    }
+
+    // Subir foto de perfil
+    public function subirFoto(Request $request)
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        // Eliminar foto anterior si existe
+        if ($user->foto_perfil) {
+            Storage::disk('public')->delete($user->foto_perfil);
+        }
+
+        $path = $request->file('foto')->store('fotos-perfil', 'public');
+        $user->update(['foto_perfil' => $path]);
+
+        return response()->json([
+            'message' => 'Foto actualizada.',
+            'foto_url' => asset('storage/' . $path),
+        ]);
     }
 
     // Cambiar contraseña

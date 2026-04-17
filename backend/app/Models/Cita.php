@@ -48,6 +48,11 @@ class Cita extends Model
         return $this->hasOne(Receta::class);
     }
 
+    public function consulta()
+    {
+        return $this->hasOne(Consulta::class);
+    }
+
     // Helper para generar clave única
     public static function generarClaveCita()
     {

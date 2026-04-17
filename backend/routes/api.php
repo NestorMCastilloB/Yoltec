@@ -14,6 +14,8 @@ use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\CalendarioAdminController;
+use App\Http\Controllers\ConsultaController;
+use App\Http\Controllers\PerfilMedicoController;
 
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
@@ -28,10 +30,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/fcm-token', function (Request $request) {
+        $request->validate(['fcm_token' => 'required|string']);
+        $request->user()->update(['fcm_token' => $request->fcm_token]);
+        return response()->json(['message' => 'Token FCM registrado.']);
+    });
 
     // Perfil
     Route::get('/perfil', [PerfilController::class, 'show']);
     Route::put('/perfil', [PerfilController::class, 'update']);
+    Route::post('/perfil/foto', [PerfilController::class, 'subirFoto']);
     Route::post('/perfil/cambiar-password', [PerfilController::class, 'cambiarPassword']);
 
     // Citas
@@ -42,6 +50,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar']);
     Route::post('/citas/{id}/atender', [CitaController::class, 'atender']);       // Solo doctor
     Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']); // Solo doctor
+    Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);   // Solo doctor
+    Route::get('/citas/{id}/consulta', [ConsultaController::class, 'show']);
+
+    // Perfil médico e historial
+    Route::get('/perfil-medico', [PerfilMedicoController::class, 'show']);
+    Route::put('/perfil-medico', [PerfilMedicoController::class, 'update']);
+    Route::get('/perfil-medico/historial', [PerfilMedicoController::class, 'historial']);
+    Route::get('/perfil-medico/alumno/{id}', [PerfilMedicoController::class, 'show']);         // Doctor ve perfil de alumno
+    Route::get('/perfil-medico/alumno/{id}/historial', [PerfilMedicoController::class, 'historial']); // Doctor ve historial de alumno
 
     // Bitácoras
     Route::get('/bitacoras', [BitacoraController::class, 'index']);

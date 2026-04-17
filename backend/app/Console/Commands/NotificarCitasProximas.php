@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\CitaProximaMail;
 use App\Models\Cita;
+use App\Services\FcmService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
@@ -47,6 +48,16 @@ class NotificarCitasProximas extends Command
                 horaCita: Carbon::parse($cita->hora_cita)->format('H:i') . ' hrs',
                 motivo: $cita->motivo ?? ''
             ));
+
+            // Notificación push si tiene token FCM
+            if ($alumno->fcm_token) {
+                (new FcmService())->send(
+                    $alumno->fcm_token,
+                    'Recordatorio de cita',
+                    "Tienes una cita mañana a las " . Carbon::parse($cita->hora_cita)->format('H:i') . " hrs.",
+                    ['cita_id' => (string) $cita->id, 'tipo' => 'recordatorio_24h']
+                );
+            }
 
             $this->info("Notificado: {$alumno->email} — cita {$cita->clave_cita}");
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\User;
 use App\Models\DiaEspecial;
+use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -191,10 +192,21 @@ class CitaController extends Controller
         $validated['estatus'] = 'programada';
 
         $cita = Cita::create($validated);
+        $cita->load(['alumno', 'doctor']);
+
+        // Notificación push al alumno
+        if ($cita->alumno?->fcm_token) {
+            (new FcmService())->send(
+                $cita->alumno->fcm_token,
+                'Cita confirmada',
+                "Tu cita está programada para el {$cita->fecha_cita} a las {$cita->hora_cita}.",
+                ['cita_id' => (string) $cita->id, 'tipo' => 'cita_confirmada']
+            );
+        }
 
         return response()->json([
             'message' => 'Cita agendada exitosamente',
-            'cita' => $cita->load(['alumno', 'doctor'])
+            'cita' => $cita
         ], 201);
     }
 
@@ -230,6 +242,17 @@ class CitaController extends Controller
         }
 
         $cita->update(['estatus' => 'cancelada']);
+        $cita->load('alumno');
+
+        // Notificación push al alumno
+        if ($cita->alumno?->fcm_token) {
+            (new FcmService())->send(
+                $cita->alumno->fcm_token,
+                'Cita cancelada',
+                "Tu cita del {$cita->fecha_cita} a las {$cita->hora_cita} fue cancelada.",
+                ['cita_id' => (string) $cita->id, 'tipo' => 'cita_cancelada']
+            );
+        }
 
         return response()->json([
             'message' => 'Cita cancelada exitosamente',
