@@ -56,3 +56,4 @@ tester/
 # ─── Archivos locales con credenciales reales ──────
 contexto_proyecto.md
 backend/.env.docker
+Iniciar/
