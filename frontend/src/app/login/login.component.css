@@ -138,3 +138,20 @@
   text-decoration: none;
 }
 .forgot-link:hover { text-decoration: underline; }
+
+.duracion-select {
+  width: 100%;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: #37474f;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.duracion-select:focus {
+  outline: none;
+  border-color: #4caf50;
+}

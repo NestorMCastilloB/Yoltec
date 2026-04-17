@@ -19,7 +19,17 @@ export class LoginComponent implements OnDestroy {
   activeTab: string = 'student';
   isLoading = false;
   errorMessage: string | null = null;
-  
+  recordarPor: number = 1440;
+
+  readonly duracionOpciones = [
+    { valor: 1440,  etiqueta: '1 día' },
+    { valor: 2880,  etiqueta: '2 días' },
+    { valor: 7200,  etiqueta: '5 días' },
+    { valor: 10080, etiqueta: '1 semana' },
+    { valor: 20160, etiqueta: '2 semanas' },
+    { valor: 43200, etiqueta: '1 mes' },
+  ];
+
   studentData = {
     identificador: '',
     password: ''
@@ -55,8 +65,8 @@ export class LoginComponent implements OnDestroy {
   private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin') {
     this.isLoading = true;
     this.errorMessage = null;
-    
-    this.authService.login(identificador, password, tipoUsuario)
+
+    this.authService.login(identificador, password, tipoUsuario, this.recordarPor)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {

@@ -27,6 +27,7 @@ class AuthController extends Controller
             'password'      => 'required|string',
             'tipo_usuario'  => 'required|in:alumno,doctor,admin',
             'device_token'  => 'nullable|string',
+            'recordar_por'  => 'nullable|integer|in:1440,2880,7200,10080,20160,43200',
         ]);
 
         $tipoUsuario  = $request->tipo_usuario;
@@ -51,9 +52,11 @@ class AuthController extends Controller
             }
         }
 
+        $recordarPor = $request->input('recordar_por', 1440); // minutos, default 1 día
+
         // Alumnos y admins: nunca requieren 2FA
         if ($tipoUsuario === 'alumno' || $tipoUsuario === 'admin' || config('app.env') === 'local') {
-            return $this->successResponse($user);
+            return $this->successResponse($user, $recordarPor);
         }
 
         // Doctores en producción: verificar dispositivo de confianza
@@ -67,9 +70,12 @@ class AuthController extends Controller
             if ($trusted) {
                 // Renovar expiración y devolver token directamente
                 $trusted->update(['expires_at' => Carbon::now()->addDays(self::DEVICE_TRUST_DAYS)]);
-                return $this->successResponse($user);
+                return $this->successResponse($user, $recordarPor);
             }
         }
+
+        // Guardar duración elegida para usarla al verificar 2FA
+        Cache::put("pending_recordar_{$user->id}", $recordarPor, 600);
 
         // Sin dispositivo de confianza: enviar código 2FA
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -140,7 +146,11 @@ class AuthController extends Controller
             ->where('expires_at', '<', Carbon::now())
             ->delete();
 
-        $response = $this->successResponse($user);
+        // Recuperar duración del token de la sesión pendiente (guardada en caché)
+        $recordarPor = Cache::get("pending_recordar_{$user->id}", 1440);
+        Cache::forget("pending_recordar_{$user->id}");
+
+        $response = $this->successResponse($user, $recordarPor);
         $data = $response->getData(true);
         $data['device_token'] = $deviceToken;
 
@@ -197,9 +207,9 @@ class AuthController extends Controller
         return response()->json(['user' => $request->user()], 200);
     }
 
-    private function successResponse(User $user)
+    private function successResponse(User $user, int $minutosExpiracion = 1440)
     {
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], Carbon::now()->addMinutes($minutosExpiracion))->plainTextToken;
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso',

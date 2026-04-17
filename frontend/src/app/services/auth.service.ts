@@ -45,8 +45,8 @@ export class AuthService {
     }
   }
 
-  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {
-    const body: any = { identificador, password, tipo_usuario: tipoUsuario };
+  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin', recordarPor: number = 1440): Observable<LoginResponse> {
+    const body: any = { identificador, password, tipo_usuario: tipoUsuario, recordar_por: recordarPor };
     if (tipoUsuario === 'doctor') {
       const deviceToken = localStorage.getItem('doctor_device_token');
       if (deviceToken) body.device_token = deviceToken;
