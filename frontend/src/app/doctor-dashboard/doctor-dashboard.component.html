@@ -412,6 +412,14 @@
 
                   <div class="card-actions">
                     <button
+                      class="btn-perfil-alumno"
+                      *ngIf="cita.alumno"
+                      (click)="openPerfilAlumno(cita.alumno.id)"
+                      title="Ver perfil médico"
+                    >
+                      Ver perfil
+                    </button>
+                    <button
                       class="btn-secondary"
                       (click)="onCancelCita(cita)"
                       [disabled]="isSubmitting"
@@ -467,6 +475,9 @@
                   <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
                   <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
                   <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
+                  <div class="card-actions" *ngIf="cita.alumno">
+                    <button class="btn-perfil-alumno" (click)="openPerfilAlumno(cita.alumno.id)">Ver perfil</button>
+                  </div>
                 </div>
               </ng-container>
               <ng-template #noHistorialDoctor>
@@ -1002,6 +1013,75 @@
         <button class="btn-primary" (click)="submitConsulta()" [disabled]="isSubmittingConsulta">
           {{ isSubmittingConsulta ? 'Guardando...' : 'Guardar y marcar atendida' }}
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL PERFIL MÉDICO ALUMNO ===== -->
+  <div class="modal-overlay" *ngIf="showPerfilAlumnoModal" (click)="closePerfilAlumno()">
+    <div class="modal-perfil-alumno" (click)="$event.stopPropagation()">
+      <div class="modal-perfil-header">
+        <h3>Perfil Médico del Paciente</h3>
+        <button class="modal-close" (click)="closePerfilAlumno()">✕</button>
+      </div>
+
+      <div *ngIf="isLoadingPerfilAlumno" class="modal-loading">Cargando perfil...</div>
+
+      <div *ngIf="!isLoadingPerfilAlumno && perfilAlumnoData" class="modal-perfil-body">
+
+        <!-- Avatar + datos básicos -->
+        <div class="perfil-alumno-top">
+          <div class="perfil-alumno-avatar">
+            <img *ngIf="perfilAlumnoData.foto_perfil" [src]="perfilAlumnoData.foto_perfil" alt="foto" />
+            <span *ngIf="!perfilAlumnoData.foto_perfil">{{ perfilAlumnoData.nombre[0] }}{{ perfilAlumnoData.apellido[0] }}</span>
+          </div>
+          <div class="perfil-alumno-info">
+            <h4>{{ perfilAlumnoData.nombre }} {{ perfilAlumnoData.apellido }}</h4>
+            <p>N° Control: <strong>{{ perfilAlumnoData.numero_control }}</strong></p>
+            <p>Email: {{ perfilAlumnoData.email }}</p>
+            <p *ngIf="perfilAlumnoData.telefono">Tel: {{ perfilAlumnoData.telefono }}</p>
+          </div>
+        </div>
+
+        <!-- Datos médicos -->
+        <div class="perfil-alumno-medico">
+          <div class="dato-medico">
+            <span class="dato-label">Tipo de sangre</span>
+            <span class="dato-valor" [class.sin-dato]="!perfilAlumnoData.tipo_sangre">
+              {{ perfilAlumnoData.tipo_sangre || 'No especificado' }}
+            </span>
+          </div>
+          <div class="dato-medico">
+            <span class="dato-label">Alergias</span>
+            <span class="dato-valor" [class.sin-dato]="!perfilAlumnoData.alergias">
+              {{ perfilAlumnoData.alergias || 'Ninguna registrada' }}
+            </span>
+          </div>
+          <div class="dato-medico">
+            <span class="dato-label">Enfermedades crónicas</span>
+            <span class="dato-valor" [class.sin-dato]="!perfilAlumnoData.enfermedades_cronicas">
+              {{ perfilAlumnoData.enfermedades_cronicas || 'Ninguna registrada' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Historial de consultas -->
+        <div class="perfil-alumno-historial">
+          <h4>Historial de consultas ({{ historialAlumno.length }})</h4>
+          <p *ngIf="historialAlumno.length === 0" class="sin-dato">Sin consultas previas.</p>
+          <div *ngFor="let item of historialAlumno" class="historial-item-mini">
+            <div class="historial-mini-header" (click)="toggleHistorialAlumnoItem(item.id)">
+              <span class="historial-fecha">{{ item.fecha_cita | date:'dd/MM/yyyy' }}</span>
+              <span class="historial-motivo-mini">{{ item.motivo }}</span>
+              <span>{{ historialAlumnoExpandido === item.id ? '▲' : '▼' }}</span>
+            </div>
+            <div *ngIf="historialAlumnoExpandido === item.id" class="historial-mini-detalle">
+              <p *ngIf="item.consulta"><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
+              <p *ngIf="item.consulta"><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
+              <p *ngIf="item.receta"><strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

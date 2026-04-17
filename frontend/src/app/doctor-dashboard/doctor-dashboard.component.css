@@ -1332,3 +1332,166 @@
 .modal-consulta .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem; }
 .form-msg { padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem; background: #ffebee; color: #c62828; font-size: 0.9rem; }
 .form-msg.success { background: #e8f5e9; color: #2e7d32; }
+
+/* ===== BOTÓN VER PERFIL ALUMNO ===== */
+.btn-perfil-alumno {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-perfil-alumno:hover { background: #bbdefb; }
+
+/* ===== MODAL PERFIL MÉDICO ALUMNO ===== */
+.modal-perfil-alumno {
+  background: white;
+  border-radius: 16px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #e8f5e9;
+}
+
+.modal-perfil-header h3 {
+  margin: 0;
+  color: #1B5E20;
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #90a4ae;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: #37474f; }
+
+.modal-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #78909c;
+}
+
+.modal-perfil-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.perfil-alumno-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.perfil-alumno-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #66bb6a, #4caf50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.perfil-alumno-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.perfil-alumno-info h4 { margin: 0 0 0.25rem; color: #1B5E20; font-size: 1rem; }
+.perfil-alumno-info p { margin: 0.15rem 0; font-size: 0.88rem; color: #546e7a; }
+
+.perfil-alumno-medico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  background: #f9fbe7;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.dato-medico {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.dato-medico:last-child { grid-column: 1 / -1; }
+
+.dato-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #78909c;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dato-valor {
+  font-size: 0.9rem;
+  color: #37474f;
+  font-weight: 500;
+}
+.dato-valor.sin-dato { color: #b0bec5; font-style: italic; font-weight: 400; }
+
+.perfil-alumno-historial h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #455a64;
+  margin: 0 0 0.75rem;
+  border-bottom: 1px solid #eceff1;
+  padding-bottom: 0.4rem;
+}
+
+.historial-item-mini {
+  border: 1px solid #e8f5e9;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.historial-mini-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+  background: #fafffe;
+  transition: background 0.15s;
+  font-size: 0.88rem;
+}
+.historial-mini-header:hover { background: #f1f8e9; }
+
+.historial-fecha { font-weight: 700; color: #2e7d32; flex-shrink: 0; }
+.historial-motivo-mini { flex: 1; color: #546e7a; }
+
+.historial-mini-detalle {
+  padding: 0.6rem 0.85rem;
+  background: white;
+  border-top: 1px solid #f1f8e9;
+  font-size: 0.87rem;
+  color: #37474f;
+  line-height: 1.6;
+}
+.historial-mini-detalle p { margin: 0.2rem 0; }

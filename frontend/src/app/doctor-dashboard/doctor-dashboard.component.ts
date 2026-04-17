@@ -13,6 +13,7 @@ import { PreEvaluacionIAService, PreEvaluacion } from '../services/pre-evaluacio
 import { IaPriorityService, ClasificacionPrioridad, ResumenPrioridad } from '../services/ia-priority.service';
 import { EstadisticasService, Estadisticas } from '../services/estadisticas.service';
 import { ConsultaService } from '../services/consulta.service';
+import { PerfilMedicoService, PerfilMedico, ConsultaHistorial } from '../services/perfil-medico.service';
 
 Chart.register(...registerables);
 
@@ -86,6 +87,13 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
   prioridadResumen: ResumenPrioridad | null = null;
   isLoadingPrioridad = false;
   prioridadError: string | null = null;
+
+  // Perfil médico del alumno (modal)
+  showPerfilAlumnoModal = false;
+  perfilAlumnoData: PerfilMedico | null = null;
+  historialAlumno: ConsultaHistorial[] = [];
+  isLoadingPerfilAlumno = false;
+  historialAlumnoExpandido: number | null = null;
 
   // Formulario de consulta
   showConsultaForm = false;
@@ -174,7 +182,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
     private preEvaluacionIAService: PreEvaluacionIAService,
     private iaPriorityService: IaPriorityService,
     private estadisticasService: EstadisticasService,
-    private consultaService: ConsultaService
+    private consultaService: ConsultaService,
+    private perfilMedicoService: PerfilMedicoService
   ) {}
 
   ngOnInit(): void {
@@ -1285,6 +1294,34 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy, AfterViewChe
         this.closePreEvaluacionModal();
       }
     });
+  }
+
+  // ===== PERFIL MÉDICO ALUMNO =====
+
+  openPerfilAlumno(alumnoId: number): void {
+    this.showPerfilAlumnoModal = true;
+    this.perfilAlumnoData = null;
+    this.historialAlumno = [];
+    this.historialAlumnoExpandido = null;
+    this.isLoadingPerfilAlumno = true;
+
+    this.perfilMedicoService.getPerfilAlumno(alumnoId)
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)), finalize(() => { this.isLoadingPerfilAlumno = false; }))
+      .subscribe(res => { if (res) this.perfilAlumnoData = res.perfil; });
+
+    this.perfilMedicoService.getHistorialAlumno(alumnoId)
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+      .subscribe(res => { if (res) this.historialAlumno = res.historial; });
+  }
+
+  closePerfilAlumno(): void {
+    this.showPerfilAlumnoModal = false;
+    this.perfilAlumnoData = null;
+    this.historialAlumno = [];
+  }
+
+  toggleHistorialAlumnoItem(id: number): void {
+    this.historialAlumnoExpandido = this.historialAlumnoExpandido === id ? null : id;
   }
 
   getEstatusClass(estatus: string): string {
