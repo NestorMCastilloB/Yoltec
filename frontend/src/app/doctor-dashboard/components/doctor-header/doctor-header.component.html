@@ -1,0 +1,40 @@
+<header class="dashboard-header">
+  <div class="header-content">
+    <div class="logo-area">
+      <img src="/logo.png" alt="Logo Clínica" class="logo">
+      <h1>Consultorio Médico</h1>
+    </div>
+    <div class="user-info">
+      <span>Bienvenido, {{ doctorName }}</span>
+      <button class="logout-btn" (click)="logoutEvent.emit()">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <nav class="dashboard-nav">
+    <button class="nav-button" [class.active]="activeSection === 'inicio'" (click)="sectionChange.emit('inicio')">
+      Inicio
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'citas'" (click)="sectionChange.emit('citas')">
+      Citas
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'bitacoras'" (click)="sectionChange.emit('bitacoras')">
+      Bitácoras
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'recetas'" (click)="sectionChange.emit('recetas')">
+      Recetas
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'pre-evaluaciones'"
+      (click)="sectionChange.emit('pre-evaluaciones')">
+      🤖 Pre-evaluaciones
+      <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'ia-prioridad'"
+      (click)="sectionChange.emit('ia-prioridad')">
+      ⚡ Prioridad IA
+    </button>
+    <button class="nav-button" [class.active]="activeSection === 'estadisticas'"
+      (click)="sectionChange.emit('estadisticas')">
+      📊 Estadísticas
+    </button>
+  </nav>
+</header>

@@ -1,0 +1,78 @@
+<div class="inicio-container">
+  <!-- Encabezado de bienvenida -->
+  <div class="welcome-header">
+    <h2>¡Hola, {{ doctorName }}! 👋</h2>
+    <p>Bienvenido a tu panel de control. Aquí tienes un resumen de tu actividad médica.</p>
+  </div>
+
+  <!-- Tarjetas de estadísticas (más grandes y espaciadas) -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-content">
+        <h3>Citas del día</h3>
+        <p class="stat-value">{{ todayAppointments }}</p>
+        <span class="stat-detail">Programadas para hoy</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>Pacientes atendidos</h3>
+        <p class="stat-value">{{ patientsAttended }}</p>
+        <span class="stat-detail">Historial reciente</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <h3>Citas pendientes</h3>
+        <p class="stat-value">{{ pendingBitacoras }}</p>
+        <span class="stat-detail">Requieren atención</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Próxima cita (destacada) -->
+  <div class="proxima-cita-wrapper">
+    <div class="proxima-cita-card" *ngIf="proximaCita; else sinProxima">
+      <div class="proxima-header">
+        <span class="proxima-icon">📌</span>
+        <h3>Próxima cita</h3>
+      </div>
+      <div class="proxima-cita-info">
+        <div class="proxima-dato">
+          <span class="proxima-label">Paciente</span>
+          <span class="proxima-valor">{{ proximaCita.alumno?.nombre }} {{ proximaCita.alumno?.apellido }}</span>
+        </div>
+        <div class="proxima-dato">
+          <span class="proxima-label">Fecha</span>
+          <span class="proxima-valor">{{ proximaCita.fecha_cita }}</span>
+        </div>
+        <div class="proxima-dato">
+          <span class="proxima-label">Hora</span>
+          <span class="proxima-valor">{{ proximaCita.hora_cita }}</span>
+        </div>
+        <div class="proxima-dato">
+          <span class="proxima-label">Motivo</span>
+          <span class="proxima-valor">{{ proximaCita.motivo || 'No especificado' }}</span>
+        </div>
+        <div class="proxima-dato">
+          <span class="proxima-label">Clave de cita</span>
+          <span class="proxima-valor codigo">{{ proximaCita.clave_cita }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #sinProxima>
+      <div class="proxima-cita-card empty">
+        <div class="proxima-header">
+          <span class="proxima-icon">📭</span>
+          <h3>No hay citas próximas</h3>
+        </div>
+        <p>Las citas que programes aparecerán aquí.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

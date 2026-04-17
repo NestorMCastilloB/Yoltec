@@ -1,0 +1,63 @@
+<div class="ia-prioridad-wrapper">
+  <div class="section-header">
+    <h2>⚡ Clasificación de Prioridad IA</h2>
+    <button class="btn-primary" (click)="loadPrioridad()">Actualizar</button>
+  </div>
+  <p class="ia-disclaimer">
+    🤖 Esta clasificación es una herramienta de apoyo basada en el historial del alumno. La decisión final siempre es
+    del doctor.
+  </p>
+
+  <div *ngIf="isLoadingPrioridad" class="loading">Analizando citas...</div>
+  <div *ngIf="prioridadError" class="alert-error">{{ prioridadError }}</div>
+
+  <div *ngIf="prioridadResumen && !isLoadingPrioridad">
+    <div class="prioridad-resumen">
+      <div class="prioridad-badge alta">
+        <span class="badge-num">{{ prioridadResumen.resumen.alta }}</span>
+        <span class="badge-label">🔴 Alta prioridad</span>
+      </div>
+      <div class="prioridad-badge media">
+        <span class="badge-num">{{ prioridadResumen.resumen.media }}</span>
+        <span class="badge-label">🟠 Media prioridad</span>
+      </div>
+      <div class="prioridad-badge baja">
+        <span class="badge-num">{{ prioridadResumen.resumen.baja }}</span>
+        <span class="badge-label">🟢 Baja prioridad</span>
+      </div>
+      <div class="prioridad-badge total">
+        <span class="badge-num">{{ prioridadResumen.total_citas }}</span>
+        <span class="badge-label">📋 Total citas</span>
+      </div>
+    </div>
+
+    <div *ngIf="prioridadResumen.citas.length === 0" class="empty-state">
+      ✨ No hay citas pendientes para clasificar.
+    </div>
+
+    <div class="citas-prioridad-lista" *ngIf="prioridadResumen.citas.length > 0">
+      <div *ngFor="let item of prioridadResumen.citas" class="cita-prioridad-card"
+        [ngClass]="'prioridad-' + item.prioridad">
+        <div class="cita-prioridad-header">
+          <span class="prioridad-tag" [ngClass]="'tag-' + item.prioridad">
+            {{ item.prioridad === 'alta' ? '🔴' : item.prioridad === 'media' ? '🟠' : '🟢' }} {{ item.prioridad |
+            uppercase }}
+          </span>
+          <span class="prioridad-score">🎯 Puntuación: {{ item.puntuacion }}</span>
+        </div>
+        <div class="cita-prioridad-body">
+          <p><strong>👤 Paciente:</strong> {{ item.cita.alumno.nombre }} ({{ item.cita.alumno.numero_control }})</p>
+          <p><strong>📅 Fecha:</strong> {{ item.cita.fecha_cita | date:'dd/MM/yyyy' }} a las {{ item.cita.hora_cita }}
+          </p>
+          <p><strong>📝 Motivo:</strong> {{ item.cita.motivo }}</p>
+          <p class="justificacion"><strong>🤖 Análisis IA:</strong> {{ item.justificacion_resumida }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!prioridadResumen && !isLoadingPrioridad && !prioridadError" class="empty-state">
+    <p>📊 Presiona "Actualizar" para clasificar las citas pendientes.</p>
+    <button class="btn-primary" (click)="loadPrioridad()">Clasificar ahora</button>
+  </div>
+</div>
