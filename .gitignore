@@ -52,3 +52,7 @@ docs/*.docx
 docs/*.html
 tester/
 .env.companero
+
+# ─── Archivos locales con credenciales reales ──────
+contexto_proyecto.md
+backend/.env.docker
