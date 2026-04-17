@@ -1,1 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
+/* Eliminar márgenes blancos del navegador */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #0F172A;
+    /* mismo color de fondo para evitar parpadeos */
+}

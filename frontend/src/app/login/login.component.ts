@@ -15,16 +15,21 @@ import { Subject, of } from 'rxjs';
 })
 export class LoginComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   activeTab: string = 'student';
   isLoading = false;
   errorMessage: string | null = null;
   recordarPor: number = 1440;
 
+  // Control de visibilidad de contraseñas
+  showPasswordStudent = false;
+  showPasswordDoctor = false;
+  showPasswordAdmin = false;
+
   readonly duracionOpciones = [
-    { valor: 1440,  etiqueta: '1 día' },
-    { valor: 2880,  etiqueta: '2 días' },
-    { valor: 7200,  etiqueta: '5 días' },
+    { valor: 1440, etiqueta: '1 día' },
+    { valor: 2880, etiqueta: '2 días' },
+    { valor: 7200, etiqueta: '5 días' },
     { valor: 10080, etiqueta: '1 semana' },
     { valor: 20160, etiqueta: '2 semanas' },
     { valor: 43200, etiqueta: '1 mes' },
@@ -48,7 +53,14 @@ export class LoginComponent implements OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
+
+  // Alternar visibilidad de contraseña según rol
+  togglePassword(role: 'student' | 'doctor' | 'admin') {
+    if (role === 'student') this.showPasswordStudent = !this.showPasswordStudent;
+    if (role === 'doctor') this.showPasswordDoctor = !this.showPasswordDoctor;
+    if (role === 'admin') this.showPasswordAdmin = !this.showPasswordAdmin;
+  }
 
   onStudentLogin() {
     this.login(this.studentData.identificador, this.studentData.password, 'alumno');
@@ -93,5 +105,7 @@ export class LoginComponent implements OnDestroy {
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+    // Limpiar mensaje de error al cambiar de pestaña
+    this.errorMessage = null;
   }
 }

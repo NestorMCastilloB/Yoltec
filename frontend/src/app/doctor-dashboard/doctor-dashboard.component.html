@@ -2,54 +2,40 @@
   <!-- Encabezado -->
   <header class="dashboard-header">
     <div class="header-content">
-      <h1>Consultorio Médico</h1>
+      <div class="logo-area">
+        <!-- Asegúrate de colocar tu logo en assets/logo.png (o la ruta que uses) -->
+        <img src="assets/logo.png" alt="Logo Clínica" class="logo">
+        <h1>Consultorio Médico</h1>
+      </div>
       <div class="user-info">
         <span>Bienvenido, {{ doctorName }}</span>
         <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
-    
+
     <!-- Navegación -->
     <nav class="dashboard-nav">
-      <button 
-        [class.active]="activeSection === 'inicio'" 
-        (click)="setActiveSection('inicio')"
-        class="nav-button">
+      <button [class.active]="activeSection === 'inicio'" (click)="setActiveSection('inicio')" class="nav-button">
         Inicio
       </button>
-      <button 
-        [class.active]="activeSection === 'citas'" 
-        (click)="setActiveSection('citas')"
-        class="nav-button">
+      <button [class.active]="activeSection === 'citas'" (click)="setActiveSection('citas')" class="nav-button">
         Citas
       </button>
-      <button 
-        [class.active]="activeSection === 'bitacoras'" 
-        (click)="setActiveSection('bitacoras')"
-        class="nav-button">
+      <button [class.active]="activeSection === 'bitacoras'" (click)="setActiveSection('bitacoras')" class="nav-button">
         Bitácoras
       </button>
-      <button 
-        [class.active]="activeSection === 'recetas'" 
-        (click)="setActiveSection('recetas')"
-        class="nav-button">
+      <button [class.active]="activeSection === 'recetas'" (click)="setActiveSection('recetas')" class="nav-button">
         Recetas
       </button>
-      <button
-        [class.active]="activeSection === 'pre-evaluaciones'"
-        (click)="setActiveSection('pre-evaluaciones')"
+      <button [class.active]="activeSection === 'pre-evaluaciones'" (click)="setActiveSection('pre-evaluaciones')"
         class="nav-button">
         🤖 Pre-evaluaciones <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
       </button>
-      <button
-        [class.active]="activeSection === 'ia-prioridad'"
-        (click)="setActiveSection('ia-prioridad')"
+      <button [class.active]="activeSection === 'ia-prioridad'" (click)="setActiveSection('ia-prioridad')"
         class="nav-button">
         ⚡ Prioridad IA
       </button>
-      <button
-        [class.active]="activeSection === 'estadisticas'"
-        (click)="setActiveSection('estadisticas')"
+      <button [class.active]="activeSection === 'estadisticas'" (click)="setActiveSection('estadisticas')"
         class="nav-button">
         📊 Estadísticas
       </button>
@@ -58,13 +44,13 @@
 
   <!-- Contenido Principal -->
   <main class="dashboard-content">
-    
+
     <!-- Sección: Inicio -->
     <section *ngIf="activeSection === 'inicio'" class="content-section">
       <div class="welcome-card">
         <h2>Panel del Doctor</h2>
         <p>Bienvenido {{ doctorName }}, desde aquí puedes gestionar tus consultas, pacientes y registros médicos.</p>
-        
+
         <div class="quick-stats">
           <div class="stat-card">
             <h3>Citas del Día</h3>
@@ -175,7 +161,8 @@
         <h2>⚡ Clasificación de Prioridad IA</h2>
         <button class="btn-primary" (click)="loadPrioridad()">Actualizar</button>
       </div>
-      <p class="ia-disclaimer">Esta clasificación es una herramienta de apoyo basada en el historial del alumno. La decisión final siempre es del doctor.</p>
+      <p class="ia-disclaimer">Esta clasificación es una herramienta de apoyo basada en el historial del alumno. La
+        decisión final siempre es del doctor.</p>
 
       <div *ngIf="isLoadingPrioridad" class="loading">Analizando citas...</div>
       <div *ngIf="prioridadError" class="alert alert-error">{{ prioridadError }}</div>
@@ -207,9 +194,7 @@
         </div>
 
         <div class="citas-prioridad-lista" *ngIf="prioridadResumen.citas.length > 0">
-          <div
-            *ngFor="let item of prioridadResumen.citas"
-            class="cita-prioridad-card"
+          <div *ngFor="let item of prioridadResumen.citas" class="cita-prioridad-card"
             [ngClass]="'prioridad-' + item.prioridad">
             <div class="cita-prioridad-header">
               <span class="prioridad-tag" [ngClass]="'tag-' + item.prioridad">
@@ -219,7 +204,8 @@
             </div>
             <div class="cita-prioridad-body">
               <p><strong>Paciente:</strong> {{ item.cita.alumno.nombre }} ({{ item.cita.alumno.numero_control }})</p>
-              <p><strong>Fecha:</strong> {{ item.cita.fecha_cita | date:'dd/MM/yyyy' }} a las {{ item.cita.hora_cita }}</p>
+              <p><strong>Fecha:</strong> {{ item.cita.fecha_cita | date:'dd/MM/yyyy' }} a las {{ item.cita.hora_cita }}
+              </p>
               <p><strong>Motivo:</strong> {{ item.cita.motivo }}</p>
               <p class="justificacion"><strong>Análisis IA:</strong> {{ item.justificacion_resumida }}</p>
             </div>
@@ -251,20 +237,15 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="numeroControl">Número de control del alumno</label>
-              <input
-                type="text"
-                id="numeroControl"
-                name="numero_control"
-                [(ngModel)]="createFormData.numero_control"
-                required
-                placeholder="Ej. A12345678"
-              />
+              <input type="text" id="numeroControl" name="numero_control" [(ngModel)]="createFormData.numero_control"
+                required placeholder="Ej. A12345678" />
             </div>
             <div class="form-group full-width">
               <label>Fecha de la cita</label>
               <div class="calendar-card">
                 <div class="calendar-header">
-                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
+                  <button type="button" class="calendar-nav" (click)="changeMonth(-1)"
+                    [disabled]="isCurrentMonth">‹</button>
                   <h4>{{ calendarLabel | titlecase }}</h4>
                   <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
                 </div>
@@ -278,11 +259,7 @@
                 </div>
                 <div class="calendar-grid">
                   <ng-container *ngFor="let week of calendarWeeks">
-                    <button
-                      type="button"
-                      *ngFor="let day of week"
-                      class="calendar-day"
-                      [ngClass]="{
+                    <button type="button" *ngFor="let day of week" class="calendar-day" [ngClass]="{
                         outside: !day.isCurrentMonth,
                         today: day.isToday,
                         selected: isSelectedDate(day.date),
@@ -291,11 +268,8 @@
                         'status-partial': day.availability === 'partial',
                         'status-full': day.availability === 'full',
                         'status-none': day.availability === 'none'
-                      }"
-                      [ngStyle]="getDayStyle(day)"
-                      [attr.aria-pressed]="isSelectedDate(day.date)"
-                      (click)="selectCalendarDay(day)"
-                    >
+                      }" [ngStyle]="getDayStyle(day)" [attr.aria-pressed]="isSelectedDate(day.date)"
+                      (click)="selectCalendarDay(day)">
                       <span class="day-number">{{ day.label }}</span>
                       <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
                     </button>
@@ -305,17 +279,12 @@
               <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
                 <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
               </div>
-              <input
-                type="hidden"
-                id="fechaCita"
-                name="fecha_cita"
-                [(ngModel)]="createFormData.fecha_cita"
-                required
-              />
+              <input type="hidden" id="fechaCita" name="fecha_cita" [(ngModel)]="createFormData.fecha_cita" required />
             </div>
             <div class="form-group full-width">
               <label>Hora</label>
-              <div class="slots-wrapper" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
+              <div class="slots-wrapper"
+                [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
                 <div class="slots-legend">
                   <span class="leg-dot free"></span> Libre
                   <span class="leg-dot selected-dot"></span> Seleccionado
@@ -324,12 +293,10 @@
                 <div class="slots-group">
                   <span class="slots-period">🌅 Mañana</span>
                   <div class="time-slots">
-                    <button type="button" class="slot-button"
-                      *ngFor="let slot of timeSlots.slice(0, 16)"
+                    <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(0, 16)"
                       [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
                       [class.booked]="isSlotUnavailable(slot)"
-                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
-                      (click)="selectTimeSlot(slot)">
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
                       {{ formatTime(slot) }}
                     </button>
                   </div>
@@ -337,12 +304,10 @@
                 <div class="slots-group">
                   <span class="slots-period">🌇 Tarde</span>
                   <div class="time-slots">
-                    <button type="button" class="slot-button"
-                      *ngFor="let slot of timeSlots.slice(16)"
+                    <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(16)"
                       [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
                       [class.booked]="isSlotUnavailable(slot)"
-                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
-                      (click)="selectTimeSlot(slot)">
+                      [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
                       {{ formatTime(slot) }}
                     </button>
                   </div>
@@ -354,25 +319,14 @@
               <small class="helper-text warning" *ngIf="createFormData.fecha_cita && !hasAvailableSlotsForSelectedDate">
                 Este día ya no tiene espacios disponibles.
               </small>
-              <input
-                type="hidden"
-                id="horaCita"
-                name="hora_cita"
-                [(ngModel)]="createFormData.hora_cita"
-                required
-              />
+              <input type="hidden" id="horaCita" name="hora_cita" [(ngModel)]="createFormData.hora_cita" required />
             </div>
           </div>
 
           <div class="form-group">
             <label for="motivo">Motivo</label>
-            <textarea
-              id="motivo"
-              name="motivo"
-              [(ngModel)]="createFormData.motivo"
-              rows="3"
-              placeholder="Describe el motivo de la consulta"
-            ></textarea>
+            <textarea id="motivo" name="motivo" [(ngModel)]="createFormData.motivo" rows="3"
+              placeholder="Describe el motivo de la consulta"></textarea>
           </div>
 
           <button class="btn-primary" type="submit" [disabled]="isSubmitting || createCitaForm.invalid">
@@ -383,12 +337,8 @@
 
       <!-- Buscador de citas -->
       <div class="search-bar">
-        <input
-          type="text"
-          [(ngModel)]="searchCitas"
-          placeholder="Buscar por alumno, número de control o motivo..."
-          class="search-input"
-        >
+        <input type="text" [(ngModel)]="searchCitas" placeholder="Buscar por alumno, número de control o motivo..."
+          class="search-input">
         <button *ngIf="searchCitas" class="search-clear" (click)="searchCitas = ''">✕</button>
       </div>
 
@@ -411,33 +361,17 @@
                   <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
 
                   <div class="card-actions">
-                    <button
-                      class="btn-perfil-alumno"
-                      *ngIf="cita.alumno"
-                      (click)="openPerfilAlumno(cita.alumno.id)"
-                      title="Ver perfil médico"
-                    >
+                    <button class="btn-perfil-alumno" *ngIf="cita.alumno" (click)="openPerfilAlumno(cita.alumno.id)"
+                      title="Ver perfil médico">
                       Ver perfil
                     </button>
-                    <button
-                      class="btn-secondary"
-                      (click)="onCancelCita(cita)"
-                      [disabled]="isSubmitting"
-                    >
+                    <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
                       {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
                     </button>
-                    <button
-                      class="btn-warning"
-                      (click)="onMarkAsNoShow(cita)"
-                      [disabled]="isSubmitting"
-                    >
+                    <button class="btn-warning" (click)="onMarkAsNoShow(cita)" [disabled]="isSubmitting">
                       {{ isSubmitting ? 'Procesando...' : 'No asistió' }}
                     </button>
-                    <button
-                      class="btn-primary"
-                      (click)="onMarkAsAttended(cita)"
-                      [disabled]="isSubmitting"
-                    >
+                    <button class="btn-primary" (click)="onMarkAsAttended(cita)" [disabled]="isSubmitting">
                       {{ isSubmitting ? 'Procesando...' : 'Marcar atendida' }}
                     </button>
                   </div>
@@ -455,21 +389,15 @@
               <h3>Historial reciente</h3>
 
               <ng-container *ngIf="filteredHandledCitas.length > 0; else noHistorialDoctor">
-                <div
-                  *ngFor="let cita of filteredHandledCitas"
-                  class="cita-card"
-                  [class.cancelada]="cita.estatus === 'cancelada'"
-                  [class.no-asistio]="cita.estatus === 'no_asistio'"
-                >
+                <div *ngFor="let cita of filteredHandledCitas" class="cita-card"
+                  [class.cancelada]="cita.estatus === 'cancelada'" [class.no-asistio]="cita.estatus === 'no_asistio'">
                   <div class="cita-header">
                     <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
-                    <span
-                      class="estatus"
-                      [class.atendida]="cita.estatus === 'atendida'"
+                    <span class="estatus" [class.atendida]="cita.estatus === 'atendida'"
                       [class.cancelada]="cita.estatus === 'cancelada'"
-                      [class.no-asistio]="cita.estatus === 'no_asistio'"
-                    >
-                      {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' : 'Cancelada' }}
+                      [class.no-asistio]="cita.estatus === 'no_asistio'">
+                      {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' :
+                      'Cancelada' }}
                     </span>
                   </div>
                   <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
@@ -500,7 +428,8 @@
       <div class="section-header">
         <h2>Bitácoras Médicas</h2>
         <div class="section-header-actions">
-          <button class="btn-csv" (click)="exportBitacorasCSV()" [disabled]="bitacoras.length === 0" title="Exportar a CSV">
+          <button class="btn-csv" (click)="exportBitacorasCSV()" [disabled]="bitacoras.length === 0"
+            title="Exportar a CSV">
             ⬇ CSV
           </button>
           <button class="btn-primary" (click)="toggleBitacoraForm()">
@@ -527,100 +456,54 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="citaAsociada">Cita atendida</label>
-              <select
-                id="citaAsociada"
-                name="cita_id"
-                [(ngModel)]="bitacoraFormData.cita_id"
-                required
-                [disabled]="editingBitacoraId !== null"
-              >
+              <select id="citaAsociada" name="cita_id" [(ngModel)]="bitacoraFormData.cita_id" required
+                [disabled]="editingBitacoraId !== null">
                 <option value="" disabled selected>Selecciona una cita atendida</option>
                 <option *ngFor="let cita of availableCitasForBitacora" [value]="cita.id">
-                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }})
+                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{
+                  cita.alumno?.apellido }})
                 </option>
               </select>
             </div>
             <div class="form-group">
               <label for="diagnostico">Diagnóstico</label>
-              <textarea
-                id="diagnostico"
-                name="diagnostico"
-                [(ngModel)]="bitacoraFormData.diagnostico"
-                rows="2"
-                required
-                placeholder="Describe el diagnóstico"
-              ></textarea>
+              <textarea id="diagnostico" name="diagnostico" [(ngModel)]="bitacoraFormData.diagnostico" rows="2" required
+                placeholder="Describe el diagnóstico"></textarea>
             </div>
             <div class="form-group">
               <label for="tratamiento">Tratamiento</label>
-              <textarea
-                id="tratamiento"
-                name="tratamiento"
-                [(ngModel)]="bitacoraFormData.tratamiento"
-                rows="2"
-                required
-                placeholder="Describe el tratamiento"
-              ></textarea>
+              <textarea id="tratamiento" name="tratamiento" [(ngModel)]="bitacoraFormData.tratamiento" rows="2" required
+                placeholder="Describe el tratamiento"></textarea>
             </div>
           </div>
 
           <div class="form-grid small-grid">
             <div class="form-group">
               <label for="peso">Peso</label>
-              <input
-                type="text"
-                id="peso"
-                name="peso"
-                [(ngModel)]="bitacoraFormData.peso"
-                required
-                placeholder="Ej. 70 kg"
-              />
+              <input type="text" id="peso" name="peso" [(ngModel)]="bitacoraFormData.peso" required
+                placeholder="Ej. 70 kg" />
             </div>
             <div class="form-group">
               <label for="altura">Altura</label>
-              <input
-                type="text"
-                id="altura"
-                name="altura"
-                [(ngModel)]="bitacoraFormData.altura"
-                required
-                placeholder="Ej. 1.70 m"
-              />
+              <input type="text" id="altura" name="altura" [(ngModel)]="bitacoraFormData.altura" required
+                placeholder="Ej. 1.70 m" />
             </div>
             <div class="form-group">
               <label for="temperatura">Temperatura</label>
-              <input
-                type="text"
-                id="temperatura"
-                name="temperatura"
-                [(ngModel)]="bitacoraFormData.temperatura"
-                required
-                placeholder="Ej. 36.5 °C"
-              />
+              <input type="text" id="temperatura" name="temperatura" [(ngModel)]="bitacoraFormData.temperatura" required
+                placeholder="Ej. 36.5 °C" />
             </div>
             <div class="form-group">
               <label for="presion">Presión arterial</label>
-              <input
-                type="text"
-                id="presion"
-                name="presion_arterial"
-                [(ngModel)]="bitacoraFormData.presion_arterial"
-                required
-                placeholder="Ej. 120/80"
-              />
+              <input type="text" id="presion" name="presion_arterial" [(ngModel)]="bitacoraFormData.presion_arterial"
+                required placeholder="Ej. 120/80" />
             </div>
           </div>
 
           <div class="form-group">
             <label for="observaciones">Observaciones adicionales</label>
-              <textarea
-                id="observaciones"
-                name="observaciones"
-                [(ngModel)]="bitacoraFormData.observaciones"
-                rows="3"
-                required
-                placeholder="Notas relevantes de la consulta"
-              ></textarea>
+            <textarea id="observaciones" name="observaciones" [(ngModel)]="bitacoraFormData.observaciones" rows="3"
+              required placeholder="Notas relevantes de la consulta"></textarea>
           </div>
 
           <button class="btn-primary" type="submit" [disabled]="isSubmittingBitacora">
@@ -672,26 +555,29 @@
                   </div>
                 </dl>
 
-              <div class="metrics-row" *ngIf="bitacora.peso || bitacora.altura || bitacora.temperatura || bitacora.presion_arterial">
-                <span class="metric-chip" *ngIf="bitacora.peso">⚖️ Peso: {{ bitacora.peso }}</span>
-                <span class="metric-chip" *ngIf="bitacora.altura">📏 Altura: {{ bitacora.altura }}</span>
-                <span class="metric-chip" *ngIf="bitacora.temperatura">🌡️ Temp: {{ bitacora.temperatura }}</span>
-                <span class="metric-chip" *ngIf="bitacora.presion_arterial">🩺 Presión: {{ bitacora.presion_arterial }}</span>
-              </div>
+                <div class="metrics-row"
+                  *ngIf="bitacora.peso || bitacora.altura || bitacora.temperatura || bitacora.presion_arterial">
+                  <span class="metric-chip" *ngIf="bitacora.peso">⚖️ Peso: {{ bitacora.peso }}</span>
+                  <span class="metric-chip" *ngIf="bitacora.altura">📏 Altura: {{ bitacora.altura }}</span>
+                  <span class="metric-chip" *ngIf="bitacora.temperatura">🌡️ Temp: {{ bitacora.temperatura }}</span>
+                  <span class="metric-chip" *ngIf="bitacora.presion_arterial">🩺 Presión: {{ bitacora.presion_arterial
+                    }}</span>
+                </div>
 
-              <div class="card-actions">
-                <button class="btn-secondary" type="button" (click)="startEditBitacora(bitacora)">
-                  Editar bitácora
-                </button>
+                <div class="card-actions">
+                  <button class="btn-secondary" type="button" (click)="startEditBitacora(bitacora)">
+                    Editar bitácora
+                  </button>
+                </div>
               </div>
+            </article>
+            <!-- Paginación bitácoras -->
+            <div class="pagination" *ngIf="totalPagesBitacoras > 1">
+              <button class="page-btn" (click)="prevPageBitacoras()" [disabled]="currentPageBitacoras === 1">‹</button>
+              <span class="page-info">{{ currentPageBitacoras }} / {{ totalPagesBitacoras }}</span>
+              <button class="page-btn" (click)="nextPageBitacoras()"
+                [disabled]="currentPageBitacoras === totalPagesBitacoras">›</button>
             </div>
-          </article>
-          <!-- Paginación bitácoras -->
-          <div class="pagination" *ngIf="totalPagesBitacoras > 1">
-            <button class="page-btn" (click)="prevPageBitacoras()" [disabled]="currentPageBitacoras === 1">‹</button>
-            <span class="page-info">{{ currentPageBitacoras }} / {{ totalPagesBitacoras }}</span>
-            <button class="page-btn" (click)="nextPageBitacoras()" [disabled]="currentPageBitacoras === totalPagesBitacoras">›</button>
-          </div>
           </div>
         </ng-container>
         <ng-template #loadingBitacoras>
@@ -718,54 +604,32 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="citaReceta">Cita atendida</label>
-              <select
-                id="citaReceta"
-                name="cita_id"
-                [(ngModel)]="recetaFormData.cita_id"
-                required
-                (ngModelChange)="onRecetaCitaChange($event)"
-                [disabled]="editingRecetaId !== null"
-              >
+              <select id="citaReceta" name="cita_id" [(ngModel)]="recetaFormData.cita_id" required
+                (ngModelChange)="onRecetaCitaChange($event)" [disabled]="editingRecetaId !== null">
                 <option value="" disabled selected>Selecciona una cita atendida</option>
                 <option *ngFor="let cita of availableCitasForReceta" [value]="cita.id">
-                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }})
+                  {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{
+                  cita.alumno?.apellido }})
                 </option>
               </select>
             </div>
             <div class="form-group">
               <label for="fechaEmision">Fecha de emisión</label>
-              <input
-                type="date"
-                id="fechaEmision"
-                name="fecha_emision"
-                [(ngModel)]="recetaFormData.fecha_emision"
-                required
-              />
+              <input type="date" id="fechaEmision" name="fecha_emision" [(ngModel)]="recetaFormData.fecha_emision"
+                required />
             </div>
           </div>
 
           <div class="form-group">
             <label for="medicamentos">Medicamentos recetados</label>
-            <textarea
-              id="medicamentos"
-              name="medicamentos"
-              [(ngModel)]="recetaFormData.medicamentos"
-              rows="3"
-              required
-              placeholder="Nombre comercial, presentación y dosis"
-            ></textarea>
+            <textarea id="medicamentos" name="medicamentos" [(ngModel)]="recetaFormData.medicamentos" rows="3" required
+              placeholder="Nombre comercial, presentación y dosis"></textarea>
           </div>
 
           <div class="form-group">
             <label for="indicaciones">Indicaciones</label>
-            <textarea
-              id="indicaciones"
-              name="indicaciones"
-              [(ngModel)]="recetaFormData.indicaciones"
-              rows="3"
-              required
-              placeholder="Instrucciones para el paciente"
-            ></textarea>
+            <textarea id="indicaciones" name="indicaciones" [(ngModel)]="recetaFormData.indicaciones" rows="3" required
+              placeholder="Instrucciones para el paciente"></textarea>
           </div>
 
           <button class="btn-primary" type="submit" [disabled]="isSubmittingReceta">
@@ -812,12 +676,13 @@
                 </div>
               </div>
             </article>
-          <!-- Paginación recetas -->
-          <div class="pagination" *ngIf="totalPagesRecetas > 1">
-            <button class="page-btn" (click)="prevPageRecetas()" [disabled]="currentPageRecetas === 1">‹</button>
-            <span class="page-info">{{ currentPageRecetas }} / {{ totalPagesRecetas }}</span>
-            <button class="page-btn" (click)="nextPageRecetas()" [disabled]="currentPageRecetas === totalPagesRecetas">›</button>
-          </div>
+            <!-- Paginación recetas -->
+            <div class="pagination" *ngIf="totalPagesRecetas > 1">
+              <button class="page-btn" (click)="prevPageRecetas()" [disabled]="currentPageRecetas === 1">‹</button>
+              <span class="page-info">{{ currentPageRecetas }} / {{ totalPagesRecetas }}</span>
+              <button class="page-btn" (click)="nextPageRecetas()"
+                [disabled]="currentPageRecetas === totalPagesRecetas">›</button>
+            </div>
           </div>
         </ng-container>
         <ng-template #loadingRecetas>
@@ -881,7 +746,8 @@
         <div *ngIf="preEvaluacionesHistorial.length > 0" class="historial-preevaluaciones">
           <h3 style="margin: 2rem 0 1rem; color: #555;">Historial revisadas</h3>
           <div class="pre-evaluaciones-grid">
-            <article *ngFor="let preEval of preEvaluacionesHistorial" class="data-card pre-evaluacion-card historial-card">
+            <article *ngFor="let preEval of preEvaluacionesHistorial"
+              class="data-card pre-evaluacion-card historial-card">
               <header class="card-header">
                 <div class="card-title">
                   <h4>{{ preEval.cita?.alumno?.nombre }} {{ preEval.cita?.alumno?.apellido }}</h4>
@@ -889,7 +755,8 @@
                     {{ formatDateDisplay(preEval.cita.fecha_cita) }} · {{ formatTime(preEval.cita.hora_cita) }} hrs
                   </p>
                 </div>
-                <span class="badge-pill" [class]="preEval.estatus_validacion === 'validado' ? 'badge-success' : 'badge-error'">
+                <span class="badge-pill"
+                  [class]="preEval.estatus_validacion === 'validado' ? 'badge-success' : 'badge-error'">
                   {{ preEval.estatus_validacion === 'validado' ? '✓ Validado' : '✗ Descartado' }}
                 </span>
               </header>
@@ -919,7 +786,8 @@
           <div class="alumno-info">
             <h4>{{ selectedPreEvaluacion.cita?.alumno?.nombre }} {{ selectedPreEvaluacion.cita?.alumno?.apellido }}</h4>
             <p>No. Control: {{ selectedPreEvaluacion.cita?.alumno?.numero_control }}</p>
-            <p>Cita: {{ formatDateDisplay(selectedPreEvaluacion.cita?.fecha_cita || '') }} · {{ formatTime(selectedPreEvaluacion.cita?.hora_cita || '') }} hrs</p>
+            <p>Cita: {{ formatDateDisplay(selectedPreEvaluacion.cita?.fecha_cita || '') }} · {{
+              formatTime(selectedPreEvaluacion.cita?.hora_cita || '') }} hrs</p>
           </div>
 
           <div class="diagnostico-ia-section">
@@ -951,10 +819,7 @@
             <h3>Validación del Doctor</h3>
             <div class="form-group">
               <label for="comentario">Comentario (opcional):</label>
-              <textarea
-                id="comentario"
-                [(ngModel)]="comentarioValidacion"
-                rows="3"
+              <textarea id="comentario" [(ngModel)]="comentarioValidacion" rows="3"
                 placeholder="Agrega observaciones sobre la evaluación...">
               </textarea>
             </div>
@@ -966,16 +831,10 @@
 
           <div class="modal-actions">
             <button class="btn-secondary" (click)="closePreEvaluacionModal()">Cancelar</button>
-            <button 
-              class="btn-danger" 
-              (click)="validarPreEvaluacion('descartar')"
-              [disabled]="isSubmittingValidacion">
+            <button class="btn-danger" (click)="validarPreEvaluacion('descartar')" [disabled]="isSubmittingValidacion">
               {{ isSubmittingValidacion ? 'Procesando...' : 'Descartar' }}
             </button>
-            <button 
-              class="btn-success" 
-              (click)="validarPreEvaluacion('validar')"
-              [disabled]="isSubmittingValidacion">
+            <button class="btn-success" (click)="validarPreEvaluacion('validar')" [disabled]="isSubmittingValidacion">
               {{ isSubmittingValidacion ? 'Procesando...' : 'Validar diagnóstico' }}
             </button>
           </div>
@@ -1005,7 +864,8 @@
       </div>
       <div class="form-group">
         <label>Observaciones</label>
-        <textarea [(ngModel)]="consultaForm.observaciones" rows="2" placeholder="Notas adicionales (opcional)..."></textarea>
+        <textarea [(ngModel)]="consultaForm.observaciones" rows="2"
+          placeholder="Notas adicionales (opcional)..."></textarea>
       </div>
 
       <div class="modal-actions">
@@ -1033,7 +893,8 @@
         <div class="perfil-alumno-top">
           <div class="perfil-alumno-avatar">
             <img *ngIf="perfilAlumnoData.foto_perfil" [src]="perfilAlumnoData.foto_perfil" alt="foto" />
-            <span *ngIf="!perfilAlumnoData.foto_perfil">{{ perfilAlumnoData.nombre[0] }}{{ perfilAlumnoData.apellido[0] }}</span>
+            <span *ngIf="!perfilAlumnoData.foto_perfil">{{ perfilAlumnoData.nombre[0] }}{{ perfilAlumnoData.apellido[0]
+              }}</span>
           </div>
           <div class="perfil-alumno-info">
             <h4>{{ perfilAlumnoData.nombre }} {{ perfilAlumnoData.apellido }}</h4>
@@ -1078,7 +939,8 @@
             <div *ngIf="historialAlumnoExpandido === item.id" class="historial-mini-detalle">
               <p *ngIf="item.consulta"><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
               <p *ngIf="item.consulta"><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
-              <p *ngIf="item.receta"><strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}</p>
+              <p *ngIf="item.receta"><strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}
+              </p>
             </div>
           </div>
         </div>
