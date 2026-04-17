@@ -1,0 +1,283 @@
+/* ===== DOCTOR IA PRIORIDAD - ESTILOS MEJORADOS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.ia-prioridad-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Encabezado */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #E2E8F0, #A5F3C3);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 0;
+}
+
+.ia-disclaimer {
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4CAF50;
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: #CBD5E1;
+    margin: 0;
+}
+
+/* Tarjetas de resumen */
+.prioridad-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.prioridad-badge {
+    flex: 1;
+    min-width: 120px;
+    background: #1E293B;
+    border-radius: 28px;
+    padding: 1.2rem 0.8rem;
+    text-align: center;
+    border: 1px solid #334155;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.prioridad-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.prioridad-badge.alta::before {
+    background: #EF4444;
+}
+
+.prioridad-badge.media::before {
+    background: #F59E0B;
+}
+
+.prioridad-badge.baja::before {
+    background: #4CAF50;
+}
+
+.prioridad-badge.total::before {
+    background: #3B82F6;
+}
+
+.prioridad-badge:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+.badge-num {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.badge-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.prioridad-badge.alta .badge-num {
+    color: #F87171;
+}
+
+.prioridad-badge.media .badge-num {
+    color: #FBBF24;
+}
+
+.prioridad-badge.baja .badge-num {
+    color: #66BB6A;
+}
+
+.prioridad-badge.total .badge-num {
+    color: #60A5FA;
+}
+
+.badge-label {
+    color: #94A3B8;
+}
+
+/* Lista de citas */
+.citas-prioridad-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cita-prioridad-card {
+    background: #1E293B;
+    border-radius: 24px;
+    padding: 1.2rem;
+    border: 1px solid #334155;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.cita-prioridad-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+}
+
+.cita-prioridad-card.prioridad-alta::before {
+    background: #EF4444;
+}
+
+.cita-prioridad-card.prioridad-media::before {
+    background: #F59E0B;
+}
+
+.cita-prioridad-card.prioridad-baja::before {
+    background: #4CAF50;
+}
+
+.cita-prioridad-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 20px rgba(0, 191, 165, 0.15);
+    border-color: #4CAF50;
+}
+
+.cita-prioridad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.prioridad-tag {
+    padding: 0.25rem 0.8rem;
+    border-radius: 40px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: white;
+}
+
+.tag-alta {
+    background: #EF4444;
+}
+
+.tag-media {
+    background: #F59E0B;
+}
+
+.tag-baja {
+    background: #4CAF50;
+}
+
+.prioridad-score {
+    font-size: 0.75rem;
+    background: #0F172A;
+    padding: 0.2rem 0.6rem;
+    border-radius: 40px;
+    color: #94A3B8;
+}
+
+.cita-prioridad-body p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #CBD5E1;
+}
+
+.cita-prioridad-body strong {
+    color: #E2E8F0;
+}
+
+.justificacion {
+    background: #0F172A;
+    padding: 0.6rem;
+    border-radius: 16px;
+    font-style: italic;
+    margin-top: 0.5rem !important;
+    border-left: 3px solid #4CAF50;
+}
+
+/* Estados vacío y loading */
+.empty-state,
+.loading {
+    text-align: center;
+    padding: 2rem;
+    background: #1E293B;
+    border-radius: 28px;
+    border: 1px solid #334155;
+    color: #94A3B8;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.loading::before {
+    content: '⏳';
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #EF4444;
+    padding: 1rem;
+    border-radius: 16px;
+    color: #F87171;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .prioridad-resumen {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cita-prioridad-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

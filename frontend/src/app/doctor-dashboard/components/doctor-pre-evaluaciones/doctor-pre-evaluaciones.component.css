@@ -1,0 +1,348 @@
+/* ===== DOCTOR PRE-EVALUACIONES IA - ESTILOS MEJORADOS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.pre-evaluaciones-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Encabezado */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #E2E8F0, #A5F3C3);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 0;
+}
+
+.badge-primary {
+    background: #EF4444;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Grid de tarjetas */
+.pre-evaluaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+}
+
+.data-card {
+    background: #1E293B;
+    border-radius: 28px;
+    padding: 1.2rem;
+    border: 1px solid #334155;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.data-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 191, 165, 0.15);
+    border-color: #4CAF50;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.card-title h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #E2E8F0;
+    margin: 0;
+}
+
+.card-caption {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    margin: 0.2rem 0 0;
+}
+
+.badge-pill {
+    padding: 0.3rem 0.8rem;
+    border-radius: 40px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.confianza-alta {
+    background: rgba(76, 175, 80, 0.2);
+    color: #A5F3C3;
+}
+
+.confianza-media {
+    background: rgba(245, 158, 11, 0.2);
+    color: #FBBF24;
+}
+
+.confianza-baja {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+}
+
+.confianza-muy-baja {
+    background: rgba(156, 39, 176, 0.2);
+    color: #CE93D8;
+}
+
+.diagnostico-sugerido {
+    background: #0F172A;
+    padding: 0.8rem;
+    border-radius: 20px;
+    margin: 0.8rem 0;
+    border-left: 4px solid #4CAF50;
+    color: #E2E8F0;
+    font-size: 0.9rem;
+}
+
+.sintomas-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.tag {
+    background: #0F172A;
+    border: 1px solid #334155;
+    border-radius: 40px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.75rem;
+    color: #94A3B8;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+/* Historial */
+.historial-preevaluaciones {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+}
+
+.historial-preevaluaciones h3 {
+    color: #E2E8F0;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.badge-success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #A5F3C3;
+}
+
+.badge-error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+}
+
+.comentario-doctor {
+    background: #0F172A;
+    padding: 0.5rem;
+    border-radius: 16px;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #CBD5E1;
+}
+
+/* Alertas */
+.alert {
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4CAF50;
+    padding: 1rem;
+    border-radius: 16px;
+    color: #A5F3C3;
+    margin: 0.5rem 0;
+}
+
+.alert.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left-color: #EF4444;
+    color: #F87171;
+}
+
+.placeholder-card {
+    background: #1E293B;
+    border-radius: 28px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid #334155;
+    color: #94A3B8;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #1E293B;
+    border-radius: 32px;
+    max-width: 90%;
+    width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid #334155;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #334155;
+}
+
+.modal-header h2 {
+    font-size: 1.3rem;
+    margin: 0;
+    color: #E2E8F0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #94A3B8;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.alumno-info {
+    background: #0F172A;
+    padding: 1rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+}
+
+.alumno-info h4 {
+    color: #E2E8F0;
+    margin: 0 0 0.5rem;
+}
+
+.diagnostico-ia-section {
+    margin-bottom: 1.5rem;
+}
+
+.diagnostico-text {
+    background: #0F172A;
+    padding: 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    color: #A5F3C3;
+}
+
+.respuestas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #0F172A;
+    padding: 1rem;
+    border-radius: 20px;
+}
+
+.respuesta-item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.respuesta-key {
+    font-weight: 600;
+    color: #94A3B8;
+    min-width: 120px;
+}
+
+.respuesta-value {
+    color: #CBD5E1;
+}
+
+.validacion-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.validacion-form label {
+    font-weight: 600;
+    color: #CBD5E1;
+}
+
+.validacion-form textarea {
+    background: #0F172A;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    padding: 0.8rem;
+    color: #E2E8F0;
+    font-family: inherit;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pre-evaluaciones-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .respuesta-item {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .respuesta-key {
+        min-width: auto;
+    }
+}

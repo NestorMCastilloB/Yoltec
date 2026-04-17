@@ -1,0 +1,150 @@
+/* ===== DOCTOR ESTADÍSTICAS - ESTILOS MEJORADOS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.estadisticas-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #E2E8F0, #A5F3C3);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 0;
+}
+
+/* Tarjetas de resumen */
+.estadisticas-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.estat-card {
+    flex: 1;
+    min-width: 140px;
+    background: #1E293B;
+    border-radius: 28px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #334155;
+    transition: transform 0.2s;
+}
+
+.estat-card:hover {
+    transform: translateY(-3px);
+    border-color: #4CAF50;
+}
+
+.estat-card.total .estat-num {
+    color: #60A5FA;
+}
+
+.estat-card.atendida .estat-num {
+    color: #66BB6A;
+}
+
+.estat-card.cancelada .estat-num {
+    color: #F87171;
+}
+
+.estat-card.no-asistio .estat-num {
+    color: #FBBF24;
+}
+
+.estat-card.tasa .estat-num {
+    color: #A78BFA;
+}
+
+.estat-num {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.estat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94A3B8;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+/* Gráficas más compactas */
+.estadisticas-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.chart-box {
+    background: #1E293B;
+    border-radius: 28px;
+    padding: 1rem;
+    border: 1px solid #334155;
+    transition: transform 0.2s;
+}
+
+.chart-box:hover {
+    border-color: #4CAF50;
+}
+
+.chart-box h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #CBD5E1;
+    margin: 0 0 1rem;
+    text-align: center;
+}
+
+.chart-box canvas {
+    max-height: 250px;
+    width: 100%;
+}
+
+/* Estados */
+.loading,
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    background: #1E293B;
+    border-radius: 28px;
+    border: 1px solid #334155;
+    color: #94A3B8;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #EF4444;
+    padding: 1rem;
+    border-radius: 16px;
+    color: #F87171;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .estadisticas-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .estadisticas-resumen {
+        flex-direction: column;
+    }
+}

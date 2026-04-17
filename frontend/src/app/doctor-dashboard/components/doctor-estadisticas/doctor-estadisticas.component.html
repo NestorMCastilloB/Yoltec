@@ -1,0 +1,50 @@
+<div class="estadisticas-wrapper">
+  <div class="section-header">
+    <h2>📊 Estadísticas Generales</h2>
+    <button class="btn-primary" (click)="loadEstadisticas()">Actualizar</button>
+  </div>
+
+  <div *ngIf="isLoadingEstadisticas" class="loading">⏳ Cargando estadísticas...</div>
+  <div *ngIf="estadisticasError" class="alert-error">{{ estadisticasError }}</div>
+
+  <div *ngIf="estadisticas && !isLoadingEstadisticas">
+    <div class="estadisticas-resumen">
+      <div class="estat-card total">
+        <span class="estat-num">{{ estadisticas.total_citas }}</span>
+        <span class="estat-label">📋 Total citas</span>
+      </div>
+      <div class="estat-card atendida">
+        <span class="estat-num">{{ estadisticas.resumen_estados.atendida }}</span>
+        <span class="estat-label">✅ Atendidas</span>
+      </div>
+      <div class="estat-card cancelada">
+        <span class="estat-num">{{ estadisticas.resumen_estados.cancelada }}</span>
+        <span class="estat-label">❌ Canceladas</span>
+      </div>
+      <div class="estat-card no-asistio">
+        <span class="estat-num">{{ estadisticas.resumen_estados.no_asistio }}</span>
+        <span class="estat-label">🚫 No asistieron</span>
+      </div>
+      <div class="estat-card tasa">
+        <span class="estat-num">{{ estadisticas.tasa_asistencia }}%</span>
+        <span class="estat-label">📈 Tasa asistencia</span>
+      </div>
+    </div>
+
+    <div class="estadisticas-charts">
+      <div class="chart-box">
+        <h3>📅 Citas por mes (últimos 6 meses)</h3>
+        <canvas #barCanvas></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>🥧 Distribución por estado</h3>
+        <canvas #doughnutCanvas></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!estadisticas && !isLoadingEstadisticas && !estadisticasError" class="empty-state">
+    <p>📊 Presiona "Actualizar" para cargar las estadísticas.</p>
+    <button class="btn-primary" (click)="loadEstadisticas()">Cargar estadísticas</button>
+  </div>
+</div>

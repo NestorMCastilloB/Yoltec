@@ -1,0 +1,94 @@
+<div class="section-header">
+  <h2>Gestión de Recetas</h2>
+  <button class="btn-primary" (click)="toggleRecetaForm()">
+    {{ showRecetaForm ? 'Cerrar formulario' : 'Registrar Receta' }}
+  </button>
+</div>
+
+<div *ngIf="recetaMessage" class="alert">{{ recetaMessage }}</div>
+
+<div *ngIf="showRecetaForm" class="form-card">
+  <form #recetaForm="ngForm" (ngSubmit)="onCreateReceta(recetaForm)">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="citaReceta">Cita atendida</label>
+        <select id="citaReceta" name="cita_id" [(ngModel)]="recetaFormData.cita_id" required
+          (ngModelChange)="onRecetaCitaChange($event)" [disabled]="editingRecetaId !== null">
+          <option value="" disabled selected>Selecciona una cita atendida</option>
+          <option *ngFor="let cita of availableCitasForReceta" [value]="cita.id">
+            {{ formatDateDisplay(cita.fecha_cita) }} - {{ cita.hora_cita }} hrs ({{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }})
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fechaEmision">Fecha de emisión</label>
+        <input type="date" id="fechaEmision" name="fecha_emision" [(ngModel)]="recetaFormData.fecha_emision" required />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="medicamentos">Medicamentos recetados</label>
+      <textarea id="medicamentos" name="medicamentos" [(ngModel)]="recetaFormData.medicamentos" rows="3" required
+        placeholder="Nombre comercial, presentación y dosis"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="indicaciones">Indicaciones</label>
+      <textarea id="indicaciones" name="indicaciones" [(ngModel)]="recetaFormData.indicaciones" rows="3" required
+        placeholder="Instrucciones para el paciente"></textarea>
+    </div>
+
+    <button class="btn-primary" type="submit" [disabled]="isSubmittingReceta">
+      {{ isSubmittingReceta ? 'Guardando...' : 'Guardar receta' }}
+    </button>
+  </form>
+</div>
+
+<div class="recetas-container">
+  <ng-container *ngIf="!isLoadingRecetas; else loadingRecetas">
+    <div *ngIf="recetasError" class="alert error">{{ recetasError }}</div>
+
+    <div *ngIf="!recetasError && recetas.length === 0" class="placeholder-card">
+      <h3>No hay recetas registradas aún</h3>
+      <p>Registra una receta para que el alumno pueda consultarla en su perfil.</p>
+    </div>
+
+    <div *ngIf="recetas.length > 0" class="recetas-layout">
+      <article *ngFor="let receta of pagedRecetas" class="data-card receta-card">
+        <header class="card-header">
+          <div class="card-title">
+            <h4>{{ receta.alumno?.nombre }} {{ receta.alumno?.apellido }}</h4>
+            <p class="card-caption" *ngIf="receta.cita">
+              {{ formatDateDisplay(receta.cita.fecha_cita) }} · {{ formatTime(receta.cita.hora_cita) }} hrs
+            </p>
+          </div>
+          <span class="badge-pill badge-info">Emitida {{ formatRecetaDate(receta.fecha_emision) }}</span>
+        </header>
+
+        <div class="card-body">
+          <div class="detail-item">
+            <dt>Medicamentos recetados</dt>
+            <dd class="text-pre">{{ receta.medicamentos }}</dd>
+          </div>
+          <div class="detail-item" *ngIf="receta.indicaciones">
+            <dt>Indicaciones</dt>
+            <dd class="text-pre">{{ receta.indicaciones }}</dd>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-secondary" type="button" (click)="startEditReceta(receta)">Editar receta</button>
+          </div>
+        </div>
+      </article>
+
+      <div class="pagination" *ngIf="totalPagesRecetas > 1">
+        <button class="page-btn" (click)="prevPageRecetas()" [disabled]="currentPageRecetas === 1">‹</button>
+        <span class="page-info">{{ currentPageRecetas }} / {{ totalPagesRecetas }}</span>
+        <button class="page-btn" (click)="nextPageRecetas()" [disabled]="currentPageRecetas === totalPagesRecetas">›</button>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #loadingRecetas>
+    <div class="placeholder-card">Cargando recetas...</div>
+  </ng-template>
+</div>
