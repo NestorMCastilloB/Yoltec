@@ -425,6 +425,23 @@ class _DoctorCitaCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _reprogramar(context, cita),
+                      icon: const Icon(Icons.edit_calendar_outlined, size: 16),
+                      label: const Text('Reprogramar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryColor,
+                        side: const BorderSide(color: AppTheme.primaryColor),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: ElevatedButton.icon(
@@ -443,6 +460,17 @@ class _DoctorCitaCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _reprogramar(BuildContext context, Cita cita) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _ReprogramarCitaSheet(cita: cita),
     );
   }
 
@@ -540,6 +568,194 @@ class _DoctorCitaCard extends StatelessWidget {
               }
             },
             child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Modal Reprogramar Cita ───────────────────────────────────────────────────
+
+class _ReprogramarCitaSheet extends StatefulWidget {
+  final Cita cita;
+  const _ReprogramarCitaSheet({required this.cita});
+
+  @override
+  State<_ReprogramarCitaSheet> createState() => _ReprogramarCitaSheetState();
+}
+
+class _ReprogramarCitaSheetState extends State<_ReprogramarCitaSheet> {
+  DateTime? _fechaSeleccionada;
+  String? _horaSeleccionada;
+  bool _guardando = false;
+  String? _error;
+
+  static final List<String> _horas = [
+    for (int h = 8; h <= 16; h++)
+      for (int m = 0; m < 60; m += 15)
+        if (!(h == 16 && m > 45))
+          '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}',
+  ];
+
+  String _formatFecha(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _seleccionarFecha() async {
+    final hoy = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada ?? hoy.add(const Duration(days: 1)),
+      firstDate: hoy,
+      lastDate: hoy.add(const Duration(days: 90)),
+      locale: const Locale('es', 'MX'),
+      selectableDayPredicate: (day) => day.weekday != DateTime.sunday,
+      helpText: 'Selecciona la nueva fecha',
+      cancelText: 'Cancelar',
+      confirmText: 'Aceptar',
+    );
+    if (picked != null) {
+      setState(() {
+        _fechaSeleccionada = picked;
+        _error = null;
+      });
+    }
+  }
+
+  Future<void> _confirmar() async {
+    if (_fechaSeleccionada == null) {
+      setState(() => _error = 'Selecciona una fecha.');
+      return;
+    }
+    if (_horaSeleccionada == null) {
+      setState(() => _error = 'Selecciona una hora.');
+      return;
+    }
+    setState(() { _guardando = true; _error = null; });
+
+    final token = Provider.of<AuthService>(context, listen: false).token ?? '';
+    final ok = await Provider.of<CitaService>(context, listen: false)
+        .reprogramarCita(
+      token,
+      widget.cita.id,
+      _formatFecha(_fechaSeleccionada!),
+      _horaSeleccionada!,
+    );
+
+    if (!mounted) return;
+    setState(() => _guardando = false);
+
+    if (ok) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cita reprogramada correctamente.'),
+          backgroundColor: AppTheme.primaryColor,
+        ),
+      );
+    } else {
+      final svc = Provider.of<CitaService>(context, listen: false);
+      setState(() => _error = svc.error ?? 'Error al reprogramar la cita.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: mq.viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppTheme.gray400,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Reprogramar cita',
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.gray900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            widget.cita.nombreAlumno,
+            style: const TextStyle(color: AppTheme.gray600, fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+
+          // Selector de fecha
+          OutlinedButton.icon(
+            onPressed: _seleccionarFecha,
+            icon: const Icon(Icons.calendar_month_outlined),
+            label: Text(
+              _fechaSeleccionada == null
+                  ? 'Seleccionar nueva fecha'
+                  : _formatFecha(_fechaSeleccionada!),
+            ),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Selector de hora
+          DropdownButtonFormField<String>(
+            value: _horaSeleccionada,
+            decoration: const InputDecoration(
+              labelText: 'Nueva hora',
+              border: OutlineInputBorder(),
+              isDense: true,
+              prefixIcon: Icon(Icons.access_time_outlined),
+            ),
+            items: _horas
+                .map((h) => DropdownMenuItem(value: h, child: Text(h)))
+                .toList(),
+            onChanged: (v) => setState(() {
+              _horaSeleccionada = v;
+              _error = null;
+            }),
+          ),
+
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!,
+                style: const TextStyle(color: AppTheme.error, fontSize: 13)),
+          ],
+
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _guardando ? null : _confirmar,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: _guardando
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Confirmar reprogramación',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),

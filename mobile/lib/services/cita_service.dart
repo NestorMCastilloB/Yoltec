@@ -168,6 +168,32 @@ class CitaService extends ChangeNotifier {
     }
   }
 
+  Future<bool> reprogramarCita(
+      String token, int citaId, String fechaCita, String horaCita) async {
+    try {
+      final data = await ApiService.put(
+        '/citas/$citaId/reprogramar',
+        {'fecha_cita': fechaCita, 'hora_cita': horaCita},
+        token: token,
+      );
+      final idx = _citas.indexWhere((c) => c.id == citaId);
+      if (idx != -1) {
+        final updated = Cita.fromJson(data['cita'] as Map<String, dynamic>);
+        _citas[idx] = updated;
+        notifyListeners();
+      }
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Error al reprogramar la cita.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>> obtenerDisponibilidad(
       String token, int month, int year) async {
     return ApiService.get(
