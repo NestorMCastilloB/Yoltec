@@ -1,344 +1,381 @@
 # Manual de Usuario – Yoltec
 
-## 1. Introducción
+**Versión:** 2.0
+**Fecha:** Abril 2026
 
-Yoltec es un sistema web para la gestión de citas médicas, bitácoras y recetas entre alumnos y doctores. Este manual explica cómo usar el sistema desde la perspectiva de un usuario final (alumno o doctor).
-
-El sistema tiene dos partes:
-- Una **API backend** (Laravel) que se comunica con la base de datos.
-- Una **aplicación web frontend** (Angular) que ves en el navegador.
+Sistema de gestión de consultorio médico universitario con inteligencia artificial integrada.
 
 ---
 
-## 2. Acceso al sistema
+## 1. Acceso al sistema
 
-### 2.1. Acceso con Docker (modo producción/despliegue local)
+### 1.1. Web (navegador)
 
-1. Abre una terminal en la carpeta raíz del proyecto `Yoltec`.
-2. Ejecuta:
-   ```bash
-   docker-compose up --build
-   ```
-3. Cuando los servicios estén arriba:
-   - Abre el navegador en: `http://localhost:4200` → Aplicación web de Yoltec.
+**Producción:** https://frontend-nu-weld-77.vercel.app
+**Local:** http://localhost:4200
 
-> Nota: El backend se expone en `http://localhost:8000/api`, pero normalmente no necesitas acceder directamente; el frontend lo usa internamente.
+### 1.2. App móvil (Android)
 
-### 2.2. Acceso en modo desarrollo (sin Docker)
-
-**Backend (Laravel):**
-1. Entra a la carpeta `backend/`.
-2. Configura tu archivo `.env` con la conexión a la base de datos Neon.
-3. Ejecuta:
-   ```bash
-   composer install
-   php artisan migrate
-   php artisan serve --host=0.0.0.0 --port=8000
-   ```
-
-**Frontend (Angular):**
-1. Entra a la carpeta `frontend/`.
-2. Ejecuta:
-   ```bash
-   npm install
-   npm start
-   ```
-3. Abre `http://localhost:4200` en el navegador.
+Descarga el APK desde el repositorio (`mobile/build/app/outputs/flutter-apk/app-release.apk`) e instálalo en tu dispositivo Android.
 
 ---
 
-## 3. Roles de usuario
+## 2. Roles del sistema
 
-El sistema maneja dos tipos de usuario:
-
-- **Alumno** (`tipo = alumno`)
-  - Puede agendar y cancelar sus propias citas.
-  - Puede consultar sus bitácoras médicas.
-  - Puede consultar sus recetas médicas.
-
-- **Doctor** (`tipo = doctor`)
-  - Puede agendar citas para alumnos.
-  - Puede cancelar citas.
-  - Puede marcar citas como "atendidas".
-  - Puede registrar y editar bitácoras.
-  - Puede registrar y editar recetas.
-
-Dependiendo del tipo de usuario, verás un panel distinto después de iniciar sesión.
+| Rol | Acceso |
+|-----|--------|
+| **Alumno** | Agendar citas, ver historial, chat IA, perfil médico |
+| **Doctor** | Gestionar citas, recetas, bitácora, clasificación IA |
+| **Admin** | CRUD de usuarios, días especiales del calendario |
 
 ---
 
-## 4. Inicio de sesión
+## 3. Inicio de sesión
 
-1. Entra a `http://localhost:4200`.
-2. Verás una pantalla de login con dos pestañas:
-   - **Estudiante**
-   - **Doctor**
+La pantalla de login tiene tres pestañas: **Estudiante**, **Doctor** y **Admin**.
 
-### 4.1. Pestaña "Estudiante"
+### 3.1. Alumno
 
-Campos:
-- **Número de Control o Usuario**: puedes usar tu número de control o tu nombre de usuario.
-- **Contraseña**: tu contraseña de acceso.
+- **Número de control:** tu número de control universitario (ej. `22690495`)
+- **NIP:** tu número de identificación personal
 
-Pasos:
-1. Selecciona la pestaña **Estudiante**.
-2. Llena los campos.
-3. Haz clic en **"Iniciar Sesión"**.
+### 3.2. Doctor
 
-### 4.2. Pestaña "Doctor"
+- **Usuario:** tu nombre de usuario (ej. `doctorOmar`)
+- **Contraseña:** tu contraseña
 
-Campos:
-- **Usuario**: tu `username` como doctor.
-- **Contraseña**.
+> En producción los doctores reciben un **código de verificación por email** (2FA) después de ingresar su contraseña. Escribe el código en la pantalla siguiente. Puedes marcar el dispositivo como "de confianza" para no pedir el código durante 30 días.
 
-Pasos:
-1. Selecciona la pestaña **Doctor**.
-2. Llena los campos.
-3. Haz clic en **"Iniciar Sesión"**.
+### 3.3. Admin
 
-### 4.3. Mensajes de error frecuentes
+- **Usuario:** `admin`
+- **Contraseña:** tu contraseña
 
-- Si las credenciales no son válidas, verás:
-  - `Las credenciales son incorrectas.`
-- Si inicias sesión con un usuario de tipo diferente a la pestaña seleccionada (por ejemplo, un alumno en la pestaña de doctor), el sistema te mostrará un mensaje indicando que el tipo de usuario no coincide con la pestaña.
+### 3.4. Recuperación de contraseña (doctores y admin)
 
-Tras un inicio de sesión exitoso:
-- Si eres **alumno**, irás a `/student-dashboard`.
-- Si eres **doctor**, irás a `/doctor-dashboard`.
+1. Haz clic en **"¿Olvidaste tu contraseña?"** en la pantalla de login.
+2. Ingresa tu correo electrónico registrado.
+3. Recibirás un enlace por email.
+4. Haz clic en el enlace y escribe tu nueva contraseña.
 
 ---
 
-## 5. Panel del Alumno
+## 4. Panel del Alumno
 
-Al entrar como alumno verás el **Student Dashboard**, con un menú superior con las secciones:
+Al iniciar sesión como alumno entrarás al **Panel del Estudiante**. El menú superior tiene las secciones:
 
-- **Inicio**
-- **Citas**
-- **Bitácora**
-- **Recetas**
+**Inicio · Citas · Pre-evaluación IA · Recetas · Mi Perfil · Cerrar sesión**
 
-Y un botón para **Cerrar sesión**.
+### 4.1. Inicio
 
-### 5.1. Sección "Inicio"
+Muestra un resumen de tu situación médica:
+- Próxima cita (fecha, hora, motivo)
+- Total de citas programadas
+- Total de citas atendidas
 
-Muestra un resumen rápido:
+### 4.2. Citas
 
-- **Próxima Cita**
-  - Fecha de tu cita más cercana en el futuro.
-  - Hora de la cita.
-  - Motivo (si fue capturado).
-
-- **Citas Programadas**
-  - Número total de citas con estatus "programada".
-
-Si no tienes citas futuras, aparece un mensaje indicando que no tienes citas programadas.
-
-### 5.2. Sección "Citas" (Alumno)
-
-En esta sección puedes **agendar nuevas citas** y **cancelar citas pendientes**.
-
-#### 5.2.1. Agendar una cita nueva
+#### Agendar una cita
 
 1. Haz clic en **"Agendar Nueva Cita"**.
-2. En el formulario:
-   - Selecciona la **fecha** en el calendario.
-     - Los **domingos** se muestran como día cerrado y no se pueden elegir.
-     - Los días llenos se muestran como "sin lugares".
-   - Selecciona una **hora** disponible.
-     - El horario va de **7:00 a 21:00** en bloques de **15 minutos**.
-     - No puedes seleccionar horarios pasados del mismo día.
-     - No puedes seleccionar bloques que ya están ocupados.
-   - (Opcional) Escribe el **motivo** de tu consulta.
-3. Haz clic en **"Guardar cita"**.
+2. Selecciona una **fecha** en el calendario:
+   - Verde: mucha disponibilidad
+   - Amarillo: poca disponibilidad
+   - Rojo/gris: sin lugares o día inhabilitado
+   - Los domingos siempre están cerrados
+3. Selecciona una **hora** disponible (8:00 – 17:00, cada 15 minutos).
+4. Escribe el **motivo** de tu consulta (obligatorio).
+5. Haz clic en **"Confirmar cita"**.
 
-Posibles mensajes:
-- Si el horario ya está ocupado:
-  - `La hora seleccionada ya está ocupada. Elige otro bloque disponible.`
-- Si falta seleccionar fecha u hora, el sistema no permitirá guardar y mostrará mensajes de ayuda bajo los campos.
+#### Cancelar una cita
 
-#### 5.2.2. Ver y cancelar citas
+En la lista de citas programadas, haz clic en **"Cancelar"** junto a la cita que deseas cancelar. El slot quedará libre para otros alumnos.
 
-La sección muestra dos columnas:
+#### Ver historial de citas
 
-- **Próximas citas** (estatus `programada`):
-  - Fecha y hora.
-  - Motivo (si existe).
-  - Doctor asignado (si ya hay uno).
-  - Botón **"Cancelar cita"**.
+Desplázate hacia abajo para ver tus citas pasadas (atendidas, canceladas, no asistidas) con fecha, hora y estatus.
 
-- **Historial reciente** (citas `atendida` o `cancelada`):
-  - Fecha y hora.
-  - Motivo.
-  - Estatus: "Atendida" o "Cancelada".
+### 4.3. Pre-evaluación IA
 
-Al cancelar una cita verás un mensaje como:
-- `Cita cancelada correctamente.`
+Esta sección te permite hacer una **evaluación de síntomas** antes de tu cita, asistida por inteligencia artificial.
 
-> Nota: El sistema también marca automáticamente como "canceladas" las citas que quedan en el pasado sin haberse atendido.
+1. Haz clic en **"Nueva Pre-evaluación"**.
+2. Describe tus síntomas en el **chat** (en lenguaje natural, en español).
+3. El asistente te hará preguntas para entender mejor tu situación.
+4. Tras 3–5 intercambios recibirás un **diagnóstico orientativo** con:
+   - Enfermedad más probable
+   - Porcentaje de confianza
+   - 3 posibles diagnósticos
+   - Recomendación (urgente / consulta en 24h / esperar)
+5. El resultado queda guardado y el doctor lo puede revisar antes de tu cita.
 
-### 5.3. Sección "Bitácora" (Alumno)
+> El diagnóstico de la IA es **orientativo**, no reemplaza la evaluación médica del doctor.
 
-Aquí puedes consultar las **bitácoras médicas** registradas por el doctor.
+### 4.4. Historial médico
 
-Para cada bitácora se muestra:
-- Nombre del alumno (tú).
-- Información de la cita asociada (fecha y hora).
-- Fecha y hora de creación de la bitácora.
-- **Diagnóstico**, **Tratamiento** y **Observaciones**.
-- Medidas como **peso**, **altura**, **temperatura** y **presión arterial** (si el doctor las capturó).
+Aquí puedes ver todas tus **consultas atendidas** con:
+- Fecha de la consulta
+- Diagnóstico del doctor
+- Tratamiento indicado
+- Observaciones
+- Receta (si se emitió)
 
-Las bitácoras son de solo lectura para el alumno.
+### 4.5. Recetas
 
-### 5.4. Sección "Recetas" (Alumno)
+Lista de tus recetas médicas. Para cada una verás:
+- Fecha de emisión
+- Medicamentos recetados
+- Indicaciones del doctor
 
-Aquí puedes consultar tus **recetas médicas**.
+Las recetas son de solo lectura.
 
-Para cada receta verás:
-- Nombre del alumno.
-- Datos de la cita (fecha y hora).
-- **Fecha de emisión** de la receta.
-- **Medicamentos recetados**.
-- **Indicaciones** del doctor (si las hay).
+### 4.6. Mi Perfil
 
-No puedes editar las recetas; son únicamente de consulta.
+#### Datos personales
 
----
+- Puedes ver tu nombre, correo, teléfono y número de control.
+- Haz clic en **"Editar"** para actualizar tus datos y guarda con **"Guardar cambios"**.
 
-## 6. Panel del Doctor
+#### Perfil médico
 
-Al entrar como doctor verás el **Doctor Dashboard**, con las secciones:
+Puedes registrar o actualizar:
+- Tipo de sangre
+- Alergias conocidas
+- Enfermedades crónicas
 
-- **Inicio**
-- **Citas**
-- **Bitácoras**
-- **Recetas**
+Esta información la puede ver el doctor antes de atenderte.
 
-Y un botón de **Cerrar sesión**.
+#### Foto de perfil
 
-### 6.1. Sección "Inicio"
+Haz clic en tu foto (o en el ícono de cámara) para subir una imagen desde tu computadora.
 
-Muestra estadísticas generales:
+#### Cambiar contraseña
 
-- **Citas del día**: número de citas programadas para la fecha actual.
-- **Pacientes atendidos**: total de citas que se han marcado como "atendidas".
-- **Citas pendientes**: total de citas con estatus "programada".
-
-### 6.2. Sección "Citas" (Doctor)
-
-Desde aquí el doctor puede **agendar citas** para los alumnos, **cancelar citas** y **marcarlas como atendidas**.
-
-#### 6.2.1. Agendar cita para un alumno
-
-1. Haz clic en **"Agendar Nueva Cita"**.
-2. Llena los campos:
-   - **Número de control del alumno** (obligatorio).
-   - **Fecha**: selección en el calendario (no se permiten domingos ni días sin cupo).
-   - **Hora**: selección en la lista de horarios disponibles.
-   - **Motivo** (opcional).
-3. Haz clic en **"Guardar cita"**.
-
-Mensajes importantes:
-- Si el formulario es inválido o falta el número de control:
-  - `Ingresa el número de control del alumno.`
-- Si el horario ya está ocupado o en el pasado:
-  - `La hora seleccionada ya está ocupada. Elige otro bloque disponible.`
-
-#### 6.2.2. Cancelar o marcar cita como atendida
-
-En la lista de **Próximas citas**, cada tarjeta tiene opciones:
-
-- **Cancelar cita**
-  - Cambia el estatus a `cancelada`.
-  - Muestra el mensaje `Cita cancelada correctamente.` cuando tiene éxito.
-
-- **Marcar atendida**
-  - Cambia el estatus a `atendida`.
-  - Asigna el doctor actual a la cita y registra la fecha y hora de atención.
-  - Actualiza estadísticas y listas de citas.
-
-Las citas atendidas y canceladas se muestran en el **historial reciente**.
-
-### 6.3. Sección "Bitácoras" (Doctor)
-
-Permite **registrar** nuevas bitácoras médicas y **editar** las existentes.
-
-#### 6.3.1. Registrar bitácora
-
-1. Haz clic en **"Registrar Bitácora"**.
-2. Completa el formulario:
-   - **Cita atendida**: selecciona de la lista de citas con estatus "atendida" que aún no tienen bitácora.
-   - **Diagnóstico**.
-   - **Tratamiento**.
-   - **Observaciones**.
-   - **Peso**.
-   - **Altura**.
-   - **Temperatura**.
-   - **Presión arterial**.
-3. Haz clic en **"Guardar bitácora"**.
-
-Validaciones y mensajes:
-- Si no seleccionas una cita atendida:
-  - `Selecciona la cita atendida correspondiente.`
-- Si falta cualquier otro campo obligatorio:
-  - `Por favor completa todos los campos obligatorios de la bitácora.`
-
-#### 6.3.2. Editar bitácora
-
-1. En la lista de bitácoras, haz clic en **"Editar bitácora"** en el registro que quieres modificar.
-2. Se abrirá el formulario con los datos actuales.
-3. Ajusta la información.
-4. Guarda los cambios.
-
-El alumno verá siempre la versión actualizada de la bitácora.
-
-### 6.4. Sección "Recetas" (Doctor)
-
-Permite **crear** y **editar** recetas para las citas atendidas.
-
-#### 6.4.1. Registrar receta nueva
-
-1. Haz clic en **"Registrar Receta"**.
-2. Completa el formulario:
-   - **Cita atendida**: selecciona una cita con estatus "atendida" que aún no tenga receta.
-   - **Fecha de emisión**: se puede ajustar; por defecto se usa la fecha de la cita.
-   - **Medicamentos recetados**: texto libre con nombres, dosis, etc.
-   - **Indicaciones**: instrucciones para el paciente.
-3. Haz clic en **"Guardar receta"**.
-
-Validaciones:
-- Si no seleccionas cita:
-  - `Selecciona la cita atendida correspondiente.`
-- Si no llenas medicamentos, indicaciones o fecha de emisión, se mostrarán mensajes indicando qué falta.
-- Si ya existe una receta para esa misma cita, se mostrará un mensaje similar a:
-  - `Ya existe una receta registrada para esta cita. Puedes editar la existente en lugar de crear otra.`
-
-> Importante: Solo se permite **una receta por cada cita atendida**.
-
-#### 6.4.2. Editar receta existente
-
-1. En la lista de recetas, haz clic en **"Editar receta"**.
-2. Se abrirá el formulario con los datos actuales (medicamentos, indicaciones, fecha de emisión).
-3. Realiza los cambios necesarios.
-4. Guarda la receta.
-
-Cuando editas, la cita asociada no se puede cambiar.
+1. Ingresa tu contraseña actual.
+2. Escribe la nueva contraseña (mínimo 8 caracteres).
+3. Confírmala.
+4. Haz clic en **"Cambiar contraseña"**.
 
 ---
 
-## 7. Cerrar sesión
+## 5. Panel del Doctor
 
-Tanto en el panel de alumno como en el de doctor, en la parte superior derecha hay un botón **"Cerrar Sesión"**.
+Al iniciar sesión como doctor entrarás al **Panel del Doctor**. El menú lateral tiene las secciones:
 
-Al hacer clic:
-- Se cierra tu sesión en el servidor.
-- Se eliminan el token y los datos de usuario almacenados en el navegador.
-- Se te redirige a la pantalla de inicio de sesión.
+**Inicio · Citas · Bitácoras · Estadísticas · Recetas · Pre-evaluaciones · IA Prioridad · Mi Perfil · Cerrar sesión**
+
+### 5.1. Inicio
+
+Vista rápida del día:
+- Citas programadas para hoy
+- Próxima cita (con nombre del alumno y hora)
+- Total de citas atendidas hoy
+- Total de citas del mes
+
+### 5.2. Citas
+
+#### Filtros
+
+En la parte superior puedes filtrar por:
+- **Estatus:** programada / atendida / cancelada / no asistió
+- **Fecha desde / hasta**
+- Botón **"Limpiar filtros"** para resetear
+
+#### Agendar cita para un alumno
+
+1. Haz clic en **"Agendar cita"**.
+2. Ingresa el **número de control** del alumno.
+3. Selecciona fecha, hora y motivo.
+4. Confirma.
+
+#### Acciones sobre citas
+
+Cada cita tiene un menú de acciones:
+
+| Acción | Estatus resultante |
+|--------|-------------------|
+| **Atender** | `atendida` — abre el formulario de consulta |
+| **No asistió** | `no_asistio` |
+| **Cancelar** | `cancelada` |
+| **Reprogramar** | Cambia fecha y hora (estatus sigue `programada`) |
+| **Ver perfil médico** | Modal con foto, datos médicos e historial del alumno |
+
+#### Registrar consulta (al atender)
+
+Cuando marcas una cita como "Atender" se abre el formulario de consulta:
+- **Diagnóstico** (obligatorio)
+- **Tratamiento** (obligatorio)
+- **Observaciones** (opcional)
+
+El alumno podrá ver este registro en su historial médico.
+
+#### Reprogramar cita
+
+1. En el menú de la cita, selecciona **"Reprogramar"**.
+2. Se abre un modal con el calendario.
+3. Selecciona nueva fecha y hora disponible.
+4. Confirma la reprogramación.
+
+El alumno recibirá una notificación push si tiene la app instalada.
+
+### 5.3. Bitácoras
+
+Historial completo de todas las consultas atendidas.
+
+**Filtros disponibles:**
+- Por nombre o número de control del alumno
+- Por rango de fechas
+
+**Exportar:**
+- Botón **"Exportar CSV"** para descargar el historial en formato Excel-compatible.
+
+Para cada registro verás: diagnóstico, tratamiento, observaciones, signos vitales (peso, altura, temperatura, presión arterial).
+
+### 5.4. Estadísticas
+
+Gráficas del consultorio:
+- **Barras por mes:** citas atendidas vs. canceladas
+- **Donut:** distribución por estatus (programada, atendida, cancelada, no asistió)
+- Totales del período seleccionado
+
+### 5.5. Recetas
+
+#### Crear receta
+
+1. Haz clic en **"Nueva Receta"**.
+2. Selecciona la **cita atendida** (solo aparecen citas atendidas sin receta previa).
+3. Llena:
+   - **Medicamentos:** nombre, dosis, frecuencia
+   - **Indicaciones:** instrucciones para el alumno
+   - **Fecha de emisión**
+4. Guarda.
+
+> Solo se puede crear **una receta por cita**. Para modificarla usa el botón "Editar".
+
+#### Editar receta
+
+Haz clic en **"Editar"** junto a la receta que deseas modificar. Puedes cambiar medicamentos, indicaciones y fecha de emisión.
+
+### 5.6. Pre-evaluaciones IA
+
+Lista de pre-evaluaciones enviadas por alumnos antes de sus citas.
+
+Para cada evaluación puedes:
+- **Validar diagnóstico:** confirmar que el diagnóstico IA es correcto
+- **Descartar diagnóstico:** marcarlo como incorrecto
+
+Esto ayuda a mejorar el modelo de IA con el tiempo.
+
+### 5.7. IA Clasificación de Prioridad
+
+Esta sección muestra la **prioridad asignada** a cada alumno según su historial de citas:
+
+- **Alta prioridad:** alumno que asiste puntualmente y no cancela
+- **Baja prioridad:** alumno con historial frecuente de cancelaciones o inasistencias
+
+> La clasificación es **informativa solamente**. El sistema nunca cancela citas automáticamente.
+
+### 5.8. Mi Perfil
+
+Igual que el alumno: puedes ver y editar tus datos personales, cambiar tu foto de perfil y cambiar tu contraseña.
 
 ---
 
-## 8. Buenas prácticas de uso
+## 6. Panel de Administrador
 
-- No compartas tu usuario ni contraseña.
-- Si usas un equipo compartido, **cierra sesión** al terminar.
-- Como alumno, revisa tu bitácora y recetas después de cada consulta para confirmar que la información sea correcta.
-- Como doctor, procura llenar todos los campos de bitácoras y recetas de forma clara y legible.
+Acceso: `/admin-dashboard`
+
+### 6.1. Gestión de alumnos
+
+- **Listar** todos los alumnos registrados
+- **Crear** nuevo alumno (nombre, número de control, NIP, email, teléfono)
+- **Editar** datos de un alumno
+- **Eliminar** alumno
+
+### 6.2. Gestión de doctores
+
+- **Listar** todos los doctores
+- **Crear** nuevo doctor (nombre, usuario, contraseña, email, especialidad)
+- **Editar** datos de un doctor
+- **Eliminar** doctor
+
+### 6.3. Días especiales del calendario
+
+Permite bloquear o marcar días especiales en el calendario de citas:
+
+1. Haz clic en **"Agregar día especial"**.
+2. Selecciona la **fecha**.
+3. Elige el **tipo:** festivo, cerrado, horario especial.
+4. Escribe una **descripción** (opcional, ej. "Día del maestro").
+5. Guarda.
+
+Los días especiales aparecerán marcados en el calendario de alumnos y doctores y no permitirán agendar citas.
+
+---
+
+## 7. App móvil (Android)
+
+La app móvil tiene las mismas funciones principales que la versión web:
+
+**Para alumnos:**
+- Login
+- Ver y agendar citas
+- Chat IA (pre-evaluación de síntomas)
+- Historial médico y recetas
+- Perfil médico (editable)
+- Cambiar contraseña y foto de perfil
+
+**Para doctores:**
+- Login + 2FA
+- Ver citas del día
+- Agendar y cancelar citas para alumnos
+- Pre-evaluaciones IA
+- Bitácora e historial
+- Clasificación de prioridad
+
+**Notificaciones push:**
+- Confirmación de cita agendada
+- Aviso de cancelación o reprogramación
+- Recordatorio 24 horas antes de tu cita
+
+---
+
+## 8. Notificaciones por email
+
+El sistema envía correos automáticos en los siguientes eventos:
+
+| Evento | Destinatario |
+|--------|-------------|
+| Recordatorio 24h antes de cita | Alumno y doctor |
+| Código 2FA (solo doctores en producción) | Doctor |
+| Enlace de recuperación de contraseña | Doctor o admin |
+
+---
+
+## 9. Cerrar sesión
+
+Tanto en web como en la app, usa el botón **"Cerrar sesión"** del menú. Esto elimina tu sesión del servidor y borra el token local.
+
+Si usas un equipo compartido, **siempre cierra sesión** al terminar.
+
+---
+
+## 10. Preguntas frecuentes
+
+**¿Por qué no puedo seleccionar el domingo?**
+El consultorio no atiende los domingos. Estos días siempre aparecen bloqueados en el calendario.
+
+**¿Por qué un horario aparece en rojo?**
+Ya está ocupado por otro alumno. Elige otro bloque disponible.
+
+**¿Puedo cambiar la hora de mi cita?**
+Cancela tu cita actual y agenda una nueva en el horario que desees. Solo el doctor puede reprogramar directamente.
+
+**¿El diagnóstico de la IA es definitivo?**
+No. Es un apoyo orientativo. El diagnóstico oficial lo da el doctor durante la consulta.
+
+**No me llegó el código 2FA, ¿qué hago?**
+Haz clic en **"Reenviar código"** en la pantalla de verificación. Revisa también tu carpeta de spam.
+
+**¿Puedo usar la app sin conexión a internet?**
+No. Tanto la web como la app requieren conexión para funcionar (la información está en la nube).
