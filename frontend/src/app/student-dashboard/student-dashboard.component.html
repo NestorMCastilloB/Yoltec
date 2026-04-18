@@ -378,6 +378,169 @@
       </div>
     </section>
 
+    <!-- Sección: Mi Perfil -->
+    <section *ngIf="activeSection === 'perfil'" class="content-section perfil-section">
+      <div class="section-header">
+        <h2>Mi Perfil</h2>
+      </div>
+
+      <div *ngIf="isLoadingPerfil" class="loading">Cargando perfil...</div>
+
+      <div *ngIf="!isLoadingPerfil && perfilMedico">
+
+        <!-- Foto de perfil -->
+        <div class="foto-perfil-wrap">
+          <div class="foto-perfil-avatar">
+            <img *ngIf="fotoPreview || perfilMedico.foto_perfil"
+                 [src]="fotoPreview || perfilMedico.foto_perfil"
+                 alt="Foto de perfil" class="foto-perfil-img" />
+            <span *ngIf="!fotoPreview && !perfilMedico.foto_perfil" class="foto-perfil-initials">
+              {{ perfilMedico.nombre[0] }}{{ perfilMedico.apellido[0] }}
+            </span>
+          </div>
+          <div class="foto-perfil-actions">
+            <label class="btn-cambiar-foto" [class.loading]="isUploadingFoto">
+              <span>{{ isUploadingFoto ? 'Subiendo...' : 'Cambiar foto' }}</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFotoChange($event)" [disabled]="isUploadingFoto" hidden />
+            </label>
+            <span *ngIf="fotoMsg" class="foto-msg" [class.error]="fotoMsg.includes('Error')">{{ fotoMsg }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-grid">
+          <!-- Datos personales -->
+          <div class="perfil-card">
+            <div class="perfil-card-header">
+              <h3>Datos personales</h3>
+              <button *ngIf="!editandoPersonal" class="btn-edit" (click)="startEditPersonal()">Editar</button>
+            </div>
+            <div *ngIf="personalMsg" class="form-msg" [class.success]="!personalMsg.includes('Error')">{{ personalMsg }}</div>
+
+            <ng-container *ngIf="!editandoPersonal">
+              <div class="perfil-item"><span class="perfil-label">Nombre</span><span>{{ perfilMedico.nombre }} {{ perfilMedico.apellido }}</span></div>
+              <div class="perfil-item"><span class="perfil-label">N° Control</span><span>{{ perfilMedico.numero_control }}</span></div>
+              <div class="perfil-item"><span class="perfil-label">Email</span><span>{{ perfilMedico.email }}</span></div>
+              <div class="perfil-item"><span class="perfil-label">Teléfono</span><span>{{ perfilMedico.telefono || '—' }}</span></div>
+              <div class="perfil-item"><span class="perfil-label">Fecha nacimiento</span><span>{{ perfilMedico.fecha_nacimiento || '—' }}</span></div>
+            </ng-container>
+
+            <ng-container *ngIf="editandoPersonal">
+              <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="personalForm.nombre" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" [(ngModel)]="personalForm.apellido" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" [(ngModel)]="personalForm.email" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" [(ngModel)]="personalForm.telefono" class="form-input" placeholder="Opcional" />
+              </div>
+              <div class="form-group">
+                <label>Fecha de nacimiento</label>
+                <input type="date" [(ngModel)]="personalForm.fecha_nacimiento" class="form-input" />
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" (click)="submitDatosPersonales()" [disabled]="isSubmittingPersonal">
+                  {{ isSubmittingPersonal ? 'Guardando...' : 'Guardar' }}
+                </button>
+                <button class="btn-secondary" (click)="cancelEditPersonal()" [disabled]="isSubmittingPersonal">Cancelar</button>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Información médica -->
+          <div class="perfil-card">
+            <h3>Información médica</h3>
+            <div *ngIf="perfilMsg" class="form-msg" [class.success]="perfilMsg.includes('actualizado')">{{ perfilMsg }}</div>
+            <div class="form-group">
+              <label>Tipo de sangre</label>
+              <select [(ngModel)]="perfilForm.tipo_sangre" class="form-select">
+                <option value="">No especificado</option>
+                <option *ngFor="let t of ['A+','A-','B+','B-','AB+','AB-','O+','O-']" [value]="t">{{ t }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Alergias</label>
+              <textarea [(ngModel)]="perfilForm.alergias" rows="2" placeholder="Ej: Penicilina, polen..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Enfermedades crónicas</label>
+              <textarea [(ngModel)]="perfilForm.enfermedades_cronicas" rows="2" placeholder="Ej: Diabetes, hipertensión..."></textarea>
+            </div>
+            <button class="btn-primary" (click)="submitPerfil()" [disabled]="isSubmittingPerfil">
+              {{ isSubmittingPerfil ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+
+          <!-- Cambiar contraseña -->
+          <div class="perfil-card">
+            <h3>Cambiar contraseña</h3>
+            <div *ngIf="passwordMsg" class="form-msg" [class.success]="passwordMsg.includes('correctamente')">{{ passwordMsg }}</div>
+            <div class="form-group">
+              <label>Contraseña actual</label>
+              <input type="password" [(ngModel)]="passwordForm.password_actual" class="form-input" placeholder="Tu contraseña actual" />
+            </div>
+            <div class="form-group">
+              <label>Nueva contraseña</label>
+              <input type="password" [(ngModel)]="passwordForm.password_nuevo" class="form-input" placeholder="Mínimo 8 caracteres" />
+            </div>
+            <div class="form-group">
+              <label>Confirmar nueva contraseña</label>
+              <input type="password" [(ngModel)]="passwordForm.password_nuevo_confirmation" class="form-input" placeholder="Repite la nueva contraseña" />
+            </div>
+            <button class="btn-primary" (click)="submitCambiarPassword()"
+              [disabled]="isSubmittingPassword || !passwordForm.password_actual || !passwordForm.password_nuevo || !passwordForm.password_nuevo_confirmation">
+              {{ isSubmittingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección: Historial Médico -->
+    <section *ngIf="activeSection === 'historial'" class="content-section">
+      <div class="section-header">
+        <h2>Historial Médico</h2>
+      </div>
+
+      <div *ngIf="isLoadingHistorial" class="loading">Cargando historial...</div>
+
+      <div *ngIf="!isLoadingHistorial && historial.length === 0" class="empty-state">
+        No tienes consultas registradas aún.
+      </div>
+
+      <div class="historial-lista" *ngIf="!isLoadingHistorial && historial.length > 0">
+        <div *ngFor="let item of historial" class="historial-item" [class.expandido]="historialExpandido === item.id">
+          <div class="historial-header" (click)="toggleHistorialItem(item.id)">
+            <div class="historial-info">
+              <span class="historial-fecha">{{ item.fecha_cita | date:'dd/MM/yyyy' }}</span>
+              <span class="historial-motivo">{{ item.motivo }}</span>
+              <span class="historial-doctor" *ngIf="item.doctor">Dr. {{ item.doctor.nombre }} {{ item.doctor.apellido }}</span>
+            </div>
+            <span class="historial-toggle">{{ historialExpandido === item.id ? '▲' : '▼' }}</span>
+          </div>
+          <div class="historial-detalle" *ngIf="historialExpandido === item.id">
+            <div *ngIf="item.consulta; else sinConsulta">
+              <p><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
+              <p><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
+              <p *ngIf="item.consulta.observaciones"><strong>Observaciones:</strong> {{ item.consulta.observaciones }}</p>
+            </div>
+            <ng-template #sinConsulta><p class="sin-datos">Sin registro de consulta.</p></ng-template>
+            <div *ngIf="item.receta" class="historial-receta">
+              <strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}
+              <p *ngIf="item.receta.indicaciones">{{ item.receta.indicaciones }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -484,107 +647,5 @@
       </div>
     </div>
   </div>
-
-  <!-- ===== PERFIL MÉDICO ===== -->
-  <section *ngIf="activeSection === 'perfil'" class="content-section perfil-section">
-    <div class="section-header">
-      <h2>Mi Perfil Médico</h2>
-    </div>
-
-    <div *ngIf="isLoadingPerfil" class="loading">Cargando perfil...</div>
-
-    <!-- Foto de perfil -->
-    <div *ngIf="!isLoadingPerfil && perfilMedico" class="foto-perfil-wrap">
-      <div class="foto-perfil-avatar">
-        <img *ngIf="fotoPreview || perfilMedico.foto_perfil"
-             [src]="fotoPreview || perfilMedico.foto_perfil"
-             alt="Foto de perfil" class="foto-perfil-img" />
-        <span *ngIf="!fotoPreview && !perfilMedico.foto_perfil" class="foto-perfil-initials">
-          {{ perfilMedico.nombre[0] }}{{ perfilMedico.apellido[0] }}
-        </span>
-      </div>
-      <div class="foto-perfil-actions">
-        <label class="btn-cambiar-foto" [class.loading]="isUploadingFoto">
-          <span>{{ isUploadingFoto ? 'Subiendo...' : 'Cambiar foto' }}</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFotoChange($event)" [disabled]="isUploadingFoto" hidden />
-        </label>
-        <span *ngIf="fotoMsg" class="foto-msg" [class.error]="fotoMsg.includes('Error')">{{ fotoMsg }}</span>
-      </div>
-    </div>
-
-    <div *ngIf="!isLoadingPerfil && perfilMedico" class="perfil-grid">
-      <!-- Datos personales (solo lectura) -->
-      <div class="perfil-card">
-        <h3>Datos personales</h3>
-        <div class="perfil-item"><span class="perfil-label">Nombre</span><span>{{ perfilMedico.nombre }} {{ perfilMedico.apellido }}</span></div>
-        <div class="perfil-item"><span class="perfil-label">N° Control</span><span>{{ perfilMedico.numero_control }}</span></div>
-        <div class="perfil-item"><span class="perfil-label">Email</span><span>{{ perfilMedico.email }}</span></div>
-        <div class="perfil-item"><span class="perfil-label">Teléfono</span><span>{{ perfilMedico.telefono || '—' }}</span></div>
-        <div class="perfil-item"><span class="perfil-label">Fecha nacimiento</span><span>{{ perfilMedico.fecha_nacimiento || '—' }}</span></div>
-      </div>
-
-      <!-- Datos médicos (editables) -->
-      <div class="perfil-card">
-        <h3>Información médica</h3>
-        <div *ngIf="perfilMsg" class="form-msg" [class.success]="perfilMsg.includes('actualizado')">{{ perfilMsg }}</div>
-        <div class="form-group">
-          <label>Tipo de sangre</label>
-          <select [(ngModel)]="perfilForm.tipo_sangre" class="form-select">
-            <option value="">No especificado</option>
-            <option *ngFor="let t of ['A+','A-','B+','B-','AB+','AB-','O+','O-']" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Alergias</label>
-          <textarea [(ngModel)]="perfilForm.alergias" rows="2" placeholder="Ej: Penicilina, polen..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Enfermedades crónicas</label>
-          <textarea [(ngModel)]="perfilForm.enfermedades_cronicas" rows="2" placeholder="Ej: Diabetes, hipertensión..."></textarea>
-        </div>
-        <button class="btn-primary" (click)="submitPerfil()" [disabled]="isSubmittingPerfil">
-          {{ isSubmittingPerfil ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== HISTORIAL MÉDICO ===== -->
-  <section *ngIf="activeSection === 'historial'" class="content-section">
-    <div class="section-header">
-      <h2>Historial Médico</h2>
-    </div>
-
-    <div *ngIf="isLoadingHistorial" class="loading">Cargando historial...</div>
-
-    <div *ngIf="!isLoadingHistorial && historial.length === 0" class="empty-state">
-      No tienes consultas registradas aún.
-    </div>
-
-    <div class="historial-lista" *ngIf="!isLoadingHistorial && historial.length > 0">
-      <div *ngFor="let item of historial" class="historial-item" [class.expandido]="historialExpandido === item.id">
-        <div class="historial-header" (click)="toggleHistorialItem(item.id)">
-          <div class="historial-info">
-            <span class="historial-fecha">{{ item.fecha_cita | date:'dd/MM/yyyy' }}</span>
-            <span class="historial-motivo">{{ item.motivo }}</span>
-            <span class="historial-doctor" *ngIf="item.doctor">Dr. {{ item.doctor.nombre }} {{ item.doctor.apellido }}</span>
-          </div>
-          <span class="historial-toggle">{{ historialExpandido === item.id ? '▲' : '▼' }}</span>
-        </div>
-        <div class="historial-detalle" *ngIf="historialExpandido === item.id">
-          <div *ngIf="item.consulta; else sinConsulta">
-            <p><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
-            <p><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
-            <p *ngIf="item.consulta.observaciones"><strong>Observaciones:</strong> {{ item.consulta.observaciones }}</p>
-          </div>
-          <ng-template #sinConsulta><p class="sin-datos">Sin registro de consulta.</p></ng-template>
-          <div *ngIf="item.receta" class="historial-receta">
-            <strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}
-            <p *ngIf="item.receta.indicaciones">{{ item.receta.indicaciones }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
 </div>

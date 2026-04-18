@@ -57,4 +57,16 @@ export class PerfilMedicoService {
     fd.append('foto', file);
     return this.http.post<{ message: string; foto_url: string }>(`${API_BASE_URL}/perfil/foto`, fd);
   }
+
+  getPropioPerfil(): Observable<{ perfil: any }> {
+    return this.http.get<{ perfil: any }>(`${API_BASE_URL}/perfil`);
+  }
+
+  updateDatosPersonales(data: { nombre?: string; apellido?: string; email?: string; telefono?: string; fecha_nacimiento?: string }): Observable<any> {
+    return this.http.put(`${API_BASE_URL}/perfil`, data);
+  }
+
+  cambiarPassword(data: { password_actual: string; password_nuevo: string; password_nuevo_confirmation: string }): Observable<any> {
+    return this.http.post(`${API_BASE_URL}/perfil/cambiar-password`, data);
+  }
 }

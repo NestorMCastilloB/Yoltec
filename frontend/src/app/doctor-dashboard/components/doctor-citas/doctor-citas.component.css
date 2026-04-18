@@ -505,3 +505,64 @@
   .citas-layout { grid-template-columns: 1fr; }
   .section-header { flex-direction: column; align-items: flex-start; }
 }
+    .citas-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+/* ===== FILTROS ===== */
+.filtros-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+.filtro-select, .filtro-fecha {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #1B5E20;
+}
+.btn-limpiar {
+  padding: 0.45rem 0.9rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.btn-limpiar:hover { background: #c8e6c9; }
+
+/* ===== BOTONES ACCIONES CITA ===== */
+.btn-atender { background: #2e7d32; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.82rem; cursor: pointer; }
+.btn-atender:hover { background: #1b5e20; }
+.btn-reprogramar { background: #1565c0; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.82rem; cursor: pointer; }
+.btn-reprogramar:hover { background: #0d47a1; }
+.btn-no-show { background: #e65100; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.82rem; cursor: pointer; }
+.btn-no-show:hover { background: #bf360c; }
+.btn-cancelar { background: #b71c1c; color: #fff; border: none; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.82rem; cursor: pointer; }
+.btn-cancelar:hover { background: #7f0000; }
+
+/* ===== ESTATUS BADGE ===== */
+.estatus.programada { background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 12px; font-size: 0.78rem; }
+
+/* ===== MODAL REPROGRAMAR ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal { background: #fff; border-radius: 12px; padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.modal h3 { margin: 0 0 1rem; color: #1B5E20; font-size: 1.1rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.875rem; color: #555; margin-bottom: 0.3rem; }
+.form-msg { padding: 0.6rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; background: #ffebee; color: #c62828; }
+.form-msg.success { background: #e8f5e9; color: #2e7d32; }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+.btn-primary { background: #2e7d32; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.9rem; cursor: pointer; }
+.btn-primary:hover:not(:disabled) { background: #1b5e20; }
+.btn-secondary { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.9rem; cursor: pointer; }

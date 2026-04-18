@@ -113,11 +113,27 @@
     </form>
   </div>
 
-  <!-- Barra de búsqueda -->
+  <!-- Barra de búsqueda y filtros -->
   <div class="search-bar">
     <input type="text" [(ngModel)]="searchCitas" placeholder="Buscar por alumno, número de control o motivo..."
       class="search-input">
     <button *ngIf="searchCitas" class="search-clear" (click)="searchCitas = ''">✕</button>
+  </div>
+
+  <div class="filtros-bar">
+    <select [(ngModel)]="filtroEstatus" class="filtro-select">
+      <option value="">Todos los estatus</option>
+      <option value="programada">Programada</option>
+      <option value="atendida">Atendida</option>
+      <option value="cancelada">Cancelada</option>
+      <option value="no_asistio">No asistió</option>
+    </select>
+    <input type="date" [(ngModel)]="filtroFechaDesde" class="filtro-fecha">
+    <input type="date" [(ngModel)]="filtroFechaHasta" class="filtro-fecha">
+    <button class="btn-limpiar" (click)="limpiarFiltros()"
+      *ngIf="filtroEstatus || filtroFechaDesde || filtroFechaHasta || searchCitas">
+      Limpiar filtros
+    </button>
   </div>
 
   <!-- Contenedor de citas -->
@@ -131,7 +147,20 @@
           <h3>Próximas citas</h3>
           <ng-container *ngIf="filteredPendingCitas.length > 0; else noPendientesDoctor">
             <div *ngFor="let cita of filteredPendingCitas" class="cita-card">
-              <!-- ... contenido igual ... -->
+              <div class="cita-header">
+                <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
+                <span class="estatus programada">Programada</span>
+              </div>
+              <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
+              <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
+              <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
+              <div class="card-actions">
+                <button class="btn-atender" (click)="onMarkAsAttended(cita)" [disabled]="isSubmitting">Atender</button>
+                <button class="btn-reprogramar" (click)="openReprogramar(cita)" [disabled]="isSubmitting">Reprogramar</button>
+                <button class="btn-no-show" (click)="onMarkAsNoShow(cita)" [disabled]="isSubmitting">No asistió</button>
+                <button class="btn-cancelar" (click)="onCancelCita(cita)" [disabled]="isSubmitting">Cancelar</button>
+                <button class="btn-perfil-alumno" *ngIf="cita.alumno" (click)="openPerfilAlumno(cita.alumno.id)">Ver perfil</button>
+              </div>
             </div>
           </ng-container>
           <ng-template #noPendientesDoctor>
@@ -277,6 +306,36 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reprogramar cita -->
+<div class="modal-overlay" *ngIf="showReprogramarModal" (click)="closeReprogramar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>Reprogramar cita</h3>
+
+    <div *ngIf="reprogramarMsg" class="form-msg" [class.success]="reprogramarMsg.includes('correctamente')">
+      {{ reprogramarMsg }}
+    </div>
+
+    <div class="form-group">
+      <label>Nueva fecha</label>
+      <input type="date" [(ngModel)]="reprogramarFecha" [min]="today" class="filtro-fecha">
+    </div>
+    <div class="form-group">
+      <label>Nueva hora</label>
+      <select [(ngModel)]="reprogramarHora" class="filtro-select">
+        <option value="">Selecciona hora</option>
+        <option *ngFor="let slot of timeSlots" [value]="normalizeTime(slot)">{{ formatTime(slot) }}</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closeReprogramar()">Cancelar</button>
+      <button class="btn-primary" (click)="submitReprogramar()" [disabled]="isSubmittingReprogramar">
+        {{ isSubmittingReprogramar ? 'Reprogramando...' : 'Confirmar reprogramación' }}
+      </button>
     </div>
   </div>
 </div>

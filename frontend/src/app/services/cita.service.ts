@@ -80,6 +80,10 @@ export class CitaService {
     return this.http.post<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/cancelar`, {});
   }
 
+  reprogramarCita(id: number, fecha_cita: string, hora_cita: string): Observable<{ message: string; cita: Cita }> {
+    return this.http.put<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/reprogramar`, { fecha_cita, hora_cita });
+  }
+
   markAsAttended(id: number): Observable<{ message: string; cita: Cita }> {
     return this.http.post<{ message: string; cita: Cita }>(`${this.baseUrl}/${id}/atender`, {});
   }

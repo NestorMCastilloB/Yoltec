@@ -74,7 +74,20 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   isLoadingPerfilAlumno = false;
   historialAlumnoExpandido: number | null = null;
 
-  private readonly today = this.formatDate(new Date());
+  // Filtros
+  filtroEstatus = '';
+  filtroFechaDesde = '';
+  filtroFechaHasta = '';
+
+  // Modal reprogramar
+  showReprogramarModal = false;
+  reprogramarCitaId: number | null = null;
+  reprogramarFecha = '';
+  reprogramarHora = '';
+  reprogramarMsg: string | null = null;
+  isSubmittingReprogramar = false;
+
+  readonly today = this.formatDate(new Date());
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -98,12 +111,31 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   get filteredHandledCitas(): Cita[] { return this.filterCitas(this.handledCitas); }
 
   private filterCitas(citas: Cita[]): Cita[] {
+    let result = citas;
     const q = this.searchCitas.trim().toLowerCase();
-    if (!q) return citas;
-    return citas.filter(c => {
-      const nombre = `${c.alumno?.nombre ?? ''} ${c.alumno?.apellido ?? ''}`.toLowerCase();
-      return nombre.includes(q) || (c.alumno?.numero_control ?? '').toLowerCase().includes(q) || (c.motivo ?? '').toLowerCase().includes(q);
-    });
+    if (q) {
+      result = result.filter(c => {
+        const nombre = `${c.alumno?.nombre ?? ''} ${c.alumno?.apellido ?? ''}`.toLowerCase();
+        return nombre.includes(q) || (c.alumno?.numero_control ?? '').toLowerCase().includes(q) || (c.motivo ?? '').toLowerCase().includes(q);
+      });
+    }
+    if (this.filtroEstatus) {
+      result = result.filter(c => c.estatus === this.filtroEstatus);
+    }
+    if (this.filtroFechaDesde) {
+      result = result.filter(c => c.fecha_cita >= this.filtroFechaDesde);
+    }
+    if (this.filtroFechaHasta) {
+      result = result.filter(c => c.fecha_cita <= this.filtroFechaHasta);
+    }
+    return result;
+  }
+
+  limpiarFiltros(): void {
+    this.filtroEstatus = '';
+    this.filtroFechaDesde = '';
+    this.filtroFechaHasta = '';
+    this.searchCitas = '';
   }
 
   get calendarLabel(): string {
@@ -295,6 +327,43 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
 
   toggleHistorialAlumnoItem(id: number): void {
     this.historialAlumnoExpandido = this.historialAlumnoExpandido === id ? null : id;
+  }
+
+  openReprogramar(cita: Cita): void {
+    this.reprogramarCitaId = cita.id;
+    this.reprogramarFecha = cita.fecha_cita;
+    this.reprogramarHora = this.normalizeTime(cita.hora_cita);
+    this.reprogramarMsg = null;
+    this.showReprogramarModal = true;
+  }
+
+  closeReprogramar(): void {
+    this.showReprogramarModal = false;
+    this.reprogramarCitaId = null;
+    this.reprogramarMsg = null;
+  }
+
+  submitReprogramar(): void {
+    if (!this.reprogramarCitaId || !this.reprogramarFecha || !this.reprogramarHora) {
+      this.reprogramarMsg = 'Selecciona fecha y hora.';
+      return;
+    }
+    this.isSubmittingReprogramar = true;
+    this.reprogramarMsg = null;
+    this.citaService.reprogramarCita(this.reprogramarCitaId, this.reprogramarFecha, this.reprogramarHora)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => { this.reprogramarMsg = error?.error?.message || 'No se pudo reprogramar.'; return of(null); }),
+        finalize(() => { this.isSubmittingReprogramar = false; })
+      )
+      .subscribe(response => {
+        if (response) {
+          this.reprogramarMsg = 'Cita reprogramada correctamente.';
+          this.loadCitas();
+          this.loadAvailability();
+          setTimeout(() => this.closeReprogramar(), 1000);
+        }
+      });
   }
 
   private loadCitas(): void {

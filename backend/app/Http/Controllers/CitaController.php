@@ -283,6 +283,66 @@ class CitaController extends Controller
         ], 200);
     }
 
+    // Reprogramar cita (solo doctor)
+    public function reprogramar(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$user->esDoctor()) {
+            return response()->json(['message' => 'Solo el doctor puede reprogramar citas'], 403);
+        }
+
+        $cita = Cita::findOrFail($id);
+
+        if ($cita->estatus !== 'programada') {
+            return response()->json(['message' => 'Solo se pueden reprogramar citas programadas'], 422);
+        }
+
+        $validated = $request->validate([
+            'fecha_cita' => 'required|date|after_or_equal:today',
+            'hora_cita'  => 'required|date_format:H:i',
+        ]);
+
+        $diaSemana = Carbon::parse($validated['fecha_cita'])->dayOfWeek;
+        if ($diaSemana === 0) {
+            return response()->json(['message' => 'No se pueden agendar citas los domingos.'], 422);
+        }
+
+        if ($validated['hora_cita'] < '08:00' || $validated['hora_cita'] > '16:45') {
+            return response()->json(['message' => 'El horario de atención es de 08:00 a 16:45.'], 422);
+        }
+
+        $slotOcupado = Cita::where('fecha_cita', $validated['fecha_cita'])
+            ->where('hora_cita', $validated['hora_cita'])
+            ->where('estatus', 'programada')
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($slotOcupado) {
+            return response()->json(['message' => 'El horario seleccionado ya no está disponible.'], 422);
+        }
+
+        $cita->update([
+            'fecha_cita' => $validated['fecha_cita'],
+            'hora_cita'  => $validated['hora_cita'],
+        ]);
+        $cita->load(['alumno', 'doctor']);
+
+        if ($cita->alumno?->fcm_token) {
+            (new FcmService())->send(
+                $cita->alumno->fcm_token,
+                'Cita reprogramada',
+                "Tu cita fue reprogramada para el {$cita->fecha_cita} a las {$cita->hora_cita}.",
+                ['cita_id' => (string) $cita->id, 'tipo' => 'cita_reprogramada']
+            );
+        }
+
+        return response()->json([
+            'message' => 'Cita reprogramada exitosamente',
+            'cita'    => $cita
+        ], 200);
+    }
+
     // Marcar como no asistió (solo doctor, manual)
     public function noAsistio(Request $request, $id)
     {
