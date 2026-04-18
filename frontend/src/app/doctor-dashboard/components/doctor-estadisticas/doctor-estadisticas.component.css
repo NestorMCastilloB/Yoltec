@@ -1,150 +1,225 @@
-/* ===== DOCTOR ESTADÍSTICAS - ESTILOS MEJORADOS ===== */
+/* ===== DOCTOR ESTADÍSTICAS — Diseño premium ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .estadisticas-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
 }
 
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #edf2e8;
+  margin-bottom: 0.5rem;
+  position: relative;
 }
 
 .section-header h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #E2E8F0, #A5F3C3);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #001f36;
+  margin: 0;
 }
 
-/* Tarjetas de resumen */
+.section-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #9dad42, #258a60);
+  border-radius: 2px;
+}
+
+/* ---- Resumen de estadísticas ---- */
 .estadisticas-resumen {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .estat-card {
-    flex: 1;
-    min-width: 140px;
-    background: #1E293B;
-    border-radius: 28px;
-    padding: 1rem;
-    text-align: center;
-    border: 1px solid #334155;
-    transition: transform 0.2s;
+  flex: 1;
+  min-width: 130px;
+  border-radius: 22px;
+  padding: 1.3rem 1rem;
+  text-align: center;
+  border: 1.5px solid transparent;
+  transition: transform 0.22s, box-shadow 0.22s;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Tonalidad diferente por tipo */
+.estat-card.total {
+  background: linear-gradient(145deg, #eef7f2, #e0f0e8) padding-box,
+              linear-gradient(135deg, #258a60, #1c5560) border-box;
+  box-shadow: 0 3px 16px rgba(28,85,96,0.1);
+}
+
+.estat-card.atendida {
+  background: linear-gradient(145deg, #edf6f0, #d8ede4) padding-box,
+              linear-gradient(135deg, #9dad42, #258a60) border-box;
+  box-shadow: 0 3px 16px rgba(37,138,96,0.1);
+}
+
+.estat-card.cancelada {
+  background: linear-gradient(145deg, #fff5f5, #fee2e2) padding-box,
+              linear-gradient(135deg, #fca5a5, #ef4444) border-box;
+  box-shadow: 0 3px 16px rgba(239,68,68,0.1);
+}
+
+.estat-card.no-asistio {
+  background: linear-gradient(145deg, #fffbeb, #fef3c7) padding-box,
+              linear-gradient(135deg, #fcd34d, #f59e0b) border-box;
+  box-shadow: 0 3px 16px rgba(245,158,11,0.1);
+}
+
+.estat-card.tasa {
+  background: linear-gradient(145deg, #f0fdf4, #e8f5ef) padding-box,
+              linear-gradient(135deg, #006666, #1c5560) border-box;
+  box-shadow: 0 3px 16px rgba(0,102,102,0.12);
+}
+
+/* Punto decorativo de fondo */
+.estat-card::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  opacity: 0.06;
+  pointer-events: none;
+}
+.estat-card.total::after      { background: #258a60; }
+.estat-card.atendida::after   { background: #9dad42; }
+.estat-card.cancelada::after  { background: #ef4444; }
+.estat-card.no-asistio::after { background: #f59e0b; }
+.estat-card.tasa::after       { background: #006666; }
 
 .estat-card:hover {
-    transform: translateY(-3px);
-    border-color: #4CAF50;
+  transform: translateY(-4px);
 }
 
-.estat-card.total .estat-num {
-    color: #60A5FA;
-}
-
-.estat-card.atendida .estat-num {
-    color: #66BB6A;
-}
-
-.estat-card.cancelada .estat-num {
-    color: #F87171;
-}
-
-.estat-card.no-asistio .estat-num {
-    color: #FBBF24;
-}
-
-.estat-card.tasa .estat-num {
-    color: #A78BFA;
-}
+.estat-card.total:hover     { box-shadow: 0 12px 28px rgba(28,85,96,0.18); }
+.estat-card.atendida:hover  { box-shadow: 0 12px 28px rgba(37,138,96,0.18); }
+.estat-card.cancelada:hover { box-shadow: 0 12px 28px rgba(239,68,68,0.18); }
+.estat-card.no-asistio:hover{ box-shadow: 0 12px 28px rgba(245,158,11,0.18); }
+.estat-card.tasa:hover      { box-shadow: 0 12px 28px rgba(0,102,102,0.18); }
 
 .estat-num {
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  display: block;
 }
+
+.estat-card.total     .estat-num { color: #1c5560; }
+.estat-card.atendida  .estat-num { color: #258a60; }
+.estat-card.cancelada .estat-num { color: #ef4444; }
+.estat-card.no-asistio .estat-num { color: #f59e0b; }
+.estat-card.tasa      .estat-num { color: #006666; }
 
 .estat-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #94A3B8;
-    display: block;
-    margin-top: 0.5rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: block;
+  margin-top: 0.5rem;
+  font-weight: 700;
 }
 
-/* Gráficas más compactas */
+.estat-card.total     .estat-label { color: #258a60; }
+.estat-card.atendida  .estat-label { color: #6b7e1e; }
+.estat-card.cancelada .estat-label { color: #dc2626; }
+.estat-card.no-asistio .estat-label { color: #d97706; }
+.estat-card.tasa      .estat-label { color: #006666; }
+
+/* ---- Gráficas ---- */
 .estadisticas-charts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
 }
 
 .chart-box {
-    background: #1E293B;
-    border-radius: 28px;
-    padding: 1rem;
-    border: 1px solid #334155;
-    transition: transform 0.2s;
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box;
+  border: 1.5px solid transparent;
+  border-radius: 24px;
+  padding: 1.6rem;
+  box-shadow: 0 3px 14px rgba(28,85,96,0.07);
+  transition: transform 0.22s, box-shadow 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #9dad42, #258a60, #1c5560);
+  border-radius: 24px 24px 0 0;
 }
 
 .chart-box:hover {
-    border-color: #4CAF50;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(37,138,96,0.12);
 }
 
 .chart-box h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #CBD5E1;
-    margin: 0 0 1rem;
-    text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1c5560;
+  margin: 0 0 1.2rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 0.82rem;
 }
 
 .chart-box canvas {
-    max-height: 250px;
-    width: 100%;
+  max-height: 250px;
+  width: 100%;
 }
 
-/* Estados */
+/* ---- Estados ---- */
 .loading,
 .empty-state {
-    text-align: center;
-    padding: 2rem;
-    background: #1E293B;
-    border-radius: 28px;
-    border: 1px solid #334155;
-    color: #94A3B8;
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(145deg, #f8faf4, #f0f6ec);
+  border-radius: 24px;
+  border: 1.5px dashed #d4e6d0;
+  color: #9ab8a8;
+  font-size: 0.95rem;
 }
 
 .alert-error {
-    background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #EF4444;
-    padding: 1rem;
-    border-radius: 16px;
-    color: #F87171;
+  background: linear-gradient(135deg, rgba(239,68,68,0.07), rgba(239,68,68,0.04));
+  border-left: 4px solid #ef4444;
+  border: 1px solid rgba(239,68,68,0.15);
+  border-left: 4px solid #ef4444;
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  color: #dc2626;
+  font-size: 0.88rem;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-    .estadisticas-charts {
-        grid-template-columns: 1fr;
-    }
-
-    .estadisticas-resumen {
-        flex-direction: column;
-    }
+  .estadisticas-charts { grid-template-columns: 1fr; }
+  .estadisticas-resumen { gap: 0.75rem; }
+  .estat-card { min-width: 110px; padding: 1rem 0.7rem; }
 }
