@@ -276,16 +276,6 @@
 }
 
 /* ===== TARJETAS GENÉRICAS con borde gradiente ===== */
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* ===== TARJETAS Y ESTADÍSTICAS ===== */
 .welcome-card,
@@ -456,19 +446,6 @@
   background: #f59e0b;
   color: white;
   box-shadow: 0 4px 14px rgba(245,158,11,0.3);
-}
-
-/* ===== CAMPOS ===== */
-  border: 1px solid #F59E0B;
-  color: #FBBF24;
-  border-radius: 40px;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-}
-
-.btn-warning:hover {
-  background: #F59E0B;
-  color: #1E293B;
 }
 
 /* Campos de formulario */
