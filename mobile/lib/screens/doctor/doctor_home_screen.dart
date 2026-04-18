@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/models/cita.dart';
 import 'package:yoltec_mobile/models/bitacora.dart';
+import 'package:yoltec_mobile/services/api_service.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
@@ -48,6 +52,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
       const _DoctorRecetasTab(),
       const _DoctorPreEvaluacionesTab(),
       const _DoctorPrioridadTab(),
+      const _DoctorPerfilTab(),
     ];
 
     return Scaffold(
@@ -93,6 +98,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               icon: Icon(Icons.stars_outlined),
               activeIcon: Icon(Icons.stars),
               label: 'Prioridad'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'Perfil'),
         ],
       ),
     );
@@ -1605,6 +1614,499 @@ class _EstatusChipDoctor extends StatelessWidget {
         texto,
         style: TextStyle(
             color: color, fontSize: 11, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+// ─── Tab Perfil Doctor ────────────────────────────────────────────────────────
+
+class _DoctorPerfilTab extends StatefulWidget {
+  const _DoctorPerfilTab();
+
+  @override
+  State<_DoctorPerfilTab> createState() => _DoctorPerfilTabState();
+}
+
+class _DoctorPerfilTabState extends State<_DoctorPerfilTab> {
+  bool _cargando = true;
+  String? _error;
+
+  String _nombre = '';
+  String _apellido = '';
+  String _email = '';
+  String _username = '';
+  String _telefono = '';
+  String? _fotoPerfil;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarPerfil());
+  }
+
+  Future<void> _cargarPerfil() async {
+    setState(() {
+      _cargando = true;
+      _error = null;
+    });
+    try {
+      final token =
+          Provider.of<AuthService>(context, listen: false).token ?? '';
+      final data = await ApiService.get('/perfil', token: token);
+      final perfil = data['data'] ?? data;
+      if (mounted) {
+        setState(() {
+          _nombre = (perfil['nombre'] ?? '').toString();
+          _apellido = (perfil['apellido'] ?? '').toString();
+          _email = (perfil['email'] ?? '').toString();
+          _username = (perfil['username'] ?? '').toString();
+          _telefono = (perfil['telefono'] ?? '').toString();
+          _fotoPerfil = perfil['foto_perfil']?.toString();
+          _cargando = false;
+        });
+      }
+    } on ApiException catch (e) {
+      if (mounted) setState(() { _error = e.message; _cargando = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = 'Error al cargar perfil'; _cargando = false; });
+    }
+  }
+
+  Future<void> _cambiarFoto() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (picked == null) return;
+    try {
+      final token =
+          Provider.of<AuthService>(context, listen: false).token ?? '';
+      final result = await ApiService.postMultipart(
+        '/perfil/foto',
+        File(picked.path),
+        'foto',
+        token: token,
+      );
+      final nuevaFoto =
+          (result['data'] ?? result)['foto_perfil']?.toString();
+      if (mounted) {
+        setState(() => _fotoPerfil = nuevaFoto);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto actualizada'),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
+  void _mostrarCambiarPassword() {
+    showDialog(
+      context: context,
+      builder: (_) => const _DoctorCambiarPasswordDialog(),
+    );
+  }
+
+  String get _iniciales {
+    final n = _nombre.trim();
+    final a = _apellido.trim();
+    if (n.isEmpty && a.isEmpty) return '?';
+    return '${n.isNotEmpty ? n[0].toUpperCase() : ''}'
+        '${a.isNotEmpty ? a[0].toUpperCase() : ''}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_cargando) {
+      return const Center(
+          child: CircularProgressIndicator(color: AppTheme.primaryColor));
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+              const SizedBox(height: 12),
+              Text(_error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppTheme.gray700)),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _cargarPerfil,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      color: AppTheme.primaryColor,
+      onRefresh: _cargarPerfil,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // ── Avatar ──────────────────────────────────────────────────
+          Center(
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 52,
+                  backgroundColor: AppTheme.primarySurface,
+                  backgroundImage:
+                      (_fotoPerfil != null && _fotoPerfil!.isNotEmpty)
+                          ? NetworkImage(_fotoPerfil!)
+                          : null,
+                  child: (_fotoPerfil == null || _fotoPerfil!.isEmpty)
+                      ? Text(
+                          _iniciales,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        )
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _cambiarFoto,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const Icon(Icons.camera_alt,
+                          size: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Text(
+              'Dr. $_nombre $_apellido'.trim(),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.gray900,
+              ),
+            ),
+          ),
+          if (_email.isNotEmpty)
+            Center(
+              child: Text(_email,
+                  style:
+                      const TextStyle(color: AppTheme.gray600, fontSize: 13)),
+            ),
+          const SizedBox(height: 20),
+
+          // ── Datos personales ─────────────────────────────────────────
+          _DoctorSeccionCard(
+            titulo: 'Datos Personales',
+            icono: Icons.badge_outlined,
+            children: [
+              if (_username.isNotEmpty)
+                _DoctorCampoInfo(label: 'Usuario', valor: _username),
+              _DoctorCampoInfo(
+                  label: 'Nombre', valor: '$_nombre $_apellido'.trim()),
+              _DoctorCampoInfo(label: 'Email', valor: _email),
+              if (_telefono.isNotEmpty)
+                _DoctorCampoInfo(label: 'Telefono', valor: _telefono),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // ── Seguridad ────────────────────────────────────────────────
+          _DoctorSeccionCard(
+            titulo: 'Seguridad',
+            icono: Icons.lock_outline,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _mostrarCambiarPassword,
+                  icon: const Icon(Icons.key_outlined, size: 18),
+                  label: const Text('Cambiar contrasena'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Diálogo: Cambiar contraseña (Doctor) ─────────────────────────────────────
+
+class _DoctorCambiarPasswordDialog extends StatefulWidget {
+  const _DoctorCambiarPasswordDialog();
+
+  @override
+  State<_DoctorCambiarPasswordDialog> createState() =>
+      _DoctorCambiarPasswordDialogState();
+}
+
+class _DoctorCambiarPasswordDialogState
+    extends State<_DoctorCambiarPasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _actualCtrl = TextEditingController();
+  final _nuevoCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+  bool _guardando = false;
+  bool _verActual = false;
+  bool _verNuevo = false;
+  bool _verConfirm = false;
+
+  @override
+  void dispose() {
+    _actualCtrl.dispose();
+    _nuevoCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _guardar() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _guardando = true);
+    try {
+      final token =
+          Provider.of<AuthService>(context, listen: false).token ?? '';
+      await ApiService.post(
+        '/perfil/cambiar-password',
+        {
+          'password_actual': _actualCtrl.text,
+          'password_nuevo': _nuevoCtrl.text,
+          'password_nuevo_confirmation': _confirmCtrl.text,
+        },
+        token: token,
+      );
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Contrasena actualizada correctamente'),
+          backgroundColor: AppTheme.primaryColor,
+        ),
+      );
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(e.message), backgroundColor: AppTheme.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.lock_outline, color: AppTheme.primaryColor, size: 22),
+          SizedBox(width: 8),
+          Text('Cambiar contrasena', style: TextStyle(fontSize: 17)),
+        ],
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _actualCtrl,
+                obscureText: !_verActual,
+                decoration: InputDecoration(
+                  labelText: 'Contrasena actual',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_verActual
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined),
+                    onPressed: () =>
+                        setState(() => _verActual = !_verActual),
+                  ),
+                ),
+                validator: (v) => (v == null || v.isEmpty)
+                    ? 'Ingresa tu contrasena actual'
+                    : null,
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _nuevoCtrl,
+                obscureText: !_verNuevo,
+                decoration: InputDecoration(
+                  labelText: 'Nueva contrasena',
+                  prefixIcon: const Icon(Icons.lock_reset_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(_verNuevo
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined),
+                    onPressed: () =>
+                        setState(() => _verNuevo = !_verNuevo),
+                  ),
+                ),
+                validator: (v) =>
+                    (v == null || v.length < 6) ? 'Minimo 6 caracteres' : null,
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _confirmCtrl,
+                obscureText: !_verConfirm,
+                decoration: InputDecoration(
+                  labelText: 'Confirmar nueva contrasena',
+                  prefixIcon: const Icon(Icons.check_circle_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_verConfirm
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined),
+                    onPressed: () =>
+                        setState(() => _verConfirm = !_verConfirm),
+                  ),
+                ),
+                validator: (v) => (v != _nuevoCtrl.text)
+                    ? 'Las contrasenas no coinciden'
+                    : null,
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _guardando ? null : () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _guardando ? null : _guardar,
+          child: _guardando
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
+                )
+              : const Text('Guardar'),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Widgets auxiliares: Perfil Doctor ───────────────────────────────────────
+
+class _DoctorSeccionCard extends StatelessWidget {
+  final String titulo;
+  final IconData icono;
+  final List<Widget> children;
+  final Widget? accion;
+
+  const _DoctorSeccionCard({
+    required this.titulo,
+    required this.icono,
+    required this.children,
+    this.accion,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icono, size: 18, color: AppTheme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  titulo,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppTheme.gray800,
+                  ),
+                ),
+                if (accion != null) ...[
+                  const Spacer(),
+                  accion!,
+                ],
+              ],
+            ),
+            const Divider(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DoctorCampoInfo extends StatelessWidget {
+  final String label;
+  final String valor;
+
+  const _DoctorCampoInfo({required this.label, required this.valor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: const TextStyle(
+                  color: AppTheme.gray500, fontSize: 13),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              valor,
+              style: const TextStyle(
+                  color: AppTheme.gray800,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
       ),
     );
   }
