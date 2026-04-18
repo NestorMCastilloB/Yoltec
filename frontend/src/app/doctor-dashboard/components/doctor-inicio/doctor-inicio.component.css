@@ -1,206 +1,273 @@
-/* ===== DOCTOR INICIO - ESTILOS MEJORADOS ===== */
+/* ===== DOCTOR INICIO — Diseño premium consultorio ===== */
+
 .inicio-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Encabezado de bienvenida */
+/* ---- Bienvenida ---- */
 .welcome-header {
-    text-align: center;
-    margin-bottom: 0.5rem;
+  text-align: center;
+  padding: 1.8rem 1rem 0.5rem;
 }
 
 .welcome-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #E2E8F0, #A5F3C3);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #001f36;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
 }
 
 .welcome-header p {
-    font-size: 1rem;
-    color: #94A3B8;
+  font-size: 1rem;
+  color: #1c5560;
+  font-weight: 400;
+  opacity: 0.85;
 }
 
-/* Cuadrícula de estadísticas (más espaciada) */
+/* ---- Grid de estadísticas ---- */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.8rem;
-    margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
+/* Base de stat-card con borde gradiente */
 .stat-card {
-    background: #1E293B;
-    border-radius: 28px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    border: 1px solid #334155;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 28px;
+  padding: 1.6rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+  border: 1.5px solid transparent;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Tonalidades y bordes diferentes por card */
+.stat-card:nth-child(1) {
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+              linear-gradient(135deg, #b1bf63, #258a60) border-box;
+  box-shadow: 0 4px 22px rgba(37,138,96,0.10);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(145deg, #fbffcd 0%, #f2f9d4 100%) padding-box,
+              linear-gradient(135deg, #9dad42, #b1bf63) border-box;
+  box-shadow: 0 4px 22px rgba(157,173,66,0.16);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(145deg, #e8f5ef 0%, #d8eee4 100%) padding-box,
+              linear-gradient(135deg, #258a60, #1c5560) border-box;
+  box-shadow: 0 4px 22px rgba(28,85,96,0.13);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.stat-card:nth-child(1)::after { background: #258a60; }
+.stat-card:nth-child(2)::after { background: #9dad42; }
+.stat-card:nth-child(3)::after { background: #006666; }
 
 .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 30px rgba(0, 191, 165, 0.2);
-    border-color: #4CAF50;
+  transform: translateY(-5px);
 }
 
+.stat-card:nth-child(1):hover { box-shadow: 0 14px 34px rgba(37,138,96,0.18); }
+.stat-card:nth-child(2):hover { box-shadow: 0 14px 34px rgba(157,173,66,0.24); }
+.stat-card:nth-child(3):hover { box-shadow: 0 14px 34px rgba(28,85,96,0.20); }
+
+/* Iconos con fondo diferente por card */
 .stat-icon {
-    font-size: 2.8rem;
-    background: #0F172A;
-    width: 70px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid #334155;
+  font-size: 2.2rem;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.stat-card:nth-child(1) .stat-icon {
+  background: linear-gradient(145deg, #eef9f4, #d8f0e5);
+  box-shadow: 0 3px 10px rgba(37,138,96,0.15);
+}
+
+.stat-card:nth-child(2) .stat-icon {
+  background: linear-gradient(145deg, #ffffff, #f4f9d8);
+  box-shadow: 0 3px 10px rgba(157,173,66,0.18);
+}
+
+.stat-card:nth-child(3) .stat-icon {
+  background: linear-gradient(145deg, #d4ede0, #c2e2d0);
+  box-shadow: 0 3px 10px rgba(28,85,96,0.15);
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.08) rotate(-3deg);
 }
 
 .stat-content {
-    flex: 1;
+  flex: 1;
 }
 
 .stat-content h3 {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #94A3B8;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.5px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
 }
+
+.stat-card:nth-child(1) .stat-content h3 { color: #1c5560; }
+.stat-card:nth-child(2) .stat-content h3 { color: #5a6e1a; }
+.stat-card:nth-child(3) .stat-content h3 { color: #1c5560; }
 
 .stat-value {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #66BB6A;
-    margin: 0.2rem 0;
-    line-height: 1;
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0.15rem 0;
 }
+
+.stat-card:nth-child(1) .stat-value { color: #258a60; }
+.stat-card:nth-child(2) .stat-value { color: #6b7e1e; }
+.stat-card:nth-child(3) .stat-value { color: #006666; }
 
 .stat-detail {
-    font-size: 0.75rem;
-    color: #64748B;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-weight: 700;
+  margin-top: 0.3rem;
+  display: block;
 }
 
-/* Próxima cita (destacada) */
+.stat-card:nth-child(1) .stat-detail { color: #9dad42; }
+.stat-card:nth-child(2) .stat-detail { color: #9dad42; }
+.stat-card:nth-child(3) .stat-detail { color: #258a60; }
+
+/* ---- Próxima cita ---- */
 .proxima-cita-wrapper {
-    margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .proxima-cita-card {
-    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-    border-radius: 32px;
-    padding: 1.8rem;
-    border: 1px solid #334155;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-    transition: all 0.2s;
+  border-radius: 28px;
+  padding: 2rem;
+  border: 1.5px solid transparent;
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+              linear-gradient(135deg, #b1bf63 0%, #258a60 50%, #1c5560 100%) border-box;
+  box-shadow: 0 6px 28px rgba(37,138,96,0.11), 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
 }
 
-.proxima-cita-card:not(.empty) {
-    border-left: 6px solid #4CAF50;
-    background: linear-gradient(135deg, #1E293B, #0F172A);
+.proxima-cita-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #9dad42, #258a60, #1c5560);
+  border-radius: 28px 28px 0 0;
+}
+
+.proxima-cita-card:not(.empty):hover {
+  box-shadow: 0 12px 40px rgba(37,138,96,0.16), 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .proxima-cita-card.empty {
-    text-align: center;
-    background: #1E293B;
-    opacity: 0.8;
+  text-align: center;
+  background: linear-gradient(145deg, #f8faf4, #f2f7ee) padding-box,
+              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box;
+  color: #9ab8a8;
 }
 
 .proxima-header {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #edf2e8;
 }
 
 .proxima-icon {
-    font-size: 1.8rem;
+  font-size: 1.6rem;
+  filter: drop-shadow(0 2px 4px rgba(37,138,96,0.2));
 }
 
 .proxima-header h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #E2E8F0;
-    margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #001f36;
+  margin: 0;
 }
 
 .proxima-cita-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1.4rem;
 }
 
 .proxima-dato {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .proxima-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #94A3B8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #9dad42;
 }
 
 .proxima-valor {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #CBD5E1;
-    word-break: break-word;
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #001f36;
+  word-break: break-word;
 }
 
 .proxima-valor.codigo {
-    font-family: monospace;
-    background: #0F172A;
-    padding: 0.2rem 0.5rem;
-    border-radius: 12px;
-    display: inline-block;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    border: 1px solid #334155;
+  font-family: 'Courier New', monospace;
+  background: linear-gradient(135deg, #fbffcd, #f2f9d4);
+  padding: 0.28rem 0.75rem;
+  border-radius: 10px;
+  display: inline-block;
+  font-size: 0.85rem;
+  letter-spacing: 1.2px;
+  border: 1px solid #c8dfa4;
+  color: #1c5560;
+  font-weight: 700;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-    .stats-grid {
-        gap: 1rem;
-    }
-
-    .stat-card {
-        padding: 1rem;
-    }
-
-    .stat-icon {
-        width: 55px;
-        height: 55px;
-        font-size: 2rem;
-    }
-
-    .stat-value {
-        font-size: 1.8rem;
-    }
-
-    .proxima-cita-info {
-        grid-template-columns: 1fr;
-    }
-
-    .proxima-header h3 {
-        font-size: 1.2rem;
-    }
+  .stats-grid { gap: 1rem; }
+  .stat-card { padding: 1.1rem; border-radius: 22px; }
+  .stat-icon { width: 56px; height: 56px; font-size: 1.8rem; border-radius: 16px; }
+  .stat-value { font-size: 2rem; }
+  .proxima-cita-info { grid-template-columns: 1fr 1fr; }
+  .welcome-header h2 { font-size: 1.5rem; }
+  .proxima-cita-card { padding: 1.4rem; border-radius: 22px; }
 }
