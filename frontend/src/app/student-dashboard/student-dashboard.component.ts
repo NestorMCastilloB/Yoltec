@@ -9,7 +9,7 @@ import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabil
 import { Bitacora, BitacoraService } from '../services/bitacora.service';
 import { Receta, RecetaService } from '../services/receta.service';
 import { PreEvaluacionIAService, ChatMessage, ChatResponse, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
-import { PerfilMedicoService, PerfilMedico, ConsultaHistorial } from '../services/perfil-medico.service';
+import { PerfilMedicoService, PerfilMedico, ConsultaHistorial, SesionActiva } from '../services/perfil-medico.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -114,6 +114,9 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   passwordForm = { password_actual: '', password_nuevo: '', password_nuevo_confirmation: '' };
   isSubmittingPassword = false;
   passwordMsg: string | null = null;
+  sesiones: SesionActiva[] = [];
+  isLoadingSesiones = false;
+  sesionMsg: string | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -157,6 +160,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     }
     if (section === 'perfil') {
       this.loadPerfil();
+      this.loadSesiones();
     }
     if (section === 'historial') {
       this.loadHistorial();
@@ -239,6 +243,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         if (res) {
           this.passwordMsg = 'Contraseña actualizada correctamente.';
           this.passwordForm = { password_actual: '', password_nuevo: '', password_nuevo_confirmation: '' };
+        }
+      });
+  }
+
+  loadSesiones(): void {
+    this.isLoadingSesiones = true;
+    this.perfilMedicoService.getSesiones()
+      .pipe(takeUntil(this.destroy$), catchError(() => of({ sesiones: [] })), finalize(() => this.isLoadingSesiones = false))
+      .subscribe(res => { this.sesiones = res.sesiones; });
+  }
+
+  revocarSesion(id: number): void {
+    this.sesionMsg = null;
+    this.perfilMedicoService.revocarSesion(id)
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+      .subscribe(res => {
+        if (res !== null) {
+          this.sesiones = this.sesiones.filter(s => s.id !== id);
+          this.sesionMsg = 'Sesión cerrada correctamente.';
         }
       });
   }

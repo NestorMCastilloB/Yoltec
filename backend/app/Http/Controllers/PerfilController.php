@@ -62,6 +62,39 @@ class PerfilController extends Controller
         ]);
     }
 
+    // Listar sesiones activas (tokens Sanctum)
+    public function sesiones(Request $request)
+    {
+        $user = $request->user();
+        $currentTokenId = $user->currentAccessToken()->id;
+
+        $sesiones = $user->tokens()->orderByDesc('last_used_at')->get()->map(function ($token) use ($currentTokenId) {
+            return [
+                'id'           => $token->id,
+                'nombre'       => $token->name,
+                'ultimo_uso'   => $token->last_used_at,
+                'creada_en'    => $token->created_at,
+                'es_actual'    => $token->id === $currentTokenId,
+            ];
+        });
+
+        return response()->json(['sesiones' => $sesiones]);
+    }
+
+    // Revocar una sesión específica
+    public function revocarSesion(Request $request, $id)
+    {
+        $user = $request->user();
+        $token = $user->tokens()->find($id);
+
+        if (!$token) {
+            return response()->json(['message' => 'Sesión no encontrada'], 404);
+        }
+
+        $token->delete();
+        return response()->json(['message' => 'Sesión cerrada.']);
+    }
+
     // Cambiar contraseña
     public function cambiarPassword(Request $request)
     {

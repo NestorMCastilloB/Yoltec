@@ -499,6 +499,26 @@
               {{ isSubmittingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
             </button>
           </div>
+
+          <!-- Sesiones activas (Y20I-87) -->
+          <div class="perfil-card">
+            <h3>Sesiones activas</h3>
+            <div *ngIf="sesionMsg" class="form-msg success">{{ sesionMsg }}</div>
+            <div *ngIf="isLoadingSesiones" class="loading">Cargando sesiones...</div>
+            <div *ngIf="!isLoadingSesiones && sesiones.length === 0" class="empty-state-small">No hay sesiones activas.</div>
+            <ul *ngIf="!isLoadingSesiones && sesiones.length > 0" class="sesiones-lista">
+              <li *ngFor="let s of sesiones" class="sesion-item">
+                <div class="sesion-info">
+                  <span class="sesion-nombre">{{ s.nombre }}</span>
+                  <span *ngIf="s.es_actual" class="sesion-badge">Sesión actual</span>
+                  <span class="sesion-detalle">
+                    Último uso: {{ s.ultimo_uso ? (s.ultimo_uso | date:'dd/MM/yyyy HH:mm':'':'es') : 'Nunca' }}
+                  </span>
+                </div>
+                <button *ngIf="!s.es_actual" class="btn-danger-sm" (click)="revocarSesion(s.id)">Cerrar</button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>

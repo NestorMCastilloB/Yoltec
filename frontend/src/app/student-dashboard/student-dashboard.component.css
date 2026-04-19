@@ -1635,3 +1635,14 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
+
+/* Sesiones activas (Y20I-87) */
+.sesiones-lista { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.sesion-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+.sesion-info { display: flex; flex-direction: column; gap: 0.15rem; }
+.sesion-nombre { font-weight: 600; font-size: 0.9rem; color: #1e293b; }
+.sesion-badge { font-size: 0.72rem; background: #dcfce7; color: #166534; padding: 0.1rem 0.4rem; border-radius: 4px; width: fit-content; }
+.sesion-detalle { font-size: 0.78rem; color: #64748b; }
+.btn-danger-sm { padding: 0.3rem 0.7rem; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.btn-danger-sm:hover { background: #fca5a5; }
+.empty-state-small { font-size: 0.9rem; color: #64748b; padding: 0.5rem 0; }

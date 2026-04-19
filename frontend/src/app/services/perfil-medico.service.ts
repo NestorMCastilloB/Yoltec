@@ -69,4 +69,20 @@ export class PerfilMedicoService {
   cambiarPassword(data: { password_actual: string; password_nuevo: string; password_nuevo_confirmation: string }): Observable<any> {
     return this.http.post(`${API_BASE_URL}/perfil/cambiar-password`, data);
   }
+
+  getSesiones(): Observable<{ sesiones: SesionActiva[] }> {
+    return this.http.get<{ sesiones: SesionActiva[] }>(`${API_BASE_URL}/sesiones`);
+  }
+
+  revocarSesion(id: number): Observable<any> {
+    return this.http.delete(`${API_BASE_URL}/sesiones/${id}`);
+  }
+}
+
+export interface SesionActiva {
+  id: number;
+  nombre: string;
+  ultimo_uso: string | null;
+  creada_en: string;
+  es_actual: boolean;
 }

@@ -46,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/perfil', [PerfilController::class, 'update']);
     Route::post('/perfil/foto', [PerfilController::class, 'subirFoto']);
     Route::post('/perfil/cambiar-password', [PerfilController::class, 'cambiarPassword']);
+    Route::get('/sesiones', [PerfilController::class, 'sesiones']);
+    Route::delete('/sesiones/{id}', [PerfilController::class, 'revocarSesion']);
 
     // Citas
     Route::get('/citas', [CitaController::class, 'index']);
