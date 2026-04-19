@@ -99,6 +99,19 @@
 .btn-primary:hover { background: #388E3C; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.search-bar { margin-bottom: 1rem; }
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: #4CAF50; }
+
 .btn-secondary {
   background: #607d8b;
   color: white;

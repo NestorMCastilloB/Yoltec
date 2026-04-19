@@ -32,12 +32,20 @@
       <div *ngIf="isLoadingAlumnos" class="loading">Cargando alumnos...</div>
       <div *ngIf="alumnosError" class="alert-error">{{ alumnosError }}</div>
 
+      <!-- Búsqueda de alumnos (Y20I-102) -->
+      <div *ngIf="!isLoadingAlumnos && !alumnosError && alumnos.length > 0" class="search-bar">
+        <input type="text" [(ngModel)]="alumnosBusqueda" placeholder="Buscar por nombre, N° control o email..." class="search-input" />
+      </div>
+
       <!-- Tabla de alumnos -->
       <div *ngIf="!isLoadingAlumnos && alumnos.length === 0 && !alumnosError" class="empty-state">
         No hay alumnos registrados.
       </div>
+      <div *ngIf="!isLoadingAlumnos && alumnos.length > 0 && alumnosFiltrados.length === 0" class="empty-state">
+        No se encontraron alumnos con "{{ alumnosBusqueda }}".
+      </div>
 
-      <div class="table-wrapper" *ngIf="alumnos.length > 0">
+      <div class="table-wrapper" *ngIf="alumnosFiltrados.length > 0">
         <table class="data-table">
           <thead>
             <tr>
@@ -49,7 +57,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let a of alumnos">
+            <tr *ngFor="let a of alumnosFiltrados">
               <td>{{ a.numero_control }}</td>
               <td>{{ a.nombre }} {{ a.apellido }}</td>
               <td>{{ a.email }}</td>

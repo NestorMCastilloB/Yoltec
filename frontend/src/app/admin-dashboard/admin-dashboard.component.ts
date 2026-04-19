@@ -22,6 +22,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Alumnos
   alumnos: Alumno[] = [];
+  alumnosBusqueda = '';
   isLoadingAlumnos = false;
   alumnosError: string | null = null;
   showAlumnoForm = false;
@@ -29,6 +30,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   alumnoMsg: string | null = null;
   isSubmittingAlumno = false;
   alumnoForm = { numero_control: '', nombre: '', apellido: '', email: '', nip: '', telefono: '', fecha_nacimiento: '' };
+
+  get alumnosFiltrados(): Alumno[] {
+    const q = this.alumnosBusqueda.trim().toLowerCase();
+    if (!q) return this.alumnos;
+    return this.alumnos.filter(a =>
+      a.numero_control.toLowerCase().includes(q) ||
+      a.nombre.toLowerCase().includes(q) ||
+      a.apellido.toLowerCase().includes(q) ||
+      (a.email ?? '').toLowerCase().includes(q)
+    );
+  }
 
   // Doctores
   doctores: Doctor[] = [];
