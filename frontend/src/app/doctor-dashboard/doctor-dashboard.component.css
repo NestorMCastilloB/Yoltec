@@ -764,17 +764,6 @@
     padding: 1rem;
   }
 }
-  
-  .welcome-card,
-  .placeholder-card {
-    padding: 1.5rem;
-  }
-  
-  .nav-button {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.85rem;
-  }
-}
 
 .btn-secondary {
   background: transparent;
