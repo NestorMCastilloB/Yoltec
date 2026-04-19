@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/screens/home_screen.dart';
 import 'package:yoltec_mobile/screens/login_screen.dart';
+import 'package:yoltec_mobile/screens/splash_screen.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
@@ -38,7 +39,7 @@ class YoltecApp extends StatelessWidget {
         title: 'Yoltec - Consultorio Medico',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const AuthWrapper(),
+        home: const SplashScreen(),
         locale: const Locale('es', 'MX'),
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,

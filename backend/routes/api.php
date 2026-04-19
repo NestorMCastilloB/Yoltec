@@ -17,6 +17,11 @@ use App\Http\Controllers\CalendarioAdminController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\PerfilMedicoController;
 
+// Health check (Y20I-93)
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()]);
+});
+
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
 Route::middleware('throttle:5,10')->post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
