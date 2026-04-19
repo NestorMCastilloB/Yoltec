@@ -10,6 +10,7 @@ import { Bitacora, BitacoraService } from '../services/bitacora.service';
 import { Receta, RecetaService } from '../services/receta.service';
 import { PreEvaluacionIAService, ChatMessage, ChatResponse, PreEvaluacion, PreEvaluacionResult } from '../services/pre-evaluacion-ia.service';
 import { PerfilMedicoService, PerfilMedico, ConsultaHistorial, SesionActiva } from '../services/perfil-medico.service';
+import { ThemeService } from '../services/theme.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -127,7 +128,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     private bitacoraService: BitacoraService,
     private recetaService: RecetaService,
     private preEvaluacionIAService: PreEvaluacionIAService,
-    private perfilMedicoService: PerfilMedicoService
+    private perfilMedicoService: PerfilMedicoService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {

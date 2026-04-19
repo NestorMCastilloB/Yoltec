@@ -7,6 +7,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { AdminService, Alumno, Doctor } from '../services/admin.service';
 import { CalendarioAdminService, DiaEspecial, TIPO_LABELS } from '../services/calendario-admin.service';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -73,7 +74,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private adminService: AdminService,
-    private calendarioService: CalendarioAdminService
+    private calendarioService: CalendarioAdminService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {

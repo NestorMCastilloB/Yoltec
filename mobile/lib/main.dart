@@ -12,6 +12,7 @@ import 'package:yoltec_mobile/services/ia_priority_service.dart';
 import 'package:yoltec_mobile/services/notification_service.dart';
 import 'package:yoltec_mobile/services/pre_evaluacion_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
+import 'package:yoltec_mobile/services/theme_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
 void main() async {
@@ -34,11 +35,15 @@ class YoltecApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RecetaService()),
         ChangeNotifierProvider(create: (_) => PreEvaluacionService()),
         ChangeNotifierProvider(create: (_) => IAPriorityService()),
+        ChangeNotifierProvider(create: (_) => ThemeService()),
       ],
-      child: MaterialApp(
+      child: Consumer<ThemeService>(
+        builder: (_, themeService, child) => MaterialApp(
         title: 'Yoltec - Consultorio Medico',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeService.mode,
         home: const SplashScreen(),
         locale: const Locale('es', 'MX'),
         localizationsDelegates: const [
@@ -50,6 +55,7 @@ class YoltecApp extends StatelessWidget {
           Locale('es', 'MX'),
           Locale('en', 'US'),
         ],
+      ),
       ),
     );
   }

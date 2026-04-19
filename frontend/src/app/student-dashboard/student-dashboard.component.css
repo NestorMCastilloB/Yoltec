@@ -1646,3 +1646,104 @@
 .btn-danger-sm { padding: 0.3rem 0.7rem; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
 .btn-danger-sm:hover { background: #fca5a5; }
 .empty-state-small { font-size: 0.9rem; color: #64748b; padding: 0.5rem 0; }
+
+/* ===== TOGGLE TEMA ===== */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s;
+}
+.theme-toggle-btn:hover { background: rgba(255,255,255,0.15); }
+
+/* ===== DARK MODE ===== */
+:host-context(.dark-mode) .student-dashboard {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .dashboard-header {
+  background: #1e1e1e;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  border-bottom: 1px solid #333;
+}
+:host-context(.dark-mode) .header-content h1 { color: #81c784; }
+:host-context(.dark-mode) .user-info span { color: #bdbdbd; }
+:host-context(.dark-mode) .dashboard-nav { background: #1e1e1e; border-top: 1px solid #333; }
+:host-context(.dark-mode) .nav-button { color: #9e9e9e; }
+:host-context(.dark-mode) .nav-button.active { color: #81c784; border-bottom-color: #81c784; }
+:host-context(.dark-mode) .nav-button:hover { color: #a5d6a7; }
+:host-context(.dark-mode) .dashboard-content { background: #121212; }
+:host-context(.dark-mode) .welcome-card,
+:host-context(.dark-mode) .form-card,
+:host-context(.dark-mode) .data-card,
+:host-context(.dark-mode) .chart-box,
+:host-context(.dark-mode) .calendar-card {
+  background: #1e1e1e;
+  border-color: #333;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .welcome-card h2,
+:host-context(.dark-mode) .data-card h3,
+:host-context(.dark-mode) .form-card h3 { color: #81c784; }
+:host-context(.dark-mode) .cita-card {
+  background: #2c2c2c;
+  border-color: #444;
+  border-left-color: #43a047;
+}
+:host-context(.dark-mode) .cita-card p { color: #bdbdbd; }
+:host-context(.dark-mode) .cita-card h4 { color: #e0e0e0; }
+:host-context(.dark-mode) .cita-card.cancelada { border-left-color: #ef5350; }
+:host-context(.dark-mode) .cita-card.no-asistio { border-left-color: #ffa726; }
+:host-context(.dark-mode) .slot-button {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #bdbdbd;
+}
+:host-context(.dark-mode) .slot-button:hover:not(.booked):not(.selected) {
+  border-color: #43a047;
+  color: #81c784;
+  background: #1a2e1a;
+}
+:host-context(.dark-mode) .calendar-day {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .calendar-day.unavailable {
+  background: #2d1a1a;
+  color: #ef9a9a;
+  border-color: #7f1d1d;
+}
+:host-context(.dark-mode) .form-group input,
+:host-context(.dark-mode) .form-group textarea,
+:host-context(.dark-mode) .form-group select,
+:host-context(.dark-mode) .search-input,
+:host-context(.dark-mode) .filtro-input {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .form-group label { color: #81c784; }
+:host-context(.dark-mode) .page-btn {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .sesion-item {
+  background: #2c2c2c;
+  border-color: #444;
+}
+:host-context(.dark-mode) .sesion-nombre { color: #e0e0e0; }
+:host-context(.dark-mode) .historial-card,
+:host-context(.dark-mode) .perfil-card {
+  background: #2c2c2c;
+  border-color: #444;
+}

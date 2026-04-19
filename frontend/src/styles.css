@@ -5,5 +5,11 @@ body {
   height: 100%;
   background-color: #f2f6ee;
   font-family: 'Inter', 'Poppins', sans-serif;
+  transition: background-color 0.3s;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
 }
 
