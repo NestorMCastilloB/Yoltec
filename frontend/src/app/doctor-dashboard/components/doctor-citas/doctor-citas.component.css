@@ -505,15 +505,6 @@
   .citas-layout { grid-template-columns: 1fr; }
   .section-header { flex-direction: column; align-items: flex-start; }
 }
-    .citas-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
 /* ===== FILTROS ===== */
 .filtros-bar {
   display: flex;
