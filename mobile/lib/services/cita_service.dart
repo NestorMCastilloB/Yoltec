@@ -1,15 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:yoltec_mobile/models/cita.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
+import 'package:yoltec_mobile/services/offline_cache_service.dart';
 
 class CitaService extends ChangeNotifier {
   List<Cita> _citas = [];
   bool _isLoading = false;
   String? _error;
+  bool _isOffline = false;
 
   List<Cita> get citas => _citas;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isOffline => _isOffline;
 
   List<Cita> get citasProgramadas =>
       _citas.where((c) => c.isProgramada).toList();
@@ -33,13 +36,20 @@ class CitaService extends ChangeNotifier {
     try {
       final data = await ApiService.get('/citas', token: token);
       final lista = data['citas'] as List<dynamic>? ?? [];
-      _citas = lista
-          .map((e) => Cita.fromJson(e as Map<String, dynamic>))
-          .toList();
+      _citas = lista.map((e) => Cita.fromJson(e as Map<String, dynamic>)).toList();
+      _isOffline = false;
+      await OfflineCacheService.guardar('citas', data);
     } on ApiException catch (e) {
       _error = e.message;
-    } catch (e) {
-      _error = 'Error al cargar citas.';
+    } catch (_) {
+      final cached = await OfflineCacheService.cargar('citas');
+      if (cached != null) {
+        final lista = cached['citas'] as List<dynamic>? ?? [];
+        _citas = lista.map((e) => Cita.fromJson(e as Map<String, dynamic>)).toList();
+        _isOffline = true;
+      } else {
+        _error = 'Sin conexión y sin datos guardados.';
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

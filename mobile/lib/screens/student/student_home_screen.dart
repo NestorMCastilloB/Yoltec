@@ -64,7 +64,39 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           ),
         ],
       ),
-      body: tabs[_tabIndex],
+      body: Column(
+        children: [
+          // Banner offline
+          Consumer<CitaService>(
+            builder: (_, citas, __) => Consumer<BitacoraService>(
+              builder: (_, bitacora, __) => Consumer<RecetaService>(
+                builder: (_, recetas, __) {
+                  final offline = citas.isOffline || bitacora.isOffline || recetas.isOffline;
+                  if (!offline) return const SizedBox.shrink();
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    color: const Color(0xFFF57F17),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Sin conexion — mostrando datos guardados',
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(child: tabs[_tabIndex]),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tabIndex,
         onTap: (i) => setState(() => _tabIndex = i),
