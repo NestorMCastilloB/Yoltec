@@ -57,3 +57,4 @@ tester/
 contexto_proyecto.md
 backend/.env.docker
 Iniciar/
+releases/*.apk
