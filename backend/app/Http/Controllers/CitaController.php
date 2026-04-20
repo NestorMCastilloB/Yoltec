@@ -9,6 +9,7 @@ use App\Models\DiaEspecial;
 use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Controlador para gestionar citas
@@ -16,14 +17,22 @@ use Illuminate\Support\Carbon;
 class CitaController extends Controller
 {
     /**
-     * Marcar automáticamente como canceladas las citas programadas
-     * cuya fecha y hora ya quedaron en el pasado.
+     * Marcar automáticamente como "no asistió" las citas programadas
+     * cuya fecha y hora ya pasaron.
+     *
+     * Se ejecuta máximo una vez cada 5 minutos (cache-throttle) para evitar
+     * hacer un UPDATE en cada petición GET y no degradar el rendimiento.
      */
     private function autoCancelPastAppointments(): void
     {
+        $cacheKey = 'auto_cancel_past_appointments_last_run';
+
+        if (Cache::has($cacheKey)) {
+            return; // Ya se ejecutó hace menos de 5 minutos
+        }
+
         $now = Carbon::now();
 
-        // Citas programadas cuyo tiempo ya pasó = no asistió (distinto de cancelada por el usuario)
         Cita::where('estatus', 'programada')
             ->where(function ($query) use ($now) {
                 $query->where('fecha_cita', '<', $now->toDateString())
@@ -33,6 +42,8 @@ class CitaController extends Controller
                     });
             })
             ->update(['estatus' => 'no_asistio']);
+
+        Cache::put($cacheKey, true, now()->addMinutes(5));
     }
 
     // Listar citas
