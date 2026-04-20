@@ -33,6 +33,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'nip',        // NIP en texto plano — nunca debe exponerse en respuestas JSON
+        'fcm_token',  // Token interno de Firebase — no relevante para el cliente
     ];
 
     protected $casts = [
