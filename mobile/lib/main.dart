@@ -2,8 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:yoltec_mobile/screens/home_screen.dart';
-import 'package:yoltec_mobile/screens/login_screen.dart';
 import 'package:yoltec_mobile/screens/splash_screen.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
@@ -61,35 +59,3 @@ class YoltecApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<AuthService>(
-      builder: (context, authService, _) {
-        if (authService.isLoading) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: AppTheme.primaryColor),
-                  SizedBox(height: 16),
-                  Text(
-                    'Cargando...',
-                    style: TextStyle(color: AppTheme.gray600),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return authService.isAuthenticated
-            ? const HomeScreen()
-            : const LoginScreen();
-      },
-    );
-  }
-}

@@ -10,6 +10,7 @@ import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
+import 'package:yoltec_mobile/services/biometric_service.dart';
 import 'package:yoltec_mobile/services/theme_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
@@ -1139,10 +1140,38 @@ class _PerfilTabState extends State<_PerfilTab> {
   String _alergias = '';
   String _enfermedadesCronicas = '';
 
+  // Biometría
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cargarPerfil());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _cargarPerfil();
+      await _cargarEstadoBiometrico();
+    });
+  }
+
+  Future<void> _cargarEstadoBiometrico() async {
+    final available = await BiometricService.isAvailable();
+    final enabled = await BiometricService.isEnabled();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = enabled;
+      });
+    }
+  }
+
+  Future<void> _toggleBiometrico(bool valor) async {
+    if (valor) {
+      // Al activar, pedir autenticación primero para confirmar
+      final autenticado = await BiometricService.authenticate();
+      if (!autenticado || !mounted) return;
+    }
+    await BiometricService.setEnabled(valor);
+    if (mounted) setState(() => _biometricEnabled = valor);
   }
 
   Future<void> _cargarPerfil() async {
@@ -1427,6 +1456,27 @@ class _PerfilTabState extends State<_PerfilTab> {
                   ),
                 ),
               ),
+              if (_biometricAvailable) ...[
+                const SizedBox(height: 10),
+                SwitchListTile.adaptive(
+                  value: _biometricEnabled,
+                  onChanged: _toggleBiometrico,
+                  title: const Text(
+                    'Acceso con huella dactilar',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    _biometricEnabled
+                        ? 'Activo — se pedira huella al abrir la app'
+                        : 'Inactivo',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  secondary: const Icon(Icons.fingerprint,
+                      color: AppTheme.primaryColor),
+                  activeColor: AppTheme.primaryColor,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 24),

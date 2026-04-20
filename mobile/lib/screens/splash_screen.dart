@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:yoltec_mobile/screens/home_screen.dart';
-import 'package:yoltec_mobile/screens/login_screen.dart';
-import 'package:yoltec_mobile/services/auth_service.dart';
+import 'package:yoltec_mobile/screens/auth_wrapper.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -39,11 +36,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigate() {
     if (!mounted) return;
-    final authService = context.read<AuthService>();
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) =>
-            authService.isAuthenticated ? const HomeScreen() : const LoginScreen(),
+        pageBuilder: (_, __, ___) => const AuthWrapper(),
         transitionsBuilder: (_, animation, __, child) =>
             FadeTransition(opacity: animation, child: child),
         transitionDuration: const Duration(milliseconds: 400),
