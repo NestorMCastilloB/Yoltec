@@ -11,8 +11,9 @@ import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../../../servi
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './doctor-bitacoras.component.html',
-  styleUrls: ['./doctor-bitacoras.component.css']   // ← Agrega esta línea
+  styleUrls: ['./doctor-bitacoras.component.css']   // ← Asegúrate de que esté
 })
+
 export class DoctorBitacorasComponent implements OnInit, OnDestroy {
   citas: Cita[] = [];
   bitacoras: Bitacora[] = [];
@@ -25,7 +26,7 @@ export class DoctorBitacorasComponent implements OnInit, OnDestroy {
   editingBitacoraId: number | null = null;
   bitacoraFormData: Partial<CreateBitacoraPayload> = this.emptyForm();
 
-  readonly PAGE_SIZE = 10;
+  readonly PAGE_SIZE = 6;
   currentPageBitacoras = 1;
 
   get pagedBitacoras(): Bitacora[] {

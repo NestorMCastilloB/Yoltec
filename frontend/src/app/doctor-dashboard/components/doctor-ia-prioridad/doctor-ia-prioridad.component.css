@@ -1,4 +1,4 @@
-/* ===== DOCTOR IA PRIORIDAD — Diseño premium ===== */
+/* ===== DOCTOR IA PRIORIDAD — Con variables globales y modo oscuro mejorado ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .ia-prioridad-wrapper {
@@ -7,6 +7,7 @@
   gap: 2rem;
 }
 
+/* ===== ENCABEZADO ===== */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -14,7 +15,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #edf2e8;
+  border-bottom: 2px solid var(--border-light);
   margin-bottom: 0.5rem;
   position: relative;
 }
@@ -22,7 +23,7 @@
 .section-header h2 {
   font-size: 1.7rem;
   font-weight: 700;
-  color: #001f36;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -33,24 +34,42 @@
   left: 0;
   width: 40px;
   height: 3px;
-  background: linear-gradient(90deg, #9dad42, #258a60);
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
   border-radius: 2px;
 }
 
-/* ---- Disclaimer IA ---- */
+.btn-primary {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== DISCLAIMER IA ===== */
 .ia-disclaimer {
-  background: linear-gradient(135deg, #fbffcd, #f5f9e0);
-  border-left: 4px solid #9dad42;
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent-mid);
   padding: 0.9rem 1.2rem;
   border-radius: 18px;
   font-size: 0.86rem;
-  color: #1c5560;
-  border: 1px solid #c8dfa4;
-  border-left: 4px solid #9dad42;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--accent-mid);
   font-weight: 500;
 }
 
-/* ---- Resumen de prioridades ---- */
+/* ===== RESUMEN DE PRIORIDADES (diseño base claro) ===== */
 .prioridad-resumen {
   display: flex;
   flex-wrap: wrap;
@@ -68,6 +87,8 @@
   transition: transform 0.22s, box-shadow 0.22s;
   position: relative;
   overflow: hidden;
+  background: var(--bg-card) padding-box, linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
+  box-shadow: var(--shadow-sm);
 }
 
 .prioridad-badge::after {
@@ -82,43 +103,46 @@
   pointer-events: none;
 }
 
-/* Tonalidades por prioridad */
+/* Colores específicos para cada prioridad (modo claro) */
 .prioridad-badge.alta {
   background: linear-gradient(145deg, #fff5f5, #fee2e2) padding-box,
-              linear-gradient(135deg, #fca5a5, #ef4444) border-box;
-  box-shadow: 0 3px 16px rgba(239,68,68,0.12);
+    linear-gradient(135deg, #fca5a5, #ef4444) border-box;
 }
-.prioridad-badge.alta::after { background: #ef4444; }
+
+.prioridad-badge.alta::after {
+  background: #ef4444;
+}
 
 .prioridad-badge.media {
   background: linear-gradient(145deg, #fffbeb, #fef3c7) padding-box,
-              linear-gradient(135deg, #fcd34d, #f59e0b) border-box;
-  box-shadow: 0 3px 16px rgba(245,158,11,0.12);
+    linear-gradient(135deg, #fcd34d, #f59e0b) border-box;
 }
-.prioridad-badge.media::after { background: #f59e0b; }
+
+.prioridad-badge.media::after {
+  background: #f59e0b;
+}
 
 .prioridad-badge.baja {
   background: linear-gradient(145deg, #eef7f2, #d8ede4) padding-box,
-              linear-gradient(135deg, #9dad42, #258a60) border-box;
-  box-shadow: 0 3px 16px rgba(37,138,96,0.12);
+    linear-gradient(135deg, #9dad42, #258a60) border-box;
 }
-.prioridad-badge.baja::after { background: #258a60; }
+
+.prioridad-badge.baja::after {
+  background: #258a60;
+}
 
 .prioridad-badge.total {
   background: linear-gradient(145deg, #eef7fa, #d4eef5) padding-box,
-              linear-gradient(135deg, #258a60, #1c5560) border-box;
-  box-shadow: 0 3px 16px rgba(28,85,96,0.12);
+    linear-gradient(135deg, #258a60, #1c5560) border-box;
 }
-.prioridad-badge.total::after { background: #1c5560; }
+
+.prioridad-badge.total::after {
+  background: #1c5560;
+}
 
 .prioridad-badge:hover {
   transform: translateY(-5px);
 }
-
-.prioridad-badge.alta:hover  { box-shadow: 0 14px 32px rgba(239,68,68,0.22); }
-.prioridad-badge.media:hover { box-shadow: 0 14px 32px rgba(245,158,11,0.22); }
-.prioridad-badge.baja:hover  { box-shadow: 0 14px 32px rgba(37,138,96,0.22); }
-.prioridad-badge.total:hover { box-shadow: 0 14px 32px rgba(28,85,96,0.22); }
 
 .badge-num {
   display: block;
@@ -127,10 +151,21 @@
   line-height: 1;
 }
 
-.prioridad-badge.alta  .badge-num { color: #ef4444; }
-.prioridad-badge.media .badge-num { color: #f59e0b; }
-.prioridad-badge.baja  .badge-num { color: #258a60; }
-.prioridad-badge.total .badge-num { color: #1c5560; }
+.prioridad-badge.alta .badge-num {
+  color: #ef4444;
+}
+
+.prioridad-badge.media .badge-num {
+  color: #f59e0b;
+}
+
+.prioridad-badge.baja .badge-num {
+  color: #258a60;
+}
+
+.prioridad-badge.total .badge-num {
+  color: #1c5560;
+}
 
 .badge-label {
   font-size: 0.68rem;
@@ -141,12 +176,23 @@
   display: block;
 }
 
-.prioridad-badge.alta  .badge-label { color: #dc2626; }
-.prioridad-badge.media .badge-label { color: #d97706; }
-.prioridad-badge.baja  .badge-label { color: #258a60; }
-.prioridad-badge.total .badge-label { color: #1c5560; }
+.prioridad-badge.alta .badge-label {
+  color: #dc2626;
+}
 
-/* ---- Lista de citas por prioridad ---- */
+.prioridad-badge.media .badge-label {
+  color: #d97706;
+}
+
+.prioridad-badge.baja .badge-label {
+  color: #258a60;
+}
+
+.prioridad-badge.total .badge-label {
+  color: #1c5560;
+}
+
+/* ===== LISTA DE CITAS POR PRIORIDAD ===== */
 .citas-prioridad-lista {
   display: flex;
   flex-direction: column;
@@ -154,18 +200,17 @@
 }
 
 .cita-prioridad-card {
-  background: linear-gradient(#ffffff, #ffffff) padding-box,
-              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box;
+  background: var(--bg-card) padding-box,
+    linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
   border: 1.5px solid transparent;
   border-radius: 22px;
   padding: 1.3rem 1.3rem 1.3rem 1.6rem;
-  box-shadow: 0 2px 12px rgba(28,85,96,0.06);
+  box-shadow: var(--shadow-sm);
   transition: all 0.22s;
   position: relative;
   overflow: hidden;
 }
 
-/* Barra lateral de color por prioridad */
 .cita-prioridad-card::before {
   content: '';
   position: absolute;
@@ -179,16 +224,18 @@
 .cita-prioridad-card.prioridad-alta::before {
   background: linear-gradient(180deg, #ef4444, #dc2626);
 }
+
 .cita-prioridad-card.prioridad-media::before {
   background: linear-gradient(180deg, #f59e0b, #d97706);
 }
+
 .cita-prioridad-card.prioridad-baja::before {
   background: linear-gradient(180deg, #258a60, #1c5560);
 }
 
 .cita-prioridad-card:hover {
   transform: translateX(5px);
-  box-shadow: 0 10px 28px rgba(37,138,96,0.13);
+  box-shadow: var(--shadow-md);
 }
 
 .cita-prioridad-header {
@@ -200,7 +247,6 @@
   margin-bottom: 0.75rem;
 }
 
-/* ---- Tags de prioridad ---- */
 .prioridad-tag {
   padding: 0.28rem 0.9rem;
   border-radius: 20px;
@@ -211,67 +257,67 @@
 }
 
 .tag-alta {
-  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.07));
+  background: rgba(239, 68, 68, 0.12);
   color: #dc2626;
-  border: 1px solid rgba(239,68,68,0.25);
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
 .tag-media {
-  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.07));
+  background: rgba(245, 158, 11, 0.12);
   color: #d97706;
-  border: 1px solid rgba(245,158,11,0.25);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .tag-baja {
-  background: linear-gradient(135deg, rgba(37,138,96,0.12), rgba(28,85,96,0.07));
+  background: rgba(37, 138, 96, 0.12);
   color: #258a60;
-  border: 1px solid rgba(37,138,96,0.25);
+  border: 1px solid rgba(37, 138, 96, 0.25);
 }
 
 .prioridad-score {
   font-size: 0.72rem;
-  background: linear-gradient(135deg, #fbffcd, #f2f9d4);
+  background: var(--accent-soft);
   padding: 0.25rem 0.7rem;
   border-radius: 20px;
-  color: #1c5560;
+  color: var(--text-secondary);
   font-weight: 700;
-  border: 1px solid #c8dfa4;
+  border: 1px solid var(--border-light);
 }
 
 .cita-prioridad-body p {
   margin: 0.45rem 0;
   font-size: 0.88rem;
-  color: #1c5560;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .cita-prioridad-body strong {
-  color: #001f36;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .justificacion {
-  background: linear-gradient(135deg, #fbffcd, #f5f9e0);
+  background: var(--accent-soft);
   padding: 0.7rem 0.9rem;
   border-radius: 14px;
   font-style: italic;
   margin-top: 0.75rem !important;
-  border-left: 3px solid #9dad42;
-  border: 1px solid #c8dfa4;
-  border-left: 3px solid #9dad42;
-  color: #1c5560;
+  border-left: 3px solid var(--accent-mid);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--accent-mid);
+  color: var(--text-secondary);
   font-size: 0.84rem;
 }
 
-/* ---- Estados ---- */
+/* ===== ESTADOS ===== */
 .empty-state,
 .loading {
   text-align: center;
   padding: 3rem;
-  background: linear-gradient(145deg, #f8faf4, #f0f6ec);
+  background: var(--bg-side);
   border-radius: 24px;
-  border: 1.5px dashed #d4e6d0;
-  color: #9ab8a8;
+  border: 1.5px dashed var(--border-light);
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -289,23 +335,88 @@
 }
 
 @keyframes pulse-load {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.9); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
 }
 
 .alert-error {
-  background: rgba(239,68,68,0.06);
-  border-left: 4px solid #ef4444;
-  border: 1px solid rgba(239,68,68,0.15);
-  border-left: 4px solid #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 4px solid var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-left: 4px solid var(--danger);
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  color: #dc2626;
+  color: var(--danger);
   font-size: 0.88rem;
 }
 
+/* ===== AJUSTES DE MODO OSCURO PARA BADGES DE PRIORIDAD ===== */
+body.dark-mode .prioridad-badge.alta {
+  background: linear-gradient(145deg, #2d1a1a, #1f0f0f) padding-box !important;
+  box-shadow: 0 3px 16px rgba(239, 68, 68, 0.2) !important;
+}
+
+body.dark-mode .prioridad-badge.media {
+  background: linear-gradient(145deg, #2b1f0f, #1f150a) padding-box,
+    linear-gradient(135deg, #f59e0b, #d97706) border-box;
+  box-shadow: 0 3px 16px rgba(245, 158, 11, 0.2);
+}
+
+body.dark-mode .prioridad-badge.baja {
+  background: linear-gradient(145deg, #0f2a1a, #0a1f12) padding-box,
+    linear-gradient(135deg, #258a60, #1c5e44) border-box;
+  box-shadow: 0 3px 16px rgba(37, 138, 96, 0.2);
+}
+
+body.dark-mode .prioridad-badge.total {
+  background: linear-gradient(145deg, #0f242a, #0a1a1f) padding-box,
+    linear-gradient(135deg, #1c5560, #0f3d45) border-box;
+  box-shadow: 0 3px 16px rgba(28, 85, 96, 0.2);
+}
+
+/* Ajuste de los números y etiquetas para que resalten */
+body.dark-mode .prioridad-badge.alta .badge-num,
+body.dark-mode .prioridad-badge.alta .badge-label {
+  color: #fca5a5;
+}
+
+body.dark-mode .prioridad-badge.media .badge-num,
+body.dark-mode .prioridad-badge.media .badge-label {
+  color: #fcd34d;
+}
+
+body.dark-mode .prioridad-badge.baja .badge-num,
+body.dark-mode .prioridad-badge.baja .badge-label {
+  color: #86efac;
+}
+
+body.dark-mode .prioridad-badge.total .badge-num,
+body.dark-mode .prioridad-badge.total .badge-label {
+  color: #7ab3c8;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .prioridad-resumen { gap: 0.75rem; }
-  .prioridad-badge { min-width: 110px; padding: 1.1rem 0.6rem; }
-  .cita-prioridad-header { flex-direction: column; align-items: flex-start; }
+  .prioridad-resumen {
+    gap: 0.75rem;
+  }
+
+  .prioridad-badge {
+    min-width: 110px;
+    padding: 1.1rem 0.6rem;
+  }
+
+  .cita-prioridad-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,0 +1,345 @@
+/* ===== DOCTOR RECETAS — Con variables globales y diseño premium ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.recetas-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ===== ENCABEZADO ===== */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.section-header h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    border-radius: 2px;
+}
+
+/* ===== BOTÓN PRINCIPAL ===== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 22px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.22s;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== FORMULARIO ===== */
+.form-card {
+    background: var(--bg-card) padding-box,
+        linear-gradient(135deg, var(--border-light), var(--accent-mid)) border-box;
+    border: 1.5px solid transparent;
+    border-radius: 24px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.form-group label {
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-light);
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+    background: var(--bg-card);
+}
+
+/* ===== TARJETAS DE RECETAS ===== */
+.recetas-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.8rem;
+}
+
+.data-card {
+    border-radius: 24px;
+    padding: 1.4rem;
+    border: 1.5px solid transparent;
+    transition: transform 0.22s, box-shadow 0.22s;
+    background: var(--bg-card) padding-box,
+        linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.data-card:nth-child(even) {
+    background: var(--accent-soft) padding-box,
+        linear-gradient(135deg, var(--gradient-start), var(--accent-mid)) border-box;
+}
+
+.data-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.card-title h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.card-caption {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0.2rem 0 0;
+}
+
+.badge-pill {
+    padding: 0.28rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(37, 138, 96, 0.12);
+    color: var(--success);
+    border: 1px solid rgba(37, 138, 96, 0.2);
+}
+
+.badge-info {
+    background: rgba(28, 85, 96, 0.12);
+    color: var(--accent-dark);
+    border-color: rgba(28, 85, 96, 0.2);
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.detail-item dt {
+    font-weight: 700;
+    color: var(--accent-mid);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-item dd {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    white-space: pre-line;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.btn-edit-receta {
+    background: transparent;
+    border: 1.5px solid var(--gradient-start);
+    color: var(--gradient-end);
+    padding: 0.45rem 1.2rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-edit-receta:hover {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===== PAGINACIÓN (idéntica a bitácoras) ===== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-light);
+    clear: both;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    padding: 0.5rem 1.2rem;
+    border-radius: 60px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+}
+
+.page-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--gradient-start);
+    color: white;
+    transform: scale(1.05);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-side);
+    padding: 0.25rem 0.9rem;
+    border-radius: 40px;
+    border: 1px solid var(--border-light);
+    min-width: 70px;
+    text-align: center;
+}
+
+/* ===== ALERTAS ===== */
+.alert {
+    background: rgba(37, 138, 96, 0.07);
+    border-left: 4px solid var(--success);
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+}
+
+.alert.error {
+    background: rgba(239, 68, 68, 0.06);
+    border-left-color: var(--danger);
+    color: var(--danger);
+}
+
+.placeholder-card {
+    background: var(--bg-side);
+    border-radius: 24px;
+    padding: 2.5rem;
+    text-align: center;
+    border: 1.5px dashed var(--border-light);
+    color: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .recetas-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pagination {
+        padding: 0.4rem 0.8rem;
+        gap: 0.5rem;
+    }
+
+    .page-info {
+        font-size: 0.8rem;
+        min-width: 55px;
+    }
+}

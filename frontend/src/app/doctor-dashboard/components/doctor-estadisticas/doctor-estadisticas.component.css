@@ -1,4 +1,4 @@
-/* ===== DOCTOR ESTADÍSTICAS — Diseño premium ===== */
+/* ===== DOCTOR ESTADÍSTICAS — Con variables globales y modo oscuro ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .estadisticas-wrapper {
@@ -7,6 +7,7 @@
   gap: 1.8rem;
 }
 
+/* ===== ENCABEZADO ===== */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -14,7 +15,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #edf2e8;
+  border-bottom: 2px solid var(--border-light);
   margin-bottom: 0.5rem;
   position: relative;
 }
@@ -22,7 +23,7 @@
 .section-header h2 {
   font-size: 1.7rem;
   font-weight: 700;
-  color: #001f36;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -33,11 +34,29 @@
   left: 0;
   width: 40px;
   height: 3px;
-  background: linear-gradient(90deg, #9dad42, #258a60);
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
   border-radius: 2px;
 }
 
-/* ---- Resumen de estadísticas ---- */
+.btn-primary {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== RESUMEN DE ESTADÍSTICAS ===== */
 .estadisticas-resumen {
   display: flex;
   flex-wrap: wrap;
@@ -55,40 +74,11 @@
   transition: transform 0.22s, box-shadow 0.22s;
   position: relative;
   overflow: hidden;
+  background: var(--bg-card) padding-box,
+    linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Tonalidad diferente por tipo */
-.estat-card.total {
-  background: linear-gradient(145deg, #eef7f2, #e0f0e8) padding-box,
-              linear-gradient(135deg, #258a60, #1c5560) border-box;
-  box-shadow: 0 3px 16px rgba(28,85,96,0.1);
-}
-
-.estat-card.atendida {
-  background: linear-gradient(145deg, #edf6f0, #d8ede4) padding-box,
-              linear-gradient(135deg, #9dad42, #258a60) border-box;
-  box-shadow: 0 3px 16px rgba(37,138,96,0.1);
-}
-
-.estat-card.cancelada {
-  background: linear-gradient(145deg, #fff5f5, #fee2e2) padding-box,
-              linear-gradient(135deg, #fca5a5, #ef4444) border-box;
-  box-shadow: 0 3px 16px rgba(239,68,68,0.1);
-}
-
-.estat-card.no-asistio {
-  background: linear-gradient(145deg, #fffbeb, #fef3c7) padding-box,
-              linear-gradient(135deg, #fcd34d, #f59e0b) border-box;
-  box-shadow: 0 3px 16px rgba(245,158,11,0.1);
-}
-
-.estat-card.tasa {
-  background: linear-gradient(145deg, #f0fdf4, #e8f5ef) padding-box,
-              linear-gradient(135deg, #006666, #1c5560) border-box;
-  box-shadow: 0 3px 16px rgba(0,102,102,0.12);
-}
-
-/* Punto decorativo de fondo */
 .estat-card::after {
   content: '';
   position: absolute;
@@ -97,24 +87,34 @@
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  opacity: 0.06;
+  opacity: 0.08;
   pointer-events: none;
 }
-.estat-card.total::after      { background: #258a60; }
-.estat-card.atendida::after   { background: #9dad42; }
-.estat-card.cancelada::after  { background: #ef4444; }
-.estat-card.no-asistio::after { background: #f59e0b; }
-.estat-card.tasa::after       { background: #006666; }
+
+/* Colores específicos (independientes del tema para mantener identidad) */
+.estat-card.total::after {
+  background: #258a60;
+}
+
+.estat-card.atendida::after {
+  background: #9dad42;
+}
+
+.estat-card.cancelada::after {
+  background: #ef4444;
+}
+
+.estat-card.no-asistio::after {
+  background: #f59e0b;
+}
+
+.estat-card.tasa::after {
+  background: #006666;
+}
 
 .estat-card:hover {
   transform: translateY(-4px);
 }
-
-.estat-card.total:hover     { box-shadow: 0 12px 28px rgba(28,85,96,0.18); }
-.estat-card.atendida:hover  { box-shadow: 0 12px 28px rgba(37,138,96,0.18); }
-.estat-card.cancelada:hover { box-shadow: 0 12px 28px rgba(239,68,68,0.18); }
-.estat-card.no-asistio:hover{ box-shadow: 0 12px 28px rgba(245,158,11,0.18); }
-.estat-card.tasa:hover      { box-shadow: 0 12px 28px rgba(0,102,102,0.18); }
 
 .estat-num {
   font-size: 2.4rem;
@@ -122,12 +122,6 @@
   line-height: 1;
   display: block;
 }
-
-.estat-card.total     .estat-num { color: #1c5560; }
-.estat-card.atendida  .estat-num { color: #258a60; }
-.estat-card.cancelada .estat-num { color: #ef4444; }
-.estat-card.no-asistio .estat-num { color: #f59e0b; }
-.estat-card.tasa      .estat-num { color: #006666; }
 
 .estat-label {
   font-size: 0.65rem;
@@ -138,13 +132,48 @@
   font-weight: 700;
 }
 
-.estat-card.total     .estat-label { color: #258a60; }
-.estat-card.atendida  .estat-label { color: #6b7e1e; }
-.estat-card.cancelada .estat-label { color: #dc2626; }
-.estat-card.no-asistio .estat-label { color: #d97706; }
-.estat-card.tasa      .estat-label { color: #006666; }
+/* Colores en modo claro (por defecto) */
+.estat-card.total .estat-num {
+  color: #1c5560;
+}
 
-/* ---- Gráficas ---- */
+.estat-card.atendida .estat-num {
+  color: #258a60;
+}
+
+.estat-card.cancelada .estat-num {
+  color: #ef4444;
+}
+
+.estat-card.no-asistio .estat-num {
+  color: #f59e0b;
+}
+
+.estat-card.tasa .estat-num {
+  color: #006666;
+}
+
+.estat-card.total .estat-label {
+  color: #258a60;
+}
+
+.estat-card.atendida .estat-label {
+  color: #6b7e1e;
+}
+
+.estat-card.cancelada .estat-label {
+  color: #dc2626;
+}
+
+.estat-card.no-asistio .estat-label {
+  color: #d97706;
+}
+
+.estat-card.tasa .estat-label {
+  color: #006666;
+}
+
+/* ===== GRÁFICAS ===== */
 .estadisticas-charts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -152,12 +181,12 @@
 }
 
 .chart-box {
-  background: linear-gradient(#ffffff, #ffffff) padding-box,
-              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box;
+  background: var(--bg-card) padding-box,
+    linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
   border: 1.5px solid transparent;
   border-radius: 24px;
   padding: 1.6rem;
-  box-shadow: 0 3px 14px rgba(28,85,96,0.07);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.22s, box-shadow 0.22s;
   position: relative;
   overflow: hidden;
@@ -170,24 +199,23 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #9dad42, #258a60, #1c5560);
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end), var(--accent-dark));
   border-radius: 24px 24px 0 0;
 }
 
 .chart-box:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(37,138,96,0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .chart-box h3 {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #1c5560;
+  color: var(--text-secondary);
   margin: 0 0 1.2rem;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  font-size: 0.82rem;
 }
 
 .chart-box canvas {
@@ -195,31 +223,87 @@
   width: 100%;
 }
 
-/* ---- Estados ---- */
+/* ===== ESTADOS ===== */
 .loading,
 .empty-state {
   text-align: center;
   padding: 3rem;
-  background: linear-gradient(145deg, #f8faf4, #f0f6ec);
+  background: var(--bg-side);
   border-radius: 24px;
-  border: 1.5px dashed #d4e6d0;
-  color: #9ab8a8;
+  border: 1.5px dashed var(--border-light);
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
 .alert-error {
-  background: linear-gradient(135deg, rgba(239,68,68,0.07), rgba(239,68,68,0.04));
-  border-left: 4px solid #ef4444;
-  border: 1px solid rgba(239,68,68,0.15);
-  border-left: 4px solid #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 4px solid var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-left: 4px solid var(--danger);
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  color: #dc2626;
+  color: var(--danger);
   font-size: 0.88rem;
 }
 
+/* ===== MODO OSCURO: AJUSTES EN ESTADÍSTICAS ===== */
+body.dark-mode .estat-card {
+  background: linear-gradient(145deg, #1a1f0f, #12170a) padding-box,
+    linear-gradient(135deg, #2e3820, #5c6a2e) border-box;
+}
+
+body.dark-mode .estat-card.total .estat-num {
+  color: #7ab3c8;
+}
+
+body.dark-mode .estat-card.atendida .estat-num {
+  color: #86efac;
+}
+
+body.dark-mode .estat-card.cancelada .estat-num {
+  color: #fca5a5;
+}
+
+body.dark-mode .estat-card.no-asistio .estat-num {
+  color: #fcd34d;
+}
+
+body.dark-mode .estat-card.tasa .estat-num {
+  color: #7ab3c8;
+}
+
+body.dark-mode .estat-card.total .estat-label {
+  color: #7ab3c8;
+}
+
+body.dark-mode .estat-card.atendida .estat-label {
+  color: #86efac;
+}
+
+body.dark-mode .estat-card.cancelada .estat-label {
+  color: #fca5a5;
+}
+
+body.dark-mode .estat-card.no-asistio .estat-label {
+  color: #fcd34d;
+}
+
+body.dark-mode .estat-card.tasa .estat-label {
+  color: #7ab3c8;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .estadisticas-charts { grid-template-columns: 1fr; }
-  .estadisticas-resumen { gap: 0.75rem; }
-  .estat-card { min-width: 110px; padding: 1rem 0.7rem; }
+  .estadisticas-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .estadisticas-resumen {
+    gap: 0.75rem;
+  }
+
+  .estat-card {
+    min-width: 110px;
+    padding: 1rem 0.7rem;
+  }
 }
