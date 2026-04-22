@@ -10,7 +10,8 @@ import { Receta, RecetaService, CreateRecetaPayload } from '../../../services/re
   selector: 'app-doctor-recetas',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './doctor-recetas.component.html'
+  templateUrl: './doctor-recetas.component.html',
+  styleUrls: ['./doctor-recetas.component.css']   // ← Agrega esta línea
 })
 export class DoctorRecetasComponent implements OnInit, OnDestroy {
   citas: Cita[] = [];
@@ -23,7 +24,7 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
   editingRecetaId: number | null = null;
   recetaFormData: Partial<CreateRecetaPayload> = this.emptyForm();
 
-  readonly PAGE_SIZE = 10;
+  readonly PAGE_SIZE = 6;
   currentPageRecetas = 1;
 
   get pagedRecetas(): Receta[] {
@@ -40,7 +41,7 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private citaService: CitaService, private recetaService: RecetaService) {}
+  constructor(private citaService: CitaService, private recetaService: RecetaService) { }
 
   ngOnInit(): void {
     this.loadCitas();
