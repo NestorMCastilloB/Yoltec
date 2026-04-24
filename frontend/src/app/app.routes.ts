@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { SplashScreenComponent } from './splash-screen/splash-screen.component';
-import { LoginComponent } from './login/login.component';
-import { Verify2faComponent } from './verify-2fa/verify-2fa.component';
-import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
-import { DoctorDashboardComponent } from './doctor-dashboard/doctor-dashboard.component';
-import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { SplashScreenComponent } from './components/login/splash-screen/splash-screen.component';
+import { LoginComponent } from './components/login/login/login.component';
+import { Verify2faComponent } from './components/login/verify-2fa/verify-2fa.component';
+import { StudentDashboardComponent } from './components/student/student-dashboard/student-dashboard.component';
+import { DoctorDashboardComponent } from './components/doctor/doctor-dashboard/doctor-dashboard.component';
+import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
+import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
