@@ -6,7 +6,8 @@ import { ThemeService } from '../../../services/theme.service';
   selector: 'app-doctor-header',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './doctor-header.component.html'
+  templateUrl: './doctor-header.component.html',
+  styleUrl: './doctor-header.component.css'
 })
 export class DoctorHeaderComponent {
   @Input() doctorName = 'Doctor';

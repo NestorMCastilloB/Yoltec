@@ -292,3 +292,63 @@
   .tab-button { font-size: 0.82rem; }
   .login-card h2 { font-size: 1.4rem; }
 }
+
+/* ===== DARK MODE ===== */
+:host-context(.dark-mode) .login-container {
+  background: linear-gradient(145deg, #0d1a0d 0%, #0f172a 40%, #111827 80%, #0a1a14 100%);
+}
+:host-context(.dark-mode) .login-container::before {
+  background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 65%);
+}
+:host-context(.dark-mode) .login-container::after {
+  background: radial-gradient(circle, rgba(34,197,94,0.09) 0%, transparent 65%);
+}
+:host-context(.dark-mode) .login-card {
+  background: linear-gradient(#1e293b, #1e293b) padding-box,
+              linear-gradient(145deg, #4ade80, #22c55e, #0d9488) border-box;
+  box-shadow: 0 10px 48px rgba(0,0,0,0.45), 0 3px 12px rgba(0,0,0,0.25);
+}
+:host-context(.dark-mode) .login-card h2 { color: #e2e8f0; }
+:host-context(.dark-mode) .tabs { border-bottom-color: #334155; }
+:host-context(.dark-mode) .tab-button { color: #64748b; }
+:host-context(.dark-mode) .tab-button.active {
+  color: #4ade80;
+  border-bottom-color: #4ade80;
+  background: linear-gradient(180deg, transparent 60%, rgba(74,222,128,0.05) 100%);
+}
+:host-context(.dark-mode) .tab-button:hover:not(.active) {
+  color: #86efac;
+  background: rgba(74,222,128,0.04);
+}
+:host-context(.dark-mode) .form-container h3 { color: #4ade80; }
+:host-context(.dark-mode) .form-group label { color: #4ade80; }
+:host-context(.dark-mode) .form-group input,
+:host-context(.dark-mode) .duracion-select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+:host-context(.dark-mode) .form-group input::placeholder { color: #475569; }
+:host-context(.dark-mode) .form-group input:focus,
+:host-context(.dark-mode) .duracion-select:focus {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.12);
+  background: #1e293b;
+}
+:host-context(.dark-mode) .toggle-password { color: #64748b; }
+:host-context(.dark-mode) .toggle-password:hover { color: #4ade80; }
+:host-context(.dark-mode) .login-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #0d9488 100%);
+  box-shadow: 0 5px 18px rgba(34,197,94,0.3);
+}
+:host-context(.dark-mode) .login-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a, #0f766e);
+  box-shadow: 0 10px 28px rgba(34,197,94,0.4);
+}
+:host-context(.dark-mode) .forgot-link { color: #4ade80; }
+:host-context(.dark-mode) .forgot-link:hover { color: #86efac; }
+:host-context(.dark-mode) .error-message {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: #fca5a5;
+}

@@ -411,3 +411,61 @@
 :host-context(.dark-mode) .theme-toggle-btn {
   border-color: rgba(255,255,255,0.2);
 }
+/* --- Clases corregidas y elementos adicionales --- */
+:host-context(.dark-mode) .table-wrapper {
+  background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+:host-context(.dark-mode) .data-table th {
+  background: #1e1e1e;
+  color: #81c784;
+  border-bottom: 1px solid #333;
+}
+:host-context(.dark-mode) .data-table td {
+  color: #e0e0e0;
+  border-bottom-color: #333;
+}
+:host-context(.dark-mode) .data-table tr:hover td { background: #2c2c2c; }
+:host-context(.dark-mode) .modal {
+  background: #1e1e1e;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+:host-context(.dark-mode) .modal h3 { color: #81c784; }
+:host-context(.dark-mode) .modal-confirm p { color: #9e9e9e; }
+:host-context(.dark-mode) .form-group label { color: #9e9e9e; }
+:host-context(.dark-mode) .form-group input {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .form-group input:focus { border-color: #81c784; }
+:host-context(.dark-mode) .section-header h2 { color: #e0e0e0; }
+:host-context(.dark-mode) .empty-state { background: #1e1e1e; color: #757575; }
+:host-context(.dark-mode) .loading { color: #9e9e9e; }
+:host-context(.dark-mode) .cal-grid-wrapper {
+  background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+:host-context(.dark-mode) .cal-nav-btn {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}
+:host-context(.dark-mode) .cal-nav-btn:hover { background: #1a3a1a; border-color: #81c784; }
+:host-context(.dark-mode) .cal-month-label { color: #e0e0e0; }
+:host-context(.dark-mode) .cal-day { background: #2c2c2c; }
+:host-context(.dark-mode) .cal-day:hover:not(.other-month) { background: #1a3a1a; border-color: #81c784; }
+:host-context(.dark-mode) .cal-day.holiday,
+:host-context(.dark-mode) .cal-day.vacation { background: rgba(185,28,28,0.2); border-color: rgba(239,68,68,0.3); }
+:host-context(.dark-mode) .cal-day.reduced { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+:host-context(.dark-mode) .day-num { color: #e0e0e0; }
+:host-context(.dark-mode) .dia-item {
+  background: #2c2c2c;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+:host-context(.dark-mode) .dia-fecha { color: #e0e0e0; }
+:host-context(.dark-mode) .form-select {
+  background: #2c2c2c;
+  border-color: #444;
+  color: #e0e0e0;
+}

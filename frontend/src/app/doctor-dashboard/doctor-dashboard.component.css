@@ -2101,3 +2101,192 @@
 .btn-cambiar-foto { background: #e8f5e9; color: #1B5E20; border: 1px solid #a5d6a7; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.85rem; cursor: pointer; }
 .foto-msg { font-size: 0.82rem; color: #1B5E20; }
 .foto-msg.error { color: #c62828; }
+
+/* ===================================================================
+   MODO CLARO — restaura los estilos claros sobre los dark hardcodeados
+   =================================================================== */
+:host-context(:not(.dark-mode)) .doctor-dashboard {
+  background: #f2f6ee !important;
+  color: #001f36 !important;
+}
+:host-context(:not(.dark-mode)) .dashboard-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e4edd8 !important;
+  box-shadow: 0 2px 16px rgba(28,85,96,0.09) !important;
+}
+:host-context(:not(.dark-mode)) .logo-area h1 {
+  color: #001f36 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #001f36 !important;
+  font-size: 1.3rem !important;
+}
+:host-context(:not(.dark-mode)) .user-info span { color: #1c5560 !important; }
+:host-context(:not(.dark-mode)) .user-info span strong { color: #001f36 !important; }
+:host-context(:not(.dark-mode)) .dashboard-nav {
+  background: #ffffff !important;
+  border-top: 1px solid #edf2e8 !important;
+}
+:host-context(:not(.dark-mode)) .nav-button { color: #7a9e8c !important; background: transparent !important; }
+:host-context(:not(.dark-mode)) .nav-button:hover { color: #258a60 !important; }
+:host-context(:not(.dark-mode)) .nav-button.active {
+  color: #258a60 !important;
+  border-bottom-color: #258a60 !important;
+}
+:host-context(:not(.dark-mode)) .nav-button.active::after { color: #258a60 !important; }
+:host-context(:not(.dark-mode)) .welcome-card,
+:host-context(:not(.dark-mode)) .placeholder-card,
+:host-context(:not(.dark-mode)) .form-card,
+:host-context(:not(.dark-mode)) .data-card,
+:host-context(:not(.dark-mode)) .citas-column,
+:host-context(:not(.dark-mode)) .pre-evaluacion-card,
+:host-context(:not(.dark-mode)) .chart-box {
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box !important;
+  border: 1.5px solid transparent !important;
+  box-shadow: 0 2px 14px rgba(28,85,96,0.07) !important;
+}
+:host-context(:not(.dark-mode)) .stat-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e4edd8 !important;
+  box-shadow: 0 2px 10px rgba(28,85,96,0.06) !important;
+}
+:host-context(:not(.dark-mode)) .stat-card h3 { color: #6b8c7a !important; }
+:host-context(:not(.dark-mode)) .stat-card .stat-value { color: #258a60 !important; }
+:host-context(:not(.dark-mode)) .section-header h2 { color: #001f36 !important; }
+:host-context(:not(.dark-mode)) .btn-primary {
+  background: linear-gradient(135deg, #258a60 0%, #1c5560 100%) !important;
+  color: white !important;
+}
+:host-context(:not(.dark-mode)) .form-group input,
+:host-context(:not(.dark-mode)) .form-group textarea,
+:host-context(:not(.dark-mode)) .form-group select,
+:host-context(:not(.dark-mode)) .search-input,
+:host-context(:not(.dark-mode)) .filtro-input {
+  background: #f8faf4 !important;
+  border: 1.5px solid #d4e6d0 !important;
+  color: #001f36 !important;
+}
+:host-context(:not(.dark-mode)) .form-group input:focus,
+:host-context(:not(.dark-mode)) .form-group textarea:focus,
+:host-context(:not(.dark-mode)) .form-group select:focus,
+:host-context(:not(.dark-mode)) .search-input:focus,
+:host-context(:not(.dark-mode)) .filtro-input:focus {
+  background: #ffffff !important;
+  border-color: #258a60 !important;
+  box-shadow: 0 0 0 3px rgba(37,138,96,0.1) !important;
+}
+:host-context(:not(.dark-mode)) .cita-card {
+  background: #f8faf4 !important;
+  border: 1px solid #e4edd8 !important;
+  border-left: 4px solid #258a60 !important;
+}
+:host-context(:not(.dark-mode)) .cita-card.cancelada { border-left-color: #ef4444 !important; }
+:host-context(:not(.dark-mode)) .cita-card.no-asistio { border-left-color: #f59e0b !important; }
+:host-context(:not(.dark-mode)) .estatus.programada {
+  background: rgba(37,138,96,0.1) !important;
+  color: #258a60 !important;
+  border: 1px solid rgba(37,138,96,0.2) !important;
+}
+:host-context(:not(.dark-mode)) .estatus.atendida {
+  background: rgba(28,85,96,0.1) !important;
+  color: #1c5560 !important;
+  border: 1px solid rgba(28,85,96,0.2) !important;
+}
+:host-context(:not(.dark-mode)) .estatus.cancelada {
+  background: rgba(239,68,68,0.09) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239,68,68,0.2) !important;
+}
+:host-context(:not(.dark-mode)) .estatus.no-asistio {
+  background: rgba(245,158,11,0.1) !important;
+  color: #d97706 !important;
+  border: 1px solid rgba(245,158,11,0.2) !important;
+}
+:host-context(:not(.dark-mode)) .calendar-card {
+  background: #f8faf4 !important;
+  border: 1.5px solid #d4e6d0 !important;
+}
+:host-context(:not(.dark-mode)) .calendar-day {
+  background: #ffffff !important;
+  border: 1.5px solid #e4edd8 !important;
+  color: #001f36 !important;
+}
+:host-context(:not(.dark-mode)) .calendar-day.selected {
+  background: linear-gradient(135deg, #258a60, #1c5560) !important;
+  color: white !important;
+}
+:host-context(:not(.dark-mode)) .calendar-day.unavailable {
+  background: #fef2f2 !important;
+  color: #f87171 !important;
+  border-color: #fecaca !important;
+}
+:host-context(:not(.dark-mode)) .slot-button {
+  background: #f8faf4 !important;
+  border: 1.5px solid #d4e6d0 !important;
+  color: #1c5560 !important;
+}
+:host-context(:not(.dark-mode)) .slot-button.selected {
+  background: linear-gradient(135deg, #258a60, #1c5560) !important;
+  color: white !important;
+}
+:host-context(:not(.dark-mode)) .slot-button.booked {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+}
+:host-context(:not(.dark-mode)) .pagination .page-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #d4e6d0 !important;
+  color: #1c5560 !important;
+}
+:host-context(:not(.dark-mode)) .modal-overlay {
+  background: rgba(0,31,54,0.5) !important;
+}
+:host-context(:not(.dark-mode)) .modal-content,
+:host-context(:not(.dark-mode)) .modal-perfil-alumno,
+:host-context(:not(.dark-mode)) .modal-consulta {
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+              linear-gradient(135deg, #b1bf63, #258a60) border-box !important;
+  border: 1.5px solid transparent !important;
+}
+:host-context(:not(.dark-mode)) .perfil-card {
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+:host-context(:not(.dark-mode)) .filtro-select,
+:host-context(:not(.dark-mode)) .filtro-fecha { background: white !important; color: #001f36 !important; }
+:host-context(:not(.dark-mode)) .historial-mini-header { background: #fafffe !important; }
+:host-context(:not(.dark-mode)) .historial-mini-detalle { background: white !important; }
+
+/* ===================================================================
+   MODO OSCURO — estilos adicionales que necesitan override explícito
+   =================================================================== */
+:host-context(.dark-mode) .theme-toggle-btn {
+  border-color: rgba(255,255,255,0.25);
+}
+:host-context(.dark-mode) .modal-perfil-alumno,
+:host-context(.dark-mode) .modal-content,
+:host-context(.dark-mode) .modal-consulta {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+:host-context(.dark-mode) .modal-perfil-header { border-bottom-color: #334155 !important; }
+:host-context(.dark-mode) .modal-perfil-header h3 { color: #4ade80 !important; }
+:host-context(.dark-mode) .perfil-alumno-medico { background: #0f172a !important; }
+:host-context(.dark-mode) .perfil-alumno-info h4 { color: #4ade80 !important; }
+:host-context(.dark-mode) .perfil-alumno-info p { color: #94a3b8 !important; }
+:host-context(.dark-mode) .dato-valor { color: #e2e8f0 !important; }
+:host-context(.dark-mode) .historial-item-mini { border-color: #334155 !important; }
+:host-context(.dark-mode) .historial-mini-header { background: #1e293b !important; }
+:host-context(.dark-mode) .historial-mini-header:hover { background: #1a3a2a !important; }
+:host-context(.dark-mode) .historial-fecha { color: #4ade80 !important; }
+:host-context(.dark-mode) .historial-motivo-mini { color: #94a3b8 !important; }
+:host-context(.dark-mode) .historial-mini-detalle { background: #0f172a !important; border-top-color: #334155 !important; color: #94a3b8 !important; }
+:host-context(.dark-mode) .perfil-card { background: #1e293b !important; }
+:host-context(.dark-mode) .perfil-card h3 { color: #4ade80 !important; border-bottom-color: #334155 !important; }
+:host-context(.dark-mode) .form-input { background: #0f172a !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+:host-context(.dark-mode) .filtro-select,
+:host-context(.dark-mode) .filtro-fecha { background: #0f172a !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+:host-context(.dark-mode) .btn-reprogramar { background: rgba(74,222,128,0.15) !important; color: #4ade80 !important; border-color: rgba(74,222,128,0.3) !important; }
+:host-context(.dark-mode) .btn-limpiar-filtros { background: transparent !important; border-color: #334155 !important; color: #94a3b8 !important; }

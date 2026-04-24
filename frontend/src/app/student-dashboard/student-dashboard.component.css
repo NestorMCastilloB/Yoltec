@@ -1650,7 +1650,7 @@
 /* ===== TOGGLE TEMA ===== */
 .theme-toggle-btn {
   background: none;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid rgba(27, 94, 32, 0.25);
   border-radius: 50%;
   width: 2rem;
   height: 2rem;
@@ -1660,9 +1660,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
-.theme-toggle-btn:hover { background: rgba(255,255,255,0.15); }
+.theme-toggle-btn:hover { background: rgba(27, 94, 32, 0.08); }
 
 /* ===== DARK MODE ===== */
 :host-context(.dark-mode) .student-dashboard {
@@ -1747,3 +1747,144 @@
   background: #2c2c2c;
   border-color: #444;
 }
+
+/* --- Elementos adicionales dark mode --- */
+:host-context(.dark-mode) .theme-toggle-btn {
+  border-color: rgba(255,255,255,0.25);
+}
+:host-context(.dark-mode) .theme-toggle-btn:hover { background: rgba(255,255,255,0.1); }
+
+:host-context(.dark-mode) .citas-column {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+:host-context(.dark-mode) .citas-column h3 { color: #4ade80; border-bottom-color: #334155; }
+:host-context(.dark-mode) .placeholder-card {
+  background: #1e293b;
+  border-left-color: #4ade80;
+  box-shadow: none;
+}
+:host-context(.dark-mode) .placeholder-card h3 { color: #4ade80; }
+:host-context(.dark-mode) .placeholder-card li { color: #94a3b8; }
+:host-context(.dark-mode) .section-header h2 { color: #e2e8f0; }
+:host-context(.dark-mode) .welcome-card h2 { color: #4ade80; }
+
+/* Modales */
+:host-context(.dark-mode) .modal-overlay { background: rgba(0,0,0,0.75); }
+:host-context(.dark-mode) .modal-content {
+  background: #1e293b;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+:host-context(.dark-mode) .modal-header { border-bottom-color: #334155; }
+:host-context(.dark-mode) .modal-header h2 { color: #4ade80; }
+:host-context(.dark-mode) .close-btn { color: #64748b; }
+:host-context(.dark-mode) .close-btn:hover { background: #334155; color: #e2e8f0; }
+:host-context(.dark-mode) .modal-actions { border-top-color: #334155; }
+:host-context(.dark-mode) .cita-info { background: #1a3a2a; }
+:host-context(.dark-mode) .cita-info p { color: #86efac; }
+:host-context(.dark-mode) .progress-bar { background: #334155; }
+:host-context(.dark-mode) .opcion-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+:host-context(.dark-mode) .opcion-btn:hover { border-color: #4ade80; background: #1a3a2a; }
+:host-context(.dark-mode) .opcion-btn.selected {
+  border-color: transparent;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color: white;
+}
+
+/* Resultado IA */
+:host-context(.dark-mode) .diagnostico-principal {
+  background: linear-gradient(135deg, #1a3a1a, #1e4d1e);
+}
+:host-context(.dark-mode) .diagnostico-principal h4 { color: #4ade80; }
+:host-context(.dark-mode) .confianza-alta { background: rgba(74,222,128,0.15); color: #4ade80; }
+:host-context(.dark-mode) .confianza-media { background: rgba(251,191,36,0.15); color: #fbbf24; }
+:host-context(.dark-mode) .confianza-baja { background: rgba(248,113,113,0.15); color: #f87171; }
+:host-context(.dark-mode) .confianza-muy-baja { background: rgba(192,132,252,0.15); color: #c084fc; }
+:host-context(.dark-mode) .tag { background: #1a2e4a; color: #60a5fa; }
+:host-context(.dark-mode) .recomendacion p { background: #2a1f0a; color: #fbbf24; }
+:host-context(.dark-mode) .sintomas-detectados h5,
+:host-context(.dark-mode) .posibles-enfermedades h5,
+:host-context(.dark-mode) .recomendacion h5 { color: #94a3b8; }
+:host-context(.dark-mode) .posibles-enfermedades ul { color: #94a3b8; }
+
+/* Estatus badges */
+:host-context(.dark-mode) .estatus.programada { background: rgba(74,222,128,0.15); color: #4ade80; }
+:host-context(.dark-mode) .estatus.atendida { background: rgba(96,165,250,0.15); color: #60a5fa; }
+:host-context(.dark-mode) .estatus.cancelada { background: rgba(248,113,113,0.15); color: #f87171; }
+:host-context(.dark-mode) .estatus.no-asistio { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+/* Recetas y bitácora */
+:host-context(.dark-mode) .bitacora-card,
+:host-context(.dark-mode) .receta-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+:host-context(.dark-mode) .bitacora-header h3,
+:host-context(.dark-mode) .receta-header h3 { color: #4ade80; }
+:host-context(.dark-mode) .bitacora-date { background: rgba(74,222,128,0.15); color: #4ade80; }
+:host-context(.dark-mode) .receta-date { background: rgba(96,165,250,0.15); color: #60a5fa; }
+:host-context(.dark-mode) .bitacora-detail,
+:host-context(.dark-mode) .receta-detail { color: #94a3b8; }
+:host-context(.dark-mode) .bitacora-detail strong,
+:host-context(.dark-mode) .receta-detail strong { color: #4ade80; }
+:host-context(.dark-mode) .bitacora-metrics span { background: rgba(74,222,128,0.1); color: #4ade80; }
+:host-context(.dark-mode) .receta-text {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+/* Historial */
+:host-context(.dark-mode) .historial-item {
+  background: #1e293b;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+:host-context(.dark-mode) .historial-header:hover { background: #1a3a2a; }
+:host-context(.dark-mode) .historial-fecha { color: #4ade80; }
+:host-context(.dark-mode) .historial-motivo { color: #94a3b8; }
+:host-context(.dark-mode) .historial-clave { color: #64748b; }
+:host-context(.dark-mode) .historial-toggle { color: #64748b; }
+:host-context(.dark-mode) .historial-detalle {
+  background: #0f172a;
+  border-top-color: #334155;
+}
+:host-context(.dark-mode) .detalle-bloque h4 { color: #64748b; }
+:host-context(.dark-mode) .detalle-bloque p { color: #94a3b8; }
+:host-context(.dark-mode) .no-historial { background: #1e293b; color: #64748b; }
+
+/* Calendario */
+:host-context(.dark-mode) .calendar-header h4 { color: #4ade80; }
+:host-context(.dark-mode) .calendar-nav { background: #334155; color: #e2e8f0; border: none; }
+:host-context(.dark-mode) .calendar-nav:hover { background: #22c55e; color: #001f36; }
+:host-context(.dark-mode) .calendar-nav:disabled { background: #1e293b; opacity: 0.4; }
+:host-context(.dark-mode) .calendar-legend { color: #64748b; }
+:host-context(.dark-mode) .calendar-weekdays span { color: #64748b; }
+:host-context(.dark-mode) .selected-date-info {
+  background: #1a3a2a;
+  border-color: #334155;
+  color: #86efac;
+}
+:host-context(.dark-mode) .alert { background: #1a3a2a; border-left-color: #4ade80; color: #86efac; }
+:host-context(.dark-mode) .alert.info { background: #1a2e4a; border-left-color: #60a5fa; color: #93c5fd; }
+
+/* Tarjeta IA chat */
+:host-context(.dark-mode) .chat-modal .modal-header { background: #1e293b; }
+:host-context(.dark-mode) .ia-error-msg {
+  background: rgba(239,68,68,0.15);
+  border-color: rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+
+/* Sesiones activas */
+:host-context(.dark-mode) .sesion-badge { background: rgba(74,222,128,0.15); color: #4ade80; }
+:host-context(.dark-mode) .sesion-detalle { color: #64748b; }
+:host-context(.dark-mode) .btn-danger-sm { background: rgba(185,28,28,0.2); color: #f87171; }
+:host-context(.dark-mode) .btn-danger-sm:hover { background: rgba(185,28,28,0.35); }
+:host-context(.dark-mode) .empty-state-small { color: #64748b; }
