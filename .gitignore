@@ -55,6 +55,10 @@ tester/
 
 # ─── Archivos locales con credenciales reales ──────
 contexto_proyecto.md
+
+# ─── Claude Code (IA asistente) ────────────────────
+CLAUDE.md
+.claude/
 backend/.env.docker
 Iniciar/
 releases/*.apk
