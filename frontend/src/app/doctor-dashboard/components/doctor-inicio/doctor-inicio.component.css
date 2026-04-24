@@ -1,4 +1,4 @@
-/* ===== DOCTOR INICIO — Diseño premium consultorio ===== */
+/* ===== DOCTOR INICIO — Con variables y modo oscuro ===== */
 
 .inicio-container {
   display: flex;
@@ -17,14 +17,17 @@
 .welcome-header h2 {
   font-size: 2rem;
   font-weight: 700;
-  color: #001f36;
+  background: linear-gradient(135deg, var(--text-secondary), var(--accent-dark));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   margin-bottom: 0.5rem;
   letter-spacing: -0.5px;
 }
 
 .welcome-header p {
   font-size: 1rem;
-  color: #1c5560;
+  color: var(--text-secondary);
   font-weight: 400;
   opacity: 0.85;
 }
@@ -36,7 +39,6 @@
   gap: 1.5rem;
 }
 
-/* Base de stat-card con borde gradiente */
 .stat-card {
   border-radius: 28px;
   padding: 1.6rem 1.4rem;
@@ -47,27 +49,12 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
+  background: var(--bg-card) padding-box,
+    linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) border-box;
+  box-shadow: var(--shadow-md);
 }
 
-/* Tonalidades y bordes diferentes por card */
-.stat-card:nth-child(1) {
-  background: linear-gradient(#ffffff, #ffffff) padding-box,
-              linear-gradient(135deg, #b1bf63, #258a60) border-box;
-  box-shadow: 0 4px 22px rgba(37,138,96,0.10);
-}
-
-.stat-card:nth-child(2) {
-  background: linear-gradient(145deg, #fbffcd 0%, #f2f9d4 100%) padding-box,
-              linear-gradient(135deg, #9dad42, #b1bf63) border-box;
-  box-shadow: 0 4px 22px rgba(157,173,66,0.16);
-}
-
-.stat-card:nth-child(3) {
-  background: linear-gradient(145deg, #e8f5ef 0%, #d8eee4 100%) padding-box,
-              linear-gradient(135deg, #258a60, #1c5560) border-box;
-  box-shadow: 0 4px 22px rgba(28,85,96,0.13);
-}
-
+/* Círculo decorativo */
 .stat-card::after {
   content: '';
   position: absolute;
@@ -78,21 +65,15 @@
   border-radius: 50%;
   opacity: 0.07;
   pointer-events: none;
+  background: var(--gradient-end);
 }
-
-.stat-card:nth-child(1)::after { background: #258a60; }
-.stat-card:nth-child(2)::after { background: #9dad42; }
-.stat-card:nth-child(3)::after { background: #006666; }
 
 .stat-card:hover {
   transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
 }
 
-.stat-card:nth-child(1):hover { box-shadow: 0 14px 34px rgba(37,138,96,0.18); }
-.stat-card:nth-child(2):hover { box-shadow: 0 14px 34px rgba(157,173,66,0.24); }
-.stat-card:nth-child(3):hover { box-shadow: 0 14px 34px rgba(28,85,96,0.20); }
-
-/* Iconos con fondo diferente por card */
+/* Iconos */
 .stat-icon {
   font-size: 2.2rem;
   width: 68px;
@@ -103,21 +84,8 @@
   border-radius: 20px;
   flex-shrink: 0;
   transition: transform 0.2s;
-}
-
-.stat-card:nth-child(1) .stat-icon {
-  background: linear-gradient(145deg, #eef9f4, #d8f0e5);
-  box-shadow: 0 3px 10px rgba(37,138,96,0.15);
-}
-
-.stat-card:nth-child(2) .stat-icon {
-  background: linear-gradient(145deg, #ffffff, #f4f9d8);
-  box-shadow: 0 3px 10px rgba(157,173,66,0.18);
-}
-
-.stat-card:nth-child(3) .stat-icon {
-  background: linear-gradient(145deg, #d4ede0, #c2e2d0);
-  box-shadow: 0 3px 10px rgba(28,85,96,0.15);
+  background: var(--bg-side);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card:hover .stat-icon {
@@ -132,22 +100,16 @@
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 0.35rem;
+  color: var(--text-secondary);
 }
-
-.stat-card:nth-child(1) .stat-content h3 { color: #1c5560; }
-.stat-card:nth-child(2) .stat-content h3 { color: #5a6e1a; }
-.stat-card:nth-child(3) .stat-content h3 { color: #1c5560; }
 
 .stat-value {
   font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
   margin: 0.15rem 0;
+  color: var(--gradient-end);
 }
-
-.stat-card:nth-child(1) .stat-value { color: #258a60; }
-.stat-card:nth-child(2) .stat-value { color: #6b7e1e; }
-.stat-card:nth-child(3) .stat-value { color: #006666; }
 
 .stat-detail {
   font-size: 0.68rem;
@@ -156,11 +118,8 @@
   font-weight: 700;
   margin-top: 0.3rem;
   display: block;
+  color: var(--accent-mid);
 }
-
-.stat-card:nth-child(1) .stat-detail { color: #9dad42; }
-.stat-card:nth-child(2) .stat-detail { color: #9dad42; }
-.stat-card:nth-child(3) .stat-detail { color: #258a60; }
 
 /* ---- Próxima cita ---- */
 .proxima-cita-wrapper {
@@ -171,9 +130,9 @@
   border-radius: 28px;
   padding: 2rem;
   border: 1.5px solid transparent;
-  background: linear-gradient(#ffffff, #ffffff) padding-box,
-              linear-gradient(135deg, #b1bf63 0%, #258a60 50%, #1c5560 100%) border-box;
-  box-shadow: 0 6px 28px rgba(37,138,96,0.11), 0 2px 8px rgba(0,0,0,0.04);
+  background: var(--bg-card) padding-box,
+    linear-gradient(135deg, var(--gradient-start), var(--gradient-end), var(--accent-dark)) border-box;
+  box-shadow: var(--shadow-md);
   transition: box-shadow 0.25s;
   position: relative;
   overflow: hidden;
@@ -186,19 +145,19 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #9dad42, #258a60, #1c5560);
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end), var(--accent-dark));
   border-radius: 28px 28px 0 0;
 }
 
 .proxima-cita-card:not(.empty):hover {
-  box-shadow: 0 12px 40px rgba(37,138,96,0.16), 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-lg);
 }
 
 .proxima-cita-card.empty {
   text-align: center;
-  background: linear-gradient(145deg, #f8faf4, #f2f7ee) padding-box,
-              linear-gradient(135deg, #d4e6d0, #b1bf63) border-box;
-  color: #9ab8a8;
+  background: var(--bg-side) padding-box,
+    linear-gradient(135deg, var(--border-light), var(--gradient-start)) border-box;
+  color: var(--text-muted);
 }
 
 .proxima-header {
@@ -207,18 +166,18 @@
   gap: 0.8rem;
   margin-bottom: 1.6rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #edf2e8;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .proxima-icon {
   font-size: 1.6rem;
-  filter: drop-shadow(0 2px 4px rgba(37,138,96,0.2));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .proxima-header h3 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #001f36;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -239,35 +198,60 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: #9dad42;
+  color: var(--accent-mid);
 }
 
 .proxima-valor {
   font-size: 0.98rem;
   font-weight: 500;
-  color: #001f36;
+  color: var(--text-primary);
   word-break: break-word;
 }
 
 .proxima-valor.codigo {
   font-family: 'Courier New', monospace;
-  background: linear-gradient(135deg, #fbffcd, #f2f9d4);
+  background: var(--accent-soft);
   padding: 0.28rem 0.75rem;
   border-radius: 10px;
   display: inline-block;
   font-size: 0.85rem;
   letter-spacing: 1.2px;
-  border: 1px solid #c8dfa4;
-  color: #1c5560;
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
   font-weight: 700;
 }
 
 @media (max-width: 768px) {
-  .stats-grid { gap: 1rem; }
-  .stat-card { padding: 1.1rem; border-radius: 22px; }
-  .stat-icon { width: 56px; height: 56px; font-size: 1.8rem; border-radius: 16px; }
-  .stat-value { font-size: 2rem; }
-  .proxima-cita-info { grid-template-columns: 1fr 1fr; }
-  .welcome-header h2 { font-size: 1.5rem; }
-  .proxima-cita-card { padding: 1.4rem; border-radius: 22px; }
+  .stats-grid {
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.1rem;
+    border-radius: 22px;
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.8rem;
+    border-radius: 16px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .proxima-cita-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .welcome-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .proxima-cita-card {
+    padding: 1.4rem;
+    border-radius: 22px;
+  }
 }

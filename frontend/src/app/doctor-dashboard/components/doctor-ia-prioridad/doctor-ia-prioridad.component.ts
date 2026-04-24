@@ -9,7 +9,7 @@ import { IaPriorityService, ResumenPrioridad } from '../../../services/ia-priori
   standalone: true,
   imports: [CommonModule],
   templateUrl: './doctor-ia-prioridad.component.html',
-  styleUrls: ['./doctor-ia-prioridad.component.css']   // ← Agregar
+  styleUrls: ['./doctor-ia-prioridad.component.css']   // ← Línea necesaria
 })
 export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
   prioridadResumen: ResumenPrioridad | null = null;

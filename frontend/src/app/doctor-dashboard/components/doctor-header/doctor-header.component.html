@@ -1,13 +1,13 @@
 <header class="dashboard-header">
   <div class="header-content">
     <div class="logo-area">
-      <img src="/logo.png" alt="Logo Clínica" class="logo">
+      <img src="./logo.jpeg" alt="Logo Clínica" class="logo">
       <h1>Consultorio Médico</h1>
     </div>
     <div class="user-info">
       <span>Bienvenido, {{ doctorName }}</span>
-      <button class="theme-toggle-btn" (click)="themeService.toggle()" [title]="themeService.isDark ? 'Modo claro' : 'Modo oscuro'">
-        {{ themeService.isDark ? '☀️' : '🌙' }}
+      <button class="theme-toggle-btn" (click)="toggleTheme()">
+        {{ isDarkMode ? '☀️' : '🌙' }}
       </button>
       <button class="logout-btn" (click)="logoutEvent.emit()">Cerrar Sesión</button>
     </div>
