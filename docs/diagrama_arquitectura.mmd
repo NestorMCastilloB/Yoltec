@@ -1,0 +1,58 @@
+graph TB
+    subgraph Clientes["Clientes"]
+        WEB["Angular 20\nVercel\nfrontend-nu-weld-77.vercel.app"]
+        MOB["Flutter Android\nAPK Release"]
+    end
+
+    subgraph Backend["Backend — Railway"]
+        API["Laravel 12\nAPI REST\n/api/v1/..."]
+        SCHED["Scheduler\ncitas:notificar-proximas\ncada hora"]
+        CACHE["Cache + Rate Limiting\nDB Cache Store"]
+    end
+
+    subgraph IA_Service["Microservicio IA — Railway"]
+        FASTAPI["FastAPI\nPython"]
+        GROQ_INT["Modulo Chat\nGroq LLM"]
+        SKLEARN["Modulo Diagnostico\nsklearn model.pkl"]
+        PRIORITY["Modulo Prioridad\nReglas + sklearn"]
+    end
+
+    subgraph DataLayer["Capa de Datos"]
+        DB[("PostgreSQL\nNeon Cloud")]
+    end
+
+    subgraph ExternalServices["Servicios Externos"]
+        GROQ["Groq API\nllama-3.1-8b-instant\ngratuita"]
+        FCM["Firebase\nCloud Messaging"]
+        SMTP["SMTP\nResend / Gmail"]
+    end
+
+    WEB -- "HTTPS + Bearer Token" --> API
+    MOB -- "HTTPS + Bearer Token" --> API
+
+    API -- "PostgreSQL SSL" --> DB
+    SCHED -- "PostgreSQL SSL" --> DB
+
+    API -- "HTTP /predict /chat /priority" --> FASTAPI
+
+    FASTAPI --> GROQ_INT
+    FASTAPI --> SKLEARN
+    FASTAPI --> PRIORITY
+    GROQ_INT -- "HTTPS API" --> GROQ
+
+    SCHED -- "Recordatorios" --> SMTP
+    API -- "2FA + Recovery" --> SMTP
+    API -- "Push notifications" --> FCM
+    FCM -- "Push" --> MOB
+
+    classDef client fill:#4f81bd,stroke:#2e5f9a,color:#fff
+    classDef backend fill:#70ad47,stroke:#4a7a2e,color:#fff
+    classDef ia fill:#ed7d31,stroke:#c05c1c,color:#fff
+    classDef data fill:#7030a0,stroke:#4d1e70,color:#fff
+    classDef external fill:#bfbfbf,stroke:#808080,color:#000
+
+    class WEB,MOB client
+    class API,SCHED,CACHE backend
+    class FASTAPI,GROQ_INT,SKLEARN,PRIORITY ia
+    class DB data
+    class GROQ,FCM,SMTP external

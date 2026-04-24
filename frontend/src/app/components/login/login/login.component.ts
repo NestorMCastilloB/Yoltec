@@ -22,23 +22,19 @@ export class LoginComponent implements OnDestroy {
 
   showPasswordStudent = false;
   showPasswordDoctor = false;
-  showPasswordAdmin = false;
 
   studentData = { identificador: '', password: '' };
   doctorData = { identificador: '', password: '' };
-  adminData = { identificador: '', password: '' };
 
   constructor(private router: Router, private authService: AuthService) { }
 
-  togglePassword(role: 'student' | 'doctor' | 'admin') {
+  togglePassword(role: 'student' | 'doctor') {
     if (role === 'student') this.showPasswordStudent = !this.showPasswordStudent;
     if (role === 'doctor') this.showPasswordDoctor = !this.showPasswordDoctor;
-    if (role === 'admin') this.showPasswordAdmin = !this.showPasswordAdmin;
   }
 
   onStudentLogin() { this.login(this.studentData.identificador, this.studentData.password, 'alumno'); }
   onDoctorLogin() { this.login(this.doctorData.identificador, this.doctorData.password, 'doctor'); }
-  onAdminLogin() { this.login(this.adminData.identificador, this.adminData.password, 'admin'); }
 
   private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin') {
     this.isLoading = true;

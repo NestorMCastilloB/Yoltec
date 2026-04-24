@@ -2,7 +2,7 @@
   <!-- Lado izquierdo: oscuro, mensaje de bienvenida -->
   <div class="welcome-panel">
     <div class="welcome-content">
-      <h1>Bienvenido a <h1>YOLTEC</h1></h1>
+      <h1>Bienvenido a <span>YOLTEC</span></h1>
       <p>Tu plataforma de gestión clínica académica.</p>
       <p>Inicia sesión con tu cuenta y accede a todos los servicios médicos.</p>
       <div class="decorative-lines"></div>
@@ -25,10 +25,6 @@
       <button [class.active]="activeTab === 'doctor'" (click)="setActiveTab('doctor')" class="role-btn">
         <span class="role-icon">👨‍⚕️</span>
         <span class="role-name">Doctor</span>
-      </button>
-      <button [class.active]="activeTab === 'admin'" (click)="setActiveTab('admin')" class="role-btn">
-        <span class="role-icon">👨‍💼</span>
-        <span class="role-name">Administrador</span>
       </button>
     </div>
 
@@ -86,31 +82,6 @@
         </div>
       </form>
 
-      <!-- Admin -->
-      <form *ngIf="activeTab === 'admin'" (ngSubmit)="onAdminLogin()" #adminForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-        <div class="form-group">
-          <label for="adminIdentificador">Usuario</label>
-          <input type="text" id="adminIdentificador" [(ngModel)]="adminData.identificador" name="identificador"
-            placeholder="admin" required>
-        </div>
-        <div class="form-group">
-          <label for="adminPassword">Contraseña</label>
-          <div class="password-wrapper">
-            <input [type]="showPasswordAdmin ? 'text' : 'password'" id="adminPassword" [(ngModel)]="adminData.password"
-              name="password" placeholder="Contraseña" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('admin')">{{ showPasswordAdmin ? '🙈'
-              : '👁️' }}</button>
-          </div>
-        </div>
-        <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar sesión</span>
-          <span *ngIf="isLoading">Cargando...</span>
-        </button>
-        <div class="forgot-link-wrapper">
-          <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
-        </div>
-      </form>
     </div>
   </div>
 </div>

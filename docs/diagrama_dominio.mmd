@@ -1,0 +1,121 @@
+classDiagram
+    class Usuario {
+        +int id
+        +string numero_control
+        +string username
+        +string nombre
+        +string apellido
+        +string email
+        +string tipo [alumno|doctor|admin]
+        +boolean es_admin
+        +string tipo_sangre
+        +string alergias
+        +string enfermedades_cronicas
+        +string foto_perfil
+        +string fcm_token
+        +esAlumno() bool
+        +esDoctor() bool
+        +esAdmin() bool
+    }
+
+    class Cita {
+        +int id
+        +string clave_cita
+        +int alumno_id
+        +int doctor_id
+        +date fecha_cita
+        +time hora_cita
+        +string motivo
+        +string estatus [pendiente|atendida|cancelada|no_asistio]
+        +datetime fecha_hora_atencion
+        +string notas
+        +deleted_at
+    }
+
+    class Consulta {
+        +int id
+        +int cita_id
+        +int doctor_id
+        +int alumno_id
+        +string diagnostico
+        +string tratamiento
+        +string observaciones
+    }
+
+    class Receta {
+        +int id
+        +int cita_id
+        +int alumno_id
+        +int doctor_id
+        +json medicamentos
+        +string indicaciones
+        +date fecha_emision
+    }
+
+    class Bitacora {
+        +int id
+        +int cita_id
+        +int alumno_id
+        +int doctor_id
+        +string estatus
+        +string observaciones
+        +datetime fecha_registro
+    }
+
+    class PreEvaluacionIA {
+        +int id
+        +int cita_id
+        +int alumno_id
+        +json respuestas
+        +string diagnostico_sugerido
+        +decimal confianza
+        +json sintomas_detectados
+        +string estatus_validacion [pendiente|validada|descartada]
+        +int validado_por
+        +string comentario_doctor
+        +datetime fecha_validacion
+    }
+
+    class DiaEspecial {
+        +int id
+        +date fecha
+        +string tipo [festivo|especial]
+        +string etiqueta
+    }
+
+    class TwoFactorCode {
+        +int id
+        +int user_id
+        +string codigo
+        +datetime expires_at
+        +boolean usado
+    }
+
+    class TrustedDevice {
+        +int id
+        +int user_id
+        +string device_token
+        +datetime expires_at
+    }
+
+    class AuditLog {
+        +int id
+        +int user_id
+        +string accion
+        +string modelo
+        +int modelo_id
+        +json datos_anteriores
+        +json datos_nuevos
+        +datetime created_at
+    }
+
+    Usuario "1" --> "0..*" Cita : agenda como alumno
+    Usuario "1" --> "0..*" Cita : atiende como doctor
+    Cita "1" --> "0..1" Consulta : genera
+    Cita "1" --> "0..1" Receta : incluye
+    Cita "1" --> "0..1" Bitacora : registra
+    Cita "1" --> "0..1" PreEvaluacionIA : pre-evalua
+    Usuario "1" --> "0..*" PreEvaluacionIA : solicita
+    Usuario "1" --> "0..1" TwoFactorCode : genera
+    Usuario "1" --> "0..*" TrustedDevice : confia
+    Usuario "1" --> "0..*" AuditLog : genera
