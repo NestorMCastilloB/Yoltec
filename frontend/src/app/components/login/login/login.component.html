@@ -1,144 +1,112 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Sistema Clínico Académico</h2>
+<div class="login-grid">
+  <!-- Lado izquierdo: oscuro, mensaje de bienvenida -->
+  <div class="welcome-panel">
+    <div class="welcome-content">
+      <h1>Bienvenido a <h1>YOLTEC</h1></h1>
+      <p>Tu plataforma de gestión clínica académica.</p>
+      <p>Inicia sesión con tu cuenta y accede a todos los servicios médicos.</p>
+      <div class="decorative-lines"></div>
+    </div>
+  </div>
 
-    <div class="tabs">
-      <button [class.active]="activeTab === 'student'" (click)="setActiveTab('student')" class="tab-button">
-        Estudiante
+  <!-- Lado derecho: claro, formulario de login -->
+  <div class="login-panel">
+    <div class="login-header">
+      <h2>Acceder</h2>
+      <p>Selecciona tu rol y completa tus credenciales</p>
+    </div>
+
+    <!-- Menú de roles estilo "ruleta / videojuego" -->
+    <div class="roles-menu">
+      <button [class.active]="activeTab === 'student'" (click)="setActiveTab('student')" class="role-btn">
+        <span class="role-icon">🎓</span>
+        <span class="role-name">Estudiante</span>
       </button>
-      <button [class.active]="activeTab === 'doctor'" (click)="setActiveTab('doctor')" class="tab-button">
-        Doctor
+      <button [class.active]="activeTab === 'doctor'" (click)="setActiveTab('doctor')" class="role-btn">
+        <span class="role-icon">👨‍⚕️</span>
+        <span class="role-name">Doctor</span>
       </button>
-      <button [class.active]="activeTab === 'admin'" (click)="setActiveTab('admin')" class="tab-button">
-        Admin
+      <button [class.active]="activeTab === 'admin'" (click)="setActiveTab('admin')" class="role-btn">
+        <span class="role-icon">👨‍💼</span>
+        <span class="role-name">Administrador</span>
       </button>
     </div>
 
-    <!-- Formulario Estudiante (con olvidé contraseña) -->
-    <div *ngIf="activeTab === 'student'" class="form-container">
-      <h3>Acceso Estudiantes</h3>
-      <form (ngSubmit)="onStudentLogin()" #studentForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
-
+    <!-- Formulario según rol activo -->
+    <div class="form-container">
+      <!-- Estudiante -->
+      <form *ngIf="activeTab === 'student'" (ngSubmit)="onStudentLogin()" #studentForm="ngForm">
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
         <div class="form-group">
-          <label for="studentIdentificador">Número de Control:</label>
+          <label for="studentIdentificador">Número de control</label>
           <input type="text" id="studentIdentificador" [(ngModel)]="studentData.identificador" name="identificador"
             placeholder="Ej: 22690495" required>
         </div>
-
         <div class="form-group">
-          <label for="studentPassword">NIP:</label>
+          <label for="studentPassword">NIP</label>
           <div class="password-wrapper">
             <input [type]="showPasswordStudent ? 'text' : 'password'" id="studentPassword"
               [(ngModel)]="studentData.password" name="password" placeholder="Tu NIP de 6 dígitos" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('student')">
-              {{ showPasswordStudent ? '🙈' : '👁️' }}
-            </button>
+            <button type="button" class="toggle-password" (click)="togglePassword('student')">{{ showPasswordStudent ?
+              '🙈' : '👁️' }}</button>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="studentDuracion">Mantener sesión por:</label>
-          <select id="studentDuracion" [(ngModel)]="recordarPor" name="recordarPor" class="duracion-select">
-            <option *ngFor="let op of duracionOpciones" [value]="op.valor">{{ op.etiqueta }}</option>
-          </select>
-        </div>
-
         <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar Sesión</span>
+          <span *ngIf="!isLoading">Iniciar sesión</span>
           <span *ngIf="isLoading">Cargando...</span>
         </button>
-
-        <!-- NUEVO: Enlace olvidé contraseña para estudiantes -->
         <div class="forgot-link-wrapper">
           <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
         </div>
       </form>
-    </div>
 
-    <!-- Formulario Doctor (ya tenía el enlace) -->
-    <div *ngIf="activeTab === 'doctor'" class="form-container">
-      <h3>Acceso Doctores</h3>
-      <form (ngSubmit)="onDoctorLogin()" #doctorForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
-
+      <!-- Doctor -->
+      <form *ngIf="activeTab === 'doctor'" (ngSubmit)="onDoctorLogin()" #doctorForm="ngForm">
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
         <div class="form-group">
-          <label for="doctorIdentificador">Usuario:</label>
+          <label for="doctorIdentificador">Usuario</label>
           <input type="text" id="doctorIdentificador" [(ngModel)]="doctorData.identificador" name="identificador"
             placeholder="Tu nombre de usuario" required>
         </div>
-
         <div class="form-group">
-          <label for="doctorPassword">Contraseña:</label>
+          <label for="doctorPassword">Contraseña</label>
           <div class="password-wrapper">
             <input [type]="showPasswordDoctor ? 'text' : 'password'" id="doctorPassword"
               [(ngModel)]="doctorData.password" name="password" placeholder="Tu contraseña" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('doctor')">
-              {{ showPasswordDoctor ? '🙈' : '👁️' }}
-            </button>
+            <button type="button" class="toggle-password" (click)="togglePassword('doctor')">{{ showPasswordDoctor ?
+              '🙈' : '👁️' }}</button>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="doctorDuracion">Mantener sesión por:</label>
-          <select id="doctorDuracion" [(ngModel)]="recordarPor" name="recordarPor" class="duracion-select">
-            <option *ngFor="let op of duracionOpciones" [value]="op.valor">{{ op.etiqueta }}</option>
-          </select>
-        </div>
-
         <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar Sesión</span>
+          <span *ngIf="!isLoading">Iniciar sesión</span>
           <span *ngIf="isLoading">Cargando...</span>
         </button>
-
         <div class="forgot-link-wrapper">
           <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
         </div>
       </form>
-    </div>
 
-    <!-- Formulario Admin (con olvidé contraseña) -->
-    <div *ngIf="activeTab === 'admin'" class="form-container">
-      <h3>Acceso Administrador</h3>
-      <form (ngSubmit)="onAdminLogin()" #adminForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
-
+      <!-- Admin -->
+      <form *ngIf="activeTab === 'admin'" (ngSubmit)="onAdminLogin()" #adminForm="ngForm">
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
         <div class="form-group">
-          <label for="adminIdentificador">Usuario:</label>
+          <label for="adminIdentificador">Usuario</label>
           <input type="text" id="adminIdentificador" [(ngModel)]="adminData.identificador" name="identificador"
             placeholder="admin" required>
         </div>
-
         <div class="form-group">
-          <label for="adminPassword">Contraseña:</label>
+          <label for="adminPassword">Contraseña</label>
           <div class="password-wrapper">
             <input [type]="showPasswordAdmin ? 'text' : 'password'" id="adminPassword" [(ngModel)]="adminData.password"
               name="password" placeholder="Contraseña" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('admin')">
-              {{ showPasswordAdmin ? '🙈' : '👁️' }}
-            </button>
+            <button type="button" class="toggle-password" (click)="togglePassword('admin')">{{ showPasswordAdmin ? '🙈'
+              : '👁️' }}</button>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="adminDuracion">Mantener sesión por:</label>
-          <select id="adminDuracion" [(ngModel)]="recordarPor" name="recordarPor" class="duracion-select">
-            <option *ngFor="let op of duracionOpciones" [value]="op.valor">{{ op.etiqueta }}</option>
-          </select>
-        </div>
-
         <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar Sesión</span>
+          <span *ngIf="!isLoading">Iniciar sesión</span>
           <span *ngIf="isLoading">Cargando...</span>
         </button>
-
-        <!-- NUEVO: Enlace olvidé contraseña para admin -->
         <div class="forgot-link-wrapper">
           <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
         </div>
