@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentacion del proyecto
+    url: https://github.com/elnemito001/Yoltec/blob/main/docs/entregable_sistema.md
+    about: Consulta la documentacion general del sistema Yoltec
