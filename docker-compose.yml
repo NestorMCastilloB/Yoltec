@@ -1,21 +1,13 @@
-version: "3.9"
-
-# ─────────────────────────────────────────────────────────────
-# Yoltec - Sistema de Consultorio Médico
-#
-# Bloque 1: backend (Laravel) + frontend (Angular)
-# Bloque 2: ia (Python FastAPI)
-# Nota: La app móvil Flutter se distribuye como APK, no como contenedor.
-# ─────────────────────────────────────────────────────────────
+﻿# Yoltec - Sistema de Consultorio Medico
+# backend (Laravel) + frontend (Angular) + ia (FastAPI)
 
 services:
-
-  # ── Bloque 1a: Backend Laravel ─────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: yoltec-backend
+    restart: unless-stopped
     ports:
       - "8000:8080"
     env_file:
@@ -30,12 +22,12 @@ services:
       ia:
         condition: service_healthy
 
-  # ── Bloque 1b: Frontend Angular ────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: yoltec-frontend
+    restart: unless-stopped
     ports:
       - "4200:80"
     depends_on:
@@ -43,14 +35,16 @@ services:
     networks:
       - yoltec-net
 
-  # ── Bloque 2: IA Python (FastAPI) ──────────────────────────
   ia:
     build:
       context: ./IA
       dockerfile: Dockerfile
     container_name: yoltec-ia
+    restart: unless-stopped
     ports:
       - "5000:5000"
+    env_file:
+      - ./IA/.env
     networks:
       - yoltec-net
     healthcheck:
