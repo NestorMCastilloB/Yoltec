@@ -6,7 +6,7 @@ use App\Models\PreEvaluacionIA;
 use App\Models\Cita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Http;
+
 
 class PreEvaluacionIAController extends Controller
 {

@@ -76,22 +76,23 @@ class IADummyDataSeeder extends Seeder
         $alumnos = [];
         
         $nombres = [
-            ['name' => 'Ana García López', 'nc' => '19120001'],
-            ['name' => 'Carlos Martínez Ruiz', 'nc' => '19120002'],
-            ['name' => 'María Elena Torres', 'nc' => '19120003'],
-            ['name' => 'Juan Pedro Sánchez', 'nc' => '19120004'],
-            ['name' => 'Laura Fernández', 'nc' => '19120005'],
-            ['name' => 'Roberto Díaz', 'nc' => '19120006'],
-            ['name' => 'Patricia Mendoza', 'nc' => '19120007'],
-            ['name' => 'Fernando Castillo', 'nc' => '19120008'],
+            ['nombre' => 'Ana', 'apellido' => 'García López', 'nc' => '19120001'],
+            ['nombre' => 'Carlos', 'apellido' => 'Martínez Ruiz', 'nc' => '19120002'],
+            ['nombre' => 'María Elena', 'apellido' => 'Torres', 'nc' => '19120003'],
+            ['nombre' => 'Juan Pedro', 'apellido' => 'Sánchez', 'nc' => '19120004'],
+            ['nombre' => 'Laura', 'apellido' => 'Fernández', 'nc' => '19120005'],
+            ['nombre' => 'Roberto', 'apellido' => 'Díaz', 'nc' => '19120006'],
+            ['nombre' => 'Patricia', 'apellido' => 'Mendoza', 'nc' => '19120007'],
+            ['nombre' => 'Fernando', 'apellido' => 'Castillo', 'nc' => '19120008'],
         ];
 
         foreach ($nombres as $datos) {
             $alumno = User::firstOrCreate(
                 ['numero_control' => $datos['nc']],
                 [
-                    'name' => $datos['name'],
-                    'email' => strtolower(str_replace(' ', '.', $datos['name'])) . '@universidad.edu',
+                    'nombre' => $datos['nombre'],
+                    'apellido' => $datos['apellido'],
+                    'email' => strtolower($datos['nombre'] . '.' . $datos['apellido']) . '@universidad.edu',
                     'password' => Hash::make('password123'),
                     'tipo' => 'alumno',
                     'telefono' => '444' . rand(1000000, 9999999),
@@ -108,8 +109,9 @@ class IADummyDataSeeder extends Seeder
         return User::firstOrCreate(
             ['email' => 'doctor@universidad.edu'],
             [
-                'name' => 'Dr. José Hernández Gómez',
-                'numero_control' => 'DOC001',
+                'nombre' => 'José',
+                'apellido' => 'Hernández Gómez',
+                'username' => 'doctorPrueba',
                 'password' => Hash::make('password123'),
                 'tipo' => 'doctor',
                 'telefono' => '4445556666',
