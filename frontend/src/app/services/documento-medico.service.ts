@@ -121,7 +121,6 @@ export class DocumentoMedicoService {
 
   subirDocumento(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}`, formData).pipe(
-      tap(response => console.log('Documento subido:', response)),
       catchError(this.handleError)
     );
   }
@@ -156,7 +155,6 @@ export class DocumentoMedicoService {
 
   validarDiagnostico(analisisId: number, data: ValidacionRequest): Observable<any> {
     return this.http.post(`${this.analisisUrl}/${analisisId}/validar`, data).pipe(
-      tap(response => console.log('Validación enviada:', response)),
       catchError(this.handleError)
     );
   }
@@ -170,7 +168,6 @@ export class DocumentoMedicoService {
   // ============ UTILIDADES ============
 
   private handleError(error: any) {
-    console.error('Error en servicio de documentos:', error);
     
     let errorMessage = 'Ha ocurrido un error';
     

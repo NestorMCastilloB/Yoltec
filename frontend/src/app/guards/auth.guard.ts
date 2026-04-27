@@ -62,7 +62,6 @@ export class AuthGuard implements CanActivate {
       return this.router.createUrlTree(['/login']);
       
     } catch (error) {
-      console.error('Error al analizar la información del usuario:', error);
       return this.router.createUrlTree(['/login']);
     }
   }

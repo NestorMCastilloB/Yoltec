@@ -66,7 +66,6 @@ export class SubirDocumentoComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error: any) => {
-        console.error('Error cargando pacientes:', error);
         this.isLoading = false;
         // Datos de ejemplo para desarrollo
         this.pacientes = [
@@ -129,12 +128,10 @@ export class SubirDocumentoComponent implements OnInit {
         this.documentoSubido = response.documento;
         this.analisisIA = response.analisis_ia;
         
-        console.log('Documento subido exitosamente:', response);
       },
       error: (error) => {
         this.isUploading = false;
         this.uploadError = error.message || 'Error al subir el documento';
-        console.error('Error subiendo documento:', error);
       }
     });
   }

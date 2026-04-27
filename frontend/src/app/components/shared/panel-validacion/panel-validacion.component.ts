@@ -54,7 +54,6 @@ export class PanelValidacionComponent implements OnInit {
       error: (error) => {
         this.error = error.message || 'Error cargando análisis pendientes';
         this.isLoading = false;
-        console.error('Error:', error);
       }
     });
   }
@@ -65,7 +64,6 @@ export class PanelValidacionComponent implements OnInit {
         this.estadisticas = response.estadisticas;
       },
       error: (error) => {
-        console.error('Error cargando estadísticas:', error);
       }
     });
   }
@@ -136,7 +134,6 @@ export class PanelValidacionComponent implements OnInit {
       error: (error) => {
         this.isValidating = false;
         alert('Error al validar: ' + (error.message || 'Inténtalo de nuevo'));
-        console.error('Error validando:', error);
       }
     });
   }

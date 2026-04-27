@@ -91,7 +91,6 @@ export class AuthService {
       errorMessage = error.message;
     }
 
-    console.error('Error HTTP:', error);
     return throwError(() => new Error(errorMessage));
   }
 
@@ -120,8 +119,7 @@ export class AuthService {
         this.router.navigate(['/login']);
       },
       error: (error) => {
-        console.error('Error al cerrar sesión:', error);
-        // Asegurarse de limpiar los datos de autenticación incluso si hay un error
+        // Limpiar datos de autenticación incluso si hay error
         this.clearAuthData();
         this.router.navigate(['/login']);
       }

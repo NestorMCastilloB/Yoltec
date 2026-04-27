@@ -43,7 +43,6 @@ export class AuthInterceptor implements HttpInterceptor {
         // Manejar errores de acceso prohibido (403 Forbidden)
         if (error.status === 403) {
           // Redirigir a una página de acceso denegado o mostrar un mensaje
-          console.error('Acceso denegado');
         }
         
         // Pasar el error al manejador de errores

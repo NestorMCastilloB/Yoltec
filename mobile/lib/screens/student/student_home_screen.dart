@@ -68,7 +68,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesion',
+            tooltip: 'Cerrar sesión',
             onPressed: () => _confirmarLogout(context),
           ),
         ],
@@ -139,7 +139,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cerrar sesion'),
+        title: const Text('Cerrar sesión'),
         content:
             const Text('?Seguro que deseas cerrar tu sesion?'),
         actions: [
@@ -152,7 +152,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               Navigator.pop(ctx);
               Provider.of<AuthService>(context, listen: false).logout();
             },
-            child: const Text('Cerrar sesion'),
+            child: const Text('Cerrar sesión'),
           ),
         ],
       ),
@@ -1408,7 +1408,7 @@ class _PerfilTabState extends State<_PerfilTab> {
 
           // ── Informacion medica ───────────────────────────────────────
           _SeccionCard(
-            titulo: 'Informacion Medica',
+            titulo: 'Información Médica',
             icono: Icons.medical_information_outlined,
             accion: TextButton.icon(
               onPressed: _mostrarEditarInfoMedica,
@@ -1450,7 +1450,7 @@ class _PerfilTabState extends State<_PerfilTab> {
                 child: OutlinedButton.icon(
                   onPressed: _mostrarCambiarPassword,
                   icon: const Icon(Icons.key_outlined, size: 18),
-                  label: const Text('Cambiar contrasena'),
+                  label: const Text('Cambiar contraseña'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -1558,7 +1558,7 @@ class _EditarInfoMedicaDialogState
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Informacion medica actualizada'),
+          content: Text('Información médica actualizada'),
           backgroundColor: AppTheme.primaryColor,
         ),
       );
@@ -1712,7 +1712,7 @@ class _CambiarPasswordDialogState
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Contrasena actualizada correctamente'),
+          content: Text('Contraseña actualizada correctamente'),
           backgroundColor: AppTheme.primaryColor,
         ),
       );
@@ -1738,7 +1738,7 @@ class _CambiarPasswordDialogState
           Icon(Icons.lock_outline,
               color: AppTheme.primaryColor, size: 22),
           SizedBox(width: 8),
-          Text('Cambiar contrasena',
+          Text('Cambiar contraseña',
               style: TextStyle(fontSize: 17)),
         ],
       ),
@@ -1755,7 +1755,7 @@ class _CambiarPasswordDialogState
                 controller: _actualCtrl,
                 obscureText: !_verActual,
                 decoration: InputDecoration(
-                  labelText: 'Contrasena actual',
+                  labelText: 'Contraseña actual',
                   prefixIcon:
                       const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
@@ -1768,7 +1768,7 @@ class _CambiarPasswordDialogState
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) {
-                    return 'Ingresa tu contrasena actual';
+                    return 'Ingresa tu contraseña actual';
                   }
                   return null;
                 },
@@ -1779,7 +1779,7 @@ class _CambiarPasswordDialogState
                 controller: _nuevoCtrl,
                 obscureText: !_verNuevo,
                 decoration: InputDecoration(
-                  labelText: 'Nueva contrasena',
+                  labelText: 'Nueva contraseña',
                   prefixIcon:
                       const Icon(Icons.lock_reset_outlined),
                   suffixIcon: IconButton(
@@ -1803,7 +1803,7 @@ class _CambiarPasswordDialogState
                 controller: _confirmCtrl,
                 obscureText: !_verConfirm,
                 decoration: InputDecoration(
-                  labelText: 'Confirmar nueva contrasena',
+                  labelText: 'Confirmar nueva contraseña',
                   prefixIcon: const Icon(Icons.check_circle_outline),
                   suffixIcon: IconButton(
                     icon: Icon(_verConfirm
@@ -1815,7 +1815,7 @@ class _CambiarPasswordDialogState
                 ),
                 validator: (v) {
                   if (v != _nuevoCtrl.text) {
-                    return 'Las contrasenas no coinciden';
+                    return 'Las contraseñas no coinciden';
                   }
                   return null;
                 },

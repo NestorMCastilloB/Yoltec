@@ -39,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                     Provider.of<AuthService>(context, listen: false).logout();
                   },
                   icon: const Icon(Icons.logout),
-                  label: const Text('Cerrar sesion'),
+                  label: const Text('Cerrar sesión'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                   ),

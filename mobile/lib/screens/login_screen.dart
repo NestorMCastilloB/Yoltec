@@ -321,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           color: Colors.white,
                                         ),
                                       )
-                                    : const Text('Iniciar Sesion'),
+                                    : const Text('Iniciar Sesión'),
                               ),
                             ),
 
@@ -438,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen>
             controller: _passwordCtrl,
             obscureText: _obscurePassword,
             decoration: InputDecoration(
-              labelText: 'Contrasena',
-              hintText: 'Tu contrasena',
+              labelText: 'Contraseña',
+              hintText: 'Tu contraseña',
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(_obscurePassword
@@ -451,7 +451,7 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             validator: (v) {
               if (v == null || v.isEmpty) {
-                return 'Ingresa tu contrasena';
+                return 'Ingresa tu contraseña';
               }
               return null;
             },

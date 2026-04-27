@@ -60,7 +60,6 @@ export class UserService {
   }
 
   private handleError(error: any): Observable<never> {
-    console.error('Error en UserService:', error);
     return throwError(() => error);
   }
 }
