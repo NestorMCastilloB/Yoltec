@@ -404,6 +404,111 @@ body.dark-mode .prioridad-badge.total .badge-label {
   color: #7ab3c8;
 }
 
+/* ===== FILTROS ===== */
+.filtros-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.filtro-chip {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filtro-chip:hover {
+  border-color: var(--accent-mid);
+}
+
+.filtro-chip.activo {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  border-color: transparent;
+}
+
+.filtro-alta.activo {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.filtro-media.activo {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.filtro-baja.activo {
+  background: linear-gradient(135deg, #258a60, #1c5560);
+}
+
+/* ===== EXPAND TOGGLE ===== */
+.cita-prioridad-header {
+  cursor: pointer;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.expand-icon {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* ===== DETALLES EXPANDIBLES ===== */
+.cita-detalles {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+.detalle-justificacion {
+  background: var(--accent-soft);
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-mid);
+  margin-bottom: 0.6rem;
+}
+
+.detalle-justificacion p {
+  margin: 0.4rem 0 0;
+}
+
+.detalle-factores {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.detalle-factores ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.detalle-factores li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .prioridad-resumen {

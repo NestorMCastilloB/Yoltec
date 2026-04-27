@@ -19,6 +19,8 @@ export interface ClasificacionPrioridad {
   prioridad: 'alta' | 'media' | 'baja';
   puntuacion: number;
   justificacion_resumida: string;
+  justificacion?: string;
+  factores?: string[];
 }
 
 export interface ResumenPrioridad {

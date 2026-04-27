@@ -105,6 +105,8 @@ class IAPriorityController extends Controller
                     'prioridad' => $resultado['prioridad'],
                     'puntuacion' => $resultado['puntuacion'],
                     'justificacion_resumida' => substr($resultado['justificacion'], 0, 100) . '...',
+                    'justificacion' => $resultado['justificacion'],
+                    'factores' => $resultado['factores'] ?? [],
                 ];
             } catch (\Exception $e) {
                 // Si falla la clasificación de una, continuar con las demás

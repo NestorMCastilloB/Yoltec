@@ -6,7 +6,6 @@ import 'package:yoltec_mobile/screens/splash_screen.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
-import 'package:yoltec_mobile/services/ia_priority_service.dart';
 import 'package:yoltec_mobile/services/notification_service.dart';
 import 'package:yoltec_mobile/services/pre_evaluacion_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
@@ -32,7 +31,6 @@ class YoltecApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BitacoraService()),
         ChangeNotifierProvider(create: (_) => RecetaService()),
         ChangeNotifierProvider(create: (_) => PreEvaluacionService()),
-        ChangeNotifierProvider(create: (_) => IAPriorityService()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
       ],
       child: Consumer<ThemeService>(
