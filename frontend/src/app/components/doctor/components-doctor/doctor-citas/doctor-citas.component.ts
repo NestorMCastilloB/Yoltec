@@ -281,7 +281,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
         if (response) {
           this.consultaMsg = 'Consulta guardada y cita marcada como atendida.';
           this.loadCitas();
-          setTimeout(() => this.closeConsultaForm(), 1200);
+          this.closeConsultaForm();
         }
       });
   }
@@ -361,7 +361,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
           this.reprogramarMsg = 'Cita reprogramada correctamente.';
           this.loadCitas();
           this.loadAvailability();
-          setTimeout(() => this.closeReprogramar(), 1000);
+          this.closeReprogramar();
         }
       });
   }

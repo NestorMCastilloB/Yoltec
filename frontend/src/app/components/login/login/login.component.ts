@@ -39,9 +39,8 @@ export class LoginComponent implements OnDestroy {
   private login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin') {
     this.isLoading = true;
     this.errorMessage = null;
-    const duracionFija = 1440; // 1 día
 
-    this.authService.login(identificador, password, tipoUsuario, duracionFija)
+    this.authService.login(identificador, password, tipoUsuario)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {

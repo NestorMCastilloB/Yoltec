@@ -19,6 +19,10 @@ class ConsultaController extends Controller
 
         $cita = Cita::findOrFail($citaId);
 
+        if ($cita->doctor_id && $cita->doctor_id !== $user->id) {
+            return response()->json(['message' => 'Solo el doctor asignado puede registrar la consulta'], 403);
+        }
+
         $data = $request->validate([
             'diagnostico'   => 'required|string|max:2000',
             'tratamiento'   => 'required|string|max:2000',

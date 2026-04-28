@@ -22,9 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(\Illuminate\Http\Middleware\HandleCors::class);
         
         $middleware->api(\Illuminate\Http\Middleware\HandleCors::class);
-        
-        // Middleware CORS personalizado para ngrok
-        $middleware->api(\App\Http\Middleware\CorsMiddleware::class);
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Notificar alumnos con cita en las próximas 24h — corre cada hora

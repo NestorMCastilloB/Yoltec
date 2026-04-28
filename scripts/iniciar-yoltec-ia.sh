@@ -1,197 +1,117 @@
 #!/bin/bash
 
 # Script completo para iniciar Yoltec con IA y ngrok
-# Uso: ./scripts/iniciar-yoltec-ia.sh
+# Uso: NGROK_TOKEN=tu_token NGROK_DOMAIN=tu_dominio ./scripts/iniciar-yoltec-ia.sh
 
-echo "🚀 Iniciando Yoltec con IA para acceso móvil..."
+echo "Iniciando Yoltec con IA para acceso movil..."
 
-# Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Función para verificar si un proceso está corriendo
 check_process() {
-    if pgrep -f "$1" > /dev/null; then
-        return 0
-    else
-        return 1
-    fi
+    pgrep -f "$1" > /dev/null
 }
 
-# Función para iniciar proceso en background
 start_background() {
     local name=$1
     local command=$2
     local log_file=$3
-    
-    echo -e "${BLUE}📡 Iniciando $name...${NC}"
-    
+
+    echo -e "${BLUE}Iniciando $name...${NC}"
+
     if check_process "$command"; then
-        echo -e "${YELLOW}⚠️  $name ya está corriendo${NC}"
+        echo -e "${YELLOW}$name ya esta corriendo${NC}"
         return
     fi
-    
+
     nohup $command > "$log_file" 2>&1 &
     sleep 2
-    
+
     if check_process "$command"; then
-        echo -e "${GREEN}✅ $name iniciado correctamente${NC}"
-        echo -e "${BLUE}📋 Logs: $log_file${NC}"
+        echo -e "${GREEN}$name iniciado correctamente${NC}"
     else
-        echo -e "${RED}❌ Error al iniciar $name${NC}"
-        echo -e "${RED}📋 Revisa los logs: $log_file${NC}"
+        echo -e "${RED}Error al iniciar $name — revisa: $log_file${NC}"
     fi
 }
 
 # Verificar requisitos
-echo -e "${BLUE}🔍 Verificando requisitos...${NC}"
+echo -e "${BLUE}Verificando requisitos...${NC}"
 
-# Verificar PHP
-if ! command -v php &> /dev/null; then
-    echo -e "${RED}❌ PHP no está instalado${NC}"
-    exit 1
-fi
+for cmd in php npm; do
+    if ! command -v $cmd &> /dev/null; then
+        echo -e "${RED}$cmd no esta instalado${NC}"
+        exit 1
+    fi
+done
 
-# Verificar Node.js
-if ! command -v npm &> /dev/null; then
-    echo -e "${RED}❌ Node.js/npm no está instalado${NC}"
-    exit 1
-fi
-
-# Verificar ngrok
-if ! command -v ngrok &> /dev/null; then
-    echo -e "${RED}❌ ngrok no está instalado${NC}"
-    echo -e "${YELLOW}💡 Instálalo con: npm install -g ngrok${NC}"
-    exit 1
-fi
-
-# Verificar archivo .env
 if [ ! -f "backend/.env" ]; then
-    echo -e "${YELLOW}⚠️  Creando archivo .env desde ejemplo...${NC}"
+    echo -e "${YELLOW}Creando archivo .env desde ejemplo...${NC}"
     cp backend/.env.example backend/.env
-    echo -e "${YELLOW}📝 No olvides agregar tus API keys en backend/.env:${NC}"
-    echo -e "${YELLOW}   OPENAI_API_KEY=tu_api_key${NC}"
-    echo -e "${YELLOW}   ANTHROPIC_API_KEY=tu_api_key${NC}"
+    echo -e "${YELLOW}Agrega tus credenciales en backend/.env${NC}"
 fi
 
-# Crear directorios de logs si no existen
 mkdir -p logs
 
-echo -e "${GREEN}✅ Requisitos verificados${NC}"
+echo -e "${GREEN}Requisitos verificados${NC}"
 echo ""
 
-# Iniciar Backend Laravel
-echo -e "${BLUE}🔧 Iniciando Backend Laravel...${NC}"
+# Backend
 cd backend
 start_background "Backend Laravel" "php artisan serve --host=0.0.0.0 --port=8000" "../logs/backend.log"
 cd ..
 
-# Esperar a que el backend inicie
-echo -e "${BLUE}⏳ Esperando a que el backend inicie...${NC}"
 sleep 5
 
-# Iniciar ngrok
-echo -e "${BLUE}🌐 Iniciando ngrok...${NC}"
-start_background "ngrok" "ngrok http 8000 --domain=shara-isospondylous-capitally.ngrok-free.dev --authtoken=39R1yRAJWSHk7thy5d4Gwa9NvAy_6Do8fjFRSq5HR4oMadpSg --log=stdout" "logs/ngrok.log"
+# ngrok (solo si las variables estan configuradas)
+if [ -n "$NGROK_TOKEN" ] && [ -n "$NGROK_DOMAIN" ]; then
+    if command -v ngrok &> /dev/null; then
+        start_background "ngrok" "ngrok http 8000 --domain=$NGROK_DOMAIN --authtoken=$NGROK_TOKEN --log=stdout" "logs/ngrok.log"
+        sleep 10
+    else
+        echo -e "${YELLOW}ngrok no instalado, omitiendo...${NC}"
+    fi
+else
+    echo -e "${YELLOW}NGROK_TOKEN/NGROK_DOMAIN no configurados, omitiendo ngrok...${NC}"
+fi
 
-# Esperar a que ngrok inicie
-echo -e "${BLUE}⏳ Esperando a que ngrok inicie...${NC}"
-sleep 10
-
-# Iniciar Frontend Angular
-echo -e "${BLUE}🎨 Iniciando Frontend Angular...${NC}"
+# Frontend
 cd frontend
 start_background "Frontend Angular" "npm start" "../logs/frontend.log"
 cd ..
 
 echo ""
-echo -e "${GREEN}🎉 Todos los servicios han sido iniciados${NC}"
+echo -e "${GREEN}Servicios iniciados${NC}"
 echo ""
 
-# Estado de los servicios
-echo -e "${BLUE}📊 Estado de los servicios:${NC}"
-echo ""
-
-# Backend
-if check_process "php artisan serve"; then
-    echo -e "${GREEN}✅ Backend Laravel: Corriendo en http://localhost:8000${NC}"
-else
-    echo -e "${RED}❌ Backend Laravel: No está corriendo${NC}"
-fi
-
-# ngrok
-if check_process "ngrok"; then
-    echo -e "${GREEN}✅ ngrok: Corriendo en https://shara-isospondylous-capitally.ngrok-free.dev${NC}"
-else
-    echo -e "${RED}❌ ngrok: No está corriendo${NC}"
-fi
-
-# Frontend
-if check_process "npm start"; then
-    echo -e "${GREEN}✅ Frontend Angular: Corriendo en http://localhost:4200${NC}"
-else
-    echo -e "${RED}❌ Frontend Angular: No está corriendo${NC}"
-fi
+# Estado
+echo -e "${BLUE}Estado de los servicios:${NC}"
+check_process "php artisan serve" && echo -e "${GREEN}Backend: http://localhost:8000${NC}" || echo -e "${RED}Backend: no corriendo${NC}"
+check_process "ngrok" && echo -e "${GREEN}ngrok: https://$NGROK_DOMAIN${NC}" || echo -e "${YELLOW}ngrok: no activo${NC}"
+check_process "npm start" && echo -e "${GREEN}Frontend: http://localhost:4200${NC}" || echo -e "${RED}Frontend: no corriendo${NC}"
 
 echo ""
-echo -e "${BLUE}📱 Para acceder desde tu celular:${NC}"
-echo -e "${YELLOW}1. Conecta tu celular a la misma red WiFi${NC}"
-echo -e "${YELLOW}2. Abre http://localhost:4200 en tu computadora${NC}"
-echo -e "${YELLOW}3. O usa la URL de ngrok directamente en el celular${NC}"
-echo ""
+echo -e "${BLUE}Logs: logs/backend.log | logs/frontend.log | logs/ngrok.log${NC}"
+echo -e "${BLUE}Detener: Ctrl+C${NC}"
 
-echo -e "${BLUE}🔍 Logs disponibles:${NC}"
-echo -e "${YELLOW}• Backend: logs/backend.log${NC}"
-echo -e "${YELLOW}• Frontend: logs/frontend.log${NC}"
-echo -e "${YELLOW}• ngrok: logs/ngrok.log${NC}"
-echo ""
-
-echo -e "${BLUE}🛑 Para detener todos los servicios:${NC}"
-echo -e "${YELLOW}• Presiona Ctrl+C en esta terminal${NC}"
-echo -e "${YELLOW}• O ejecuta: pkill -f 'php artisan serve' && pkill -f 'npm start' && pkill -f 'ngrok'${NC}"
-echo ""
-
-# Monitoreo
-echo -e "${BLUE}👀 Monitoreando servicios (presiona Ctrl+C para detener)...${NC}"
-
-# Función de limpieza
 cleanup() {
     echo ""
-    echo -e "${YELLOW}🛑 Deteniendo todos los servicios...${NC}"
+    echo -e "${YELLOW}Deteniendo servicios...${NC}"
     pkill -f "php artisan serve"
     pkill -f "npm start"
     pkill -f "ngrok"
-    echo -e "${GREEN}✅ Todos los servicios detenidos${NC}"
+    echo -e "${GREEN}Servicios detenidos${NC}"
     exit 0
 }
 
-# Capturar señal de interrupción
 trap cleanup SIGINT SIGTERM
 
-# Mantener el script corriendo
 while true; do
     sleep 5
-    
-    # Verificar si los servicios siguen corriendo
-    if ! check_process "php artisan serve"; then
-        echo -e "${RED}⚠️  Backend se detuvo, reiniciando...${NC}"
-        cd backend
-        start_background "Backend Laravel" "php artisan serve --host=0.0.0.0 --port=8000" "../logs/backend.log"
-        cd ..
-    fi
-    
-    if ! check_process "npm start"; then
-        echo -e "${RED}⚠️  Frontend se detuvo, reiniciando...${NC}"
-        cd frontend
-        start_background "Frontend Angular" "npm start" "../logs/frontend.log"
-        cd ..
-    fi
-    
-    if ! check_process "ngrok"; then
-        echo -e "${RED}⚠️  ngrok se detuvo, reiniciando...${NC}"
-        start_background "ngrok" "ngrok http 8000 --domain=shara-isospondylous-capitally.ngrok-free.dev --authtoken=39R1yRAJWSHk7thy5d4Gwa9NvAy_6Do8fjFRSq5HR4oMadpSg --log=stdout" "logs/ngrok.log"
-    fi
+    check_process "php artisan serve" || {
+        echo -e "${RED}Backend se detuvo, reiniciando...${NC}"
+        cd backend && start_background "Backend" "php artisan serve --host=0.0.0.0 --port=8000" "../logs/backend.log" && cd ..
+    }
 done

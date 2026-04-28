@@ -956,7 +956,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     ).pipe(
       takeUntil(this.destroy$),
       catchError(error => {
-        this.preEvaluacionError = error?.error?.message || error?.error?.detail || 'Error al conectar con la IA. Verifica que Ollama esté corriendo.';
+        this.preEvaluacionError = error?.error?.message || error?.error?.detail || 'Error al conectar con el servicio de IA. Intenta de nuevo mas tarde.';
         return of(null);
       }),
       finalize(() => {

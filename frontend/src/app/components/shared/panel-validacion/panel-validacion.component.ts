@@ -18,6 +18,8 @@ export class PanelValidacionComponent implements OnInit {
   isLoading = true;
   isValidating = false;
   error: string | null = null;
+  validacionMsg: string | null = null;
+  validacionError: string | null = null;
   
   // Modal de validación
   modalAbierto = false;
@@ -99,14 +101,16 @@ export class PanelValidacionComponent implements OnInit {
 
     // Validaciones
     if (this.formValidacion.accion === 'corregir' && !this.formValidacion.diagnostico_final.trim()) {
-      alert('Debes proporcionar un diagnóstico corregido');
+      this.validacionError = 'Debes proporcionar un diagnóstico corregido';
       return;
     }
 
     if (this.formValidacion.accion === 'rechazar' && !this.formValidacion.comentario.trim()) {
-      alert('Debes indicar el motivo del rechazo');
+      this.validacionError = 'Debes indicar el motivo del rechazo';
       return;
     }
+
+    this.validacionError = null;
 
     this.isValidating = true;
 
@@ -129,11 +133,13 @@ export class PanelValidacionComponent implements OnInit {
           'rechazar': 'Diagnóstico rechazado',
           'corregir': 'Diagnóstico corregido y guardado'
         };
-        alert(mensajes[this.formValidacion.accion]);
+        this.validacionMsg = mensajes[this.formValidacion.accion];
+        setTimeout(() => this.validacionMsg = null, 4000);
       },
       error: (error) => {
         this.isValidating = false;
-        alert('Error al validar: ' + (error.message || 'Inténtalo de nuevo'));
+        this.validacionError = 'Error al validar: ' + (error.message || 'Inténtalo de nuevo');
+        setTimeout(() => this.validacionError = null, 5000);
       }
     });
   }

@@ -141,7 +141,7 @@ class PreEvaluacionService extends ChangeNotifier {
     }
   }
 
-  /// Chat conversacional con Ollama para pre-evaluación
+  /// Chat conversacional con IA (Groq) para pre-evaluación
   Future<Map<String, dynamic>?> enviarMensajeChat(
     String token,
     int citaId,

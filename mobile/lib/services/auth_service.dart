@@ -37,13 +37,17 @@ class AuthService extends ChangeNotifier {
       final secureToken = await BiometricService.getStoredToken();
 
       if (secureToken != null && userJson != null) {
-        if (biometricEnabled) {
-          // Hay token guardado pero biometría activa: requiere autenticación
+        // Verificar que el token siga siendo valido con el backend
+        final tokenValid = await _verifyToken(secureToken);
+        if (!tokenValid) {
+          await BiometricService.clearToken();
+          final prefs2 = await SharedPreferences.getInstance();
+          await prefs2.remove('user_data');
+        } else if (biometricEnabled) {
           _requiresBiometricUnlock = true;
           _currentUser = User.fromJson(
               json.decode(userJson) as Map<String, dynamic>);
         } else {
-          // Biometría inactiva: restaurar sesión automáticamente
           _token = secureToken;
           _currentUser = User.fromJson(
               json.decode(userJson) as Map<String, dynamic>);
@@ -134,6 +138,15 @@ class AuthService extends ChangeNotifier {
       _token = secureToken;
       _requiresBiometricUnlock = false;
       notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _verifyToken(String token) async {
+    try {
+      await ApiService.get('/user', token: token);
       return true;
     } catch (_) {
       return false;

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -25,10 +25,13 @@ interface LoginResponse {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private apiUrl = API_BASE_URL;
   private tokenKey = 'auth_token';
   private userKey = 'user_data';
+  private lastActivityKey = 'last_activity';
+  private idleTimeoutMs = 30 * 60 * 1000; // 30 minutos
+  private idleCheckInterval: ReturnType<typeof setInterval> | null = null;
   private userSubject = new BehaviorSubject<User | null>(null);
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
@@ -36,17 +39,65 @@ export class AuthService {
   public currentUser$ = this.userSubject.asObservable();
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
-    // Cargar datos del usuario al iniciar
+  private activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+  private boundOnActivity = this.onActivity.bind(this);
+
+  constructor(private http: HttpClient, private router: Router, private ngZone: NgZone) {
     const user = this.getStoredUser();
     if (user) {
-      this.userSubject.next(user);
-      this.isAuthenticatedSubject.next(true);
+      if (this.isSessionExpiredByIdle()) {
+        this.clearAuthData();
+      } else {
+        this.userSubject.next(user);
+        this.isAuthenticatedSubject.next(true);
+        this.startIdleTracking();
+      }
     }
   }
 
-  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin', recordarPor: number = 1440): Observable<LoginResponse> {
-    const body: any = { identificador, password, tipo_usuario: tipoUsuario, recordar_por: recordarPor };
+  ngOnDestroy(): void {
+    this.stopIdleTracking();
+  }
+
+  private onActivity(): void {
+    localStorage.setItem(this.lastActivityKey, Date.now().toString());
+  }
+
+  private isSessionExpiredByIdle(): boolean {
+    const last = localStorage.getItem(this.lastActivityKey);
+    if (!last) return false;
+    return (Date.now() - parseInt(last, 10)) > this.idleTimeoutMs;
+  }
+
+  private startIdleTracking(): void {
+    this.onActivity();
+    this.activityEvents.forEach(evt =>
+      document.addEventListener(evt, this.boundOnActivity, { passive: true })
+    );
+    this.ngZone.runOutsideAngular(() => {
+      this.idleCheckInterval = setInterval(() => {
+        if (this.isSessionExpiredByIdle()) {
+          this.ngZone.run(() => {
+            this.logout();
+            this.router.navigate(['/login']);
+          });
+        }
+      }, 60_000);
+    });
+  }
+
+  private stopIdleTracking(): void {
+    this.activityEvents.forEach(evt =>
+      document.removeEventListener(evt, this.boundOnActivity)
+    );
+    if (this.idleCheckInterval) {
+      clearInterval(this.idleCheckInterval);
+      this.idleCheckInterval = null;
+    }
+  }
+
+  login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {
+    const body: any = { identificador, password, tipo_usuario: tipoUsuario };
     if (tipoUsuario === 'doctor') {
       const deviceToken = localStorage.getItem('doctor_device_token');
       if (deviceToken) body.device_token = deviceToken;
@@ -59,6 +110,7 @@ export class AuthService {
             this.setUser(response.user);
             this.isAuthenticatedSubject.next(true);
             this.userSubject.next(response.user);
+            this.startIdleTracking();
             this.redirectUser(response.user.tipo);
           } else if (response && response.requires_2fa) {
             sessionStorage.setItem('pending_2fa', JSON.stringify({
@@ -126,10 +178,11 @@ export class AuthService {
     });
   }
   
-  // Limpiar todos los datos de autenticación
   private clearAuthData(): void {
+    this.stopIdleTracking();
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.lastActivityKey);
     this.isAuthenticatedSubject.next(false);
     this.userSubject.next(null);
   }

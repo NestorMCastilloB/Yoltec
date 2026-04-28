@@ -118,7 +118,7 @@ export class PreEvaluacionIAService {
   }
 
   /**
-   * Chat conversacional con IA para pre-evaluación (Ollama)
+   * Chat conversacional con IA para pre-evaluación
    */
   chat(citaId: number, messages: ChatMessage[]): Observable<ChatResponse> {
     return this.http.post<ChatResponse>(`${this.apiUrl}/pre-evaluacion/chat`, {

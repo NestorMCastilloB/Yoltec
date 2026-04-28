@@ -1,4 +1,8 @@
 <div class="container mx-auto px-4 py-6">
+  <!-- Notificaciones -->
+  <div *ngIf="validacionMsg" class="toast toast-success">{{ validacionMsg }}</div>
+  <div *ngIf="validacionError" class="toast toast-error">{{ validacionError }}</div>
+
   <!-- Header -->
   <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">✅ Panel de Validación</h1>

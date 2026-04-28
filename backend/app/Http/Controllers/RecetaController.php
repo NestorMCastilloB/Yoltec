@@ -87,6 +87,10 @@ class RecetaController extends Controller
 
         $receta = Receta::findOrFail($id);
 
+        if ($receta->doctor_id !== $user->id) {
+            return response()->json(['message' => 'Solo el doctor que creó la receta puede editarla'], 403);
+        }
+
         $validated = $request->validate([
             'medicamentos' => 'required|string',
             'indicaciones' => 'required|string',

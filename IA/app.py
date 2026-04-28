@@ -4,37 +4,55 @@ Microservicio FastAPI para la IA de Yoltec.
 Corre en el contenedor 'ia' y es llamado por el backend Laravel via HTTP.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, field_validator
+from pydantic import Field
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import pickle
 import json
 import re
+import logging
 import numpy as np
 import os
-import requests as req_lib
 from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger("yoltec-ia")
+
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Yoltec IA", version="2.0.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://frontend-nu-weld-77.vercel.app",
+        "https://lucid-motivation-production.up.railway.app",
+    ],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    allow_credentials=True,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ─── Configuración del proveedor LLM ─────────────────────────────────────────
-# LLM_PROVIDER=groq   → usa Groq API (nube, rápido, recomendado para producción)
-# LLM_PROVIDER=ollama → usa Ollama local (modelos pesados, sin internet)
-LLM_PROVIDER = os.getenv('LLM_PROVIDER', 'groq')
-
+# ─── Configuración Groq LLM ──────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 
-OLLAMA_URL = os.getenv('OLLAMA_URL', 'http://localhost:11434')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen2.5:14b')
+groq_client = Groq(api_key=GROQ_API_KEY)
 
-groq_client = Groq(api_key=GROQ_API_KEY) if LLM_PROVIDER == 'groq' else None
-
-print(f"LLM Provider: {LLM_PROVIDER.upper()} ({'modelo: ' + GROQ_MODEL if LLM_PROVIDER == 'groq' else 'modelo: ' + OLLAMA_MODEL})")
+print(f"LLM Provider: GROQ (modelo: {GROQ_MODEL})")
 
 SYSTEM_PROMPT = """Eres un asistente médico de pre-evaluación en una clínica universitaria en Ciudad Valles, San Luis Potosí, México (región Huasteca Potosina). Entrevistas al estudiante sobre sus síntomas antes de su consulta con el médico.
 
@@ -157,16 +175,23 @@ def generar_recomendacion(diagnostico: str, confianza: float) -> str:
 
 # ─── Schemas ─────────────────────────────────────────────────────────────────
 class PredictRequest(BaseModel):
-    respuestas: dict
+    respuestas: dict = Field(..., max_length=50)
 
 
 class ChatMessage(BaseModel):
-    role: str
-    content: str
+    role: str = Field(..., max_length=20)
+    content: str = Field(..., max_length=5000)
+
+    @field_validator('role')
+    @classmethod
+    def validate_role(cls, v: str) -> str:
+        if v not in ('user', 'assistant'):
+            raise ValueError('role debe ser "user" o "assistant"')
+        return v
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage]
+    messages: list[ChatMessage] = Field(..., max_length=50)
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
@@ -174,27 +199,32 @@ class ChatRequest(BaseModel):
 def health():
     llm_ok = False
     try:
-        if LLM_PROVIDER == 'groq':
-            groq_client.models.list()
-            llm_ok = True
-        else:
-            r = req_lib.get(f"{OLLAMA_URL}/api/tags", timeout=3)
-            llm_ok = r.ok
+        groq_client.models.list()
+        llm_ok = True
     except Exception:
         pass
-    return {
-        "status": "ok",
-        "model_sklearn_loaded": model is not None,
-        "llm_provider": LLM_PROVIDER,
-        "llm_model": GROQ_MODEL if LLM_PROVIDER == 'groq' else OLLAMA_MODEL,
-        "llm_available": llm_ok,
-    }
+
+    status = "ok" if model is not None else "degraded"
+    code = 200 if model is not None else 503
+
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=code,
+        content={
+            "status": status,
+            "model_sklearn_loaded": model is not None,
+            "llm_provider": "groq",
+            "llm_model": GROQ_MODEL,
+            "llm_available": llm_ok,
+        }
+    )
 
 
 @app.post("/chat")
-def chat(req: ChatRequest):
+@limiter.limit("10/minute")
+def chat(request: Request, req: ChatRequest):
     """
-    Chat conversacional con Ollama para pre-evaluación de síntomas.
+    Chat conversacional con Groq para pre-evaluación de síntomas.
     Devuelve la respuesta del asistente y, cuando hay suficiente info,
     un diagnóstico preliminar estructurado.
     """
@@ -204,35 +234,16 @@ def chat(req: ChatRequest):
             for m in req.messages
         ]
 
-        if LLM_PROVIDER == 'groq':
-            response = groq_client.chat.completions.create(
-                model=GROQ_MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    *messages_payload
-                ],
-                temperature=0.7,
-                max_tokens=600,
-            )
-            assistant_message = response.choices[0].message.content
-        else:
-            # Ollama
-            response = req_lib.post(
-                f"{OLLAMA_URL}/api/chat",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        *messages_payload
-                    ],
-                    "stream": False,
-                    "options": {"temperature": 0.7, "num_predict": 600}
-                },
-                timeout=120
-            )
-            if not response.ok:
-                raise HTTPException(status_code=502, detail=f"Ollama error: {response.text}")
-            assistant_message = response.json()["message"]["content"]
+        response = groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                *messages_payload
+            ],
+            temperature=0.7,
+            max_tokens=600,
+        )
+        assistant_message = response.choices[0].message.content
 
         if "DIAGNÓSTICO_FINAL:" in assistant_message:
             parts = assistant_message.split("DIAGNÓSTICO_FINAL:", 1)
@@ -321,11 +332,13 @@ def chat(req: ChatRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Error Groq API: {str(e)}")
+        logger.error(f"Error Groq API: {e}")
+        raise HTTPException(status_code=502, detail="Error al procesar la solicitud con el servicio de IA. Intenta de nuevo.")
 
 
 @app.post("/predict")
-def predict(req: PredictRequest):
+@limiter.limit("10/minute")
+def predict(request: Request, req: PredictRequest):
     """Endpoint legacy con modelo sklearn (formulario de síntomas)."""
     if model is None:
         raise HTTPException(status_code=503, detail="Modelo sklearn no disponible. Ejecuta train_model.py primero.")

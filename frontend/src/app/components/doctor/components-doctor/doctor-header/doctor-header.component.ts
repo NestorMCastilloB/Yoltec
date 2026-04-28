@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../../services/theme.service';
 
 @Component({
   selector: 'app-doctor-header',
@@ -8,40 +9,20 @@ import { CommonModule } from '@angular/common';
   templateUrl: './doctor-header.component.html',
   styleUrl: './doctor-header.component.css'
 })
-export class DoctorHeaderComponent implements OnInit {
+export class DoctorHeaderComponent {
   @Input() doctorName = 'Doctor';
   @Input() activeSection = 'inicio';
   @Input() totalPendientes = 0;
   @Output() sectionChange = new EventEmitter<string>();
   @Output() logoutEvent = new EventEmitter<void>();
 
-  isDarkMode = false;
+  constructor(private themeService: ThemeService) {}
 
-  ngOnInit(): void {
-    // Cargar preferencia guardada
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      this.isDarkMode = true;
-      document.body.classList.add('dark-mode');
-    } else if (savedTheme === 'light') {
-      this.isDarkMode = false;
-      document.body.classList.remove('dark-mode');
-    } else {
-      // Opcional: detectar preferencia del sistema
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.isDarkMode = prefersDark;
-      if (prefersDark) document.body.classList.add('dark-mode');
-    }
+  get isDarkMode(): boolean {
+    return this.themeService.isDark;
   }
 
   toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
+    this.themeService.toggle();
   }
 }

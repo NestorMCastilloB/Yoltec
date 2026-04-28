@@ -40,7 +40,7 @@ export class Verify2faComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    if (!this.code || this.code.length !== 6) {
+    if (!this.code || !/^\d{6}$/.test(this.code)) {
       this.errorMessage = 'Ingresa el código de 6 dígitos.';
       return;
     }
