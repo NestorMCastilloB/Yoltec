@@ -1,14 +1,15 @@
 import 'package:flutter/foundation.dart';
+import 'package:yoltec_mobile/models/receta.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
 import 'package:yoltec_mobile/services/offline_cache_service.dart';
 
 class RecetaService extends ChangeNotifier {
-  List<Map<String, dynamic>> _recetas = [];
+  List<Receta> _recetas = [];
   bool _isLoading = false;
   String? _error;
   bool _isOffline = false;
 
-  List<Map<String, dynamic>> get recetas => _recetas;
+  List<Receta> get recetas => _recetas;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isOffline => _isOffline;
@@ -21,7 +22,9 @@ class RecetaService extends ChangeNotifier {
     try {
       final data = await ApiService.get('/recetas', token: token);
       final lista = data['recetas'] as List<dynamic>? ?? [];
-      _recetas = lista.cast<Map<String, dynamic>>();
+      _recetas = lista
+          .map((e) => Receta.fromJson(e as Map<String, dynamic>))
+          .toList();
       _isOffline = false;
       await OfflineCacheService.guardar('recetas', data);
     } on ApiException catch (e) {
@@ -30,7 +33,9 @@ class RecetaService extends ChangeNotifier {
       final cached = await OfflineCacheService.cargar('recetas');
       if (cached != null) {
         final lista = cached['recetas'] as List<dynamic>? ?? [];
-        _recetas = lista.cast<Map<String, dynamic>>();
+        _recetas = lista
+            .map((e) => Receta.fromJson(e as Map<String, dynamic>))
+            .toList();
         _isOffline = true;
       } else {
         _error = 'Sin conexión y sin datos guardados.';
@@ -56,7 +61,7 @@ class RecetaService extends ChangeNotifier {
       }, token: token);
       final nueva = data['receta'] as Map<String, dynamic>?;
       if (nueva != null) {
-        _recetas.insert(0, nueva);
+        _recetas.insert(0, Receta.fromJson(nueva));
         notifyListeners();
       }
       return true;

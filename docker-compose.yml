@@ -14,8 +14,6 @@ services:
       - ./backend/.env.docker
     environment:
       - IA_SERVICE_URL=http://ia:5000
-    volumes:
-      - sqlite_data:/var/www/html/database
     networks:
       - yoltec-net
     depends_on:
@@ -58,5 +56,3 @@ networks:
   yoltec-net:
     driver: bridge
 
-volumes:
-  sqlite_data:

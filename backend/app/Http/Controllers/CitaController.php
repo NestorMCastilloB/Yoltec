@@ -10,48 +10,16 @@ use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Controlador para gestionar citas
  */
 class CitaController extends Controller
 {
-    /**
-     * Marcar automáticamente como "no asistió" las citas programadas
-     * cuya fecha y hora ya pasaron.
-     *
-     * Se ejecuta máximo una vez cada 5 minutos (cache-throttle) para evitar
-     * hacer un UPDATE en cada petición GET y no degradar el rendimiento.
-     */
-    private function autoCancelPastAppointments(): void
-    {
-        $cacheKey = 'auto_cancel_past_appointments_last_run';
-
-        if (Cache::has($cacheKey)) {
-            return; // Ya se ejecutó hace menos de 5 minutos
-        }
-
-        $now = Carbon::now();
-
-        Cita::where('estatus', 'programada')
-            ->where(function ($query) use ($now) {
-                $query->where('fecha_cita', '<', $now->toDateString())
-                    ->orWhere(function ($sub) use ($now) {
-                        $sub->where('fecha_cita', $now->toDateString())
-                            ->where('hora_cita', '<=', $now->format('H:i'));
-                    });
-            })
-            ->update(['estatus' => 'no_asistio']);
-
-        Cache::put($cacheKey, true, now()->addMinutes(5));
-    }
-
     // Listar citas
     public function index(Request $request)
     {
-        // Antes de devolver las citas, actualizar estatus de las que ya pasaron
-        $this->autoCancelPastAppointments();
-
         $user = $request->user();
 
         if ($user->esAlumno()) {
@@ -72,9 +40,6 @@ class CitaController extends Controller
 
     public function availability(Request $request)
     {
-        // Asegurar que citas pasadas ya no cuenten como "programadas" para la disponibilidad
-        $this->autoCancelPastAppointments();
-
         $request->validate([
             'month' => 'nullable|integer|min:1|max:12',
             'year' => 'nullable|integer|min:2000|max:2100',
@@ -177,32 +142,41 @@ class CitaController extends Controller
             ], 422);
         }
 
-        $slotOcupado = Cita::where('fecha_cita', $validated['fecha_cita'])
-            ->where('hora_cita', $validated['hora_cita'])
-            ->where('estatus', 'programada')
-            ->exists();
+        $user = $request->user();
 
-        if ($slotOcupado) {
+        // Usar transacción con lockForUpdate para prevenir double-booking
+        $cita = DB::transaction(function () use ($validated, $user, $request) {
+            $slotOcupado = Cita::where('fecha_cita', $validated['fecha_cita'])
+                ->where('hora_cita', $validated['hora_cita'])
+                ->where('estatus', 'programada')
+                ->lockForUpdate()
+                ->exists();
+
+            if ($slotOcupado) {
+                return null;
+            }
+
+            // Generar clave única
+            $validated['clave_cita'] = Cita::generarClaveCita();
+            if ($user->esAlumno()) {
+                $validated['alumno_id'] = $user->id;
+            } elseif ($request->filled('numero_control')) {
+                $alumno = User::where('numero_control', $request->numero_control)->firstOrFail();
+                $validated['alumno_id'] = $alumno->id;
+            } else {
+                $validated['alumno_id'] = $request->alumno_id;
+            }
+            $validated['estatus'] = 'programada';
+
+            return Cita::create($validated);
+        });
+
+        if (!$cita) {
             return response()->json([
                 'message' => 'El horario seleccionado ya no está disponible. Elige otra hora.',
             ], 422);
         }
 
-        $user = $request->user();
-
-        // Generar clave única
-        $validated['clave_cita'] = Cita::generarClaveCita();
-        if ($user->esAlumno()) {
-            $validated['alumno_id'] = $user->id;
-        } elseif ($request->filled('numero_control')) {
-            $alumno = User::where('numero_control', $request->numero_control)->firstOrFail();
-            $validated['alumno_id'] = $alumno->id;
-        } else {
-            $validated['alumno_id'] = $request->alumno_id;
-        }
-        $validated['estatus'] = 'programada';
-
-        $cita = Cita::create($validated);
         $cita->load(['alumno', 'doctor']);
 
         // Notificación push al alumno

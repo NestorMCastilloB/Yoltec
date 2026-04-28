@@ -67,7 +67,9 @@ class PreEvaluacionService extends ChangeNotifier {
           .where((p) => p['estatus_validacion'] != 'pendiente')
           .toList();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Error cargando historial pre-evaluaciones: $e');
+    }
   }
 
   Future<Map<String, dynamic>?> buscarPreEvaluacionDeCita(

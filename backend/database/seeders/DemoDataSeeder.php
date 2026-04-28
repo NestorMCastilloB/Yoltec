@@ -118,7 +118,7 @@ class DemoDataSeeder extends Seeder
                     'apellido' => $datos['apellido'],
                     'email'    => strtolower($datos['nombre'] . '.' . $datos['apellido']) . '@demo.edu',
                     'password' => Hash::make($datos['nip']),
-                    'nip'      => $datos['nip'],   // NIP se guarda en texto plano (varchar 6)
+                    'nip'      => Hash::make($datos['nip']),
                     'tipo'     => 'alumno',
                 ]
             );

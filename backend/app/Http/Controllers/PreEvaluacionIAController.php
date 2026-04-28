@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PreEvaluacionIA;
 use App\Models\Cita;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -234,7 +235,7 @@ class PreEvaluacionIAController extends Controller
         try {
             $iaUrl = getenv('IA_SERVICE_URL') ?: env('IA_SERVICE_URL', 'https://yoltec-production.up.railway.app');
 
-            $response = Http::timeout(120)->post("{$iaUrl}/chat", [
+            $response = Http::timeout(20)->post("{$iaUrl}/chat", [
                 'messages' => $request->messages,
             ]);
 

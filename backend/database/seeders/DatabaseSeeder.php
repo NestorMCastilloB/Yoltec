@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
                 'tipo' => 'alumno',
                 'telefono' => '4441111111',
                 'fecha_nacimiento' => '2004-03-02',
-                'nip' => '740270',
+                'nip' => Hash::make('740270'),
             ]
         );
 
@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
                 'tipo' => 'alumno',
                 'telefono' => '4442222222',
                 'fecha_nacimiento' => '2004-08-20',
-                'nip' => '123456',
+                'nip' => Hash::make('123456'),
             ]
         );
 
@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
                 'tipo' => 'alumno',
                 'telefono' => '4443333333',
                 'fecha_nacimiento' => '2004-03-10',
-                'nip' => '789012',
+                'nip' => Hash::make('789012'),
             ]
         );
     }

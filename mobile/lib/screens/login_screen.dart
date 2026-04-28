@@ -178,8 +178,9 @@ class _LoginScreenState extends State<LoginScreen>
           children: [
             // Encabezado
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: 32, horizontal: 24),
+              padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.height < 700 ? 16 : 32,
+                  horizontal: 24),
               child: Column(
                 children: [
                   Container(
@@ -188,13 +189,13 @@ class _LoginScreenState extends State<LoginScreen>
                       color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.local_hospital,
-                      size: 52,
+                      size: MediaQuery.of(context).size.height < 700 ? 36 : 52,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   const Text(
                     'Yoltec',
                     style: TextStyle(
@@ -294,8 +295,11 @@ class _LoginScreenState extends State<LoginScreen>
                             ],
 
                             // Contenido de tabs
-                            SizedBox(
-                              height: 280,
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: MediaQuery.of(context).size.height * 0.35,
+                                minHeight: 200,
+                              ),
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [

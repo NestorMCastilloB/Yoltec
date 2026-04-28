@@ -37,7 +37,7 @@ class AuthController extends Controller
         // Buscar usuario según tipo
         if ($tipoUsuario === 'alumno') {
             $user = User::where('numero_control', $identificador)->where('tipo', 'alumno')->first();
-            if (!$user || $user->nip !== $password) {
+            if (!$user || !Hash::check($password, $user->nip)) {
                 throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
             }
         } elseif ($tipoUsuario === 'admin') {

@@ -39,6 +39,8 @@ class Cita {
     return horaCita;
   }
 
+  bool get isNoAsistio => estatus == 'no_asistio';
+
   String get estatusTexto {
     switch (estatus) {
       case 'programada':
@@ -47,6 +49,8 @@ class Cita {
         return 'Atendida';
       case 'cancelada':
         return 'Cancelada';
+      case 'no_asistio':
+        return 'No asistió';
       default:
         return estatus;
     }

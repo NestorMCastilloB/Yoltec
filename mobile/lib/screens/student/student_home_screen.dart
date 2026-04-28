@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/models/cita.dart';
 import 'package:yoltec_mobile/models/bitacora.dart';
+import 'package:yoltec_mobile/models/receta.dart';
 import 'package:yoltec_mobile/screens/pre_evaluacion_screen.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
@@ -884,16 +885,11 @@ class _RecetasTab extends StatelessWidget {
 }
 
 class _RecetaCard extends StatelessWidget {
-  final Map<String, dynamic> receta;
+  final Receta receta;
   const _RecetaCard({required this.receta});
 
   @override
   Widget build(BuildContext context) {
-    final medicamentos =
-        receta['medicamentos'] as List<dynamic>? ?? [];
-    final fechaCreacion =
-        receta['fecha_receta'] as String? ?? receta['created_at'] as String? ?? '';
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -907,24 +903,24 @@ class _RecetaCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Receta ${receta['id'] ?? ''}',
+                    'Receta ${receta.id}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
                 Text(
-                  _formatFecha(fechaCreacion),
+                  receta.fechaFormateada,
                   style: const TextStyle(
                       color: AppTheme.gray600, fontSize: 12),
                 ),
               ],
             ),
-            if (receta['diagnostico'] != null) ...[
+            if (receta.indicaciones.isNotEmpty) ...[
               const SizedBox(height: 8),
               _InfoRow(
-                  label: 'Diagnostico',
-                  value: receta['diagnostico'].toString()),
+                  label: 'Indicaciones',
+                  value: receta.indicaciones),
             ],
-            if (medicamentos.isNotEmpty) ...[
+            if (receta.medicamentos.isNotEmpty) ...[
               const Divider(height: 16),
               const Text(
                 'Medicamentos:',
@@ -932,46 +928,32 @@ class _RecetaCard extends StatelessWidget {
                     fontWeight: FontWeight.w600, fontSize: 13),
               ),
               const SizedBox(height: 6),
-              ...medicamentos.map((m) {
-                if (m is Map) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.medication_outlined,
-                            size: 14, color: AppTheme.primaryColor),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            '${m['nombre'] ?? m['medicamento'] ?? 'Medicamento'}'
-                            '${m['dosis'] != null ? ' - ${m['dosis']}' : ''}'
-                            '${m['indicaciones'] != null ? '\n${m['indicaciones']}' : ''}',
-                            style: const TextStyle(fontSize: 13),
-                          ),
+              ...receta.medicamentos.map((m) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.medication_outlined,
+                          size: 14, color: AppTheme.primaryColor),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '${m.nombre}'
+                          '${m.dosis.isNotEmpty ? ' - ${m.dosis}' : ''}'
+                          '${m.frecuencia.isNotEmpty ? '\n${m.frecuencia}' : ''}',
+                          style: const TextStyle(fontSize: 13),
                         ),
-                      ],
-                    ),
-                  );
-                }
-                return Text(m.toString(),
-                    style: const TextStyle(fontSize: 13));
+                      ),
+                    ],
+                  ),
+                );
               }),
             ],
           ],
         ),
       ),
     );
-  }
-
-  String _formatFecha(String fecha) {
-    if (fecha.length >= 10) {
-      final parts = fecha.substring(0, 10).split('-');
-      if (parts.length == 3) {
-        return '${parts[2]}/${parts[1]}/${parts[0]}';
-      }
-    }
-    return fecha;
   }
 }
 
@@ -1911,8 +1893,8 @@ class _CampoInfo extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 140,
+          Expanded(
+            flex: 2,
             child: Text(
               label,
               style: const TextStyle(
@@ -1923,6 +1905,7 @@ class _CampoInfo extends StatelessWidget {
             ),
           ),
           Expanded(
+            flex: 3,
             child: Text(
               valor.isEmpty ? '—' : valor,
               style: const TextStyle(

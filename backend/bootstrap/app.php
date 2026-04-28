@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         // Notificar alumnos con cita en las próximas 24h — corre cada hora
         $schedule->command('citas:notificar-proximas')->hourly();
+
+        // Marcar como "no asistió" las citas programadas que ya pasaron — cada 5 min
+        $schedule->command('citas:auto-cancelar-pasadas')->everyFiveMinutes();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Para rutas API, retornar siempre JSON en lugar de páginas HTML

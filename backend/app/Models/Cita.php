@@ -58,7 +58,7 @@ class Cita extends Model
     public static function generarClaveCita()
     {
         do {
-            $clave = 'CITA-' . date('Ymd') . '-' . strtoupper(substr(md5(time() . rand()), 0, 6));
+            $clave = 'CITA-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
         } while (self::where('clave_cita', $clave)->exists());
 
         return $clave;

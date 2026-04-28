@@ -11,6 +11,6 @@ COPY app.py train_model_light.py enfermedades_config.json ./
 # Entrenar modelo ligero durante el build
 RUN python train_model_light.py
 
-EXPOSE 8080
+EXPOSE 5000
 
 CMD ["python", "app.py"]

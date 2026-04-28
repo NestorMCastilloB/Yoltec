@@ -48,7 +48,7 @@ class AdminController extends Controller
             'nombre'          => $data['nombre'],
             'apellido'        => $data['apellido'],
             'email'           => $data['email'],
-            'nip'             => $data['nip'],
+            'nip'             => Hash::make($data['nip']),
             'password'        => Hash::make($data['nip']),
             'tipo'            => 'alumno',
             'telefono'        => $data['telefono'] ?? null,
@@ -81,7 +81,7 @@ class AdminController extends Controller
         $alumno->telefono        = $data['telefono'] ?? $alumno->telefono;
         $alumno->fecha_nacimiento = $data['fecha_nacimiento'] ?? $alumno->fecha_nacimiento;
         if (!empty($data['nip'])) {
-            $alumno->nip      = $data['nip'];
+            $alumno->nip      = Hash::make($data['nip']);
             $alumno->password = Hash::make($data['nip']);
         }
         $alumno->save();

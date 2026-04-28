@@ -5,8 +5,8 @@ FROM php:8.4-fpm-alpine
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apk add --no-cache \
-    bash git curl libpq-dev sqlite-dev \
-  && docker-php-ext-install pdo pdo_pgsql pdo_sqlite
+    bash git curl libpq-dev \
+  && docker-php-ext-install pdo pdo_pgsql
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
