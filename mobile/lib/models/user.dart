@@ -19,6 +19,7 @@ class User {
 
   bool get esAlumno => tipo == 'alumno';
   bool get esDoctor => tipo == 'doctor';
+  bool get esAdmin => tipo == 'admin';
   String get nombreCompleto => '$nombre $apellido';
 
   factory User.fromJson(Map<String, dynamic> json) {

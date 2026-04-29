@@ -86,7 +86,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   return Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    color: const Color(0xFFF57F17),
+                    color: AppTheme.warning,
                     child: const Row(
                       children: [
                         Icon(Icons.wifi_off, color: Colors.white, size: 16),

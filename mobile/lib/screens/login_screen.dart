@@ -221,9 +221,9 @@ class _LoginScreenState extends State<LoginScreen>
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppTheme.gray50,
-                  borderRadius: BorderRadius.vertical(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(28),
                   ),
                 ),
@@ -268,10 +268,10 @@ class _LoginScreenState extends State<LoginScreen>
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFFEBEE),
+                                  color: Theme.of(context).colorScheme.errorContainer,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: const Color(0xFFEF9A9A),
+                                    color: Theme.of(context).colorScheme.error.withValues(alpha: 0.4),
                                   ),
                                 ),
                                 child: Row(

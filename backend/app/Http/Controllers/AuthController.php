@@ -19,6 +19,8 @@ class AuthController extends Controller
 {
     const CODE_DURATION = 10;
     const DEVICE_TRUST_DAYS = 30;
+    const MAX_LOGIN_ATTEMPTS = 5;
+    const LOCKOUT_MINUTES = 15;
 
     public function login(Request $request)
     {
@@ -34,23 +36,39 @@ class AuthController extends Controller
         $identificador = $request->identificador;
         $password      = $request->password;
 
+        // Verificar bloqueo temporal por intentos fallidos
+        $lockKey = "login_lockout_{$tipoUsuario}_{$identificador}";
+        $attemptsKey = "login_attempts_{$tipoUsuario}_{$identificador}";
+
+        if (Cache::has($lockKey)) {
+            $minutosRestantes = (int) ceil(Cache::get($lockKey, 0) / 60);
+            return response()->json([
+                'message' => "Cuenta bloqueada temporalmente por demasiados intentos fallidos. Intenta de nuevo en {$minutosRestantes} minuto(s).",
+                'locked' => true,
+                'retry_after' => $minutosRestantes,
+            ], 429);
+        }
+
         // Buscar usuario según tipo
         if ($tipoUsuario === 'alumno') {
             $user = User::where('numero_control', $identificador)->where('tipo', 'alumno')->first();
             if (!$user || !Hash::check($password, $user->nip)) {
-                throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
+                return $this->handleFailedLogin($attemptsKey, $lockKey);
             }
         } elseif ($tipoUsuario === 'admin') {
             $user = User::where('username', $identificador)->where('tipo', 'admin')->first();
             if (!$user || !Hash::check($password, $user->password)) {
-                throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
+                return $this->handleFailedLogin($attemptsKey, $lockKey);
             }
         } else {
             $user = User::where('username', $identificador)->where('tipo', 'doctor')->first();
             if (!$user || !Hash::check($password, $user->password)) {
-                throw ValidationException::withMessages(['identificador' => ['Las credenciales son incorrectas.']]);
+                return $this->handleFailedLogin($attemptsKey, $lockKey);
             }
         }
+
+        // Login exitoso: limpiar intentos fallidos
+        Cache::forget($attemptsKey);
 
         $recordarPor = $request->input('recordar_por', 1440); // minutos, default 1 día
 
@@ -238,6 +256,36 @@ class AuthController extends Controller
         $maskedDomain = substr($domainParts[0], 0, 1) . str_repeat('*', max(0, strlen($domainParts[0]) - 1));
 
         return $maskedName . '@' . $maskedDomain . '.' . ($domainParts[1] ?? 'com');
+    }
+
+    private function handleFailedLogin(string $attemptsKey, string $lockKey)
+    {
+        $attempts = Cache::get($attemptsKey, 0) + 1;
+        Cache::put($attemptsKey, $attempts, self::LOCKOUT_MINUTES * 60);
+
+        if ($attempts >= self::MAX_LOGIN_ATTEMPTS) {
+            $lockSeconds = self::LOCKOUT_MINUTES * 60;
+            Cache::put($lockKey, $lockSeconds, $lockSeconds);
+            Cache::forget($attemptsKey);
+
+            \Log::warning('Cuenta bloqueada por intentos fallidos', [
+                'ip' => request()->ip(),
+                'attempts' => $attempts,
+            ]);
+
+            return response()->json([
+                'message' => 'Cuenta bloqueada temporalmente por demasiados intentos fallidos. Intenta de nuevo en ' . self::LOCKOUT_MINUTES . ' minuto(s).',
+                'locked' => true,
+                'retry_after' => self::LOCKOUT_MINUTES,
+            ], 429);
+        }
+
+        $restantes = self::MAX_LOGIN_ATTEMPTS - $attempts;
+
+        return response()->json([
+            'message' => "Las credenciales son incorrectas. Te quedan {$restantes} intento(s) antes del bloqueo temporal.",
+            'attempts_remaining' => $restantes,
+        ], 422);
     }
 
     private function logFailed2FA(User $user, string $code): void

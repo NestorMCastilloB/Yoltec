@@ -171,11 +171,11 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
         if (_errorMsg != null)
           Container(
             width: double.infinity,
-            color: const Color(0xFFFFEBEE),
+            color: Theme.of(context).colorScheme.errorContainer,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               '⚠️ $_errorMsg',
-              style: const TextStyle(color: Color(0xFFC62828), fontSize: 13),
+              style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontSize: 13),
             ),
           ),
 
@@ -202,7 +202,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isUser ? AppTheme.primaryColor : Colors.white,
+                color: isUser ? AppTheme.primaryColor : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
                   topRight: const Radius.circular(18),
@@ -248,7 +248,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(18),
                 topRight: Radius.circular(18),
@@ -279,8 +279,8 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: AppTheme.gray200)),
+        color: Theme.of(context).cardColor,
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: SafeArea(
         top: false,
