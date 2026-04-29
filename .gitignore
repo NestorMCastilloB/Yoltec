@@ -32,6 +32,7 @@ mobile/android/local.properties
 mobile/android/app/debug/
 mobile/android/app/profile/
 mobile/android/app/release/
+mobile/android/app/google-services.json
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 
