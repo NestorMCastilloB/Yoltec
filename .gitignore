@@ -45,6 +45,15 @@ mobile/.flutter-plugins-dependencies
 IA/model.pkl
 IA/label_encoder.pkl
 IA/*.pkl
+.vscode/
+
+# ─── Railway (migrado a Render) ──────────────────
+IA/railway.toml
+backend/railway.toml
+
+# ─── Flutter generados ───────────────────────────
+mobile/.dart_tool/
+mobile/.flutter-plugins-dependencies
 
 # ─── Documentos binarios (usar .md en su lugar) ─────
 docs/*.pdf
@@ -63,3 +72,11 @@ CLAUDE.md
 backend/.env.docker
 Iniciar/
 releases/*.apk
+
+# ─── Scripts y archivos obsoletos ─────────────────
+start-yoltec.bat
+stop-yoltec.bat
+scripts/
+logs/
+Untitled-*.png
+docs/presentacion-pentesting.md

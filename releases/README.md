@@ -2,13 +2,13 @@
 
 ## APK actual
 
-`yoltec-v1.0.apk` — generado el 2026-04-12, apunta a Railway (producción).
+`yoltec-v1.0.apk` — apunta a producción (Render).
 
-El archivo `.apk` está excluido de git por su tamaño (50MB). Para compartirlo:
+El archivo `.apk` está excluido de git por su tamaño (~50MB). Para compartirlo:
 
 ### Opción 1 — Enviar el archivo directamente
 
-El APK ya está generado en esta carpeta. Compártelo por WhatsApp, Drive o USB.
+Compártelo por WhatsApp, Drive o USB.
 
 ### Opción 2 — GitHub Releases (recomendado)
 
@@ -25,8 +25,7 @@ Esto publica el APK en: https://github.com/elnemito001/Yoltec/releases
 ```bash
 cd mobile
 flutter build apk --release
-# El APK queda en: mobile/build/app/outputs/apk/release/app-release.apk
-cp mobile/build/app/outputs/apk/release/app-release.apk releases/yoltec-v1.0.apk
+cp build/app/outputs/flutter-apk/app-release.apk ../releases/yoltec-v1.0.apk
 ```
 
 ## Credenciales para probar
@@ -35,3 +34,4 @@ cp mobile/build/app/outputs/apk/release/app-release.apk releases/yoltec-v1.0.apk
 |-----|---------|-----------|
 | Alumno | `22690495` | NIP: `740270` |
 | Doctor | `doctorOmar` | `doctor123` |
+| Doctor 2 | `doctorCarlos` | `doctor123` |
