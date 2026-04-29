@@ -164,8 +164,8 @@ flutter run
 | Servicio | URL |
 |----------|-----|
 | Frontend | https://frontend-nu-weld-77.vercel.app |
-| Backend | https://lucid-motivation-production.up.railway.app |
-| IA | https://yoltec-production.up.railway.app |
+| Backend | https://yoltec-backend.onrender.com |
+| IA | https://yoltec-ia.onrender.com |
 
 ---
 

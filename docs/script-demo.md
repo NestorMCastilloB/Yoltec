@@ -116,7 +116,7 @@ Tener el APK instalado en el dispositivo: `releases/yoltec-v1.0.apk`
 - IA real: Groq (LLM gratuito) + scikit-learn para diagnóstico
 - App móvil funcional con modo offline y dark mode
 - Notificaciones push (FCM) al agendar/cancelar citas
-- Despliegue en producción: Vercel (Angular) + Railway (Laravel + Python)
+- Despliegue en producción: Vercel (Angular) + Render (Laravel + Python)
 - Base de datos en Neon PostgreSQL (cloud)
 - No se guardan PDFs — todo en pantalla
 
@@ -127,5 +127,5 @@ Tener el APK instalado en el dispositivo: `releases/yoltec-v1.0.apk`
 | Servicio | URL |
 |----------|-----|
 | Frontend | https://yoltec.vercel.app |
-| Backend API | https://lucid-motivation-production.up.railway.app |
-| IA | https://yoltec-production.up.railway.app |
+| Backend API | https://yoltec-backend.onrender.com |
+| IA | https://yoltec-ia.onrender.com |

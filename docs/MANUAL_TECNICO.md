@@ -169,7 +169,7 @@ No usan `enum` ni constraints `foreignKey` estrictas para compatibilidad con Neo
 ## 6. API REST – Endpoints
 
 Base URL local: `http://localhost:8000/api`
-Base URL producción: `https://lucid-motivation-production.up.railway.app/api`
+Base URL producción: `https://yoltec-backend.onrender.com/api`
 
 Todas las rutas protegidas requieren el header:
 ```
@@ -438,7 +438,7 @@ Archivo: `mobile/lib/services/api_service.dart`
 static const String baseUrl = 'http://192.168.X.X:8000';
 
 // Producción (APK release)
-static const String baseUrl = 'https://lucid-motivation-production.up.railway.app';
+static const String baseUrl = 'https://yoltec-backend.onrender.com';
 ```
 
 > El `AndroidManifest.xml` tiene `usesCleartextTraffic="true"` para permitir HTTP en desarrollo.
@@ -561,16 +561,16 @@ flutter build apk --release
 | Servicio | URL |
 |----------|-----|
 | Frontend | https://frontend-nu-weld-77.vercel.app |
-| Backend | https://lucid-motivation-production.up.railway.app |
-| IA | https://yoltec-production.up.railway.app |
+| Backend | https://yoltec-backend.onrender.com |
+| IA | https://yoltec-ia.onrender.com |
 
 ### 13.2. Plataformas
 
 - **Frontend:** Vercel (deploy automático desde `main`)
-- **Backend:** Railway (Root Directory: `/backend`)
-- **IA:** Railway (Root Directory: `/IA`, regenera `model.pkl` en cada build)
+- **Backend:** Render (Root Directory: `/backend`)
+- **IA:** Render (Root Directory: `/IA`, regenera `model.pkl` en cada build)
 
-### 13.3. Variables críticas en Railway
+### 13.3. Variables críticas en Render
 
 - `APP_ENV=production` (activa 2FA para doctores)
 - `GROQ_API_KEY=<key>` (en el servicio IA)
@@ -590,7 +590,7 @@ flutter build apk --release
 | Hashing | Bcrypt 12 rounds |
 | CORS | `CorsMiddleware` en Laravel |
 | Roles | Verificación por `tipo` en cada controlador |
-| HTTPS | Forzado en producción (Railway + Vercel) |
+| HTTPS | Forzado en producción (Render + Vercel) |
 | Archivos sensibles | `.env`, `firebase-adminsdk.json`, `google-services.json` en `.gitignore` |
 
 ---

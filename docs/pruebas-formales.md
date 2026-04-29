@@ -23,9 +23,9 @@ Cubre los módulos principales del sistema:
 
 | Elemento | Valor |
 |----------|-------|
-| Backend | http://localhost:8000 (local) / https://lucid-motivation-production.up.railway.app (prod) |
+| Backend | http://localhost:8000 (local) / https://yoltec-backend.onrender.com (prod) |
 | Frontend | http://localhost:4200 (local) / https://yoltec.vercel.app (prod) |
-| IA | http://localhost:5000 (local) / https://yoltec-production.up.railway.app (prod) |
+| IA | http://localhost:5000 (local) / https://yoltec-ia.onrender.com (prod) |
 | DB | Neon PostgreSQL (compartida) |
 
 ### Credenciales de prueba
@@ -159,7 +159,7 @@ Cubre los módulos principales del sistema:
 |----|--------|-------------|-----------|---------|
 | DEF-01 | Seguridad | NIP del alumno estaba expuesto en respuestas JSON de `/api/perfil` | Alta | ✅ Corregido — agregado a `$hidden` en User.php |
 | DEF-02 | Rendimiento | `autoCancelPastAppointments()` ejecutaba UPDATE en BD en cada GET /citas | Media | ✅ Corregido — cache throttle de 5 minutos |
-| DEF-03 | Seguridad | Rate limiting de login no funcionaba en producción (Railway) | Alta | ✅ Corregido — `CACHE_STORE=database` en docker-entrypoint.sh |
+| DEF-03 | Seguridad | Rate limiting de login no funcionaba en producción (Render) | Alta | ✅ Corregido — `CACHE_STORE=database` en docker-entrypoint.sh |
 
 ---
 

@@ -184,8 +184,8 @@ Yoltec/
 | Servicio | URL |
 |----------|-----|
 | Frontend (Vercel) | https://frontend-nu-weld-77.vercel.app |
-| Backend (Railway) | https://lucid-motivation-production.up.railway.app |
-| IA (Railway) | https://yoltec-production.up.railway.app |
+| Backend (Render) | https://yoltec-backend.onrender.com |
+| IA (Render) | https://yoltec-ia.onrender.com |
 
 ---
 

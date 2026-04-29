@@ -35,7 +35,7 @@ cd Yoltec
 |----------|----------|-----|
 | **GitHub** | Acceso al repo | https://github.com — pedirle a Nestor que te agregue al repo |
 | **Neon** (PostgreSQL cloud) | Base de datos producción | https://neon.tech — Nestor te comparte acceso |
-| **Railway** | Hosting backend + IA | https://railway.app — Nestor te agrega al proyecto |
+| **Render** | Hosting backend + IA | https://render.com — Nestor te agrega al proyecto |
 | **Vercel** | Hosting frontend | https://vercel.com — Nestor te agrega al proyecto |
 | **Groq** | API de IA (gratis) | https://console.groq.com — crear cuenta, generar API key gratuita |
 | **Resend** | Envío de emails | https://resend.com — Nestor te comparte la API key o creas una cuenta |
@@ -202,8 +202,8 @@ docker compose up -d
 | Servicio | URL |
 |----------|-----|
 | Frontend (Vercel) | https://frontend-nu-weld-77.vercel.app |
-| Backend (Railway) | https://lucid-motivation-production.up.railway.app |
-| IA (Railway) | https://yoltec-production.up.railway.app |
+| Backend (Render) | https://yoltec-backend.onrender.com |
+| IA (Render) | https://yoltec-ia.onrender.com |
 
 ---
 
@@ -224,7 +224,7 @@ docker compose up -d
 11. **Recuperación de contraseña** — flujo `/forgot-password` + `/reset-password?token=`, email con Resend
 12. **Búsqueda en citas** — client-side por nombre/número de control/motivo
 13. **App móvil Flutter** — login, citas, IA chat, bitácora, pre-evaluaciones, recetas, agendar por doctor
-14. **APK release** — apuntando a Railway producción
+14. **APK release** — apuntando a Render producción
 
 ---
 
@@ -262,7 +262,7 @@ docker compose up -d
 - **DB compartida**: todos usan la misma Neon (dev + producción). Cuidado con `migrate:fresh`.
 - **Resend email en producción**: sin dominio verificado, solo puede enviar a `nespiolin05@gmail.com`. Para desarrollo se usa Gmail SMTP.
 - **Android cleartext**: el `AndroidManifest.xml` tiene `usesCleartextTraffic="true"` para permitir HTTP en desarrollo local.
-- **baseUrl móvil**: en `mobile/lib/services/api_service.dart`. En release apunta a Railway. Para desarrollo local cámbialo a `http://TU_IP:8000`.
+- **baseUrl móvil**: en `mobile/lib/services/api_service.dart`. En release apunta a Render. Para desarrollo local cámbialo a `http://TU_IP:8000`.
 
 ---
 

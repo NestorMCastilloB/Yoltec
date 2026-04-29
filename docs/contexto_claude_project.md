@@ -22,11 +22,11 @@ El **admin** gestiona usuarios y días especiales del calendario.
 
 | Capa | Tecnología | Hosting |
 |------|-----------|---------|
-| Backend | Laravel 12 (PHP) | Railway |
+| Backend | Laravel 12 (PHP) | Render |
 | Frontend web | Angular 20 (TypeScript) | Vercel |
 | App móvil | Flutter / Dart | APK en GitHub Releases |
 | Base de datos | PostgreSQL (Neon cloud) | Neon |
-| IA chat | Python 3 + FastAPI + Groq API | Railway |
+| IA chat | Python 3 + FastAPI + Groq API | Render |
 | IA diagnóstico | scikit-learn (HistGradientBoosting) | mismo servicio FastAPI |
 | Email | Gmail SMTP (dev) / Resend (prod) | — |
 | Push notifications | Firebase Cloud Messaging (FCM) | — |
@@ -40,8 +40,8 @@ El **admin** gestiona usuarios y días especiales del calendario.
 | Servicio | URL |
 |----------|-----|
 | Frontend (Vercel) | https://frontend-nu-weld-77.vercel.app |
-| Backend (Railway) | https://lucid-motivation-production.up.railway.app |
-| Microservicio IA (Railway) | https://yoltec-production.up.railway.app |
+| Backend (Render) | https://yoltec-backend.onrender.com |
+| Microservicio IA (Render) | https://yoltec-ia.onrender.com |
 
 ---
 
@@ -269,7 +269,7 @@ Disponible en web y móvil (Flutter).
 ### 10. App móvil Flutter
 - Login, citas, IA chat, bitácora, recetas, historial médico, agendar por doctor
 - APK release publicado en GitHub Releases v1.0
-- En release apunta a Railway (producción)
+- En release apunta a Render (producción)
 - Para dev local: cambiar `baseUrl` en `mobile/lib/services/api_service.dart`
 
 ### 11. Email y notificaciones
@@ -296,7 +296,7 @@ Disponible en web y móvil (Flutter).
 - `train_model.py` — usa dataset real (182MB CSV, 246k registros)
 - Algoritmo: `VotingClassifier` (RF + HGB + ExtraTrees)
 - Precisión esperada ~90-95% pero el path del CSV está mal en el script
-- El pkl sería demasiado grande para Railway sin Git LFS
+- El pkl sería demasiado grande para Render sin Git LFS
 
 ---
 
@@ -334,9 +334,9 @@ Disponible en web y móvil (Flutter).
 
 ## Errores conocidos / bugs en producción
 
-### IA falla en producción (Railway backend)
-**Problema:** La variable `IA_SERVICE_URL=http://localhost:5000` en el servicio backend de Railway apunta a localhost en lugar del servicio IA.
-**Fix:** Ir a Railway → servicio backend → Variables → cambiar `IA_SERVICE_URL` a `https://yoltec-production.up.railway.app`
+### IA falla en producción (Render backend)
+**Problema:** La variable `IA_SERVICE_URL=http://localhost:5000` en el servicio backend de Render apunta a localhost en lugar del servicio IA.
+**Fix:** Ir a Render → servicio backend → Variables → cambiar `IA_SERVICE_URL` a `https://yoltec-ia.onrender.com`
 **Estado:** Pendiente de aplicar.
 
 ### Resend — solo puede enviar a un correo
@@ -396,7 +396,7 @@ git push origin feature/nombre-feature
 ### backend/.env (variables importantes)
 
 ```
-APP_ENV=local                    # Cambia a production en Railway
+APP_ENV=local                    # Cambia a production en Render
 APP_URL=http://localhost:8000
 DB_CONNECTION=pgsql
 DB_HOST=ep-shy-dawn-amz6fidi.c-5.us-east-1.aws.neon.tech
@@ -405,7 +405,7 @@ DB_DATABASE=neondb
 DB_USERNAME=neondb_owner
 # DB_PASSWORD y credenciales sensibles: preguntar a Nestor
 DB_SSLMODE=require
-IA_SERVICE_URL=http://127.0.0.1:5000   # En prod Railway: URL del microservicio IA
+IA_SERVICE_URL=http://127.0.0.1:5000   # En prod Render: URL del microservicio IA
 FRONTEND_URL=http://localhost:4200
 ```
 
