@@ -3,23 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yoltec_mobile/models/user.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
-import 'package:yoltec_mobile/services/biometric_service.dart';
 import 'package:yoltec_mobile/services/notification_service.dart';
 
 class AuthService extends ChangeNotifier {
   String? _token;
   User? _currentUser;
   bool _isLoading = false;
-  bool _requiresBiometricUnlock = false;
 
   String? get token => _token;
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _token != null && _currentUser != null;
-
-  /// True cuando hay token guardado pero el acceso biométrico está activado y
-  /// el usuario aún no se ha autenticado con huella en esta sesión.
-  bool get requiresBiometricUnlock => _requiresBiometricUnlock;
 
   AuthService() {
     _loadStoredAuth();
@@ -32,23 +26,15 @@ class AuthService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString('user_data');
+      final storedToken = prefs.getString('auth_token');
 
-      final biometricEnabled = await BiometricService.isEnabled();
-      final secureToken = await BiometricService.getStoredToken();
-
-      if (secureToken != null && userJson != null) {
-        // Verificar que el token siga siendo valido con el backend
-        final tokenValid = await _verifyToken(secureToken);
+      if (storedToken != null && userJson != null) {
+        final tokenValid = await _verifyToken(storedToken);
         if (!tokenValid) {
-          await BiometricService.clearToken();
-          final prefs2 = await SharedPreferences.getInstance();
-          await prefs2.remove('user_data');
-        } else if (biometricEnabled) {
-          _requiresBiometricUnlock = true;
-          _currentUser = User.fromJson(
-              json.decode(userJson) as Map<String, dynamic>);
+          await prefs.remove('user_data');
+          await prefs.remove('auth_token');
         } else {
-          _token = secureToken;
+          _token = storedToken;
           _currentUser = User.fromJson(
               json.decode(userJson) as Map<String, dynamic>);
         }
@@ -56,7 +42,6 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _token = null;
       _currentUser = null;
-      _requiresBiometricUnlock = false;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -83,14 +68,11 @@ class AuthService extends ChangeNotifier {
         _token = data['token'] as String;
         _currentUser =
             User.fromJson(data['user'] as Map<String, dynamic>);
-        _requiresBiometricUnlock = false;
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(
             'user_data', json.encode(_currentUser!.toJson()));
-
-        // Guardar token en almacenamiento seguro
-        await BiometricService.storeToken(_token!);
+        await prefs.setString('auth_token', _token!);
 
         // Registrar token FCM en el backend
         final fcmToken = await NotificationService.getToken();
@@ -129,21 +111,6 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  /// Restaura la sesión tras autenticación biométrica exitosa.
-  Future<bool> loginWithBiometric() async {
-    try {
-      final secureToken = await BiometricService.getStoredToken();
-      if (secureToken == null) return false;
-
-      _token = secureToken;
-      _requiresBiometricUnlock = false;
-      notifyListeners();
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
   Future<bool> _verifyToken(String token) async {
     try {
       await ApiService.get('/user', token: token);
@@ -156,12 +123,10 @@ class AuthService extends ChangeNotifier {
   Future<void> logout() async {
     _token = null;
     _currentUser = null;
-    _requiresBiometricUnlock = false;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_data');
-
-    await BiometricService.clearToken();
+    await prefs.remove('auth_token');
 
     notifyListeners();
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
-import 'package:yoltec_mobile/services/biometric_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,36 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
   bool _obscureNip = true;
 
-  // Biometría
-  bool _showBiometricButton = false;
-  bool _biometricAvailable = false;
-
   final _formAlumnoKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _initBiometric();
-  }
-
-  Future<void> _initBiometric() async {
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final available = await BiometricService.isAvailable();
-    final enabled = await BiometricService.isEnabled();
-
-    if (!mounted) return;
-    setState(() {
-      _biometricAvailable = available;
-      // Mostrar botón si biometría activada Y hay sesión guardada pendiente
-      _showBiometricButton =
-          available && enabled && authService.requiresBiometricUnlock;
-    });
-
-    // Si hay sesión biométrica pendiente, lanzar el prompt automáticamente
-    if (_showBiometricButton) {
-      await _loginWithBiometric();
-    }
-  }
 
   Future<void> _login() async {
     if (!_formAlumnoKey.currentState!.validate()) return;
@@ -76,14 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (result['success'] == true) {
-      // Ofrecer activar biometría si está disponible y no estaba activa
-      if (_biometricAvailable) {
-        final enabled = await BiometricService.isEnabled();
-        if (!enabled && mounted) {
-          _ofrecerActivarBiometria();
-        }
-      }
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -93,54 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
-  }
-
-  Future<void> _loginWithBiometric() async {
-    final authenticated = await BiometricService.authenticate();
-    if (!authenticated || !mounted) return;
-
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final success = await authService.loginWithBiometric();
-
-    if (!success && mounted) {
-      setState(() {
-        _errorMessage = 'No se pudo restaurar la sesión. Inicia sesión manualmente.';
-        _showBiometricButton = false;
-      });
-    }
-  }
-
-  void _ofrecerActivarBiometria() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Acceso con huella'),
-        content: const Text(
-          '¿Deseas activar el acceso con huella dactilar para iniciar sesión más rápido?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Ahora no'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await BiometricService.setEnabled(true);
-              if (mounted) {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Acceso con huella activado'),
-                    backgroundColor: AppTheme.primaryColor,
-                  ),
-                );
-              }
-            },
-            child: const Text('Activar'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -270,22 +184,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : const Text('Iniciar Sesión'),
                               ),
                             ),
-
-                            // Botón biométrico
-                            if (_showBiometricButton) ...[
-                              const SizedBox(height: 16),
-                              OutlinedButton.icon(
-                                onPressed: _isLoading ? null : _loginWithBiometric,
-                                icon: const Icon(Icons.fingerprint, size: 22),
-                                label: const Text('Acceder con huella'),
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(double.infinity, 48),
-                                  side: BorderSide(
-                                      color: AppTheme.primaryColor),
-                                  foregroundColor: AppTheme.primaryColor,
-                                ),
-                              ),
-                            ],
 
                             const SizedBox(height: 20),
                             Text(
