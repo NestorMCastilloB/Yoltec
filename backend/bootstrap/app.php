@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(\Illuminate\Http\Middleware\HandleCors::class);
         
         $middleware->api(\Illuminate\Http\Middleware\HandleCors::class);
+
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+        ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Notificar alumnos con cita en las próximas 24h — corre cada hora

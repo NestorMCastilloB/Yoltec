@@ -9,19 +9,10 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    private function checkAdmin(Request $request)
-    {
-        $user = $request->user();
-        if (!$user || $user->tipo !== 'admin') {
-            abort(403, 'No autorizado');
-        }
-    }
-
     // ===== ALUMNOS =====
 
     public function indexAlumnos(Request $request)
     {
-        $this->checkAdmin($request);
         $alumnos = User::where('tipo', 'alumno')
             ->select('id', 'numero_control', 'nombre', 'apellido', 'email', 'telefono', 'fecha_nacimiento', 'created_at')
             ->orderBy('apellido')
@@ -31,8 +22,6 @@ class AdminController extends Controller
 
     public function storeAlumno(Request $request)
     {
-        $this->checkAdmin($request);
-
         $data = $request->validate([
             'numero_control'  => 'required|string|unique:users,numero_control',
             'nombre'          => 'required|string|max:100',
@@ -60,8 +49,6 @@ class AdminController extends Controller
 
     public function updateAlumno(Request $request, $id)
     {
-        $this->checkAdmin($request);
-
         $alumno = User::where('tipo', 'alumno')->findOrFail($id);
 
         $data = $request->validate([
@@ -91,7 +78,6 @@ class AdminController extends Controller
 
     public function destroyAlumno(Request $request, $id)
     {
-        $this->checkAdmin($request);
         $alumno = User::where('tipo', 'alumno')->findOrFail($id);
         $alumno->delete();
         return response()->json(['message' => 'Alumno eliminado correctamente']);
@@ -101,7 +87,6 @@ class AdminController extends Controller
 
     public function indexDoctores(Request $request)
     {
-        $this->checkAdmin($request);
         $doctores = User::where('tipo', 'doctor')
             ->select('id', 'username', 'nombre', 'apellido', 'email', 'telefono', 'created_at')
             ->orderBy('apellido')
@@ -111,8 +96,6 @@ class AdminController extends Controller
 
     public function storeDoctor(Request $request)
     {
-        $this->checkAdmin($request);
-
         $data = $request->validate([
             'username' => ['required', 'string', Rule::unique('users', 'username')->where('tipo', 'doctor')],
             'nombre'   => 'required|string|max:100',
@@ -137,8 +120,6 @@ class AdminController extends Controller
 
     public function updateDoctor(Request $request, $id)
     {
-        $this->checkAdmin($request);
-
         $doctor = User::where('tipo', 'doctor')->findOrFail($id);
 
         $data = $request->validate([
@@ -165,7 +146,6 @@ class AdminController extends Controller
 
     public function destroyDoctor(Request $request, $id)
     {
-        $this->checkAdmin($request);
         $doctor = User::where('tipo', 'doctor')->findOrFail($id);
         $doctor->delete();
         return response()->json(['message' => 'Doctor eliminado correctamente']);

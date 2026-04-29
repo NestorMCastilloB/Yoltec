@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/estadisticas', [EstadisticasController::class, 'index']);
 
     // Admin - CRUD alumnos y doctores
-    Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/calendario',        [CalendarioAdminController::class, 'index']);
         Route::post('/calendario',       [CalendarioAdminController::class, 'store']);
         Route::delete('/calendario/{id}', [CalendarioAdminController::class, 'destroy']);
