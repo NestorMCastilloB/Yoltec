@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Producción: Railway
+  // Producción: Render
   // Para desarrollo local con celular físico (WiFi), cambiar a: http://192.168.1.73:8000/api
-  static const String baseUrl = 'https://lucid-motivation-production.up.railway.app/api';
+  static const String baseUrl = 'https://yoltec-backend.onrender.com/api';
 
   static Map<String, String> _headers({String? token}) {
     final headers = <String, String>{

@@ -37,7 +37,7 @@ app.add_middleware(
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "https://frontend-nu-weld-77.vercel.app",
-        "https://lucid-motivation-production.up.railway.app",
+        "https://yoltec-backend.onrender.com",
     ],
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept"],
