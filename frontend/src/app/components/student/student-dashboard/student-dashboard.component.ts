@@ -118,6 +118,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   sesiones: SesionActiva[] = [];
   isLoadingSesiones = false;
   sesionMsg: string | null = null;
+  mostrarTodasSesiones = false;
 
   private destroy$ = new Subject<void>();
 
@@ -256,6 +257,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       .subscribe(res => { this.sesiones = res.sesiones; });
   }
 
+  get sesionesVisibles(): SesionActiva[] {
+    return this.mostrarTodasSesiones ? this.sesiones : this.sesiones.slice(0, 5);
+  }
+
   revocarSesion(id: number): void {
     this.sesionMsg = null;
     this.perfilMedicoService.revocarSesion(id)
@@ -266,6 +271,25 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           this.sesionMsg = 'Sesión cerrada correctamente.';
         }
       });
+  }
+
+  revocarTodasSesiones(): void {
+    this.sesionMsg = null;
+    const otras = this.sesiones.filter(s => !s.es_actual);
+    let cerradas = 0;
+    otras.forEach(s => {
+      this.perfilMedicoService.revocarSesion(s.id)
+        .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+        .subscribe(res => {
+          cerradas++;
+          if (res !== null) {
+            this.sesiones = this.sesiones.filter(x => x.id !== s.id);
+          }
+          if (cerradas === otras.length) {
+            this.sesionMsg = `${cerradas} sesiones cerradas.`;
+          }
+        });
+    });
   }
 
   loadHistorial(): void {

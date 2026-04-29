@@ -51,12 +51,14 @@ export class AuthInterceptor implements HttpInterceptor {
 
   // Agregar el token a la solicitud
   private addTokenToRequest(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
-    return request.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      'Accept': 'application/json'
+    };
+    // No fijar Content-Type en uploads de archivos (FormData) — el navegador lo pone automáticamente con el boundary
+    if (!(request.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+    return request.clone({ setHeaders: headers });
   }
 }

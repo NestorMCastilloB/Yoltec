@@ -509,8 +509,11 @@
             <div *ngIf="sesionMsg" class="form-msg success">{{ sesionMsg }}</div>
             <div *ngIf="isLoadingSesiones" class="loading">Cargando sesiones...</div>
             <div *ngIf="!isLoadingSesiones && sesiones.length === 0" class="empty-state-small">No hay sesiones activas.</div>
+            <div *ngIf="!isLoadingSesiones && sesiones.length > 1" style="margin-bottom: 0.5rem; text-align: right;">
+              <button class="btn-danger-sm" (click)="revocarTodasSesiones()">Cerrar todas las demás</button>
+            </div>
             <ul *ngIf="!isLoadingSesiones && sesiones.length > 0" class="sesiones-lista">
-              <li *ngFor="let s of sesiones" class="sesion-item">
+              <li *ngFor="let s of sesionesVisibles" class="sesion-item">
                 <div class="sesion-info">
                   <span class="sesion-nombre">{{ s.nombre }}</span>
                   <span *ngIf="s.es_actual" class="sesion-badge">Sesión actual</span>
@@ -521,6 +524,12 @@
                 <button *ngIf="!s.es_actual" class="btn-danger-sm" (click)="revocarSesion(s.id)">Cerrar</button>
               </li>
             </ul>
+            <button *ngIf="sesiones.length > 5 && !mostrarTodasSesiones" class="btn-link" (click)="mostrarTodasSesiones = true">
+              Ver todas ({{ sesiones.length }})
+            </button>
+            <button *ngIf="mostrarTodasSesiones && sesiones.length > 5" class="btn-link" (click)="mostrarTodasSesiones = false">
+              Mostrar menos
+            </button>
           </div>
         </div>
       </div>
