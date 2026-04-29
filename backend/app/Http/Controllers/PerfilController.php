@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class PerfilController extends Controller
 
@@ -39,7 +38,7 @@ class PerfilController extends Controller
         ], 200);
     }
 
-    // Subir foto de perfil
+    // Subir foto de perfil (almacenada como base64 en BD)
     public function subirFoto(Request $request)
     {
         $request->validate([
@@ -48,17 +47,15 @@ class PerfilController extends Controller
 
         $user = $request->user();
 
-        // Eliminar foto anterior si existe
-        if ($user->foto_perfil) {
-            Storage::disk('public')->delete($user->foto_perfil);
-        }
+        $file = $request->file('foto');
+        $ext = $file->getClientOriginalExtension();
+        $base64 = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
 
-        $path = $request->file('foto')->store('fotos-perfil', 'public');
-        $user->update(['foto_perfil' => $path]);
+        $user->update(['foto_perfil' => $base64]);
 
         return response()->json([
             'message' => 'Foto actualizada.',
-            'foto_url' => asset('storage/' . $path),
+            'foto_url' => $base64,
         ]);
     }
 
