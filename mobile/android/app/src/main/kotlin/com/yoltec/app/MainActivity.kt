@@ -1,4 +1,4 @@
-package com.example.yoltec_mobile
+package com.yoltec.app
 
 import io.flutter.embedding.android.FlutterActivity
 

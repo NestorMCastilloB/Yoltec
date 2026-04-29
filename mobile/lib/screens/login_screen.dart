@@ -11,37 +11,24 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _LoginScreenState extends State<LoginScreen> {
   // Controladores estudiante
   final _numeroControlCtrl = TextEditingController();
   final _nipCtrl = TextEditingController();
 
-  // Controladores doctor
-  final _usuarioCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscureNip = true;
-  bool _obscurePassword = true;
 
   // Biometría
   bool _showBiometricButton = false;
   bool _biometricAvailable = false;
 
   final _formAlumnoKey = GlobalKey<FormState>();
-  final _formDoctorKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() => _errorMessage = null);
-    });
     _initBiometric();
   }
 
@@ -65,10 +52,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _login() async {
-    final esAlumno = _tabController.index == 0;
-    final formKey = esAlumno ? _formAlumnoKey : _formDoctorKey;
-
-    if (!formKey.currentState!.validate()) return;
+    if (!_formAlumnoKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -77,9 +61,9 @@ class _LoginScreenState extends State<LoginScreen>
 
     final authService = Provider.of<AuthService>(context, listen: false);
     final result = await authService.login(
-      esAlumno ? _numeroControlCtrl.text.trim() : _usuarioCtrl.text.trim(),
-      esAlumno ? _nipCtrl.text : _passwordCtrl.text,
-      esAlumno ? 'alumno' : 'doctor',
+      _numeroControlCtrl.text.trim(),
+      _nipCtrl.text,
+      'alumno',
     );
 
     if (!mounted) return;
@@ -161,11 +145,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    _tabController.dispose();
     _numeroControlCtrl.dispose();
     _nipCtrl.dispose();
-    _usuarioCtrl.dispose();
-    _passwordCtrl.dispose();
     super.dispose();
   }
 
@@ -229,35 +210,9 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
                 child: Column(
                   children: [
-                    // Tabs
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                      decoration: BoxDecoration(
-                        color: AppTheme.gray200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        indicator: BoxDecoration(
-                          color: AppTheme.primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        labelColor: Colors.white,
-                        unselectedLabelColor: AppTheme.gray600,
-                        dividerColor: Colors.transparent,
-                        labelStyle: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                        tabs: const [
-                          Tab(text: 'Estudiante'),
-                          Tab(text: 'Doctor'),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 20),
 
-                    // Formularios
+                    // Formulario
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
@@ -294,20 +249,7 @@ class _LoginScreenState extends State<LoginScreen>
                               const SizedBox(height: 16),
                             ],
 
-                            // Contenido de tabs
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxHeight: MediaQuery.of(context).size.height * 0.35,
-                                minHeight: 200,
-                              ),
-                              child: TabBarView(
-                                controller: _tabController,
-                                children: [
-                                  _buildAlumnoForm(),
-                                  _buildDoctorForm(),
-                                ],
-                              ),
-                            ),
+                            _buildAlumnoForm(),
 
                             const SizedBox(height: 20),
 
@@ -417,51 +359,4 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildDoctorForm() {
-    return Form(
-      key: _formDoctorKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _usuarioCtrl,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Usuario',
-              hintText: 'Nombre de usuario',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
-            validator: (v) {
-              if (v == null || v.isEmpty) {
-                return 'Ingresa tu usuario';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordCtrl,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Contraseña',
-              hintText: 'Tu contraseña',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(_obscurePassword
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
-            ),
-            validator: (v) {
-              if (v == null || v.isEmpty) {
-                return 'Ingresa tu contraseña';
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }

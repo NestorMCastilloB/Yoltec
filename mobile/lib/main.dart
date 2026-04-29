@@ -14,8 +14,12 @@ import 'package:yoltec_mobile/utils/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await NotificationService.initialize();
+  try {
+    await Firebase.initializeApp();
+    await NotificationService.initialize();
+  } catch (_) {
+    // Firebase/FCM no disponible — la app funciona sin push notifications
+  }
   runApp(const YoltecApp());
 }
 
