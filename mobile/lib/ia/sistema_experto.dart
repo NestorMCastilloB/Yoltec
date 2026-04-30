@@ -1,6 +1,6 @@
-/// Sistema Experto Médico - Yoltec IA
-/// Basado en reglas médicas predefinidas
-/// Funciona 100% offline sin APIs externas
+// Sistema Experto Médico - Yoltec IA
+// Basado en reglas médicas predefinidas
+// Funciona 100% offline sin APIs externas
 
 class Sintoma {
   final String id;
@@ -324,7 +324,6 @@ class SistemaExpertoMedico {
     double probabilidad = diagnostico.probabilidadBase;
     
     // Síntomas coincidentes
-    int sintomasCoincidentes = 0;
     double pesoTotal = 0;
     double pesoCoincidente = 0;
 
@@ -332,9 +331,8 @@ class SistemaExpertoMedico {
       var sintoma = _sintomas[sintomaId];
       if (sintoma != null) {
         pesoTotal += sintoma.peso;
-        
+
         if (sintomasIds.contains(sintomaId)) {
-          sintomasCoincidentes++;
           pesoCoincidente += sintoma.peso;
         }
       }

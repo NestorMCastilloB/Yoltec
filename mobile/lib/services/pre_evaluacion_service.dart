@@ -5,7 +5,7 @@ class PreEvaluacionService extends ChangeNotifier {
   List<Map<String, dynamic>> _preguntas = [];
   List<Map<String, dynamic>> _pendientes = [];
   List<Map<String, dynamic>> _historial = [];
-  Map<int, Map<String, dynamic>> _porCita = {};
+  final Map<int, Map<String, dynamic>> _porCita = {};
   bool _isLoading = false;
   String? _error;
 

@@ -18,7 +18,6 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isChatLoading = false;
-  bool _chatFinished = false;
   Map<String, dynamic>? _resultado;
   String? _errorMsg;
 
@@ -101,7 +100,6 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
             .add({'role': 'assistant', 'content': response['message'] ?? ''});
 
         if (response['finished'] == true && response['diagnostico'] != null) {
-          _chatFinished = true;
           _resultado = response['diagnostico'] as Map<String, dynamic>;
         }
       });
@@ -211,7 +209,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.07),
+                    color: Colors.black.withValues(alpha: 0.07),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   )
@@ -257,7 +255,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.07),
+                    color: Colors.black.withValues(alpha: 0.07),
                     blurRadius: 4,
                     offset: const Offset(0, 1))
               ],
@@ -294,7 +292,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
                 onSubmitted: (_) => _enviarMensaje(),
                 decoration: InputDecoration(
                   hintText: 'Escribe tu respuesta...',
-                  hintStyle: TextStyle(color: AppTheme.gray400),
+                  hintStyle: const TextStyle(color: AppTheme.gray400),
                   filled: true,
                   fillColor: AppTheme.gray100,
                   contentPadding: const EdgeInsets.symmetric(
@@ -382,26 +380,28 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
+            const Center(
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
+                  DecoratedBox(
+                    decoration: BoxDecoration(
                       color: AppTheme.primarySurface,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check_circle_outline,
-                        color: AppTheme.primaryColor, size: 60),
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Icon(Icons.check_circle_outline,
+                          color: AppTheme.primaryColor, size: 60),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  const Text('Pre-evaluación completada',
+                  SizedBox(height: 12),
+                  Text('Pre-evaluación completada',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.gray900)),
-                  const SizedBox(height: 6),
-                  const Text(
+                  SizedBox(height: 6),
+                  Text(
                     'El médico revisará tu evaluación antes de la consulta.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppTheme.gray600),
@@ -461,7 +461,7 @@ class _PreEvaluacionScreenState extends State<PreEvaluacionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: const [
+                      const Row(children: [
                         Icon(Icons.list_alt,
                             color: AppTheme.info, size: 20),
                         SizedBox(width: 8),
@@ -591,7 +591,7 @@ class _TypingDotState extends State<_TypingDot>
         height: 8,
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
-          color: AppTheme.gray400.withOpacity(_anim.value),
+          color: AppTheme.gray400.withValues(alpha: _anim.value),
           shape: BoxShape.circle,
         ),
       ),

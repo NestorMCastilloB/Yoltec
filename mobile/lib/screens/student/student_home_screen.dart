@@ -238,15 +238,15 @@ class _InicioTab extends StatelessWidget {
   }
 
   Widget _buildSinCita(BuildContext context) {
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            const Icon(Icons.event_available,
+            Icon(Icons.event_available,
                 size: 40, color: AppTheme.gray400),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               'Sin citas proximas',
               style: TextStyle(
                   color: AppTheme.gray600, fontWeight: FontWeight.w500),
@@ -1156,15 +1156,19 @@ class _PerfilTabState extends State<_PerfilTab> {
         });
       }
     } on ApiException catch (e) {
-      if (mounted) setState(() {
-        _error = e.message;
-        _cargando = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _cargando = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() {
-        _error = 'Error al cargar perfil';
-        _cargando = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Error al cargar perfil';
+          _cargando = false;
+        });
+      }
     }
   }
 
@@ -1175,7 +1179,7 @@ class _PerfilTabState extends State<_PerfilTab> {
       maxWidth: 800,
       imageQuality: 80,
     );
-    if (picked == null) return;
+    if (picked == null || !mounted) return;
 
     try {
       final token =
@@ -1532,7 +1536,7 @@ class _EditarInfoMedicaDialogState
             children: [
               // Tipo de sangre
               DropdownButtonFormField<String>(
-                value: _tiposSangre.contains(_tipoSangre)
+                initialValue: _tiposSangre.contains(_tipoSangre)
                     ? _tipoSangre
                     : '',
                 decoration: const InputDecoration(
@@ -2120,9 +2124,9 @@ class _CalendarioDisponibilidadState
           }),
         const SizedBox(height: 8),
         // Leyenda
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             _LeyendaItem(color: AppTheme.primaryColor, label: 'Disponible'),
             SizedBox(width: 12),
             _LeyendaItem(color: AppTheme.warning, label: 'Pocos slots'),

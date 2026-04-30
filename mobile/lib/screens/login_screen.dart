@@ -186,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
 
                             const SizedBox(height: 20),
-                            Text(
+                            const Text(
                               'Solo personal autorizado del Instituto Tecnologico',
                               textAlign: TextAlign.center,
                               style: TextStyle(

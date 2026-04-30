@@ -32,9 +32,9 @@ class ApiService {
 
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Sin conexión a internet. Verifica tu red.');
+      throw const ApiException('Sin conexión a internet. Verifica tu red.');
     } on HttpException {
-      throw ApiException('Error de servidor. Intenta más tarde.');
+      throw const ApiException('Error de servidor. Intenta más tarde.');
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Error inesperado: $e');
@@ -58,9 +58,9 @@ class ApiService {
 
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Sin conexión a internet. Verifica tu red.');
+      throw const ApiException('Sin conexión a internet. Verifica tu red.');
     } on HttpException {
-      throw ApiException('Error de servidor. Intenta más tarde.');
+      throw const ApiException('Error de servidor. Intenta más tarde.');
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Error inesperado: $e');
@@ -84,9 +84,9 @@ class ApiService {
 
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Sin conexión a internet. Verifica tu red.');
+      throw const ApiException('Sin conexión a internet. Verifica tu red.');
     } on HttpException {
-      throw ApiException('Error de servidor. Intenta más tarde.');
+      throw const ApiException('Error de servidor. Intenta más tarde.');
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Error inesperado: $e');
@@ -118,9 +118,9 @@ class ApiService {
       final response = await http.Response.fromStream(streamed);
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Sin conexión a internet. Verifica tu red.');
+      throw const ApiException('Sin conexión a internet. Verifica tu red.');
     } on HttpException {
-      throw ApiException('Error de servidor. Intenta más tarde.');
+      throw const ApiException('Error de servidor. Intenta más tarde.');
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Error inesperado: $e');
@@ -134,7 +134,7 @@ class ApiService {
     try {
       data = json.decode(body);
     } catch (_) {
-      throw ApiException('Respuesta inválida del servidor.');
+      throw const ApiException('Respuesta inválida del servidor.');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -158,7 +158,7 @@ class ApiService {
         }
         throw ApiException(message ?? 'Datos inválidos.');
       case 500:
-        throw ApiException('Error interno del servidor. Intenta más tarde.');
+        throw const ApiException('Error interno del servidor. Intenta más tarde.');
       default:
         throw ApiException(message ?? 'Error desconocido (${response.statusCode}).');
     }

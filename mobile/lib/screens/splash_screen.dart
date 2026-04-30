@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                 Text(
                   'Consultorio Médico',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.5,
@@ -111,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.7)),
+                        AlwaysStoppedAnimation<Color>(Colors.white.withValues(alpha: 0.7)),
                   ),
                 ),
               ],
