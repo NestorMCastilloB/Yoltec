@@ -25,7 +25,7 @@ Route::get('/health', function () {
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
 Route::middleware('throttle:5,10')->post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
-Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+Route::middleware('throttle:5,10')->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
 Route::post('/resend-2fa', [AuthController::class, 'resendTwoFactor']);
 

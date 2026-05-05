@@ -100,14 +100,14 @@ class AuthController extends Controller
 
         TwoFactorCode::create([
             'user_id'    => $user->id,
-            'code'       => $code,
+            'code'       => Hash::make($code),
             'expires_at' => Carbon::now()->addMinutes(self::CODE_DURATION),
             'used'       => false,
         ]);
 
         try {
             Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
-            \Log::info('Email 2FA enviado a: ' . $user->email);
+            \Log::info('Email 2FA enviado', ['user_id' => $user->id]);
         } catch (\Exception $e) {
             \Log::error('SMTP ERROR 2FA: ' . $e->getMessage());
             error_log('SMTP ERROR 2FA: ' . $e->getMessage());
@@ -133,11 +133,18 @@ class AuthController extends Controller
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
-        $twoFactorCode = TwoFactorCode::where('user_id', $user->id)
-            ->where('code', $request->code)
+        $twoFactorCode = null;
+        $pendingCodes = TwoFactorCode::where('user_id', $user->id)
             ->where('used', false)
             ->where('expires_at', '>', Carbon::now())
-            ->first();
+            ->get();
+
+        foreach ($pendingCodes as $pending) {
+            if (Hash::check($request->code, $pending->code)) {
+                $twoFactorCode = $pending;
+                break;
+            }
+        }
 
         if (!$twoFactorCode) {
             $this->logFailed2FA($user, $request->code);
@@ -195,7 +202,7 @@ class AuthController extends Controller
 
         TwoFactorCode::create([
             'user_id'    => $user->id,
-            'code'       => $code,
+            'code'       => Hash::make($code),
             'expires_at' => Carbon::now()->addMinutes(self::CODE_DURATION),
             'used'       => false,
         ]);
@@ -291,11 +298,8 @@ class AuthController extends Controller
     private function logFailed2FA(User $user, string $code): void
     {
         \Log::warning('2FA fallido', [
-            'user_id'       => $user->id,
-            'email'         => $user->email,
-            'code_attempted' => $code,
-            'ip'            => request()->ip(),
-            'timestamp'     => now(),
+            'user_id' => $user->id,
+            'ip'      => request()->ip(),
         ]);
     }
 }
