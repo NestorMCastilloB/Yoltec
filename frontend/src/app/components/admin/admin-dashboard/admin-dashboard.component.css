@@ -44,7 +44,7 @@
   font-size: var(--yol-fs-sm);
   font-family: var(--yol-font);
 }
-.logout-btn:hover { background: #9B1B1B; }
+.logout-btn:hover { background: var(--yol-danger); }
 
 .admin-nav {
   display: flex;
@@ -186,7 +186,7 @@
   font-family: var(--yol-font);
   transition: background var(--yol-duration-normal) var(--yol-ease);
 }
-.btn-delete:hover { background: #9B1B1B; }
+.btn-delete:hover { background: var(--yol-danger); }
 
 /* Modal */
 .modal-overlay {
@@ -254,7 +254,7 @@
   font-family: var(--yol-font);
   transition: background var(--yol-duration-normal) var(--yol-ease);
 }
-.btn-delete-confirm:hover { background: #9B1B1B; }
+.btn-delete-confirm:hover { background: var(--yol-danger); }
 
 .form-msg {
   padding: var(--yol-s-2) var(--yol-s-4);

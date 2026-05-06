@@ -52,18 +52,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   isSubmittingDoctor = false;
   doctorForm = { username: '', nombre: '', apellido: '', email: '', password: '', telefono: '' };
 
-  // Confirmacion de borrado
+  // Confirmación de borrado
   confirmDeleteId: number | null = null;
   confirmDeleteType: 'alumno' | 'doctor' | null = null;
 
   // Calendario
   readonly tipoLabels = TIPO_LABELS;
-  readonly weekDays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+  readonly weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   calCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   calWeeks: { date: string; label: number; isCurrentMonth: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
-  // Formulario de dia especial
+  // Formulario de día especial
   showDiaForm = false;
   diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
   diaMsg: string | null = null;
@@ -290,7 +290,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   openDiaForm(fecha?: string): void {
     this.diaMsg = null;
     this.diaForm = { fecha: fecha ?? '', tipo: 'holiday', etiqueta: '' };
-    // Si ya existe un dia especial en esa fecha, pre-carga los datos
+    // Si ya existe un día especial en esa fecha, pre-carga los datos
     if (fecha) {
       const existing = this.diasEspeciales.find(d => d.fecha === fecha);
       if (existing) {

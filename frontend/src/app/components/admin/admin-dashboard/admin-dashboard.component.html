@@ -1,10 +1,10 @@
 <div class="admin-dashboard">
   <header class="admin-header">
     <div class="header-content">
-      <h1>Panel de Administracion</h1>
+      <h1>Panel de Administración</h1>
       <div class="user-info">
         <span>{{ adminName }}</span>
-        <button class="logout-btn" (click)="logout()">Cerrar Sesion</button>
+        <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
     <nav class="admin-nav">
@@ -25,14 +25,14 @@
     <!-- ===== ALUMNOS ===== -->
     <section *ngIf="activeSection === 'alumnos'" class="content-section">
       <div class="section-header">
-        <h2>Gestion de Alumnos</h2>
+        <h2>Gestión de Alumnos</h2>
         <button class="btn-primary" (click)="openAlumnoForm()">+ Nuevo Alumno</button>
       </div>
 
       <div *ngIf="isLoadingAlumnos" class="loading">Cargando alumnos...</div>
       <div *ngIf="alumnosError" class="alert-error">{{ alumnosError }}</div>
 
-      <!-- Busqueda de alumnos (Y20I-102) -->
+      <!-- Búsqueda de alumnos (Y20I-102) -->
       <div *ngIf="!isLoadingAlumnos && !alumnosError && alumnos.length > 0" class="search-bar">
         <input type="text" [(ngModel)]="alumnosBusqueda" placeholder="Buscar por nombre, N° control o email..." class="search-input" />
       </div>
@@ -52,7 +52,7 @@
               <th>N° Control</th>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Telefono</th>
+              <th>Teléfono</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -80,12 +80,12 @@
           </div>
           <div class="form-grid">
             <div class="form-group">
-              <label>Numero de Control *</label>
+              <label>Número de Control *</label>
               <input type="text" [(ngModel)]="alumnoForm.numero_control" placeholder="Ej: 22690495">
             </div>
             <div class="form-group">
-              <label>NIP {{ editingAlumnoId ? '(dejar vacio para no cambiar)' : '*' }}</label>
-              <input type="text" [(ngModel)]="alumnoForm.nip" placeholder="6 digitos" maxlength="6">
+              <label>NIP {{ editingAlumnoId ? '(dejar vacío para no cambiar)' : '*' }}</label>
+              <input type="text" [(ngModel)]="alumnoForm.nip" placeholder="6 dígitos" maxlength="6">
             </div>
             <div class="form-group">
               <label>Nombre *</label>
@@ -100,7 +100,7 @@
               <input type="email" [(ngModel)]="alumnoForm.email">
             </div>
             <div class="form-group">
-              <label>Telefono</label>
+              <label>Teléfono</label>
               <input type="text" [(ngModel)]="alumnoForm.telefono">
             </div>
             <div class="form-group">
@@ -121,7 +121,7 @@
     <!-- ===== DOCTORES ===== -->
     <section *ngIf="activeSection === 'doctores'" class="content-section">
       <div class="section-header">
-        <h2>Gestion de Doctores</h2>
+        <h2>Gestión de Doctores</h2>
         <button class="btn-primary" (click)="openDoctorForm()">+ Nuevo Doctor</button>
       </div>
 
@@ -139,7 +139,7 @@
               <th>Usuario</th>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Telefono</th>
+              <th>Teléfono</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -171,7 +171,7 @@
               <input type="text" [(ngModel)]="doctorForm.username" placeholder="Ej: doctorGarcia">
             </div>
             <div class="form-group">
-              <label>Contrasena {{ editingDoctorId ? '(dejar vacio para no cambiar)' : '*' }}</label>
+              <label>Contraseña {{ editingDoctorId ? '(dejar vacío para no cambiar)' : '*' }}</label>
               <input type="password" [(ngModel)]="doctorForm.password">
             </div>
             <div class="form-group">
@@ -187,7 +187,7 @@
               <input type="email" [(ngModel)]="doctorForm.email">
             </div>
             <div class="form-group">
-              <label>Telefono</label>
+              <label>Teléfono</label>
               <input type="text" [(ngModel)]="doctorForm.telefono">
             </div>
           </div>
@@ -206,10 +206,10 @@
   <!-- ===== CALENDARIO ===== -->
   <section *ngIf="activeSection === 'calendario'" class="content-section">
     <div class="section-header">
-      <h2>Gestion de Calendario</h2>
-      <button class="btn-primary" (click)="openDiaForm()">+ Agregar dia especial</button>
+      <h2>Gestión de Calendario</h2>
+      <button class="btn-primary" (click)="openDiaForm()">+ Agregar día especial</button>
     </div>
-    <p class="cal-hint">Haz clic en cualquier dia para marcarlo como festivo, vacaciones o dia reducido. Los alumnos y doctores veran estos dias como no disponibles o con horario reducido.</p>
+    <p class="cal-hint">Haz clic en cualquier día para marcarlo como festivo, vacaciones o día reducido. Los alumnos y doctores verán estos días como no disponibles o con horario reducido.</p>
 
     <!-- Navegacion de mes -->
     <div class="cal-nav">
@@ -247,14 +247,14 @@
 
     <!-- Leyenda -->
     <div class="cal-legend">
-      <span class="leg-item holiday">Festivo / Inhabil</span>
+      <span class="leg-item holiday">Festivo / Inhábil</span>
       <span class="leg-item vacation">Vacaciones</span>
-      <span class="leg-item reduced">Dia reducido</span>
+      <span class="leg-item reduced">Día reducido</span>
     </div>
 
     <!-- Lista de dias especiales del mes -->
     <div class="dias-lista" *ngIf="diasEspeciales.length > 0">
-      <h3>Dias especiales este mes</h3>
+      <h3>Días especiales este mes</h3>
       <div class="dia-item" *ngFor="let dia of diasEspeciales">
         <span class="dia-fecha">{{ dia.fecha }}</span>
         <span class="dia-tipo" [ngClass]="dia.tipo">{{ tipoLabels[dia.tipo].label }}</span>
@@ -266,13 +266,13 @@
       </div>
     </div>
     <div *ngIf="diasEspeciales.length === 0 && !isLoadingCal" class="empty-state">
-      No hay dias especiales este mes.
+      No hay días especiales este mes.
     </div>
 
     <!-- Modal formulario dia especial -->
     <div class="modal-overlay" *ngIf="showDiaForm" (click)="closeDiaForm()">
       <div class="modal" (click)="$event.stopPropagation()">
-        <h3>Dia especial</h3>
+        <h3>Día especial</h3>
         <div *ngIf="diaMsg" class="form-msg success">{{ diaMsg }}</div>
         <div class="form-grid">
           <div class="form-group">
@@ -282,13 +282,13 @@
           <div class="form-group">
             <label>Tipo *</label>
             <select [(ngModel)]="diaForm.tipo" class="form-select">
-              <option value="holiday">Festivo / Inhabil</option>
+              <option value="holiday">Festivo / Inhábil</option>
               <option value="vacation">Vacaciones</option>
-              <option value="reduced">Dia reducido (horario parcial)</option>
+              <option value="reduced">Día reducido (horario parcial)</option>
             </select>
           </div>
           <div class="form-group" style="grid-column: 1/-1">
-            <label>Etiqueta (descripcion)</label>
+            <label>Etiqueta (descripción)</label>
             <input type="text" [(ngModel)]="diaForm.etiqueta" placeholder="Ej: Semana Santa, Puente, etc.">
           </div>
         </div>
@@ -305,8 +305,8 @@
   <!-- Modal confirmacion de borrado -->
   <div class="modal-overlay" *ngIf="confirmDeleteId !== null" (click)="cancelDelete()">
     <div class="modal modal-confirm" (click)="$event.stopPropagation()">
-      <h3>Confirmar eliminacion?</h3>
-      <p>Esta accion no se puede deshacer.</p>
+      <h3>¿Confirmar eliminación?</h3>
+      <p>Esta acción no se puede deshacer.</p>
       <div class="modal-actions">
         <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
         <button class="btn-delete-confirm" (click)="executeDelete()">Eliminar</button>
