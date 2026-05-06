@@ -93,23 +93,23 @@
 
 /* Colores específicos (independientes del tema para mantener identidad) */
 .estat-card.total::after {
-  background: #258a60;
+  background: var(--yol-primary);
 }
 
 .estat-card.atendida::after {
-  background: #9dad42;
+  background: var(--yol-accent);
 }
 
 .estat-card.cancelada::after {
-  background: #ef4444;
+  background: var(--yol-danger);
 }
 
 .estat-card.no-asistio::after {
-  background: #f59e0b;
+  background: var(--yol-warn);
 }
 
 .estat-card.tasa::after {
-  background: #006666;
+  background: var(--yol-primary-600);
 }
 
 .estat-card:hover {
@@ -134,43 +134,43 @@
 
 /* Colores en modo claro (por defecto) */
 .estat-card.total .estat-num {
-  color: #1c5560;
+  color: var(--yol-primary-600);
 }
 
 .estat-card.atendida .estat-num {
-  color: #258a60;
+  color: var(--yol-primary);
 }
 
 .estat-card.cancelada .estat-num {
-  color: #ef4444;
+  color: var(--yol-danger);
 }
 
 .estat-card.no-asistio .estat-num {
-  color: #f59e0b;
+  color: var(--yol-warn);
 }
 
 .estat-card.tasa .estat-num {
-  color: #006666;
+  color: var(--yol-primary-600);
 }
 
 .estat-card.total .estat-label {
-  color: #258a60;
+  color: var(--yol-primary);
 }
 
 .estat-card.atendida .estat-label {
-  color: #6b7e1e;
+  color: var(--yol-accent);
 }
 
 .estat-card.cancelada .estat-label {
-  color: #dc2626;
+  color: var(--yol-danger);
 }
 
 .estat-card.no-asistio .estat-label {
-  color: #d97706;
+  color: var(--yol-warn);
 }
 
 .estat-card.tasa .estat-label {
-  color: #006666;
+  color: var(--yol-primary-600);
 }
 
 /* ===== GRÁFICAS ===== */
@@ -236,60 +236,58 @@
 }
 
 .alert-error {
-  background: rgba(239, 68, 68, 0.06);
-  border-left: 4px solid var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.15);
-  border-left: 4px solid var(--danger);
+  background: var(--yol-cancel-surface);
+  border: 1px solid var(--yol-cancel-text);
+  border-left: 4px solid var(--yol-danger);
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  color: var(--danger);
+  color: var(--yol-danger);
   font-size: 0.88rem;
 }
 
 /* ===== MODO OSCURO: AJUSTES EN ESTADÍSTICAS ===== */
 body.dark-mode .estat-card {
-  background: linear-gradient(145deg, #1a1f0f, #12170a) padding-box,
-    linear-gradient(135deg, #2e3820, #5c6a2e) border-box;
+  background: var(--yol-surface);
 }
 
 body.dark-mode .estat-card.total .estat-num {
-  color: #7ab3c8;
+  color: var(--yol-ia);
 }
 
 body.dark-mode .estat-card.atendida .estat-num {
-  color: #86efac;
+  color: var(--yol-ok-text);
 }
 
 body.dark-mode .estat-card.cancelada .estat-num {
-  color: #fca5a5;
+  color: var(--yol-cancel-text);
 }
 
 body.dark-mode .estat-card.no-asistio .estat-num {
-  color: #fcd34d;
+  color: var(--yol-warn);
 }
 
 body.dark-mode .estat-card.tasa .estat-num {
-  color: #7ab3c8;
+  color: var(--yol-ia);
 }
 
 body.dark-mode .estat-card.total .estat-label {
-  color: #7ab3c8;
+  color: var(--yol-ia);
 }
 
 body.dark-mode .estat-card.atendida .estat-label {
-  color: #86efac;
+  color: var(--yol-ok-text);
 }
 
 body.dark-mode .estat-card.cancelada .estat-label {
-  color: #fca5a5;
+  color: var(--yol-cancel-text);
 }
 
 body.dark-mode .estat-card.no-asistio .estat-label {
-  color: #fcd34d;
+  color: var(--yol-warn);
 }
 
 body.dark-mode .estat-card.tasa .estat-label {
-  color: #7ab3c8;
+  color: var(--yol-ia);
 }
 
 /* ===== RESPONSIVE ===== */

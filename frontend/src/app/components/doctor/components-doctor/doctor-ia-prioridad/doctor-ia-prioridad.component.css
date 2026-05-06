@@ -105,39 +105,39 @@
 
 /* Colores específicos para cada prioridad (modo claro) */
 .prioridad-badge.alta {
-  background: linear-gradient(145deg, #fff5f5, #fee2e2) padding-box,
-    linear-gradient(135deg, #fca5a5, #ef4444) border-box;
+  background: var(--yol-cancel-surface);
+  border: 1.5px solid var(--yol-cancel-text);
 }
 
 .prioridad-badge.alta::after {
-  background: #ef4444;
+  background: var(--yol-danger);
 }
 
 .prioridad-badge.media {
-  background: linear-gradient(145deg, #fffbeb, #fef3c7) padding-box,
-    linear-gradient(135deg, #fcd34d, #f59e0b) border-box;
+  background: var(--yol-warn-surface);
+  border: 1.5px solid var(--yol-warn);
 }
 
 .prioridad-badge.media::after {
-  background: #f59e0b;
+  background: var(--yol-warn);
 }
 
 .prioridad-badge.baja {
-  background: linear-gradient(145deg, #eef7f2, #d8ede4) padding-box,
-    linear-gradient(135deg, #9dad42, #258a60) border-box;
+  background: var(--yol-ok-surface);
+  border: 1.5px solid var(--yol-accent);
 }
 
 .prioridad-badge.baja::after {
-  background: #258a60;
+  background: var(--yol-primary);
 }
 
 .prioridad-badge.total {
-  background: linear-gradient(145deg, #eef7fa, #d4eef5) padding-box,
-    linear-gradient(135deg, #258a60, #1c5560) border-box;
+  background: var(--yol-primary-50);
+  border: 1.5px solid var(--yol-primary-600);
 }
 
 .prioridad-badge.total::after {
-  background: #1c5560;
+  background: var(--yol-primary-600);
 }
 
 .prioridad-badge:hover {
@@ -152,19 +152,19 @@
 }
 
 .prioridad-badge.alta .badge-num {
-  color: #ef4444;
+  color: var(--yol-danger);
 }
 
 .prioridad-badge.media .badge-num {
-  color: #f59e0b;
+  color: var(--yol-warn);
 }
 
 .prioridad-badge.baja .badge-num {
-  color: #258a60;
+  color: var(--yol-primary);
 }
 
 .prioridad-badge.total .badge-num {
-  color: #1c5560;
+  color: var(--yol-primary-600);
 }
 
 .badge-label {
@@ -177,19 +177,19 @@
 }
 
 .prioridad-badge.alta .badge-label {
-  color: #dc2626;
+  color: var(--yol-danger);
 }
 
 .prioridad-badge.media .badge-label {
-  color: #d97706;
+  color: var(--yol-warn);
 }
 
 .prioridad-badge.baja .badge-label {
-  color: #258a60;
+  color: var(--yol-primary);
 }
 
 .prioridad-badge.total .badge-label {
-  color: #1c5560;
+  color: var(--yol-primary-600);
 }
 
 /* ===== LISTA DE CITAS POR PRIORIDAD ===== */
@@ -222,15 +222,15 @@
 }
 
 .cita-prioridad-card.prioridad-alta::before {
-  background: linear-gradient(180deg, #ef4444, #dc2626);
+  background: var(--yol-cancel-text);
 }
 
 .cita-prioridad-card.prioridad-media::before {
-  background: linear-gradient(180deg, #f59e0b, #d97706);
+  background: var(--yol-warn);
 }
 
 .cita-prioridad-card.prioridad-baja::before {
-  background: linear-gradient(180deg, #258a60, #1c5560);
+  background: var(--yol-primary);
 }
 
 .cita-prioridad-card:hover {
@@ -257,21 +257,21 @@
 }
 
 .tag-alta {
-  background: rgba(239, 68, 68, 0.12);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: var(--yol-cancel-surface);
+  color: var(--yol-danger);
+  border: 1px solid var(--yol-cancel-text);
 }
 
 .tag-media {
-  background: rgba(245, 158, 11, 0.12);
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: var(--yol-warn-surface);
+  color: var(--yol-warn);
+  border: 1px solid var(--yol-warn);
 }
 
 .tag-baja {
-  background: rgba(37, 138, 96, 0.12);
-  color: #258a60;
-  border: 1px solid rgba(37, 138, 96, 0.25);
+  background: var(--yol-ok-surface);
+  color: var(--yol-primary);
+  border: 1px solid var(--yol-accent);
 }
 
 .prioridad-score {
@@ -349,59 +349,51 @@
 }
 
 .alert-error {
-  background: rgba(239, 68, 68, 0.06);
-  border-left: 4px solid var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.15);
-  border-left: 4px solid var(--danger);
+  background: var(--yol-cancel-surface);
+  border: 1px solid var(--yol-cancel-text);
+  border-left: 4px solid var(--yol-danger);
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  color: var(--danger);
+  color: var(--yol-danger);
   font-size: 0.88rem;
 }
 
 /* ===== AJUSTES DE MODO OSCURO PARA BADGES DE PRIORIDAD ===== */
 body.dark-mode .prioridad-badge.alta {
-  background: linear-gradient(145deg, #2d1a1a, #1f0f0f) padding-box !important;
-  box-shadow: 0 3px 16px rgba(239, 68, 68, 0.2) !important;
+  background: var(--yol-cancel-surface);
 }
 
 body.dark-mode .prioridad-badge.media {
-  background: linear-gradient(145deg, #2b1f0f, #1f150a) padding-box,
-    linear-gradient(135deg, #f59e0b, #d97706) border-box;
-  box-shadow: 0 3px 16px rgba(245, 158, 11, 0.2);
+  background: var(--yol-warn-surface);
 }
 
 body.dark-mode .prioridad-badge.baja {
-  background: linear-gradient(145deg, #0f2a1a, #0a1f12) padding-box,
-    linear-gradient(135deg, #258a60, #1c5e44) border-box;
-  box-shadow: 0 3px 16px rgba(37, 138, 96, 0.2);
+  background: var(--yol-ok-surface);
 }
 
 body.dark-mode .prioridad-badge.total {
-  background: linear-gradient(145deg, #0f242a, #0a1a1f) padding-box,
-    linear-gradient(135deg, #1c5560, #0f3d45) border-box;
-  box-shadow: 0 3px 16px rgba(28, 85, 96, 0.2);
+  background: var(--yol-primary-50);
 }
 
 /* Ajuste de los números y etiquetas para que resalten */
 body.dark-mode .prioridad-badge.alta .badge-num,
 body.dark-mode .prioridad-badge.alta .badge-label {
-  color: #fca5a5;
+  color: var(--yol-cancel-text);
 }
 
 body.dark-mode .prioridad-badge.media .badge-num,
 body.dark-mode .prioridad-badge.media .badge-label {
-  color: #fcd34d;
+  color: var(--yol-warn);
 }
 
 body.dark-mode .prioridad-badge.baja .badge-num,
 body.dark-mode .prioridad-badge.baja .badge-label {
-  color: #86efac;
+  color: var(--yol-ok-text);
 }
 
 body.dark-mode .prioridad-badge.total .badge-num,
 body.dark-mode .prioridad-badge.total .badge-label {
-  color: #7ab3c8;
+  color: var(--yol-ia);
 }
 
 /* ===== FILTROS ===== */
@@ -434,15 +426,15 @@ body.dark-mode .prioridad-badge.total .badge-label {
 }
 
 .filtro-alta.activo {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: var(--yol-cancel-text);
 }
 
 .filtro-media.activo {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: var(--yol-warn);
 }
 
 .filtro-baja.activo {
-  background: linear-gradient(135deg, #258a60, #1c5560);
+  background: var(--yol-primary);
 }
 
 /* ===== EXPAND TOGGLE ===== */

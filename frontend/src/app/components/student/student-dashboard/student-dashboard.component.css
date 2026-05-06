@@ -260,8 +260,8 @@
 }
 
 .estatus.atendida {
-  background: #e3f2fd;
-  color: #0d47a1;
+  background: var(--yol-ia-soft);
+  color: var(--yol-ia-text);
 }
 
 .estatus.cancelada {
@@ -369,8 +369,8 @@
 }
 
 .receta-date {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--yol-ia-soft);
+  color: var(--yol-ia);
 }
 
 .bitacora-detail,
@@ -542,9 +542,9 @@
   vertical-align: middle;
 }
 
-.dot.available { background: #1e88e5; }
-.dot.partial { background: #ffb300; }
-.dot.full { background: #ef5350; }
+.dot.available { background: var(--yol-ia); }
+.dot.partial { background: var(--yol-warn); }
+.dot.full { background: var(--yol-cancel-text); }
 
 .calendar-weekdays,
 .calendar-grid {
@@ -842,7 +842,7 @@
 }
 
 .btn-ia-submit {
-  background: #6C47B8 !important;
+  background: var(--yol-ia) !important;
 }
 
 .btn-ia-submit:hover {
@@ -889,8 +889,8 @@
 }
 
 .confianza-muy-baja {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: var(--yol-ia-soft);
+  color: var(--yol-ia-text);
 }
 
 .diagnostico-principal {
@@ -927,8 +927,8 @@
 }
 
 .tag {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--yol-ia-soft);
+  color: var(--yol-ia);
   padding: 0.4rem 0.8rem;
   border-radius: var(--yol-r-pill);
   font-size: var(--yol-fs-sm);
@@ -953,14 +953,14 @@
 }
 
 .alert.info {
-  background: #e3f2fd;
-  border-left-color: #2196f3;
-  color: #0d47a1;
+  background: var(--yol-ia-soft);
+  border-left-color: var(--yol-ia);
+  color: var(--yol-ia-text);
 }
 
 /* Boton IA en citas */
 .btn-ia {
-  background: #6C47B8;
+  background: var(--yol-ia);
   color: var(--yol-surface);
   border: none;
   padding: 0.6rem 1.25rem;
@@ -1569,5 +1569,5 @@
 .sesion-badge { font-size: var(--yol-fs-label); background: var(--yol-ok-surface); color: var(--yol-ok-text); padding: 0.1rem 0.4rem; border-radius: var(--yol-r-sm); width: fit-content; }
 .sesion-detalle { font-size: var(--yol-fs-cap); color: var(--yol-text-subtle); }
 .btn-danger-sm { padding: 0.3rem 0.7rem; background: var(--yol-cancel-surface); color: var(--yol-cancel-text); border: none; border-radius: var(--yol-r); font-size: var(--yol-fs-cap); cursor: pointer; transition: background var(--yol-duration-normal); flex-shrink: 0; }
-.btn-danger-sm:hover { background: #fca5a5; }
+.btn-danger-sm:hover { background: var(--yol-cancel-surface); }
 .empty-state-small { font-size: var(--yol-fs-body); color: var(--yol-text-subtle); padding: 0.5rem 0; }
