@@ -98,8 +98,8 @@ export class AuthService implements OnDestroy {
 
   login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {
     const body: any = { identificador, password, tipo_usuario: tipoUsuario };
-    if (tipoUsuario === 'doctor') {
-      const deviceToken = localStorage.getItem('doctor_device_token');
+    if (tipoUsuario === 'doctor' || tipoUsuario === 'admin') {
+      const deviceToken = localStorage.getItem(`${tipoUsuario}_device_token`);
       if (deviceToken) body.device_token = deviceToken;
     }
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, body)

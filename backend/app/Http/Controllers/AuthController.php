@@ -72,12 +72,12 @@ class AuthController extends Controller
 
         $recordarPor = $request->input('recordar_por', 1440); // minutos, default 1 día
 
-        // Alumnos y admins: nunca requieren 2FA
-        if ($tipoUsuario === 'alumno' || $tipoUsuario === 'admin' || config('app.env') === 'local') {
+        // Alumnos: nunca requieren 2FA
+        if ($tipoUsuario === 'alumno' || config('app.env') === 'local') {
             return $this->successResponse($user, $recordarPor);
         }
 
-        // Doctores en producción: verificar dispositivo de confianza
+        // Doctores y admins en producción: verificar dispositivo de confianza
         $deviceToken = $request->device_token;
         if ($deviceToken) {
             $trusted = TrustedDevice::where('user_id', $user->id)

@@ -1,0 +1,29 @@
+<div class="admin-login-bg">
+  <div class="admin-login-card">
+    <div class="admin-login-head">
+      <div class="lock-icon">&#9919;</div>
+      <p>Acceso restringido</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #adminForm="ngForm">
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" [(ngModel)]="credentials.identificador" name="identificador"
+          placeholder="Identificador" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="credentials.password" name="password"
+            placeholder="Contraseña" required autocomplete="current-password">
+          <button type="button" class="eye" (click)="togglePassword()">&#9919;</button>
+        </div>
+      </div>
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Verificando...' : 'Iniciar sesión' }}
+      </button>
+    </form>
+  </div>
+</div>

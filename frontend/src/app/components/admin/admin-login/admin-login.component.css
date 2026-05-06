@@ -1,0 +1,130 @@
+/* ===== Admin Login — Minimal, no branding ===== */
+
+.admin-login-bg {
+  min-height: 100vh;
+  background: var(--yol-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: var(--yol-font);
+}
+
+.admin-login-card {
+  background: var(--yol-surface);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  box-shadow: var(--yol-shadow-sm);
+  padding: 32px;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* ---- Header (minimal) ---- */
+.admin-login-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.lock-icon {
+  font-size: 28px;
+  color: var(--yol-text-subtle);
+  margin-bottom: 8px;
+}
+.admin-login-head p {
+  font-size: var(--yol-fs-sm);
+  color: var(--yol-text-subtle);
+  font-weight: 500;
+}
+
+/* ---- Fields ---- */
+.field {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field label {
+  font-size: var(--yol-fs-label);
+  font-weight: 600;
+  color: var(--yol-text-muted);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.field input {
+  padding: 8px 11px;
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r);
+  font-size: 13.5px;
+  font-family: inherit;
+  background: var(--yol-surface);
+  color: var(--yol-text);
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus {
+  border-color: var(--yol-primary);
+  box-shadow: 0 0 0 3px rgba(27,107,69,.12);
+}
+.field input::placeholder {
+  color: var(--yol-text-subtle);
+}
+
+/* ---- Password ---- */
+.pass-wrap {
+  position: relative;
+}
+.pass-wrap input {
+  width: 100%;
+  padding-right: 36px;
+}
+.eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--yol-text-subtle);
+}
+
+/* ---- Button ---- */
+.login-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--yol-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--yol-r);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 4px;
+  transition: background .15s ease;
+}
+.login-btn:hover {
+  background: var(--yol-primary-600);
+}
+.login-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* ---- Error ---- */
+.error-message {
+  background: var(--yol-cancel-surface);
+  color: var(--yol-cancel-text);
+  padding: 8px 12px;
+  border-radius: var(--yol-r);
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  border-left: 3px solid var(--yol-cancel-text);
+}
+
+@media (max-width: 480px) {
+  .admin-login-card {
+    padding: 24px 20px;
+  }
+}
