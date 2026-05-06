@@ -58,15 +58,17 @@ export class Verify2faComponent implements OnInit, OnDestroy {
       next: (response) => {
         // Guardar device_token para los próximos 30 días
         if (response.device_token) {
-          localStorage.setItem('doctor_device_token', response.device_token);
+          localStorage.setItem(`${response.tipo}_device_token`, response.device_token);
         }
         // Guardar token y usuario
         localStorage.setItem('auth_token', response.token);
         localStorage.setItem('user_data', JSON.stringify(response.user));
         sessionStorage.removeItem('pending_2fa');
 
-        // Redirigir
-        if (response.tipo === 'doctor') {
+        // Redirigir según rol
+        if (response.tipo === 'admin') {
+          this.router.navigate(['/admin-dashboard']);
+        } else if (response.tipo === 'doctor') {
           this.router.navigate(['/doctor-dashboard']);
         } else {
           this.router.navigate(['/student-dashboard']);

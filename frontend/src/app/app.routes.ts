@@ -5,6 +5,7 @@ import { Verify2faComponent } from './components/login/verify-2fa/verify-2fa.com
 import { StudentDashboardComponent } from './components/student/student-dashboard/student-dashboard.component';
 import { DoctorDashboardComponent } from './components/doctor/doctor-dashboard/doctor-dashboard.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
+import { AdminLoginComponent } from './components/admin/admin-login/admin-login.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth.guard';
@@ -37,6 +38,10 @@ export const routes: Routes = [
   },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+  {
+    path: 'acceso-gestion',
+    component: AdminLoginComponent
+  },
   {
     path: 'admin-dashboard',
     component: AdminDashboardComponent,
