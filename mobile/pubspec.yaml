@@ -35,6 +35,9 @@ dependencies:
   # Selección de imágenes (foto de perfil)
   image_picker: ^1.0.7
 
+  # Fuente Inter (Design System Yoltec)
+  google_fonts: ^6.2.1
+
 
 dev_dependencies:
   flutter_test:
