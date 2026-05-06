@@ -1,78 +1,101 @@
 <div class="inicio-container">
-  <!-- Encabezado de bienvenida -->
-  <div class="welcome-header">
-    <h2>¡Hola, {{ doctorName }}! 👋</h2>
-    <p>Bienvenido a tu panel de control. Aquí tienes un resumen de tu actividad médica.</p>
-  </div>
-
-  <!-- Tarjetas de estadísticas (más grandes y espaciadas) -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">📅</div>
-      <div class="stat-content">
-        <h3>Citas del día</h3>
-        <p class="stat-value">{{ todayAppointments }}</p>
-        <span class="stat-detail">Programadas para hoy</span>
-      </div>
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi accent">
+      <span class="kpi-label">Citas hoy</span>
+      <span class="kpi-value">{{ todayAppointments }}</span>
+      <span class="kpi-detail">Programadas para hoy</span>
     </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">👥</div>
-      <div class="stat-content">
-        <h3>Pacientes atendidos</h3>
-        <p class="stat-value">{{ patientsAttended }}</p>
-        <span class="stat-detail">Historial reciente</span>
-      </div>
+    <div class="kpi">
+      <span class="kpi-label">Pacientes atendidos</span>
+      <span class="kpi-value">{{ patientsAttended }}</span>
+      <span class="kpi-detail">Historial reciente</span>
     </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">⏳</div>
-      <div class="stat-content">
-        <h3>Citas pendientes</h3>
-        <p class="stat-value">{{ pendingBitacoras }}</p>
-        <span class="stat-detail">Requieren atención</span>
-      </div>
+    <div class="kpi">
+      <span class="kpi-label">Citas pendientes</span>
+      <span class="kpi-value">{{ pendingBitacoras }}</span>
+      <span class="kpi-detail">Requieren atención</span>
     </div>
   </div>
 
-  <!-- Próxima cita (destacada) -->
-  <div class="proxima-cita-wrapper">
-    <div class="proxima-cita-card" *ngIf="proximaCita; else sinProxima">
-      <div class="proxima-header">
-        <span class="proxima-icon">📌</span>
-        <h3>Próxima cita</h3>
+  <!-- Contenido principal: tabla de citas + próxima cita -->
+  <div class="row2">
+    <!-- Citas del día -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Citas del día</h2>
+        <span class="meta">{{ todayFormatted }}</span>
       </div>
-      <div class="proxima-cita-info">
-        <div class="proxima-dato">
-          <span class="proxima-label">Paciente</span>
-          <span class="proxima-valor">{{ proximaCita.alumno?.nombre }} {{ proximaCita.alumno?.apellido }}</span>
-        </div>
-        <div class="proxima-dato">
-          <span class="proxima-label">Fecha</span>
-          <span class="proxima-valor">{{ proximaCita.fecha_cita }}</span>
-        </div>
-        <div class="proxima-dato">
-          <span class="proxima-label">Hora</span>
-          <span class="proxima-valor">{{ proximaCita.hora_cita }}</span>
-        </div>
-        <div class="proxima-dato">
-          <span class="proxima-label">Motivo</span>
-          <span class="proxima-valor">{{ proximaCita.motivo || 'No especificado' }}</span>
-        </div>
-        <div class="proxima-dato">
-          <span class="proxima-label">Clave de cita</span>
-          <span class="proxima-valor codigo">{{ proximaCita.clave_cita }}</span>
+      <div class="card-body">
+        <table *ngIf="todayCitas.length > 0">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Motivo</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cita of todayCitas">
+              <td class="hora">{{ cita.hora_cita }}</td>
+              <td>
+                <div class="who">
+                  <div class="av-sm">{{ getInitials(cita) }}</div>
+                  <b>{{ cita.alumno?.nombre }} {{ cita.alumno?.apellido }}</b>
+                </div>
+              </td>
+              <td class="motivo">{{ cita.motivo || 'Sin motivo' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'ok': cita.estatus === 'programada' || cita.estatus === 'atendida',
+                  'warn': cita.estatus === 'pendiente',
+                  'cancel': cita.estatus === 'cancelada' || cita.estatus === 'no_asistio'
+                }">{{ cita.estatus | titlecase }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="todayCitas.length === 0">
+          No hay citas programadas para hoy.
         </div>
       </div>
     </div>
-    <ng-template #sinProxima>
-      <div class="proxima-cita-card empty">
-        <div class="proxima-header">
-          <span class="proxima-icon">📭</span>
-          <h3>No hay citas próximas</h3>
-        </div>
-        <p>Las citas que programes aparecerán aquí.</p>
+
+    <!-- Próxima cita -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Próxima cita</h2>
       </div>
-    </ng-template>
+      <div class="card-body">
+        <div *ngIf="proximaCita; else sinProxima" class="next-appointment">
+          <div class="next-row">
+            <span class="next-label">Paciente</span>
+            <span class="next-value">{{ proximaCita.alumno?.nombre }} {{ proximaCita.alumno?.apellido }}</span>
+          </div>
+          <div class="next-row">
+            <span class="next-label">Fecha</span>
+            <span class="next-value">{{ proximaCita.fecha_cita }}</span>
+          </div>
+          <div class="next-row">
+            <span class="next-label">Hora</span>
+            <span class="next-value">{{ proximaCita.hora_cita }}</span>
+          </div>
+          <div class="next-row">
+            <span class="next-label">Motivo</span>
+            <span class="next-value">{{ proximaCita.motivo || 'No especificado' }}</span>
+          </div>
+          <div class="next-row">
+            <span class="next-label">Clave</span>
+            <span class="next-value mono">{{ proximaCita.clave_cita }}</span>
+          </div>
+        </div>
+        <ng-template #sinProxima>
+          <div class="empty-state">
+            No hay citas próximas.
+          </div>
+        </ng-template>
+      </div>
+    </div>
   </div>
 </div>

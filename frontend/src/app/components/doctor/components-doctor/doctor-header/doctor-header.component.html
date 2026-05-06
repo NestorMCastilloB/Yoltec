@@ -1,43 +1,47 @@
-<header class="dashboard-header">
-  <div class="header-content">
-    <div class="logo-area">
-      <img src="./logo.jpeg" alt="Logo Clínica" class="logo">
-      <h1>Consultorio Médico</h1>
-    </div>
-    <div class="user-info">
-      <span>Bienvenido, {{ doctorName }}</span>
-      <button class="theme-toggle-btn" (click)="toggleTheme()">
-        {{ isDarkMode ? '☀️' : '🌙' }}
-      </button>
-      <button class="logout-btn" (click)="logoutEvent.emit()">Cerrar Sesión</button>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">Y</div>
+    <span>Yoltec</span>
+  </div>
+  <nav>
+    <a [class.active]="activeSection === 'inicio'" (click)="sectionChange.emit('inicio')">
+      <span class="ico">▦</span>Panel
+    </a>
+    <a [class.active]="activeSection === 'citas'" (click)="sectionChange.emit('citas')">
+      <span class="ico">⊞</span>Citas
+    </a>
+    <a [class.active]="activeSection === 'bitacoras'" (click)="sectionChange.emit('bitacoras')">
+      <span class="ico">⚲</span>Bitácoras
+    </a>
+    <a [class.active]="activeSection === 'recetas'" (click)="sectionChange.emit('recetas')">
+      <span class="ico">℞</span>Recetas
+    </a>
+    <a [class.active]="activeSection === 'pre-evaluaciones'" (click)="sectionChange.emit('pre-evaluaciones')">
+      <span class="ico">◔</span>Pre-evaluaciones
+      <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
+    </a>
+    <a [class.active]="activeSection === 'ia-prioridad'" (click)="sectionChange.emit('ia-prioridad')">
+      <span class="ico">⚡</span>Prioridad IA
+    </a>
+    <a [class.active]="activeSection === 'estadisticas'" (click)="sectionChange.emit('estadisticas')">
+      <span class="ico">◔</span>Estadísticas
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="avatar">{{ initials }}</div>
+    <div>
+      <b>{{ doctorName }}</b>
+      <span>Médico general</span>
     </div>
   </div>
+</aside>
 
-  <nav class="dashboard-nav">
-    <button class="nav-button" [class.active]="activeSection === 'inicio'" (click)="sectionChange.emit('inicio')">
-      Inicio
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'citas'" (click)="sectionChange.emit('citas')">
-      Citas
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'bitacoras'" (click)="sectionChange.emit('bitacoras')">
-      Bitácoras
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'recetas'" (click)="sectionChange.emit('recetas')">
-      Recetas
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'pre-evaluaciones'"
-      (click)="sectionChange.emit('pre-evaluaciones')">
-      🤖 Pre-evaluaciones
-      <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'ia-prioridad'"
-      (click)="sectionChange.emit('ia-prioridad')">
-      ⚡ Prioridad IA
-    </button>
-    <button class="nav-button" [class.active]="activeSection === 'estadisticas'"
-      (click)="sectionChange.emit('estadisticas')">
-      📊 Estadísticas
-    </button>
-  </nav>
-</header>
+<div class="topbar">
+  <div>
+    <div class="crumb">{{ sectionCrumb }}</div>
+    <h1>{{ sectionTitle }}</h1>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-logout" (click)="logoutEvent.emit()">Cerrar sesión</button>
+  </div>
+</div>

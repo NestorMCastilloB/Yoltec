@@ -1,4 +1,4 @@
-<div class="doctor-dashboard">
+<div class="doctor-layout">
   <app-doctor-header
     [doctorName]="doctorName"
     [activeSection]="activeSection"
@@ -7,34 +7,34 @@
     (logoutEvent)="logout()">
   </app-doctor-header>
 
-  <main class="dashboard-content">
-    <section *ngIf="activeSection === 'inicio'" class="content-section">
+  <main class="main-content">
+    <section *ngIf="activeSection === 'inicio'">
       <app-doctor-inicio [doctorName]="doctorName"></app-doctor-inicio>
     </section>
 
-    <section *ngIf="activeSection === 'citas'" class="content-section">
+    <section *ngIf="activeSection === 'citas'">
       <app-doctor-citas></app-doctor-citas>
     </section>
 
-    <section *ngIf="activeSection === 'bitacoras'" class="content-section">
+    <section *ngIf="activeSection === 'bitacoras'">
       <app-doctor-bitacoras></app-doctor-bitacoras>
     </section>
 
-    <section *ngIf="activeSection === 'recetas'" class="content-section">
+    <section *ngIf="activeSection === 'recetas'">
       <app-doctor-recetas></app-doctor-recetas>
     </section>
 
-    <section *ngIf="activeSection === 'pre-evaluaciones'" class="content-section">
+    <section *ngIf="activeSection === 'pre-evaluaciones'">
       <app-doctor-pre-evaluaciones
         (pendientesChange)="totalPendientes = $event">
       </app-doctor-pre-evaluaciones>
     </section>
 
-    <section *ngIf="activeSection === 'ia-prioridad'" class="content-section">
+    <section *ngIf="activeSection === 'ia-prioridad'">
       <app-doctor-ia-prioridad></app-doctor-ia-prioridad>
     </section>
 
-    <section *ngIf="activeSection === 'estadisticas'" class="content-section">
+    <section *ngIf="activeSection === 'estadisticas'">
       <app-doctor-estadisticas></app-doctor-estadisticas>
     </section>
   </main>

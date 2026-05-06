@@ -1,87 +1,63 @@
-<div class="login-grid">
-  <!-- Lado izquierdo: oscuro, mensaje de bienvenida -->
-  <div class="welcome-panel">
-    <div class="welcome-content">
-      <h1>Bienvenido a <span>YOLTEC</span></h1>
-      <p>Tu plataforma de gestión clínica académica.</p>
-      <p>Inicia sesión con tu cuenta y accede a todos los servicios médicos.</p>
-      <div class="decorative-lines"></div>
-    </div>
-  </div>
-
-  <!-- Lado derecho: claro, formulario de login -->
-  <div class="login-panel">
-    <div class="login-header">
-      <h2>Acceder</h2>
-      <p>Selecciona tu rol y completa tus credenciales</p>
+<div class="login-bg">
+  <div class="login-card">
+    <div class="login-head">
+      <img src="./logo.jpeg" alt="Yoltec" class="login-logo">
+      <h1>Yoltec</h1>
+      <p>Sistema clínico académico</p>
     </div>
 
-    <!-- Menú de roles estilo "ruleta / videojuego" -->
-    <div class="roles-menu">
-      <button [class.active]="activeTab === 'student'" (click)="setActiveTab('student')" class="role-btn">
-        <span class="role-icon">🎓</span>
-        <span class="role-name">Estudiante</span>
+    <!-- Role tabs -->
+    <div class="role-tabs">
+      <button [class.active]="activeTab === 'student'" (click)="setActiveTab('student')">Estudiante</button>
+      <button [class.active]="activeTab === 'doctor'" (click)="setActiveTab('doctor')">Doctor</button>
+    </div>
+
+    <!-- Estudiante -->
+    <form *ngIf="activeTab === 'student'" (ngSubmit)="onStudentLogin()" #studentForm="ngForm">
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="field">
+        <label>Número de control</label>
+        <input type="text" [(ngModel)]="studentData.identificador" name="identificador"
+          placeholder="Ej: 22690495" required>
+      </div>
+      <div class="field">
+        <label>NIP</label>
+        <div class="pass-wrap">
+          <input [type]="showPasswordStudent ? 'text' : 'password'"
+            [(ngModel)]="studentData.password" name="password" placeholder="Tu NIP de 6 dígitos" required>
+          <button type="button" class="eye" (click)="togglePassword('student')">{{ showPasswordStudent ? '⚿' : '⚿' }}</button>
+        </div>
+      </div>
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Cargando...' : 'Iniciar sesión' }}
       </button>
-      <button [class.active]="activeTab === 'doctor'" (click)="setActiveTab('doctor')" class="role-btn">
-        <span class="role-icon">👨‍⚕️</span>
-        <span class="role-name">Doctor</span>
+      <div class="login-foot">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+    </form>
+
+    <!-- Doctor -->
+    <form *ngIf="activeTab === 'doctor'" (ngSubmit)="onDoctorLogin()" #doctorForm="ngForm">
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" [(ngModel)]="doctorData.identificador" name="identificador"
+          placeholder="Tu nombre de usuario" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input [type]="showPasswordDoctor ? 'text' : 'password'"
+            [(ngModel)]="doctorData.password" name="password" placeholder="Tu contraseña" required>
+          <button type="button" class="eye" (click)="togglePassword('doctor')">{{ showPasswordDoctor ? '⚿' : '⚿' }}</button>
+        </div>
+      </div>
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Cargando...' : 'Iniciar sesión' }}
       </button>
-    </div>
-
-    <!-- Formulario según rol activo -->
-    <div class="form-container">
-      <!-- Estudiante -->
-      <form *ngIf="activeTab === 'student'" (ngSubmit)="onStudentLogin()" #studentForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-        <div class="form-group">
-          <label for="studentIdentificador">Número de control</label>
-          <input type="text" id="studentIdentificador" [(ngModel)]="studentData.identificador" name="identificador"
-            placeholder="Ej: 22690495" required>
-        </div>
-        <div class="form-group">
-          <label for="studentPassword">NIP</label>
-          <div class="password-wrapper">
-            <input [type]="showPasswordStudent ? 'text' : 'password'" id="studentPassword"
-              [(ngModel)]="studentData.password" name="password" placeholder="Tu NIP de 6 dígitos" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('student')">{{ showPasswordStudent ?
-              '🙈' : '👁️' }}</button>
-          </div>
-        </div>
-        <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar sesión</span>
-          <span *ngIf="isLoading">Cargando...</span>
-        </button>
-        <div class="forgot-link-wrapper">
-          <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
-        </div>
-      </form>
-
-      <!-- Doctor -->
-      <form *ngIf="activeTab === 'doctor'" (ngSubmit)="onDoctorLogin()" #doctorForm="ngForm">
-        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-        <div class="form-group">
-          <label for="doctorIdentificador">Usuario</label>
-          <input type="text" id="doctorIdentificador" [(ngModel)]="doctorData.identificador" name="identificador"
-            placeholder="Tu nombre de usuario" required>
-        </div>
-        <div class="form-group">
-          <label for="doctorPassword">Contraseña</label>
-          <div class="password-wrapper">
-            <input [type]="showPasswordDoctor ? 'text' : 'password'" id="doctorPassword"
-              [(ngModel)]="doctorData.password" name="password" placeholder="Tu contraseña" required>
-            <button type="button" class="toggle-password" (click)="togglePassword('doctor')">{{ showPasswordDoctor ?
-              '🙈' : '👁️' }}</button>
-          </div>
-        </div>
-        <button type="submit" class="login-btn" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Iniciar sesión</span>
-          <span *ngIf="isLoading">Cargando...</span>
-        </button>
-        <div class="forgot-link-wrapper">
-          <a routerLink="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
-        </div>
-      </form>
-
-    </div>
+      <div class="login-foot">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+    </form>
   </div>
 </div>

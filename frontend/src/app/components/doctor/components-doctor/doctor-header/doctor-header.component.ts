@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService } from '../../../../services/theme.service';
 
 @Component({
   selector: 'app-doctor-header',
@@ -16,13 +15,30 @@ export class DoctorHeaderComponent {
   @Output() sectionChange = new EventEmitter<string>();
   @Output() logoutEvent = new EventEmitter<void>();
 
-  constructor(private themeService: ThemeService) {}
+  private sectionMap: Record<string, { crumb: string; title: string }> = {
+    'inicio':            { crumb: 'Inicio · Panel',           title: 'Panel del consultorio' },
+    'citas':             { crumb: 'Citas · Calendario',       title: 'Citas' },
+    'bitacoras':         { crumb: 'Bitácoras · Historial',    title: 'Bitácoras' },
+    'recetas':           { crumb: 'Recetas · Listado',        title: 'Recetas' },
+    'pre-evaluaciones':  { crumb: 'IA · Pre-evaluaciones',    title: 'Pre-evaluaciones' },
+    'ia-prioridad':      { crumb: 'IA · Prioridad',           title: 'Prioridad IA' },
+    'estadisticas':      { crumb: 'Reportes · Estadísticas',  title: 'Estadísticas' },
+  };
 
-  get isDarkMode(): boolean {
-    return this.themeService.isDark;
+  get initials(): string {
+    return this.doctorName
+      .split(' ')
+      .filter(w => w.length > 0)
+      .slice(0, 2)
+      .map(w => w[0].toUpperCase())
+      .join('');
   }
 
-  toggleTheme(): void {
-    this.themeService.toggle();
+  get sectionCrumb(): string {
+    return this.sectionMap[this.activeSection]?.crumb ?? '';
+  }
+
+  get sectionTitle(): string {
+    return this.sectionMap[this.activeSection]?.title ?? '';
   }
 }

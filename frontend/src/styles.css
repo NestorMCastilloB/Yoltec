@@ -1,83 +1,85 @@
-/* ── Yoltec Design System — Tokens globales ── */
+/* ============================================================
+   Yoltec Design System — v2.0 (clinical / institutional)
+   Tokens: colors, type, spacing, radii, shadows
+   ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Primario — verde medico institucional */
-  --yol-primary: #1B6B45;
-  --yol-primary-600: #155A39;
-  --yol-primary-50: #E8F5EE;
-  --yol-accent: #4CAF82;
+  /* Brand greens */
+  --yol-primary:      #1B6B45;
+  --yol-primary-600:  #155A39;
+  --yol-primary-mid:  #2E9E6B;
+  --yol-primary-50:   #E8F5EE;
+  --yol-accent:       #4CAF82;
 
-  /* IA — azul clinico */
-  --yol-ia: #2563EB;
-  --yol-ia-600: #1D4ED8;
-  --yol-ia-50: #EFF6FF;
+  /* Surfaces */
+  --yol-bg:           #F7F9F8;
+  --yol-surface:      #FFFFFF;
+  --yol-border:       #DDE8E3;
 
-  /* Neutros */
-  --yol-bg: #F7F9F8;
-  --yol-surface: #FFFFFF;
-  --yol-border: #DDE8E3;
-  --yol-text: #1A2E25;
-  --yol-text-muted: #4A6859;
-  --yol-text-subtle: #7B8F86;
+  /* Text */
+  --yol-text:         #1A2E25;
+  --yol-text-muted:   #4A6859;
+  --yol-text-subtle:  #7B8F86;
 
-  /* Semanticos */
-  --yol-ok-surface: #E8F5EE;
-  --yol-ok-text: #1B6B45;
-  --yol-warn-surface: #FFF3E0;
-  --yol-warn-text: #F57C00;
-  --yol-cancel-surface: #FFEBEE;
-  --yol-cancel-text: #C62828;
+  /* Status — semantic */
+  --yol-ok-surface:      #E8F5EE;
+  --yol-ok-text:         #1B6B45;
+  --yol-warn:            #F57C00;
+  --yol-warn-surface:    #FFF3E0;
+  --yol-warn-text:       #F57C00;
+  --yol-cancel-surface:  #FFEBEE;
+  --yol-cancel-text:     #C62828;
   --yol-pending-surface: #F7F9F8;
-  --yol-pending-text: #4A6859;
+  --yol-pending-text:    #4A6859;
 
-  /* Tipografia */
+  /* Type */
   --yol-font: 'Inter', system-ui, -apple-system, sans-serif;
+  --yol-fs-display: 24px;
+  --yol-fs-h1:      20px;
+  --yol-fs-h2:      16px;
+  --yol-fs-h3:      14px;
+  --yol-fs-body:    14px;
+  --yol-fs-sm:      13px;
+  --yol-fs-cap:     12px;
+  --yol-fs-label:   11px;
 
-  /* Sombras */
-  --yol-shadow-sm: 0 1px 2px rgba(27, 107, 69, .06);
-  --yol-shadow-md: 0 2px 8px rgba(27, 107, 69, .08);
-  --yol-shadow-lg: 0 6px 16px rgba(27, 107, 69, .10);
-  --yol-shadow-xl: 0 12px 32px rgba(27, 107, 69, .14);
+  /* Spacing — 4px base */
+  --yol-s-1:  4px;
+  --yol-s-2:  8px;
+  --yol-s-3:  12px;
+  --yol-s-4:  16px;
+  --yol-s-5:  20px;
+  --yol-s-6:  24px;
+  --yol-s-7:  32px;
+  --yol-s-8:  48px;
 
   /* Radii */
-  --yol-radius-sm: 4px;
-  --yol-radius-md: 6px;
-  --yol-radius-lg: 8px;
-  --yol-radius-xl: 10px;
-  --yol-radius-pill: 999px;
+  --yol-r-sm:   4px;
+  --yol-r:      6px;
+  --yol-r-md:   8px;
+  --yol-r-lg:   12px;
+  --yol-r-pill:  999px;
 
-  /* Transiciones */
+  /* Shadows — green-tinted, soft */
+  --yol-shadow-xs:  0 1px 2px rgba(27,107,69,.06);
+  --yol-shadow-sm:  0 2px 8px rgba(27,107,69,.08);
+  --yol-shadow-md:  0 4px 14px rgba(27,107,69,.10);
+  --yol-shadow-lg:  0 10px 28px rgba(27,107,69,.12);
+
+  /* Motion */
   --yol-ease: cubic-bezier(.4, 0, .2, 1);
-  --yol-duration-fast: 120ms;
+  --yol-duration-fast:   120ms;
   --yol-duration-normal: 200ms;
-  --yol-duration-slow: 250ms;
+  --yol-duration-slow:   250ms;
 }
 
-/* Dark mode tokens */
-body.dark-mode {
-  --yol-bg: #121212;
-  --yol-surface: #1E1E1E;
-  --yol-border: #2C2C2C;
-  --yol-text: #E0E0E0;
-  --yol-text-muted: #9E9E9E;
-  --yol-text-subtle: #757575;
-  --yol-primary: #4CAF82;
-  --yol-primary-600: #3D9B6E;
-  --yol-primary-50: #1B3A2A;
-  --yol-ok-surface: #1B3A2A;
-  --yol-ok-text: #4CAF82;
-  --yol-shadow-md: 0 2px 8px rgba(0, 0, 0, .3);
-}
-
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   background-color: var(--yol-bg);
   font-family: var(--yol-font);
   color: var(--yol-text);
-  transition: background-color var(--yol-duration-slow) var(--yol-ease);
 }
