@@ -446,15 +446,15 @@
 }
 
 .dot.available {
-  background: #1e88e5;
+  background: var(--yol-ia);
 }
 
 .dot.partial {
-  background: #ffb300;
+  background: var(--yol-warn);
 }
 
 .dot.full {
-  background: #ef5350;
+  background: var(--yol-cancel-text);
 }
 
 .calendar-weekdays {
@@ -625,7 +625,7 @@
 
 /* ===== ALERTAS ===== */
 .alert {
-  background: rgba(37, 138, 96, 0.07);
+  background: var(--yol-ok-surface);
   border-left: 4px solid var(--success);
   padding: 1rem 1.2rem;
   border-radius: 14px;
@@ -634,7 +634,7 @@
 }
 
 .alert.error {
-  background: rgba(239, 68, 68, 0.06);
+  background: var(--yol-cancel-surface);
   border-left-color: var(--danger);
   color: var(--danger);
 }

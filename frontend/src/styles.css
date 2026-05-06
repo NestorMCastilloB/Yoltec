@@ -3,7 +3,11 @@
    Tokens: colors, type, spacing, radii, shadows
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Inter — local woff2 (no external CDN dependency) */
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/Inter-Regular.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('/fonts/Inter-Medium.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/Inter-SemiBold.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('/fonts/Inter-Bold.woff2') format('woff2')}
 
 :root {
   /* Brand greens */
@@ -29,10 +33,17 @@
   --yol-warn:            #F57C00;
   --yol-warn-surface:    #FFF3E0;
   --yol-warn-text:       #F57C00;
+  --yol-danger:          #C62828;
   --yol-cancel-surface:  #FFEBEE;
   --yol-cancel-text:     #C62828;
   --yol-pending-surface: #F7F9F8;
   --yol-pending-text:    #4A6859;
+
+  /* IA — azul clínico */
+  --yol-ia:              #2563EB;
+  --yol-ia-600:          #1D4ED8;
+  --yol-ia-soft:         #EFF6FF;
+  --yol-ia-text:         #1E40AF;
 
   /* Type */
   --yol-font: 'Inter', system-ui, -apple-system, sans-serif;
