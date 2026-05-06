@@ -148,19 +148,21 @@ nav a.active {
   align-items: center;
 }
 .btn-logout {
-  padding: 8px 14px;
+  padding: 7px 14px;
   border-radius: var(--yol-r);
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid var(--yol-cancel-text);
+  font-size: var(--yol-fs-sm);
+  font-weight: 500;
+  border: 1px solid var(--yol-border);
   background: var(--yol-surface);
-  color: var(--yol-cancel-text);
+  color: var(--yol-text-muted);
   cursor: pointer;
   font-family: inherit;
-  transition: background var(--yol-duration-fast) var(--yol-ease);
+  transition: all var(--yol-duration-fast) var(--yol-ease);
 }
 .btn-logout:hover {
   background: var(--yol-cancel-surface);
+  color: var(--yol-cancel-text);
+  border-color: var(--yol-cancel-text);
 }
 
 /* ===== RESPONSIVE ===== */
