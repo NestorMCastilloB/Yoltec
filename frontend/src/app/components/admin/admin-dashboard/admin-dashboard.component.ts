@@ -7,7 +7,6 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { AdminService, Alumno, Doctor } from '../../../services/admin.service';
 import { CalendarioAdminService, DiaEspecial, TIPO_LABELS } from '../../../services/calendario-admin.service';
-import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -53,18 +52,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   isSubmittingDoctor = false;
   doctorForm = { username: '', nombre: '', apellido: '', email: '', password: '', telefono: '' };
 
-  // Confirmación de borrado
+  // Confirmacion de borrado
   confirmDeleteId: number | null = null;
   confirmDeleteType: 'alumno' | 'doctor' | null = null;
 
   // Calendario
   readonly tipoLabels = TIPO_LABELS;
-  readonly weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  readonly weekDays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
   calCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   calWeeks: { date: string; label: number; isCurrentMonth: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
-  // Formulario de día especial
+  // Formulario de dia especial
   showDiaForm = false;
   diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
   diaMsg: string | null = null;
@@ -74,8 +73,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private adminService: AdminService,
-    private calendarioService: CalendarioAdminService,
-    public themeService: ThemeService
+    private calendarioService: CalendarioAdminService
   ) {}
 
   ngOnInit(): void {
@@ -292,7 +290,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   openDiaForm(fecha?: string): void {
     this.diaMsg = null;
     this.diaForm = { fecha: fecha ?? '', tipo: 'holiday', etiqueta: '' };
-    // Si ya existe un día especial en esa fecha, pre-carga los datos
+    // Si ya existe un dia especial en esa fecha, pre-carga los datos
     if (fecha) {
       const existing = this.diasEspeciales.find(d => d.fecha === fecha);
       if (existing) {
