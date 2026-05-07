@@ -42,6 +42,12 @@
     <h1>{{ sectionTitle }}</h1>
   </div>
   <div class="topbar-actions">
+    <div class="topbar-search">
+      <span class="search-ico">⌕</span>
+      <input type="text" placeholder="Buscar paciente, cita o receta..." (input)="onSearch($event)"/>
+    </div>
+    <button *ngIf="showExport" class="btn-action secondary" (click)="exportEvent.emit()">Exportar</button>
+    <button *ngIf="primaryAction" class="btn-action primary" (click)="sectionChange.emit('citas')">{{ primaryAction }}</button>
     <button class="btn-logout" (click)="logoutEvent.emit()">Cerrar sesión</button>
   </div>
 </div>

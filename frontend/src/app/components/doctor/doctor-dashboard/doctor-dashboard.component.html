@@ -4,16 +4,18 @@
     [activeSection]="activeSection"
     [totalPendientes]="totalPendientes"
     (sectionChange)="setActiveSection($event)"
-    (logoutEvent)="logout()">
+    (logoutEvent)="logout()"
+    (exportEvent)="onExport()"
+    (searchEvent)="onSearch($event)">
   </app-doctor-header>
 
   <main class="main-content">
     <section *ngIf="activeSection === 'inicio'">
-      <app-doctor-inicio [doctorName]="doctorName"></app-doctor-inicio>
+      <app-doctor-inicio [doctorName]="doctorName" (openCita)="onOpenCita($event)"></app-doctor-inicio>
     </section>
 
     <section *ngIf="activeSection === 'citas'">
-      <app-doctor-citas></app-doctor-citas>
+      <app-doctor-citas (openFicha)="openFichaPaciente($event)"></app-doctor-citas>
     </section>
 
     <section *ngIf="activeSection === 'bitacoras'">
@@ -36,6 +38,13 @@
 
     <section *ngIf="activeSection === 'estadisticas'">
       <app-doctor-estadisticas></app-doctor-estadisticas>
+    </section>
+
+    <section *ngIf="activeSection === 'ficha-paciente'">
+      <app-doctor-ficha-paciente
+        [alumnoId]="fichaAlumnoId"
+        (back)="setActiveSection('citas')">
+      </app-doctor-ficha-paciente>
     </section>
   </main>
 </div>

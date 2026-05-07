@@ -7,7 +7,7 @@
 }
 
 .doctor-layout {
-  display: flex;
+  display: block;
   min-height: 100vh;
   background: var(--yol-bg);
   font-family: var(--yol-font);
@@ -15,11 +15,15 @@
 }
 
 .main-content {
-  flex: 1;
   margin-left: 220px;
   min-width: 0;
   padding: 24px 28px;
   margin-top: 57px; /* topbar height */
+}
+
+.main-content > section {
+  display: block;
+  width: 100%;
 }
 
 @media (max-width: 768px) {

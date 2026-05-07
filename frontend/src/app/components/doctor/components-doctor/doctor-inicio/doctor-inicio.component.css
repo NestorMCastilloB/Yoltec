@@ -1,5 +1,10 @@
 /* ===== Doctor Inicio — Design System v2 ===== */
 
+:host {
+  display: block;
+  width: 100%;
+}
+
 .inicio-container {
   display: flex;
   flex-direction: column;
@@ -9,7 +14,7 @@
 /* ---- KPIs ---- */
 .kpis {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 }
 
@@ -41,10 +46,16 @@
   letter-spacing: -.5px;
   color: var(--yol-text);
 }
-.kpi-detail {
-  font-size: var(--yol-fs-cap);
+.kpi-trend {
+  font-size: 12px;
   color: var(--yol-text-subtle);
   font-weight: 500;
+}
+.kpi-trend.up {
+  color: var(--yol-primary);
+}
+.kpi-trend.down {
+  color: var(--yol-cancel-text);
 }
 
 /* ---- Cards ---- */
@@ -118,6 +129,27 @@ tr:hover td {
 .motivo {
   color: var(--yol-text-muted);
 }
+.td-action {
+  text-align: right;
+}
+
+/* ---- Ghost button (table action) ---- */
+.btn-ghost-sm {
+  padding: 5px 10px;
+  border-radius: var(--yol-r);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--yol-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--yol-duration-fast) var(--yol-ease);
+}
+.btn-ghost-sm:hover {
+  background: var(--yol-bg);
+  color: var(--yol-primary);
+}
 
 /* ---- Avatar small ---- */
 .who {
@@ -160,33 +192,66 @@ tr:hover td {
   color: var(--yol-cancel-text);
 }
 
-/* ---- Next appointment ---- */
-.next-appointment {
-  padding: 14px 18px;
+/* ---- Activity feed ---- */
+.activity-list {
   display: flex;
   flex-direction: column;
 }
-.next-row {
+.activity-item {
   display: flex;
-  justify-content: space-between;
-  font-size: 12.5px;
-  padding: 7px 0;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--yol-border);
 }
-.next-row:last-child {
+.activity-item:last-child {
   border-bottom: none;
 }
-.next-label {
-  color: var(--yol-text-subtle);
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--yol-r);
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
 }
-.next-value {
-  color: var(--yol-text);
+.activity-icon.receta {
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
+}
+.activity-icon.cancel {
+  background: var(--yol-cancel-surface);
+  color: var(--yol-cancel-text);
+}
+.activity-info {
+  flex: 1;
+  min-width: 0;
+}
+.activity-info b {
+  display: block;
+  font-size: 13px;
   font-weight: 500;
+  color: var(--yol-text);
 }
-.next-value.mono {
-  font-family: ui-monospace, 'Cascadia Code', monospace;
+.activity-info span {
   font-size: 12px;
-  letter-spacing: .5px;
+  color: var(--yol-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.activity-time {
+  font-size: 12px;
+  color: var(--yol-text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 
 /* ---- Empty state ---- */
@@ -198,6 +263,11 @@ tr:hover td {
 }
 
 /* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 @media (max-width: 900px) {
   .kpis {
     grid-template-columns: 1fr;

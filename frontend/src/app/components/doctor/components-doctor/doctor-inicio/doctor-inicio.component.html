@@ -4,21 +4,29 @@
     <div class="kpi accent">
       <span class="kpi-label">Citas hoy</span>
       <span class="kpi-value">{{ todayAppointments }}</span>
-      <span class="kpi-detail">Programadas para hoy</span>
+      <span class="kpi-trend up" *ngIf="todayAppointments > 0">Programadas para hoy</span>
+      <span class="kpi-trend" *ngIf="todayAppointments === 0">Sin citas hoy</span>
     </div>
     <div class="kpi">
       <span class="kpi-label">Pacientes atendidos</span>
       <span class="kpi-value">{{ patientsAttended }}</span>
-      <span class="kpi-detail">Historial reciente</span>
+      <span class="kpi-trend">Historial completo</span>
     </div>
     <div class="kpi">
-      <span class="kpi-label">Citas pendientes</span>
-      <span class="kpi-value">{{ pendingBitacoras }}</span>
-      <span class="kpi-detail">Requieren atención</span>
+      <span class="kpi-label">Recetas emitidas</span>
+      <span class="kpi-value">{{ totalRecetas }}</span>
+      <span class="kpi-trend">Total registradas</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">Asistencia</span>
+      <span class="kpi-value">{{ asistenciaPct }}%</span>
+      <span class="kpi-trend" [class.up]="asistenciaPct >= 80" [class.down]="asistenciaPct < 60">
+        {{ asistenciaPct >= 80 ? 'Buena asistencia' : asistenciaPct >= 60 ? 'Asistencia regular' : 'Requiere atención' }}
+      </span>
     </div>
   </div>
 
-  <!-- Contenido principal: tabla de citas + próxima cita -->
+  <!-- Contenido principal: tabla de citas + actividad reciente -->
   <div class="row2">
     <!-- Citas del día -->
     <div class="card">
@@ -34,6 +42,7 @@
               <th>Paciente</th>
               <th>Motivo</th>
               <th>Estatus</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +62,9 @@
                   'cancel': cita.estatus === 'cancelada' || cita.estatus === 'no_asistio'
                 }">{{ cita.estatus | titlecase }}</span>
               </td>
+              <td class="td-action">
+                <button class="btn-ghost-sm" (click)="openCita.emit(cita)">Abrir</button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -62,39 +74,25 @@
       </div>
     </div>
 
-    <!-- Próxima cita -->
+    <!-- Actividad reciente -->
     <div class="card">
       <div class="card-header">
-        <h2>Próxima cita</h2>
+        <h2>Actividad reciente</h2>
       </div>
       <div class="card-body">
-        <div *ngIf="proximaCita; else sinProxima" class="next-appointment">
-          <div class="next-row">
-            <span class="next-label">Paciente</span>
-            <span class="next-value">{{ proximaCita.alumno?.nombre }} {{ proximaCita.alumno?.apellido }}</span>
-          </div>
-          <div class="next-row">
-            <span class="next-label">Fecha</span>
-            <span class="next-value">{{ proximaCita.fecha_cita }}</span>
-          </div>
-          <div class="next-row">
-            <span class="next-label">Hora</span>
-            <span class="next-value">{{ proximaCita.hora_cita }}</span>
-          </div>
-          <div class="next-row">
-            <span class="next-label">Motivo</span>
-            <span class="next-value">{{ proximaCita.motivo || 'No especificado' }}</span>
-          </div>
-          <div class="next-row">
-            <span class="next-label">Clave</span>
-            <span class="next-value mono">{{ proximaCita.clave_cita }}</span>
+        <div class="activity-list" *ngIf="actividadReciente.length > 0">
+          <div class="activity-item" *ngFor="let item of actividadReciente">
+            <div class="activity-icon" [ngClass]="item.tipo">{{ item.icono }}</div>
+            <div class="activity-info">
+              <b>{{ item.titulo }}</b>
+              <span>{{ item.detalle }}</span>
+            </div>
+            <span class="activity-time">{{ item.tiempo }}</span>
           </div>
         </div>
-        <ng-template #sinProxima>
-          <div class="empty-state">
-            No hay citas próximas.
-          </div>
-        </ng-template>
+        <div class="empty-state" *ngIf="actividadReciente.length === 0">
+          Sin actividad reciente.
+        </div>
       </div>
     </div>
   </div>

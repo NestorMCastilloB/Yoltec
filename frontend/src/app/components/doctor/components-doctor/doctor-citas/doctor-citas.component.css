@@ -1,10 +1,143 @@
 /* ===== DOCTOR CITAS — Con variables globales y todos los elementos adaptados ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 .citas-wrapper {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+/* ===== CALENDARIO SEMANAL GRID ===== */
+.week-grid-card {
+  background: var(--yol-surface, #fff);
+  border: 1px solid var(--yol-border, #DDE8E3);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(27,107,69,.08);
+  overflow: hidden;
+}
+.week-grid-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.week-grid-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--yol-text, #1A2E25);
+}
+.week-nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.btn-week {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--yol-border, #DDE8E3);
+  background: var(--yol-surface, #fff);
+  color: var(--yol-text-muted, #4A6859);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.btn-week:hover {
+  background: var(--yol-bg, #F7F9F8);
+  color: var(--yol-primary, #1B6B45);
+  border-color: var(--yol-primary, #1B6B45);
+}
+.week-grid-table-wrap {
+  overflow-x: auto;
+}
+.week-grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+.week-grid-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--yol-text-muted, #4A6859);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  background: var(--yol-bg, #F7F9F8);
+  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+}
+.week-grid-table thead th.col-today {
+  color: var(--yol-primary, #1B6B45);
+}
+.today-dot {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 10px;
+  color: var(--yol-primary, #1B6B45);
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+.col-hora {
+  width: 64px;
+}
+.cell-hora {
+  padding: 6px 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--yol-text-subtle, #7B8F86);
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  vertical-align: top;
+}
+.cell-slot {
+  padding: 4px 6px;
+  height: 52px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-left: 1px solid var(--yol-border, #DDE8E3);
+}
+.cell-slot.cell-today {
+  background: rgba(27,107,69,.03);
+}
+.grid-cita {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 3px solid transparent;
+  transition: opacity .15s;
+}
+.grid-cita:hover {
+  opacity: .85;
+}
+.grid-cita.ok {
+  background: var(--yol-ok-surface, #E8F5EE);
+  color: var(--yol-ok-text, #1B6B45);
+  border-left-color: var(--yol-primary, #1B6B45);
+}
+.grid-cita.warn {
+  background: var(--yol-warn-surface, #FFF3E0);
+  color: var(--yol-warn-text, #F57C00);
+  border-left-color: #F57C00;
+}
+.grid-cita.cancel {
+  background: var(--yol-cancel-surface, #FFEBEE);
+  color: var(--yol-cancel-text, #C62828);
+  border-left-color: #C62828;
+}
+
+@media (max-width: 768px) {
+  .week-grid-table {
+    min-width: 600px;
+  }
 }
 
 /* ===== ENCABEZADO ===== */
