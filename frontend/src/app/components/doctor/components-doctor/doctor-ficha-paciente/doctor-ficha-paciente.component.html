@@ -1,0 +1,141 @@
+<div class="ficha-wrapper" *ngIf="!isLoading && perfil">
+  <button class="btn-back" (click)="back.emit()">← Volver</button>
+
+  <div class="ficha-layout">
+    <!-- Card izquierda: datos del paciente -->
+    <div class="ficha-card-left">
+      <div class="ficha-head">
+        <div class="ficha-avatar">
+          <img *ngIf="perfil.foto_perfil" [src]="perfil.foto_perfil" alt="foto" />
+          <span *ngIf="!perfil.foto_perfil">{{ initials }}</span>
+        </div>
+        <h3>{{ perfil.nombre }} {{ perfil.apellido }}</h3>
+        <div class="ficha-sub">{{ perfil.numero_control }} <span *ngIf="edad">· {{ edad }}</span></div>
+      </div>
+      <div class="ficha-datos">
+        <div class="dato-row">
+          <span class="dato-label">Tipo de sangre</span>
+          <span class="dato-value">{{ perfil.tipo_sangre || '—' }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Teléfono</span>
+          <span class="dato-value">{{ perfil.telefono || '—' }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Correo</span>
+          <span class="dato-value email">{{ perfil.email }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Alergias</span>
+          <span class="dato-value">{{ perfil.alergias || 'Ninguna' }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Enf. crónicas</span>
+          <span class="dato-value">{{ perfil.enfermedades_cronicas || 'Ninguna' }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Consultas</span>
+          <span class="dato-value">{{ historial.length }}</span>
+        </div>
+        <div class="dato-row">
+          <span class="dato-label">Estatus</span>
+          <span class="badge ok">Activo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: tabs -->
+    <div class="ficha-card-right">
+      <div class="ficha-tabs">
+        <button [class.active]="activeTab === 'info'" (click)="setTab('info')">Información</button>
+        <button [class.active]="activeTab === 'historial'" (click)="setTab('historial')">Historial</button>
+        <button [class.active]="activeTab === 'recetas'" (click)="setTab('recetas')">Recetas</button>
+        <button [class.active]="activeTab === 'bitacoras'" (click)="setTab('bitacoras')">Bitácoras</button>
+      </div>
+
+      <!-- Tab: Información -->
+      <div class="tab-content" *ngIf="activeTab === 'info'">
+        <div class="info-grid">
+          <div class="info-field">
+            <label>Nombre completo</label>
+            <span>{{ perfil.nombre }} {{ perfil.apellido }}</span>
+          </div>
+          <div class="info-field">
+            <label>Número de control</label>
+            <span class="mono">{{ perfil.numero_control }}</span>
+          </div>
+          <div class="info-field">
+            <label>Fecha de nacimiento</label>
+            <span>{{ perfil.fecha_nacimiento ? (perfil.fecha_nacimiento | date:'dd/MM/yyyy') : 'No registrada' }}</span>
+          </div>
+          <div class="info-field">
+            <label>Tipo de sangre</label>
+            <span>{{ perfil.tipo_sangre || 'No especificado' }}</span>
+          </div>
+          <div class="info-field full">
+            <label>Alergias y medicamentos contraindicados</label>
+            <span>{{ perfil.alergias || 'Sin alergias conocidas.' }}</span>
+          </div>
+          <div class="info-field full">
+            <label>Enfermedades crónicas</label>
+            <span>{{ perfil.enfermedades_cronicas || 'Ninguna registrada.' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Historial -->
+      <div class="tab-content" *ngIf="activeTab === 'historial'">
+        <div *ngIf="historial.length === 0" class="tab-empty">Sin consultas previas.</div>
+        <div *ngFor="let item of historial" class="historial-row">
+          <div class="historial-header" (click)="toggleHistorial(item.id)">
+            <span class="historial-fecha">{{ item.fecha_cita | date:'dd/MM/yyyy' }}</span>
+            <span class="historial-motivo">{{ item.motivo }}</span>
+            <span class="historial-doctor" *ngIf="item.doctor">Dr. {{ item.doctor.nombre }}</span>
+            <span class="expand-icon">{{ historialExpandido === item.id ? '▲' : '▼' }}</span>
+          </div>
+          <div *ngIf="historialExpandido === item.id" class="historial-detail">
+            <div *ngIf="item.consulta">
+              <p><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
+              <p><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
+              <p *ngIf="item.consulta.observaciones"><strong>Observaciones:</strong> {{ item.consulta.observaciones }}</p>
+            </div>
+            <div *ngIf="!item.consulta" class="tab-empty">Sin formulario de consulta registrado.</div>
+            <div *ngIf="item.receta?.medicamentos || item.receta?.medicamento || item.receta?.indicaciones" class="historial-receta">
+              <strong>Receta:</strong> {{ item.receta.medicamentos || item.receta.medicamento || item.receta.indicaciones }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Recetas -->
+      <div class="tab-content" *ngIf="activeTab === 'recetas'">
+        <div *ngIf="recetas.length === 0" class="tab-empty">Sin recetas registradas.</div>
+        <div *ngFor="let r of recetas" class="receta-row">
+          <div class="receta-header">
+            <strong>{{ r.medicamentos }}</strong>
+            <span class="receta-fecha">{{ r.fecha_emision ? (r.fecha_emision | date:'dd/MM/yyyy') : (r.created_at | date:'dd/MM/yyyy') }}</span>
+          </div>
+          <p class="receta-indicaciones" *ngIf="r.indicaciones">{{ r.indicaciones }}</p>
+        </div>
+      </div>
+
+      <!-- Tab: Bitácoras -->
+      <div class="tab-content" *ngIf="activeTab === 'bitacoras'">
+        <div *ngIf="bitacoras.length === 0" class="tab-empty">Sin bitácoras registradas.</div>
+        <div *ngFor="let b of bitacoras" class="bitacora-row">
+          <div class="bitacora-header">
+            <span class="bitacora-fecha">{{ b.fecha_cita | date:'dd/MM/yyyy' }} · {{ b.hora_cita | slice:0:5 }}</span>
+            <span class="badge" [ngClass]="{
+              'ok': b.estatus === 'atendida',
+              'cancel': b.estatus === 'cancelada' || b.estatus === 'no_asistio'
+            }">{{ b.estatus | titlecase }}</span>
+          </div>
+          <p class="bitacora-motivo" *ngIf="b.motivo">{{ b.motivo }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ficha-loading" *ngIf="isLoading">Cargando ficha del paciente...</div>
+<div class="ficha-loading" *ngIf="!isLoading && !perfil && alumnoId">No se encontró el perfil del paciente.</div>

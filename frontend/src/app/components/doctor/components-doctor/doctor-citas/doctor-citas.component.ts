@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subject, of } from 'rxjs';
@@ -36,6 +36,8 @@ interface CalendarDay {
 })
 
 export class DoctorCitasComponent implements OnInit, OnDestroy {
+  @Output() openFicha = new EventEmitter<number>();
+
   citas: Cita[] = [];
   isLoadingCitas = false;
   citasError: string | null = null;
@@ -86,6 +88,11 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   reprogramarHora = '';
   reprogramarMsg: string | null = null;
   isSubmittingReprogramar = false;
+
+  // Vista semanal grid
+  currentWeekStart: Date = this.getMonday(new Date());
+  readonly hourGridSlots: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16];
+  readonly gridDayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   readonly today = this.formatDate(new Date());
   private destroy$ = new Subject<void>();
@@ -364,6 +371,83 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
           this.closeReprogramar();
         }
       });
+  }
+
+  // === Vista semanal ===
+
+  get weekGridDays(): { date: string; label: string; isToday: boolean }[] {
+    const days: { date: string; label: string; isToday: boolean }[] = [];
+    const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(this.currentWeekStart);
+      d.setDate(d.getDate() + i);
+      const dateStr = this.formatDate(d);
+      days.push({
+        date: dateStr,
+        label: `${dayNames[i]} ${d.getDate()}`,
+        isToday: dateStr === this.today
+      });
+    }
+    return days;
+  }
+
+  get weekLabel(): string {
+    const end = new Date(this.currentWeekStart);
+    end.setDate(end.getDate() + 5);
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const startDay = this.currentWeekStart.getDate();
+    const endDay = end.getDate();
+    const month = months[end.getMonth()];
+    return `Semana del ${startDay} al ${endDay} ${month}`;
+  }
+
+  changeWeek(direction: number): void {
+    const next = new Date(this.currentWeekStart);
+    next.setDate(next.getDate() + (direction * 7));
+    this.currentWeekStart = next;
+  }
+
+  goToThisWeek(): void {
+    this.currentWeekStart = this.getMonday(new Date());
+  }
+
+  getCitasForSlot(date: string, hour: number): Cita[] {
+    return this.citas.filter(c => {
+      if (c.fecha_cita !== date) return false;
+      const h = parseInt(c.hora_cita.split(':')[0], 10);
+      return h === hour;
+    });
+  }
+
+  getGridCitaClass(cita: Cita): string {
+    switch (cita.estatus) {
+      case 'programada': return 'ok';
+      case 'atendida': return 'ok';
+      case 'cancelada': return 'cancel';
+      case 'no_asistio': return 'cancel';
+      default: return 'warn';
+    }
+  }
+
+  getGridCitaInitials(cita: Cita): string {
+    const n = cita.alumno?.nombre ?? '';
+    const a = cita.alumno?.apellido ?? '';
+    return (n.charAt(0) + a.charAt(0)).toUpperCase();
+  }
+
+  getGridCitaName(cita: Cita): string {
+    const n = cita.alumno?.nombre ?? '';
+    const a = cita.alumno?.apellido ?? '';
+    return `${n} ${a}`.trim();
+  }
+
+  private getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }
 
   private loadCitas(): void {

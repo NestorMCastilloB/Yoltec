@@ -1,8 +1,17 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, of } from 'rxjs';
+import { Subject, of, forkJoin } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { Cita, CitaService } from '../../../../services/cita.service';
+import { RecetaService } from '../../../../services/receta.service';
+
+interface ActividadItem {
+  tipo: string;
+  icono: string;
+  titulo: string;
+  detalle: string;
+  tiempo: string;
+}
 
 @Component({
   selector: 'app-doctor-inicio',
@@ -13,36 +22,58 @@ import { Cita, CitaService } from '../../../../services/cita.service';
 })
 export class DoctorInicioComponent implements OnInit, OnDestroy {
   @Input() doctorName = 'Doctor';
+  @Output() openCita = new EventEmitter<Cita>();
 
   todayAppointments = 0;
   patientsAttended = 0;
-  pendingBitacoras = 0;
+  totalRecetas = 0;
+  asistenciaPct = 0;
   proximaCita: Cita | null = null;
   todayCitas: Cita[] = [];
   todayFormatted = '';
+  actividadReciente: ActividadItem[] = [];
 
   private readonly today = this.formatDate(new Date());
   private destroy$ = new Subject<void>();
 
-  constructor(private citaService: CitaService) {}
+  constructor(
+    private citaService: CitaService,
+    private recetaService: RecetaService
+  ) {}
 
   ngOnInit(): void {
     this.todayFormatted = this.formatDisplayDate(new Date());
 
-    this.citaService.getCitas()
-      .pipe(takeUntil(this.destroy$), catchError(() => of([] as Cita[])))
-      .subscribe(citas => {
-        const ahora = new Date();
-        this.todayCitas = citas.filter(c => c.fecha_cita === this.today);
-        this.todayAppointments = citas.filter(c => c.estatus === 'programada' && c.fecha_cita === this.today).length;
-        this.patientsAttended = citas.filter(c => c.estatus === 'atendida').length;
-        this.pendingBitacoras = citas.filter(c => c.estatus === 'programada').length;
+    forkJoin({
+      citas: this.citaService.getCitas().pipe(catchError(() => of([] as Cita[]))),
+      recetas: this.recetaService.getRecetas().pipe(catchError(() => of([] as any[])))
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(({ citas, recetas }) => {
+      const ahora = new Date();
 
-        const pending = citas
-          .filter(c => c.estatus === 'programada')
-          .sort((a, b) => this.toDate(a.fecha_cita, a.hora_cita).getTime() - this.toDate(b.fecha_cita, b.hora_cita).getTime());
-        this.proximaCita = pending.find(c => this.toDate(c.fecha_cita, c.hora_cita) >= ahora) ?? pending[0] ?? null;
-      });
+      // KPIs
+      this.todayCitas = citas.filter(c => c.fecha_cita === this.today);
+      this.todayAppointments = citas.filter(c => c.estatus === 'programada' && c.fecha_cita === this.today).length;
+      this.patientsAttended = citas.filter(c => c.estatus === 'atendida').length;
+      this.totalRecetas = recetas.length;
+
+      // Asistencia: atendidas / (atendidas + no_asistio) * 100
+      const atendidas = citas.filter(c => c.estatus === 'atendida').length;
+      const noAsistio = citas.filter(c => c.estatus === 'no_asistio').length;
+      this.asistenciaPct = (atendidas + noAsistio) > 0
+        ? Math.round((atendidas / (atendidas + noAsistio)) * 100)
+        : 100;
+
+      // Próxima cita
+      const pending = citas
+        .filter(c => c.estatus === 'programada')
+        .sort((a, b) => this.toDate(a.fecha_cita, a.hora_cita).getTime() - this.toDate(b.fecha_cita, b.hora_cita).getTime());
+      this.proximaCita = pending.find(c => this.toDate(c.fecha_cita, c.hora_cita) >= ahora) ?? pending[0] ?? null;
+
+      // Actividad reciente
+      this.actividadReciente = this.buildActividad(citas, recetas);
+    });
   }
 
   ngOnDestroy(): void {
@@ -54,6 +85,76 @@ export class DoctorInicioComponent implements OnInit, OnDestroy {
     const nombre = cita.alumno?.nombre ?? '';
     const apellido = cita.alumno?.apellido ?? '';
     return (nombre.charAt(0) + apellido.charAt(0)).toUpperCase();
+  }
+
+  private buildActividad(citas: Cita[], recetas: any[]): ActividadItem[] {
+    const items: ActividadItem[] = [];
+
+    // Últimas citas atendidas
+    const atendidas = citas
+      .filter(c => c.estatus === 'atendida')
+      .sort((a, b) => this.toDate(b.fecha_cita, b.hora_cita).getTime() - this.toDate(a.fecha_cita, a.hora_cita).getTime())
+      .slice(0, 2);
+
+    for (const c of atendidas) {
+      items.push({
+        tipo: 'cita',
+        icono: '⊞',
+        titulo: 'Cita atendida',
+        detalle: `${c.alumno?.nombre ?? ''} ${c.alumno?.apellido ?? ''} · ${c.hora_cita}`,
+        tiempo: this.relativeTime(c.fecha_cita, c.hora_cita)
+      });
+    }
+
+    // Últimas recetas
+    const recentRecetas = recetas.slice(-2).reverse();
+    for (const r of recentRecetas) {
+      items.push({
+        tipo: 'receta',
+        icono: '℞',
+        titulo: 'Receta emitida',
+        detalle: r.alumno ? `${r.alumno.nombre ?? ''} ${r.alumno.apellido ?? ''}` : 'Paciente',
+        tiempo: r.created_at ? this.relativeDate(r.created_at) : ''
+      });
+    }
+
+    // Últimas cancelaciones
+    const canceladas = citas
+      .filter(c => c.estatus === 'cancelada')
+      .sort((a, b) => this.toDate(b.fecha_cita, b.hora_cita).getTime() - this.toDate(a.fecha_cita, a.hora_cita).getTime())
+      .slice(0, 1);
+
+    for (const c of canceladas) {
+      items.push({
+        tipo: 'cancel',
+        icono: '✕',
+        titulo: 'Cita cancelada',
+        detalle: `${c.alumno?.nombre ?? ''} ${c.alumno?.apellido ?? ''} · ${c.fecha_cita}`,
+        tiempo: this.relativeTime(c.fecha_cita, c.hora_cita)
+      });
+    }
+
+    return items.slice(0, 5);
+  }
+
+  private relativeTime(fecha: string, hora?: string): string {
+    const d = this.toDate(fecha, hora);
+    const diff = Date.now() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h`;
+    return fecha === this.today ? 'Hoy' : 'Ayer';
+  }
+
+  private relativeDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    const diff = Date.now() - d.getTime();
+    const hrs = Math.floor(diff / 3600000);
+    if (hrs < 1) return 'Ahora';
+    if (hrs < 24) return `${hrs}h`;
+    if (hrs < 48) return 'Ayer';
+    return `${Math.floor(hrs / 24)}d`;
   }
 
   private formatDate(date: Date): string {

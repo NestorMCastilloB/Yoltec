@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { Cita } from '../../../services/cita.service';
 import { DoctorHeaderComponent } from '../components-doctor/doctor-header/doctor-header.component';
 import { DoctorInicioComponent } from '../components-doctor/doctor-inicio/doctor-inicio.component';
 import { DoctorCitasComponent } from '../components-doctor/doctor-citas/doctor-citas.component';
@@ -10,6 +11,7 @@ import { DoctorRecetasComponent } from '../components-doctor/doctor-recetas/doct
 import { DoctorPreEvaluacionesComponent } from '../components-doctor/doctor-pre-evaluaciones/doctor-pre-evaluaciones.component';
 import { DoctorIaPrioridadComponent } from '../components-doctor/doctor-ia-prioridad/doctor-ia-prioridad.component';
 import { DoctorEstadisticasComponent } from '../components-doctor/doctor-estadisticas/doctor-estadisticas.component';
+import { DoctorFichaPacienteComponent } from '../components-doctor/doctor-ficha-paciente/doctor-ficha-paciente.component';
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -24,7 +26,8 @@ import { DoctorEstadisticasComponent } from '../components-doctor/doctor-estadis
     DoctorRecetasComponent,
     DoctorPreEvaluacionesComponent,
     DoctorIaPrioridadComponent,
-    DoctorEstadisticasComponent
+    DoctorEstadisticasComponent,
+    DoctorFichaPacienteComponent
   ],
   templateUrl: './doctor-dashboard.component.html',
   styleUrls: ['./doctor-dashboard.component.css']
@@ -33,6 +36,7 @@ export class DoctorDashboardComponent implements OnInit {
   activeSection = 'inicio';
   doctorName = 'Doctor';
   totalPendientes = 0;
+  fichaAlumnoId: number | null = null;
 
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -43,6 +47,30 @@ export class DoctorDashboardComponent implements OnInit {
 
   setActiveSection(section: string): void {
     this.activeSection = section;
+    if (section !== 'ficha-paciente') {
+      this.fichaAlumnoId = null;
+    }
+  }
+
+  onOpenCita(cita: Cita): void {
+    if (cita.alumno?.id) {
+      this.openFichaPaciente(cita.alumno.id);
+    }
+  }
+
+  openFichaPaciente(alumnoId: number): void {
+    this.fichaAlumnoId = alumnoId;
+    this.activeSection = 'ficha-paciente';
+  }
+
+  searchTerm = '';
+
+  onSearch(term: string): void {
+    this.searchTerm = term;
+  }
+
+  onExport(): void {
+    // Delegado a la sección activa en futuras iteraciones
   }
 
   logout(): void {

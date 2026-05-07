@@ -1,14 +1,52 @@
 <div class="citas-wrapper">
 
+  <!-- Mensajes -->
+  <div *ngIf="submitMessage" class="alert">{{ submitMessage }}</div>
+
+  <!-- ===== CALENDARIO SEMANAL ===== -->
+  <div class="week-grid-card">
+    <div class="week-grid-header">
+      <h2>{{ weekLabel }}</h2>
+      <div class="week-nav">
+        <button class="btn-week" (click)="goToThisWeek()">Hoy</button>
+        <button class="btn-week" (click)="changeWeek(-1)">‹</button>
+        <button class="btn-week" (click)="changeWeek(1)">›</button>
+      </div>
+    </div>
+    <div class="week-grid-table-wrap">
+      <table class="week-grid-table">
+        <thead>
+          <tr>
+            <th class="col-hora">Hora</th>
+            <th *ngFor="let day of weekGridDays" [class.col-today]="day.isToday">
+              {{ day.label }}
+              <span *ngIf="day.isToday" class="today-dot">hoy</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let hour of hourGridSlots">
+            <td class="cell-hora">{{ hour | number:'2.0-0' }}:00</td>
+            <td *ngFor="let day of weekGridDays" class="cell-slot" [class.cell-today]="day.isToday">
+              <div *ngFor="let cita of getCitasForSlot(day.date, hour)"
+                   class="grid-cita" [ngClass]="getGridCitaClass(cita)"
+                   (click)="cita.alumno ? openFicha.emit(cita.alumno.id) : null">
+                {{ getGridCitaName(cita) }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== SECCIÓN EXPANDIBLE: AGENDAR + LISTA ===== -->
   <div class="section-header">
     <h2>Gestión de Citas</h2>
     <button class="btn-primary" (click)="toggleCreateForm()">
       {{ showCreateForm ? 'Cerrar formulario' : 'Agendar Nueva Cita' }}
     </button>
   </div>
-
-  <!-- Mensajes -->
-  <div *ngIf="submitMessage" class="alert">{{ submitMessage }}</div>
 
   <!-- Formulario de creación -->
   <div *ngIf="showCreateForm" class="form-card">
