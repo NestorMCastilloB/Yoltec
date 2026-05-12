@@ -100,8 +100,8 @@
               <p *ngIf="item.consulta.observaciones"><strong>Observaciones:</strong> {{ item.consulta.observaciones }}</p>
             </div>
             <div *ngIf="!item.consulta" class="tab-empty">Sin formulario de consulta registrado.</div>
-            <div *ngIf="item.receta?.medicamentos || item.receta?.medicamento || item.receta?.indicaciones" class="historial-receta">
-              <strong>Receta:</strong> {{ item.receta.medicamentos || item.receta.medicamento || item.receta.indicaciones }}
+            <div *ngIf="item.receta?.medicamento || item.receta?.indicaciones" class="historial-receta">
+              <strong>Receta:</strong> {{ item.receta?.medicamento || item.receta?.indicaciones }}
             </div>
           </div>
         </div>

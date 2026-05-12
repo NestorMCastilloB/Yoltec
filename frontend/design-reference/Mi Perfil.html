@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mi perfil</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec; --primary-100:#d1e3d8;
+    --warn:#f59e0b; --warn-50:#fef3e0;
+    --danger:#dc2626; --danger-50:#fde8e8;
+    --info:#0369a1; --info-50:#e0f2fe;
+    --bg:#f7f9f8; --surface:#fff;
+    --border:#e2e8e5; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body,#app{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit;color:var(--text)}
+
+  .app{display:flex;min-height:100vh}
+
+  .sb{width:232px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;cursor:pointer}
+  .sb a:hover{background:rgba(255,255,255,.05)}
+  .sb a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb a .ic{font-size:14px;width:16px;text-align:center}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+
+  /* Profile header */
+  .phead{background:#fff;border-bottom:1px solid var(--border);padding:28px 36px 0}
+  .phead .crumb{font-size:12px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:14px}
+  .pcard{display:flex;align-items:center;gap:24px;padding-bottom:24px}
+  .pavatar{position:relative;flex-shrink:0}
+  .pavatar .circle{width:92px;height:92px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px;letter-spacing:-1px;border:3px solid #fff;box-shadow:0 0 0 1px var(--border)}
+  .pavatar .change{position:absolute;bottom:-4px;right:-4px;background:#fff;color:var(--primary);border:1px solid var(--primary);font-size:11px;font-weight:600;padding:5px 9px;border-radius:999px;box-shadow:0 2px 4px rgba(0,0,0,.06);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .pavatar .change:hover{background:var(--primary-50)}
+  .pinfo{flex:1;min-width:0}
+  .pinfo h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.5px;display:inline-flex;align-items:center;gap:12px}
+  .pinfo .ctrl{font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;margin-bottom:10px;font-weight:500}
+  .pinfo .ctrl b{color:var(--text);font-weight:600}
+  .pinfo .meta{display:flex;gap:24px;font-size:13px;color:var(--text-muted)}
+  .pinfo .meta div{display:flex;flex-direction:column;gap:2px}
+  .pinfo .meta span{font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase}
+  .pinfo .meta b{color:var(--text);font-weight:600;font-size:13.5px}
+  .b{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;align-items:center;gap:5px}
+  .b.ok{background:var(--primary-50);color:var(--primary)}
+  .b .pulse{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  .tabs{display:flex;gap:0;border-bottom:1px solid transparent;margin-bottom:-1px}
+  .tabs button{padding:13px 4px;margin-right:28px;font-size:14px;font-weight:500;color:var(--text-muted);border-bottom:2px solid transparent;display:flex;align-items:center;gap:8px}
+  .tabs button:hover{color:var(--text)}
+  .tabs button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  .tabs button .ct{background:var(--bg);color:var(--text-muted);padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .tabs button.active .ct{background:var(--primary-50);color:var(--primary)}
+
+  .content{padding:24px 36px 60px;flex:1}
+
+  /* Btn */
+  .btn{padding:9px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn.secondary:hover{background:var(--primary-50)}
+  .btn.ghost{color:var(--text-muted)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.gray{background:#fff;color:var(--text-muted);border:1px solid var(--border-strong)}
+  .btn.gray:hover{background:var(--bg);border-color:var(--text-subtle)}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+  .section-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border)}
+  .section-head h2{margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.1px}
+  .section-head .hint{font-size:12px;color:var(--text-subtle);margin-top:2px}
+  .section-head .left h2 + .hint{margin-top:2px}
+
+  /* Info grid */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;padding:22px}
+  .grid2 .full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:baseline}
+  .field label .req{color:var(--danger)}
+  .field .ro{padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:13.5px;color:var(--text);font-weight:500;min-height:38px;display:flex;align-items:center}
+  .field .ro.empty{color:var(--text-subtle);font-weight:400;font-style:italic}
+  .field .ro.medical{font-family:inherit;line-height:1.55;align-items:flex-start;padding-top:11px;min-height:auto;white-space:pre-wrap}
+  .field input,.field select,.field textarea{padding:10px 12px;border:1px solid var(--border-strong);border-radius:7px;font-size:13.5px;background:#fff;outline:none;color:var(--text);transition:border-color .15s,box-shadow .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,92,58,.1)}
+  .field textarea{min-height:84px;resize:vertical;line-height:1.55}
+  .field .below{font-size:11.5px;color:var(--text-subtle);margin-top:2px}
+
+  .editbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:var(--bg);border-top:1px solid var(--border)}
+  .editbar .saved{font-size:12px;color:var(--text-subtle);display:flex;align-items:center;gap:6px}
+
+  /* Recetas list */
+  .receta{padding:18px 22px;border-bottom:1px solid var(--border)}
+  .receta:last-child{border-bottom:none}
+  .receta-row{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+  .receta-head .date{display:flex;align-items:center;gap:11px}
+  .receta-head .d{flex-shrink:0;width:42px;text-align:center;background:var(--primary-50);border-radius:7px;padding:6px 0;color:var(--primary)}
+  .receta-head .d b{display:block;font-size:16px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .receta-head .d span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+  .receta-head .meta b{display:block;font-size:13px;font-weight:600;text-transform:capitalize}
+  .receta-head .meta span{font-size:11.5px;color:var(--text-subtle)}
+  .receta-doctor{font-size:13px;color:var(--text-muted);text-align:right}
+  .receta-doctor b{display:block;color:var(--text);font-weight:600;font-size:13.5px;margin-bottom:2px}
+  .receta-body{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .receta-sec h4{margin:0 0 8px;font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase}
+  .med-list{display:flex;flex-direction:column;gap:6px}
+  .med{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text)}
+  .med .pill{width:22px;height:22px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px}
+  .med b{font-weight:600}
+  .med span{display:block;font-size:11.5px;color:var(--text-subtle);margin-top:1px}
+  .ind{font-size:13px;color:var(--text-muted);line-height:1.55;background:var(--bg);padding:10px 12px;border-radius:7px;border-left:3px solid var(--primary-100)}
+  .receta-foot{margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--text-subtle)}
+  .receta-foot .left{display:flex;gap:14px}
+  .receta-foot .vig{color:var(--primary);font-weight:600}
+  .receta-foot .exp{color:var(--text-subtle)}
+
+  /* Bitácora */
+  .filterbar{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:18px;flex-wrap:wrap}
+  .filterbar .lab{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-right:4px}
+  .ffld{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 11px}
+  .ffld input,.ffld select{background:transparent;border:none;outline:none;font-size:13px;color:var(--text);min-width:130px}
+  .ffld .ic{color:var(--text-subtle);font-size:13px}
+  .filterbar .spacer{flex:1}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;padding:12px 22px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border)}
+  td{padding:14px 22px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg)}
+  .date-cell{display:flex;align-items:center;gap:11px}
+  .date-cell .d{flex-shrink:0;width:42px;text-align:center;background:var(--bg);border-radius:7px;padding:6px 0;color:var(--text-subtle)}
+  .date-cell .d b{display:block;font-size:16px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .date-cell .d span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+  .date-cell .dow b{display:block;color:var(--text);font-size:13px;font-weight:500;text-transform:capitalize}
+  .date-cell .dow span{font-size:11.5px;color:var(--text-subtle)}
+  .hr{font-variant-numeric:tabular-nums;font-weight:600}
+  .motivo b{display:block;color:var(--text);font-weight:500;font-size:13.5px;margin-bottom:2px}
+  .motivo span{font-size:12px;color:var(--text-subtle)}
+  .b.attended{background:var(--info-50);color:var(--info)}
+  .b.cancel{background:var(--danger-50);color:var(--danger)}
+  .b.noshow{background:#f1f5f9;color:#64748b}
+
+  /* Switcher */
+  .switcher{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;background:#fff;border:1px solid var(--border);border-radius:8px;padding:3px;display:flex;gap:1px;box-shadow:0 6px 16px rgba(26,92,58,.14)}
+  .switcher button{padding:7px 14px;border-radius:5px;font-size:12.5px;font-weight:500;color:var(--text-muted)}
+  .switcher button.active{background:var(--primary);color:#fff}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="switcher">
+  <button id="s1" class="active">Médica · lectura</button>
+  <button id="s2">Médica · edición</button>
+  <button id="s3">Recetas</button>
+  <button id="s4">Bitácora</button>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const {useState}=React;
+
+function Sidebar(){
+  const items=[['inicio','Inicio','▦'],['citas','Mis citas','⊞'],['ia','Pre-evaluación IA','◔'],['rec','Recetas','℞'],['perf','Mi perfil','◉',true]];
+  return (
+    <aside className="sb">
+      <div className="brand"><div className="y">Y</div><div><b>Yoltec</b><span>Servicio médico</span></div></div>
+      <nav>{items.map(([k,l,i,a])=>(<a key={k} className={a?'active':''}><span className="ic">{i}</span>{l}</a>))}</nav>
+      <div className="user"><div className="av">NM</div><div><b>Nestor Castillo</b><span>22690495</span></div></div>
+    </aside>
+  );
+}
+
+function ProfileHeader({tab,setTab}){
+  return (
+    <div className="phead">
+      <div className="crumb">Mi perfil</div>
+      <div className="pcard">
+        <div className="pavatar">
+          <div className="circle">NM</div>
+          <button className="change">＋ Cambiar foto</button>
+        </div>
+        <div className="pinfo">
+          <h1>Nestor Castillo <span className="b ok"><span className="pulse"></span>Activo</span></h1>
+          <div className="ctrl">No. de control · <b>22690495</b></div>
+          <div className="meta">
+            <div><span>Carrera</span><b>Ing. Sistemas</b></div>
+            <div><span>Semestre</span><b>6°</b></div>
+            <div><span>Correo</span><b>22690495@itsm.edu.mx</b></div>
+            <div><span>Última actualización</span><b>28 abr 2026</b></div>
+          </div>
+        </div>
+      </div>
+      <div className="tabs">
+        <button className={tab==='med'?'active':''} onClick={()=>setTab('med')}>Información médica</button>
+        <button className={tab==='rec'?'active':''} onClick={()=>setTab('rec')}>Mis recetas <span className="ct">3</span></button>
+        <button className={tab==='bit'?'active':''} onClick={()=>setTab('bit')}>Bitácora <span className="ct">7</span></button>
+      </div>
+    </div>
+  );
+}
+
+function MedicaReadonly({onEdit}){
+  return (
+    <div className="card">
+      <div className="section-head">
+        <div className="left">
+          <h2>Información médica</h2>
+          <div className="hint">Tus datos los puede consultar el doctor durante la consulta. Mantenlos actualizados.</div>
+        </div>
+        <button className="btn secondary sm" onClick={onEdit}>✎ Editar</button>
+      </div>
+      <div className="grid2">
+        <div className="field"><label>Tipo de sangre</label><div className="ro">O+</div></div>
+        <div className="field"><label>Peso</label><div className="ro">68 kg</div></div>
+        <div className="field"><label>Estatura</label><div className="ro">175 cm</div></div>
+        <div className="field"><label>Contacto de emergencia</label><div className="ro">Lucía Castillo — (777) 312 4408</div></div>
+        <div className="field full">
+          <label>Alergias conocidas</label>
+          <div className="ro medical">Penicilina (reacción cutánea moderada, reportada en 2023).{'\n'}Polen — rinitis estacional en primavera.</div>
+        </div>
+        <div className="field full">
+          <label>Enfermedades crónicas / antecedentes</label>
+          <div className="ro medical">Asma leve diagnosticada en 2019 — uso ocasional de salbutamol inhalado.{'\n'}Antecedente familiar: diabetes tipo 2 (padre).</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MedicaEdit({onCancel,onSave}){
+  return (
+    <div className="card">
+      <div className="section-head">
+        <div className="left">
+          <h2>Editar información médica</h2>
+          <div className="hint">Los cambios se guardarán en tu expediente y serán visibles para el personal médico autorizado.</div>
+        </div>
+        <span className="b ok"><span className="pulse"></span>Modo edición</span>
+      </div>
+      <div className="grid2">
+        <div className="field">
+          <label>Tipo de sangre <span className="req">*</span></label>
+          <select defaultValue="O+">
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+            <option>No lo sé</option>
+          </select>
+        </div>
+        <div className="field">
+          <label>Peso (kg)</label>
+          <input defaultValue="68" inputMode="decimal"/>
+        </div>
+        <div className="field">
+          <label>Estatura (cm)</label>
+          <input defaultValue="175" inputMode="numeric"/>
+        </div>
+        <div className="field">
+          <label>Contacto de emergencia <span className="req">*</span></label>
+          <input defaultValue="Lucía Castillo — (777) 312 4408"/>
+          <div className="below">Nombre completo y teléfono a 10 dígitos.</div>
+        </div>
+        <div className="field full">
+          <label>Alergias conocidas</label>
+          <textarea defaultValue={"Penicilina (reacción cutánea moderada, reportada en 2023).\nPolen — rinitis estacional en primavera."}/>
+          <div className="below">Separa cada alergia con un salto de línea. Indica gravedad si aplica.</div>
+        </div>
+        <div className="field full">
+          <label>Enfermedades crónicas / antecedentes</label>
+          <textarea defaultValue={"Asma leve diagnosticada en 2019 — uso ocasional de salbutamol inhalado.\nAntecedente familiar: diabetes tipo 2 (padre)."}/>
+        </div>
+      </div>
+      <div className="editbar">
+        <div className="saved">Última actualización: <b style={{color:'var(--text-muted)',fontWeight:600,marginLeft:4}}>28 abr 2026, 11:42</b></div>
+        <div style={{display:'flex',gap:10}}>
+          <button className="btn gray" onClick={onCancel}>Cancelar</button>
+          <button className="btn primary" onClick={onSave}>Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const RECETAS=[
+  {
+    d:28,m:'ABR',dow:'martes',doc:'Dr. Omar Salas',esp:'Medicina general',cons:'Faringitis aguda',
+    meds:[{n:'Paracetamol 500 mg',p:'1 tableta cada 8 hrs',dur:'5 días'},{n:'Loratadina 10 mg',p:'1 tableta al día',dur:'7 días'}],
+    ind:'Tomar abundante agua, reposo relativo 48 hrs. Evitar bebidas frías y irritantes. Regresar si la fiebre supera 38.5 °C por más de 24 hrs o si aparece dificultad para tragar saliva.',
+    vig:'Vigente · vence 5 may 2026'
+  },
+  {
+    d:14,m:'ABR',dow:'martes',doc:'Dr. Omar Salas',esp:'Medicina general',cons:'Control general',
+    meds:[{n:'Multivitamínico adulto',p:'1 cápsula al día',dur:'30 días'}],
+    ind:'Mantener actividad física moderada 3 veces por semana. Próximo control en 3 meses para revisión de hemograma.',
+    vig:'Vigente · vence 14 may 2026'
+  },
+  {
+    d:2,m:'ABR',dow:'jueves',doc:'Dra. Daniela Cruz',esp:'Nutrición',cons:'Consulta nutricional',
+    meds:[{n:'Suplemento B12 1000 mcg',p:'1 tableta al día (mañana)',dur:'60 días'},{n:'Hierro 60 mg',p:'1 tableta al día con cítrico',dur:'30 días'}],
+    ind:'Plan alimenticio entregado en consulta. Aumentar ingesta de hierro hemínico (carnes magras) y vegetales de hoja verde. Próxima cita: control de peso y hemoglobina en 30 días.',
+    vig:'Expira el 2 jun 2026'
+  },
+];
+
+function Recetas(){
+  return (
+    <>
+      <div className="section-head card" style={{marginBottom:14}}>
+        <div className="left">
+          <h2>Mis recetas</h2>
+          <div className="hint">Recetas emitidas por el servicio médico universitario. Solo lectura.</div>
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          <button className="btn ghost sm">Imprimir todas</button>
+          <button className="btn secondary sm">Descargar PDF</button>
+        </div>
+      </div>
+      <div className="card">
+        {RECETAS.map((r,i)=>(
+          <div key={i} className="receta">
+            <div className="receta-row receta-head">
+              <div className="date">
+                <div className="d"><b>{String(r.d).padStart(2,'0')}</b><span>{r.m}</span></div>
+                <div className="meta"><b>{r.dow} 2026</b><span>Consulta: {r.cons}</span></div>
+              </div>
+              <div className="receta-doctor"><b>{r.doc}</b>{r.esp}</div>
+            </div>
+            <div className="receta-body">
+              <div className="receta-sec">
+                <h4>Medicamentos</h4>
+                <div className="med-list">
+                  {r.meds.map((m,j)=>(
+                    <div key={j} className="med">
+                      <div className="pill">℞</div>
+                      <div><b>{m.n}</b><span>{m.p} · {m.dur}</span></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="receta-sec">
+                <h4>Indicaciones</h4>
+                <div className="ind">{r.ind}</div>
+              </div>
+            </div>
+            <div className="receta-foot">
+              <div className="left">
+                <span className={r.vig.startsWith('Vigente')?'vig':'exp'}>{r.vig}</span>
+                <span>Folio: REC-2026-{1240+i}</span>
+              </div>
+              <button className="btn ghost sm">Ver detalle →</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+const BITACORA=[
+  {d:28,m:'ABR',dow:'martes',hr:'09:00',motivo:'Faringitis aguda',meta:'Dr. Omar Salas · Consultorio 2',estado:'attended',label:'Atendida'},
+  {d:14,m:'ABR',dow:'martes',hr:'10:30',motivo:'Control general',meta:'Dr. Omar Salas · Consultorio 2',estado:'attended',label:'Atendida'},
+  {d:2,m:'ABR',dow:'jueves',hr:'13:20',motivo:'Consulta nutricional',meta:'Dra. Daniela Cruz · Consultorio 1',estado:'attended',label:'Atendida'},
+  {d:18,m:'MAR',dow:'miércoles',hr:'11:00',motivo:'Dolor de garganta',meta:'Dra. Daniela Cruz · Consultorio 1',estado:'noshow',label:'No asistió'},
+  {d:5,m:'MAR',dow:'jueves',hr:'08:30',motivo:'Revisión general',meta:'Dr. Omar Salas · Consultorio 2',estado:'attended',label:'Atendida'},
+  {d:22,m:'FEB',dow:'lunes',hr:'12:00',motivo:'Vacunación influenza',meta:'Enf. Marta Robles · Sala 3',estado:'cancel',label:'Cancelada'},
+  {d:8,m:'FEB',dow:'lunes',hr:'09:30',motivo:'Revisión asma',meta:'Dr. Omar Salas · Consultorio 2',estado:'attended',label:'Atendida'},
+];
+
+function Bitacora(){
+  return (
+    <>
+      <div className="filterbar">
+        <span className="lab">Filtrar</span>
+        <div className="ffld"><span className="ic">⌕</span><input placeholder="Buscar por motivo o doctor"/></div>
+        <div className="ffld"><span className="ic">⊞</span><input type="date" defaultValue="2026-02-01"/></div>
+        <div className="ffld"><span className="ic">→</span><input type="date" defaultValue="2026-04-30"/></div>
+        <div className="ffld"><select defaultValue=""><option value="">Todos los estatus</option><option>Atendida</option><option>Cancelada</option><option>No asistió</option></select></div>
+        <div className="spacer"/>
+        <button className="btn ghost sm">Limpiar</button>
+        <button className="btn secondary sm">Exportar</button>
+      </div>
+      <div className="card">
+        <div className="section-head" style={{borderBottom:'1px solid var(--border)'}}>
+          <div className="left"><h2>Bitácora de consultas</h2><div className="hint">Historial completo de citas pasadas. Solo lectura.</div></div>
+          <div style={{fontSize:12.5,color:'var(--text-muted)'}}><b style={{color:'var(--text)'}}>7</b> registros · feb – abr 2026</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th style={{width:'24%'}}>Fecha</th>
+            <th style={{width:'9%'}}>Hora</th>
+            <th>Motivo</th>
+            <th style={{width:'14%'}}>Estatus</th>
+            <th style={{width:'10%',textAlign:'right'}}></th>
+          </tr></thead>
+          <tbody>
+            {BITACORA.map((c,i)=>(
+              <tr key={i}>
+                <td>
+                  <div className="date-cell">
+                    <div className="d"><b>{String(c.d).padStart(2,'0')}</b><span>{c.m}</span></div>
+                    <div className="dow"><b>{c.dow}</b><span>2026</span></div>
+                  </div>
+                </td>
+                <td className="hr">{c.hr}</td>
+                <td className="motivo"><b>{c.motivo}</b><span>{c.meta}</span></td>
+                <td><span className={'b '+c.estado}><span className="pulse"></span>{c.label}</span></td>
+                <td style={{textAlign:'right'}}><button className="btn ghost sm">Ver →</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function App({mode}){
+  const tab = mode==='rec'?'rec':mode==='bit'?'bit':'med';
+  const editing = mode==='medEdit';
+  const setTab = (t)=>{
+    // demo: jump to first state of that tab
+    document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));
+    if(t==='med'){document.getElementById('s1').classList.add('active');render('med');}
+    else if(t==='rec'){document.getElementById('s3').classList.add('active');render('rec');}
+    else if(t==='bit'){document.getElementById('s4').classList.add('active');render('bit');}
+  };
+  return (
+    <div className="app">
+      <Sidebar/>
+      <div className="main">
+        <ProfileHeader tab={tab} setTab={setTab}/>
+        <div className="content">
+          {tab==='med' && !editing && <MedicaReadonly onEdit={()=>{document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));document.getElementById('s2').classList.add('active');render('medEdit');}}/>}
+          {tab==='med' && editing && <MedicaEdit
+            onCancel={()=>{document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));document.getElementById('s1').classList.add('active');render('med');}}
+            onSave={()=>{document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));document.getElementById('s1').classList.add('active');render('med');}}
+          />}
+          {tab==='rec' && <Recetas/>}
+          {tab==='bit' && <Bitacora/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root=ReactDOM.createRoot(document.getElementById('app'));
+function render(m){root.render(<App mode={m}/>);}
+document.getElementById('s1').onclick=()=>{setActive('s1');render('med');};
+document.getElementById('s2').onclick=()=>{setActive('s2');render('medEdit');};
+document.getElementById('s3').onclick=()=>{setActive('s3');render('rec');};
+document.getElementById('s4').onclick=()=>{setActive('s4');render('bit');};
+function setActive(id){document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');}
+render('med');
+</script>
+</body>
+</html>

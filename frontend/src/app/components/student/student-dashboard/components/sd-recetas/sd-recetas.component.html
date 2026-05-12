@@ -1,0 +1,29 @@
+<section class="content-section">
+  <div class="section-header"><h2>Mis Recetas Médicas</h2></div>
+
+  <div class="recetas-container">
+    <ng-container *ngIf="!isLoading; else loadingTpl">
+      <div *ngIf="error" class="alert error">{{ error }}</div>
+
+      <div *ngIf="!error && recetas.length === 0" class="placeholder-card">
+        <h3>No tienes recetas registradas</h3>
+        <p>Cuando el doctor expida una receta para ti aparecerá en este apartado.</p>
+      </div>
+
+      <div *ngIf="recetas.length > 0" class="cards-grid">
+        <div *ngFor="let r of recetas" class="receta-card">
+          <div class="receta-header">
+            <h3>{{ r.doctor?.nombre }} {{ r.doctor?.apellido }}</h3>
+            <span class="receta-date">Emitida el {{ formatFecha(r.fecha_emision) }}</span>
+          </div>
+          <p class="receta-detail"><strong>Cita asociada:</strong> {{ formatFecha(r.cita?.fecha_cita || '') }} · {{ r.cita?.hora_cita }} hrs</p>
+          <p class="receta-detail"><strong>Medicamentos:</strong></p>
+          <p class="receta-text">{{ r.medicamentos }}</p>
+          <p class="receta-detail" *ngIf="r.indicaciones"><strong>Indicaciones:</strong></p>
+          <p class="receta-text" *ngIf="r.indicaciones">{{ r.indicaciones }}</p>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #loadingTpl><div class="placeholder-card">Cargando tus recetas...</div></ng-template>
+  </div>
+</section>

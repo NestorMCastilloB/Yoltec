@@ -338,15 +338,16 @@
   }
 
   .welcome-panel {
-    padding: 3rem 1.5rem;
-  }
-
-  .welcome-content h1 {
-    font-size: 1.8rem;
+    display: none;
   }
 
   .login-panel {
-    padding: 2rem 1.5rem;
+    padding: 2.5rem 1.25rem;
+    min-height: 100vh;
+  }
+
+  .form-container {
+    max-width: 100%;
   }
 
   .role-btn {

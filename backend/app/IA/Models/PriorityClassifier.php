@@ -1,4 +1,4 @@
-<?php
+33<?php
 
 namespace App\IA\Models;
 
@@ -195,7 +195,7 @@ class PriorityClassifier
         // En una implementación real, aquí ajustaríamos los pesos
         // basándonos en retroalimentación de doctores
         // Por ahora, los pesos son fijos basados en conocimiento médico
-        
+
         // Analizar dataset para validar umbrales
         $distribucion = ['alta' => 0, 'media' => 0, 'baja' => 0];
         foreach ($dataset as $muestra) {
@@ -222,8 +222,8 @@ class PriorityClassifier
     public function evaluar(array $datasetPrueba): array
     {
         $correctos = 0;
-        $porPrioridad = ['alta' => ['correctos' => 0, 'total' => 0], 
-                        'media' => ['correctos' => 0, 'total' => 0], 
+        $porPrioridad = ['alta' => ['correctos' => 0, 'total' => 0],
+                        'media' => ['correctos' => 0, 'total' => 0],
                         'baja' => ['correctos' => 0, 'total' => 0]];
 
         foreach ($datasetPrueba as $muestra) {
@@ -245,18 +245,18 @@ class PriorityClassifier
         }
 
         $total = count($datasetPrueba);
-        
+
         return [
             'precision_global' => $total > 0 ? $correctos / $total : 0,
             'por_prioridad' => [
-                'alta' => $porPrioridad['alta']['total'] > 0 
-                    ? $porPrioridad['alta']['correctos'] / $porPrioridad['alta']['total'] 
+                'alta' => $porPrioridad['alta']['total'] > 0
+                    ? $porPrioridad['alta']['correctos'] / $porPrioridad['alta']['total']
                     : 0,
-                'media' => $porPrioridad['media']['total'] > 0 
-                    ? $porPrioridad['media']['correctos'] / $porPrioridad['media']['total'] 
+                'media' => $porPrioridad['media']['total'] > 0
+                    ? $porPrioridad['media']['correctos'] / $porPrioridad['media']['total']
                     : 0,
-                'baja' => $porPrioridad['baja']['total'] > 0 
-                    ? $porPrioridad['baja']['correctos'] / $porPrioridad['baja']['total'] 
+                'baja' => $porPrioridad['baja']['total'] > 0
+                    ? $porPrioridad['baja']['correctos'] / $porPrioridad['baja']['total']
                     : 0,
             ],
             'total_muestras' => $total,

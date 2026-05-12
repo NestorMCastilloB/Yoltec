@@ -1,0 +1,153 @@
+<div class="pe-layout">
+  <!-- Header -->
+  <div class="pe-header">
+    <div class="pe-crumb">PRE-EVALUACION IA</div>
+    <h2 class="pe-title">Pre-evaluacion con IA</h2>
+    <p class="pe-sub">Describe tus sintomas con tus propias palabras. Esto <b>NO reemplaza una consulta medica</b> — solo orienta y prepara tu cita con el doctor.</p>
+  </div>
+
+  <div class="pe-grid">
+    <!-- Columna chat -->
+    <div class="pe-col-chat">
+      <div class="pe-chat-meta">
+        <span class="pe-session">Sesion activa</span>
+        <span class="pe-live"><span class="pe-dot"></span>IA en linea</span>
+      </div>
+
+      <div class="pe-msgs" #scrollContainer>
+        @for (msg of mensajes; track $index) {
+          <div class="pe-msg" [class.ai]="msg.tipo === 'ai'" [class.me]="msg.tipo === 'user'">
+            <div class="pe-msg-av">{{ msg.tipo === 'ai' ? 'IA' : '?' }}</div>
+            <div class="pe-msg-body">
+              <div class="pe-bubble">{{ msg.contenido }}</div>
+              <div class="pe-ts">{{ msg.hora }}</div>
+            </div>
+          </div>
+        }
+
+        <!-- Typing indicator -->
+        @if (enviando) {
+          <div class="pe-msg ai">
+            <div class="pe-msg-av">IA</div>
+            <div class="pe-msg-body">
+              <div class="pe-bubble">
+                <div class="pe-typing">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Error -->
+        @if (error) {
+          <div class="pe-error">
+            <span>{{ error }}</span>
+            <button class="pe-error-btn" (click)="reintentar()">Reintentar</button>
+          </div>
+        }
+      </div>
+
+      <!-- Input -->
+      <div class="pe-composer">
+        <div class="pe-input-row">
+          <textarea
+            #inputRef
+            [(ngModel)]="textoInput"
+            (keydown)="onKeydown($event)"
+            (input)="autoResize()"
+            placeholder="Escribe otro sintoma o duda..."
+            rows="1"
+            [disabled]="enviando">
+          </textarea>
+          <button class="pe-send" (click)="enviar()" [disabled]="enviando || !textoInput.trim()" title="Enviar">
+            &#8593;
+          </button>
+        </div>
+        <div class="pe-input-hint">
+          <span>Presiona <kbd>Enter</kbd> para enviar · <kbd>Shift</kbd>+<kbd>Enter</kbd> nueva linea</span>
+          <span>Tus respuestas son confidenciales</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna resultados -->
+    <div class="pe-col-res">
+      @if (mostrarResultado) {
+        <!-- Diagnosticos -->
+        <div class="pe-panel">
+          <div class="pe-panel-head">
+            <h3><span class="pe-panel-icon">&#9672;</span>Posibles diagnosticos</h3>
+          </div>
+
+          @for (dx of diagnosticos; track dx.nombre; let i = $index) {
+            <div class="pe-dx" [class]="'pe-dx-' + (i + 1)">
+              <div class="pe-dx-row">
+                <div class="pe-dx-name">
+                  <span class="pe-dx-rank">{{ i + 1 }}</span>
+                  {{ dx.nombre }}
+                  @if (dx.codigo) {
+                    <span class="pe-dx-code">{{ dx.codigo }}</span>
+                  }
+                </div>
+                <div class="pe-dx-pct">{{ dx.porcentaje }}%</div>
+              </div>
+              <div class="pe-bar"><div class="pe-bar-fill" [style.width.%]="dx.porcentaje"></div></div>
+              @if (dx.descripcion) {
+                <div class="pe-dx-meta">{{ dx.descripcion }}</div>
+              }
+            </div>
+          }
+
+          <!-- Warning -->
+          <div class="pe-callout">
+            <div class="pe-callout-icon">!</div>
+            <div class="pe-callout-txt">
+              <b>Solo orientativo</b>
+              El doctor confirmara el diagnostico. No tomes medicamentos sin prescripcion.
+            </div>
+          </div>
+
+          <div class="pe-panel-cta">
+            <button class="pe-btn-agendar" (click)="agendarCita()">Agendar cita</button>
+          </div>
+        </div>
+
+        <!-- Sintomas detectados -->
+        @if (sintomasDetectados.length) {
+          <div class="pe-panel">
+            <div class="pe-panel-head">
+              <h3><span class="pe-panel-icon">&#9906;</span>Sintomas detectados</h3>
+            </div>
+            <div class="pe-syms">
+              @for (s of sintomasDetectados; track s) {
+                <span class="pe-chip">{{ s }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Recomendaciones -->
+        @if (recomendaciones.length) {
+          <div class="pe-panel pe-tips">
+            <div class="pe-panel-head">
+              <h3><span class="pe-panel-icon">&#9829;</span>Recomendaciones</h3>
+            </div>
+            <ul>
+              @for (r of recomendaciones; track r; let i = $index) {
+                <li><span class="pe-tip-num">{{ i + 1 }}</span><span>{{ r }}</span></li>
+              }
+            </ul>
+          </div>
+        }
+      } @else {
+        <!-- Estado vacío -->
+        <div class="pe-empty">
+          <div class="pe-empty-icon">&#9672;</div>
+          <h3>Resultados</h3>
+          <p>Los posibles diagnosticos apareceran aqui cuando la IA tenga suficiente informacion.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

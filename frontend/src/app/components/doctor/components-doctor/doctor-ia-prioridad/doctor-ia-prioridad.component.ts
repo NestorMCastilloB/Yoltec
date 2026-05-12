@@ -15,6 +15,8 @@ export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
   prioridadResumen: ResumenPrioridad | null = null;
   isLoadingPrioridad = false;
   prioridadError: string | null = null;
+  hasError = false;
+  errorMessage = '';
 
   filtroActivo: 'todas' | 'alta' | 'media' | 'baja' = 'todas';
   expandedCards = new Set<number>();
@@ -32,15 +34,24 @@ export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
     this.destroy$.complete();
   }
 
+  // Reintenta la clasificación tras un error de conexión
+  reintentar(): void {
+    this.hasError = false;
+    this.errorMessage = '';
+    this.loadPrioridad();
+  }
+
   loadPrioridad(): void {
     this.isLoadingPrioridad = true;
-    this.prioridadError = null;
+    this.hasError = false;
+    this.errorMessage = '';
 
     this.iaPriorityService.getPendientesPorPrioridad()
       .pipe(
         takeUntil(this.destroy$),
-        catchError(error => {
-          this.prioridadError = error?.error?.message || 'No se pudo cargar la clasificación de prioridad.';
+        catchError(() => {
+          this.hasError = true;
+          this.errorMessage = 'No se pudo conectar con el servicio de prioridad. Intenta de nuevo.';
           return of(null);
         }),
         finalize(() => { this.isLoadingPrioridad = false; })

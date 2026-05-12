@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Pre-evaluación IA</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec;
+    --warn:#f59e0b; --warn-50:#fef3e0;
+    --bg:#f7f9f8; --surface:#ffffff;
+    --border:#e2e8e5; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+    --bubble-ai:#f3f4f6; --bubble-me:#e8f5ee;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;height:100%;font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+  .app{display:flex;height:100vh}
+
+  /* Sidebar */
+  .sb{width:232px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;letter-spacing:-.5px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px;letter-spacing:.3px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;text-decoration:none;cursor:pointer}
+  .sb a:hover{background:rgba(255,255,255,.05)}
+  .sb a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb a .ic{font-size:14px;width:16px;text-align:center;opacity:.95}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+  .header{padding:24px 36px 18px;background:#fff;border-bottom:1px solid var(--border)}
+  .crumb{font-size:12px;color:var(--text-subtle);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+  h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.5px}
+  .header .sub{font-size:13px;color:var(--text-subtle);max-width:640px;line-height:1.5}
+  .header .sub b{color:var(--text-muted);font-weight:600}
+
+  /* Two columns */
+  .grid{display:grid;grid-template-columns:60% 40%;flex:1;min-height:0}
+  .col-chat{display:flex;flex-direction:column;border-right:1px solid var(--border);background:#fff;min-height:0}
+  .col-res{padding:24px 28px;overflow-y:auto;background:var(--bg)}
+
+  /* Chat */
+  .chat-meta{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#fff}
+  .chat-meta .session{font-size:12px;color:var(--text-subtle)}
+  .chat-meta .session b{color:var(--text);font-weight:600}
+  .chat-meta .live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--primary);font-weight:600}
+  .chat-meta .live .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px rgba(26,92,58,.12)}
+
+  .msgs{flex:1;overflow-y:auto;padding:26px 28px 8px;display:flex;flex-direction:column;gap:18px}
+  .msg{display:flex;gap:10px;max-width:78%}
+  .msg.ai{align-self:flex-start}
+  .msg.me{align-self:flex-end;flex-direction:row-reverse}
+  .msg .av{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+  .msg.ai .av{background:var(--primary);color:#fff}
+  .msg.me .av{background:var(--primary-50);color:var(--primary)}
+  .msg .body{display:flex;flex-direction:column;gap:4px}
+  .msg.me .body{align-items:flex-end}
+  .bubble{padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--text)}
+  .msg.ai .bubble{background:var(--bubble-ai);border-top-left-radius:4px}
+  .msg.me .bubble{background:var(--bubble-me);border-top-right-radius:4px;color:#13301f}
+  .msg .ts{font-size:10.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums}
+  .msg.me .ts{text-align:right}
+  .typing{display:flex;gap:4px;padding:4px 0}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-subtle);opacity:.5;animation:b 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.15s}
+  .typing span:nth-child(3){animation-delay:.3s}
+  @keyframes b{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+
+  /* Input area */
+  .composer{border-top:1px solid var(--border);padding:14px 28px 18px;background:#fff;flex-shrink:0}
+  .input-row{display:flex;gap:10px;align-items:flex-end;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 14px;transition:border-color .15s, box-shadow .15s}
+  .input-row:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,92,58,.1);background:#fff}
+  .input-row textarea{flex:1;border:none;outline:none;resize:none;font-family:inherit;font-size:13.5px;line-height:1.5;color:var(--text);background:transparent;padding:6px 0;max-height:96px;min-height:24px}
+  .input-row textarea::placeholder{color:var(--text-subtle)}
+  .input-row .send{background:var(--primary);color:#fff;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;transition:background .15s}
+  .input-row .send:hover{background:var(--primary-600)}
+  .input-row .send:disabled{background:var(--border-strong);cursor:not-allowed}
+  .input-hint{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:var(--text-subtle)}
+  .input-hint .left{display:flex;align-items:center;gap:6px}
+  .input-hint kbd{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:inherit;font-size:10.5px;color:var(--text-muted);font-weight:600}
+  .finish-btn{width:100%;margin-top:12px;background:var(--primary);color:#fff;padding:12px 16px;border-radius:9px;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+  .finish-btn:hover{background:var(--primary-600)}
+  .finish-btn .ic{font-size:14px}
+
+  /* Right column */
+  .panel{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04);margin-bottom:18px}
+  .panel-head{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .panel-head h2{margin:0;font-size:14px;font-weight:600;letter-spacing:-.1px;display:flex;align-items:center;gap:8px}
+  .panel-head h2 .ic{width:24px;height:24px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .panel-head .meta{font-size:11.5px;color:var(--text-subtle);margin-top:4px;display:flex;align-items:center;gap:6px}
+  .panel-head .meta .dot{width:5px;height:5px;border-radius:50%;background:var(--primary)}
+
+  /* Diagnoses */
+  .dx{padding:18px 20px;border-bottom:1px solid var(--border)}
+  .dx:last-child{border-bottom:none}
+  .dx-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .dx-name{font-size:13.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+  .dx-name .rank{width:18px;height:18px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700}
+  .dx-name .code{color:var(--text-subtle);font-weight:500;font-size:11.5px;font-variant-numeric:tabular-nums}
+  .dx-pct{font-size:14px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+  .bar{height:8px;border-radius:999px;background:var(--bg);overflow:hidden;position:relative}
+  .bar .fill{height:100%;background:var(--primary);border-radius:999px;transition:width .5s ease}
+  .dx-2 .dx-pct{color:#3d8c64}
+  .dx-2 .bar .fill{background:#3d8c64}
+  .dx-3 .dx-pct{color:#6ba88a}
+  .dx-3 .bar .fill{background:#6ba88a}
+  .dx-meta{font-size:11.5px;color:var(--text-subtle);margin-top:8px;line-height:1.4}
+
+  /* Warning callout */
+  .callout{margin:14px 20px 18px;padding:12px 14px;background:var(--warn-50);border:1px solid #fde0a0;border-radius:9px;display:flex;gap:11px;align-items:flex-start}
+  .callout .ic{width:24px;height:24px;border-radius:6px;background:var(--warn);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .callout .txt{font-size:12.5px;line-height:1.45;color:#7a4d05}
+  .callout .txt b{display:block;font-weight:700;color:#5e3a02;margin-bottom:1px;font-size:13px}
+
+  /* Symptoms summary */
+  .syms{padding:14px 20px 18px;display:flex;flex-wrap:wrap;gap:6px}
+  .syms .chip{padding:4px 10px;border:1px solid var(--border);background:var(--bg);border-radius:999px;font-size:11.5px;color:var(--text-muted);font-weight:500}
+  .syms .chip.hot{background:var(--primary-50);color:var(--primary);border-color:#c5dccc}
+
+  .panel-cta{padding:14px 20px;background:var(--bg);border-top:1px solid var(--border);display:flex;gap:8px}
+  .btn{padding:10px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+  .btn.secondary{background:#fff;color:var(--primary);border:1px solid var(--primary);flex:1;justify-content:center}
+  .btn.secondary:hover{background:var(--primary-50)}
+  .btn.ghost{color:var(--text-muted);background:#fff;border:1px solid var(--border)}
+  .btn.ghost:hover{background:var(--bg)}
+
+  /* Tips card */
+  .tips ul{list-style:none;margin:0;padding:0}
+  .tips li{display:flex;gap:10px;align-items:flex-start;padding:11px 20px;border-bottom:1px solid var(--border);font-size:12.5px;line-height:1.5;color:var(--text-muted)}
+  .tips li:last-child{border-bottom:none}
+  .tips li .ic{width:20px;height:20px;border-radius:5px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+  .tips li b{color:var(--text);font-weight:600;display:block;margin-bottom:1px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sb">
+    <div class="brand">
+      <div class="y">Y</div>
+      <div><b>Yoltec</b><span>Servicio médico</span></div>
+    </div>
+    <nav>
+      <a href="Inicio Alumno.html"><span class="ic">▦</span>Inicio</a>
+      <a href="Mis Citas.html"><span class="ic">⊞</span>Mis citas</a>
+      <a class="active"><span class="ic">◈</span>Pre-evaluación IA</a>
+      <a><span class="ic">℞</span>Recetas</a>
+      <a><span class="ic">◉</span>Mi perfil</a>
+    </nav>
+    <div class="user">
+      <div class="av">AP</div>
+      <div><b>Ana Pérez García</b><span>22690495</span></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="header">
+      <div class="crumb">PRE-EVALUACIÓN IA</div>
+      <h1>Pre-evaluación con IA</h1>
+      <div class="sub">Describe tus síntomas con tus propias palabras. Esto <b>NO reemplaza una consulta médica</b> — solo orienta y prepara tu cita con el doctor.</div>
+    </div>
+
+    <div class="grid">
+      <!-- Chat -->
+      <div class="col-chat">
+        <div class="chat-meta">
+          <div class="session">Sesión <b>#PE-2026-0451</b> · Iniciada 11:14</div>
+          <div class="live"><span class="dot"></span>IA en línea</div>
+        </div>
+
+        <div class="msgs" id="msgs">
+          <div class="msg ai">
+            <div class="av">IA</div>
+            <div class="body">
+              <div class="bubble">Hola, soy tu asistente médico. ¿Qué síntomas estás presentando hoy?</div>
+              <div class="ts">11:14</div>
+            </div>
+          </div>
+
+          <div class="msg me">
+            <div class="av">AP</div>
+            <div class="body">
+              <div class="bubble">Tengo dolor de garganta desde ayer y un poco de fiebre. También me cuesta tragar.</div>
+              <div class="ts">11:14</div>
+            </div>
+          </div>
+
+          <div class="msg ai">
+            <div class="av">IA</div>
+            <div class="body">
+              <div class="bubble">Entiendo. ¿Has notado tos, secreción nasal o ganglios inflamados en el cuello? ¿Sabes qué temperatura has tenido?</div>
+              <div class="ts">11:15</div>
+            </div>
+          </div>
+
+          <div class="msg me">
+            <div class="av">AP</div>
+            <div class="body">
+              <div class="bubble">Sí, tengo los ganglios un poco inflamados del lado derecho. Fiebre de 38.2°C anoche. No tengo tos pero sí algo de congestión.</div>
+              <div class="ts">11:16</div>
+            </div>
+          </div>
+
+          <div class="msg ai">
+            <div class="av">IA</div>
+            <div class="body">
+              <div class="bubble">Gracias, Ana. Con esos datos puedo darte una orientación preliminar. ¿Tienes alguna alergia a medicamentos o has tomado algo en las últimas horas?</div>
+              <div class="ts">11:16</div>
+            </div>
+          </div>
+
+          <div class="msg me">
+            <div class="av">AP</div>
+            <div class="body">
+              <div class="bubble">Soy alérgica a la penicilina. Solo tomé un paracetamol anoche para la fiebre.</div>
+              <div class="ts">11:17</div>
+            </div>
+          </div>
+
+          <div class="msg ai">
+            <div class="av">IA</div>
+            <div class="body">
+              <div class="bubble">Perfecto, lo registré. Ya tengo suficiente información para generar tu pre-evaluación. Revisa la columna derecha → con los posibles diagnósticos y agenda tu cita para confirmación.</div>
+              <div class="ts">11:17</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <div class="input-row">
+            <textarea placeholder="Escribe otro síntoma o duda..." rows="1"></textarea>
+            <button class="send" title="Enviar">↑</button>
+          </div>
+          <div class="input-hint">
+            <span class="left">Presiona <kbd>Enter</kbd> para enviar · <kbd>Shift</kbd>+<kbd>Enter</kbd> para nueva línea</span>
+            <span>Tus respuestas son confidenciales</span>
+          </div>
+          <button class="finish-btn"><span class="ic">✓</span>Finalizar y guardar pre-evaluación</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="col-res">
+        <div class="panel">
+          <div class="panel-head">
+            <h2><span class="ic">◈</span>Posibles diagnósticos</h2>
+            <div class="meta"><span class="dot"></span>Generado a partir de 4 mensajes · Hace 8 s</div>
+          </div>
+          <div class="dx dx-1">
+            <div class="dx-row">
+              <div class="dx-name"><span class="rank">1</span>Faringitis aguda <span class="code">J02.9</span></div>
+              <div class="dx-pct">78%</div>
+            </div>
+            <div class="bar"><div class="fill" style="width:78%"></div></div>
+            <div class="dx-meta">Inflamación de garganta · fiebre · ganglios cervicales</div>
+          </div>
+          <div class="dx dx-2">
+            <div class="dx-row">
+              <div class="dx-name"><span class="rank">2</span>Amigdalitis <span class="code">J03.9</span></div>
+              <div class="dx-pct">45%</div>
+            </div>
+            <div class="bar"><div class="fill" style="width:45%"></div></div>
+            <div class="dx-meta">Requiere examen visual de amígdalas para confirmar</div>
+          </div>
+          <div class="dx dx-3">
+            <div class="dx-row">
+              <div class="dx-name"><span class="rank">3</span>Resfriado común <span class="code">J00</span></div>
+              <div class="dx-pct">30%</div>
+            </div>
+            <div class="bar"><div class="fill" style="width:30%"></div></div>
+            <div class="dx-meta">La congestión nasal apoya esta hipótesis</div>
+          </div>
+
+          <div class="callout">
+            <div class="ic">!</div>
+            <div class="txt">
+              <b>Solo orientativo</b>
+              El doctor confirmará el diagnóstico. No tomes medicamentos sin prescripción — recuerda tu alergia a penicilina.
+            </div>
+          </div>
+
+          <div class="panel-cta">
+            <button class="btn secondary"><span style="font-size:14px">⊞</span>Agendar cita</button>
+            <button class="btn ghost">Imprimir</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2><span class="ic">⚲</span>Síntomas detectados</h2>
+            <div class="meta">6 hallazgos extraídos de la conversación</div>
+          </div>
+          <div class="syms">
+            <span class="chip hot">Dolor de garganta</span>
+            <span class="chip hot">Fiebre 38.2°C</span>
+            <span class="chip hot">Disfagia leve</span>
+            <span class="chip">Ganglios cervicales</span>
+            <span class="chip">Congestión nasal</span>
+            <span class="chip">Sin tos</span>
+          </div>
+        </div>
+
+        <div class="panel tips">
+          <div class="panel-head">
+            <h2><span class="ic">♥</span>Recomendaciones mientras agendas</h2>
+          </div>
+          <ul>
+            <li><span class="ic">1</span><span><b>Hidratación abundante</b>Agua tibia y caldos suaves cada 2 horas.</span></li>
+            <li><span class="ic">2</span><span><b>Reposo relativo</b>Evita esfuerzo físico y exposición al frío.</span></li>
+            <li><span class="ic">3</span><span><b>Monitorea la fiebre</b>Si supera 39°C o persiste 48 h, acude a urgencias.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Auto-scroll chat to bottom
+  const m = document.getElementById('msgs');
+  if(m) m.scrollTop = m.scrollHeight;
+
+  // Textarea auto-grow
+  const ta = document.querySelector('.input-row textarea');
+  if(ta){
+    ta.addEventListener('input', () => {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 96) + 'px';
+    });
+  }
+</script>
+</body>
+</html>

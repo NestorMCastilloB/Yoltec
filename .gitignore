@@ -4,12 +4,14 @@ IA/__pycache__/
 IA/*.pyc
 IA/.env
 IA/data/
+IA/*.pkl
 archive/
 *.csv
 
 # ─── Laravel / Backend ─────────────────────────────
 backend/vendor/
 backend/.env
+backend/.env.docker
 backend/storage/logs/
 backend/storage/framework/cache/
 backend/storage/framework/sessions/
@@ -18,6 +20,7 @@ backend/bootstrap/cache/
 backend/database/database.sqlite
 backend/database/database.sqlite-shm
 backend/database/database.sqlite-wal
+backend/railway.toml
 
 # ─── Angular / Frontend ────────────────────────────
 frontend/node_modules/
@@ -26,6 +29,8 @@ frontend/.angular/
 
 # ─── Flutter / Mobile ──────────────────────────────
 mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
 mobile/build/
 mobile/android/.gradle/
 mobile/android/local.properties
@@ -33,50 +38,38 @@ mobile/android/app/debug/
 mobile/android/app/profile/
 mobile/android/app/release/
 mobile/android/app/google-services.json
-mobile/.flutter-plugins
-mobile/.flutter-plugins-dependencies
+
+# ─── Claude Code (IA asistente) ────────────────────
+CLAUDE.md
+.claude/
+.claudeignore
+.graphifyignore
+graphify-out/
 
 # ─── General ───────────────────────────────────────
 .DS_Store
 *.log
 *.zip
 *.rar
-.aider*
-IA/model.pkl
-IA/label_encoder.pkl
-IA/*.pkl
 .vscode/
+.aider*
+.env.companero
+contexto_proyecto.md
 
-# ─── Railway (migrado a Render) ──────────────────
+# ─── Archivos obsoletos ────────────────────────────
+Iniciar/
+tester/
+scripts/
+logs/
+start-yoltec.bat
+stop-yoltec.bat
+Untitled-*.png
+releases/*.apk
 IA/railway.toml
-backend/railway.toml
-
-# ─── Flutter generados ───────────────────────────
-mobile/.dart_tool/
-mobile/.flutter-plugins-dependencies
 
 # ─── Documentos binarios (usar .md en su lugar) ─────
 docs/*.pdf
 docs/*.odt
 docs/*.docx
 docs/*.html
-tester/
-.env.companero
-
-# ─── Archivos locales con credenciales reales ──────
-contexto_proyecto.md
-
-# ─── Claude Code (IA asistente) ────────────────────
-CLAUDE.md
-.claude/
-backend/.env.docker
-Iniciar/
-releases/*.apk
-
-# ─── Scripts y archivos obsoletos ─────────────────
-start-yoltec.bat
-stop-yoltec.bat
-scripts/
-logs/
-Untitled-*.png
 docs/presentacion-pentesting.md
