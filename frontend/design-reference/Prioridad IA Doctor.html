@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Prioridad IA (Doctor)</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec; --primary-100:#d1e3d8;
+    --danger:#dc2626; --danger-50:#fef2f2; --danger-100:#fecaca; --danger-700:#991b1b;
+    --warn:#ea580c; --warn-50:#fff7ed; --warn-100:#fed7aa; --warn-700:#9a3412;
+    --info:#3b82f6; --info-50:#eff6ff; --info-700:#1e40af;
+    --bg:#f7f9f8; --surface:#fff;
+    --border:#e2e8e5; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+    --soft:#f9fafb;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body,#app{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit}
+  a{color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer}
+  a:hover{text-decoration:underline}
+
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar (same as Pre-evaluaciones) */
+  .sb{width:240px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb nav a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;text-decoration:none}
+  .sb nav a:hover{background:rgba(255,255,255,.05);text-decoration:none}
+  .sb nav a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb nav a .ic{font-size:14px;width:16px;text-align:center}
+  .sb nav a .ct{margin-left:auto;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;min-width:18px;text-align:center}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .header{padding:28px 36px 24px;background:#fff;border-bottom:1px solid var(--border)}
+  .head-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+  .crumb{font-size:12px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:6px}
+  h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .sub{font-size:13.5px;color:var(--text-muted)}
+
+  .banner{display:flex;align-items:flex-start;gap:11px;background:var(--info-50);border-left:3px solid var(--info);border-radius:0 8px 8px 0;padding:12px 16px;margin-top:18px;color:#1e3a8a;font-size:13px;line-height:1.55}
+  .banner .ic{width:18px;height:18px;border-radius:50%;background:var(--info);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+  .banner b{font-weight:600;color:#1e3a8a}
+
+  .btn{padding:9px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap;border:1px solid transparent}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.outline{background:#fff;color:var(--primary);border-color:var(--primary)}
+  .btn.outline:hover{background:var(--primary-50)}
+  .btn.ghost{color:var(--text-muted)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.sm{padding:6px 12px;font-size:12.5px}
+
+  .content{padding:24px 36px 60px;flex:1}
+
+  /* KPI mini cards */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+  .kpi{border-radius:12px;padding:18px 20px;border:1px solid var(--border);position:relative;overflow:hidden}
+  .kpi .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px}
+  .kpi .lbl .dot{width:8px;height:8px;border-radius:50%}
+  .kpi .n{font-size:42px;font-weight:700;letter-spacing:-1px;line-height:1;margin-top:14px;font-variant-numeric:tabular-nums}
+  .kpi .foot{font-size:12px;margin-top:8px;display:flex;justify-content:space-between;align-items:baseline}
+  .kpi .foot b{font-weight:600}
+  .kpi.red{background:var(--danger-50);border-color:#fecaca}
+  .kpi.red .lbl,.kpi.red .n,.kpi.red .foot b{color:var(--danger-700)}
+  .kpi.red .dot{background:var(--danger)}
+  .kpi.red .foot{color:#b91c1c}
+  .kpi.orange{background:var(--warn-50);border-color:#fed7aa}
+  .kpi.orange .lbl,.kpi.orange .n,.kpi.orange .foot b{color:var(--warn-700)}
+  .kpi.orange .dot{background:var(--warn)}
+  .kpi.orange .foot{color:#c2410c}
+  .kpi.gray{background:var(--soft);border-color:var(--border)}
+  .kpi.gray .lbl,.kpi.gray .n,.kpi.gray .foot b{color:var(--text-muted)}
+  .kpi.gray .dot{background:var(--text-subtle)}
+  .kpi.gray .foot{color:var(--text-subtle)}
+
+  /* Table */
+  .table-wrap{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+  .table-head{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+  .table-head h2{margin:0;font-size:15px;font-weight:600}
+  .table-head .meta{font-size:12px;color:var(--text-subtle)}
+  .table-head .meta b{color:var(--text-muted);font-weight:600}
+  .th-actions{display:flex;gap:8px;align-items:center}
+  .pill-tabs{display:flex;background:var(--bg);border-radius:7px;padding:3px;gap:1px}
+  .pill-tabs button{padding:6px 12px;border-radius:5px;font-size:12px;font-weight:500;color:var(--text-muted)}
+  .pill-tabs button.active{background:#fff;color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{text-align:left;font-size:10.5px;font-weight:700;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;background:var(--soft);padding:11px 22px;border-bottom:1px solid var(--border);white-space:nowrap}
+  thead th.num{text-align:right}
+  thead th .so{margin-left:4px;color:var(--text-subtle);font-size:9px}
+  tbody td{padding:14px 22px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--soft)}
+
+  .who{display:flex;align-items:center;gap:11px;min-width:200px}
+  .who .av{width:36px;height:36px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0}
+  .who b{display:block;font-size:13.5px;font-weight:600}
+  .who span{font-size:11.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums}
+
+  .symp{color:var(--text-muted);max-width:340px;display:flex;align-items:center;gap:6px;font-size:13px}
+  .symp .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+
+  .score{font-weight:700;font-size:14.5px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  .score small{font-weight:500;color:var(--text-subtle);font-size:11.5px;margin-left:3px}
+  .score .bar{display:inline-block;vertical-align:middle;width:60px;height:5px;background:var(--bg);border-radius:999px;margin-right:9px;overflow:hidden;border:1px solid var(--border)}
+  .score .bar i{display:block;height:100%}
+
+  .b{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.3px;border:1px solid transparent}
+  .b .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .b.red{background:var(--danger-50);color:var(--danger-700);border-color:#fecaca}
+  .b.orange{background:var(--warn-50);color:var(--warn-700);border-color:#fed7aa}
+  .b.gray{background:var(--soft);color:var(--text-muted);border-color:var(--border)}
+
+  .date{color:var(--text-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .date.muted{color:var(--text-subtle);font-style:italic}
+
+  .footnote{margin-top:14px;padding:10px 14px;font-size:11.5px;color:var(--text-subtle);display:flex;align-items:center;gap:8px}
+  .footnote .ic{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--text-subtle);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+
+  .updated{font-size:11.5px;color:var(--text-subtle);margin-top:8px;text-align:right}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+function Sidebar(){
+  const items=[
+    ['panel','Panel','▦'],
+    ['citas','Citas','⊞'],
+    ['bit','Bitácoras','≡'],
+    ['rec','Recetas','℞'],
+    ['pe','Pre-evaluaciones','◔',false,3],
+    ['pri','Prioridad IA','◉',true],
+    ['est','Estadísticas','◊'],
+  ];
+  return (
+    <aside className="sb">
+      <div className="brand"><div className="y">Y</div><div><b>Yoltec</b><span>Panel médico</span></div></div>
+      <nav>{items.map(([k,l,i,a,n])=>(<a key={k} className={a?'active':''}><span className="ic">{i}</span>{l}{n?<span className="ct">{n}</span>:null}</a>))}</nav>
+      <div className="user"><div className="av">OG</div><div><b>Dr. Omar González</b><span>Médico general</span></div></div>
+    </aside>
+  );
+}
+
+const ROWS=[
+  {
+    av:'LF', nombre:'Lucía Fuentes Ortiz', ctrl:'21450923',
+    sintomas:'Dolor abdominal en fosa iliaca derecha 6/10, náusea sin vómito, sin fiebre desde anoche.',
+    score:21, pri:'ALTA', cita:'2 may 2026',
+    factores:'Síntomas agudos + inasistencias previas (3)'
+  },
+  {
+    av:'AP', nombre:'Ana Pérez García', ctrl:'22690495',
+    sintomas:'Odinofagia intensa 3 días, fiebre 38.4 °C, alergia confirmada a penicilina.',
+    score:18, pri:'ALTA', cita:'10 abr 2026',
+    factores:'Alergia medicamentosa + fiebre alta'
+  },
+  {
+    av:'DK', nombre:'Diego Kuri Salazar', ctrl:'22034512',
+    sintomas:'Crisis asmática leve esta mañana, sibilancias audibles, usa inhalador.',
+    score:16, pri:'ALTA', cita:'15 mar 2026',
+    factores:'Asma crónica + síntomas activos'
+  },
+  {
+    av:'RM', nombre:'Raúl Mendoza Vidal', ctrl:'22134781',
+    sintomas:'Cefalea pulsátil derecha con fotofobia y náusea, 2 días de evolución, recurrente.',
+    score:13, pri:'MEDIA', cita:'28 abr 2026',
+    factores:'Recurrencia mensual'
+  },
+  {
+    av:'KB', nombre:'Karla Bárcenas Ríos', ctrl:'21897603',
+    sintomas:'Dolor lumbar mecánico 4 días, irradia a glúteo derecho, sin parestesias.',
+    score:11, pri:'MEDIA', cita:'sin citas',
+    factores:'Primera consulta, sin antecedentes'
+  },
+  {
+    av:'JS', nombre:'Jorge Salinas Méndez', ctrl:'22789012',
+    sintomas:'Tos seca persistente 5 días, irritación faríngea leve, sin fiebre.',
+    score:9, pri:'MEDIA', cita:'5 may 2026',
+    factores:'Síntomas leves controlados'
+  },
+  {
+    av:'MC', nombre:'María Carrillo López', ctrl:'21567890',
+    sintomas:'Revisión de control hipertensión arterial — sin síntomas nuevos.',
+    score:6, pri:'BAJA', cita:'3 may 2026',
+    factores:'Control rutinario'
+  },
+  {
+    av:'IT', nombre:'Iván Torres Ramírez', ctrl:'23012398',
+    sintomas:'Solicita constancia médica para clase de educación física.',
+    score:3, pri:'BAJA', cita:'1 may 2026',
+    factores:'Trámite administrativo'
+  },
+];
+
+function priClass(p){return p==='ALTA'?'red':p==='MEDIA'?'orange':'gray'}
+function priFill(p){return p==='ALTA'?'#dc2626':p==='MEDIA'?'#ea580c':'#94a3b8'}
+
+function Row({r}){
+  const pct=Math.min(100,(r.score/22)*100);
+  return (
+    <tr>
+      <td>
+        <div className="who">
+          <div className="av">{r.av}</div>
+          <div><b>{r.nombre}</b><span>No. {r.ctrl}</span></div>
+        </div>
+      </td>
+      <td>
+        <div className="symp" title={r.sintomas}>
+          <span className="tx">{r.sintomas}</span>
+          <a>ver más</a>
+        </div>
+      </td>
+      <td className="score">
+        <span className="bar"><i style={{width:pct+'%',background:priFill(r.pri)}}/></span>
+        {r.score}<small>pts</small>
+      </td>
+      <td><span className={'b '+priClass(r.pri)}><span className="dot"></span>{r.pri}</span></td>
+      <td className={r.cita==='sin citas'?'date muted':'date'}>{r.cita==='sin citas'?'Sin citas':r.cita}</td>
+      <td><button className="btn outline sm">Ver ficha</button></td>
+    </tr>
+  );
+}
+
+function App(){
+  return (
+    <div className="app">
+      <Sidebar/>
+      <div className="main">
+        <div className="header">
+          <div className="head-top">
+            <div>
+              <div className="crumb">Servicio médico · Triage</div>
+              <h1>Clasificación de Prioridad IA</h1>
+              <div className="sub">Herramienta de apoyo. La decisión final es del doctor.</div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+              <button className="btn primary">↻ Actualizar clasificación</button>
+              <div className="updated">Última actualización: hoy, 09:14</div>
+            </div>
+          </div>
+          <div className="banner">
+            <span className="ic">i</span>
+            <span>La puntuación se calcula con base en <b>síntomas reportados</b>, <b>historial de inasistencias</b> y <b>condiciones crónicas registradas</b>. Pondera severidad, frecuencia y cronicidad para sugerir un orden de atención.</span>
+          </div>
+        </div>
+
+        <div className="content">
+          <div className="kpis">
+            <div className="kpi red">
+              <div className="lbl"><span className="dot"></span>Alta prioridad</div>
+              <div className="n">3</div>
+              <div className="foot"><span><b>≥15 pts</b></span><span>+1 vs ayer</span></div>
+            </div>
+            <div className="kpi orange">
+              <div className="lbl"><span className="dot"></span>Media prioridad</div>
+              <div className="n">7</div>
+              <div className="foot"><span><b>8 – 14 pts</b></span><span>−2 vs ayer</span></div>
+            </div>
+            <div className="kpi gray">
+              <div className="lbl"><span className="dot"></span>Baja prioridad</div>
+              <div className="n">12</div>
+              <div className="foot"><span><b>&lt;8 pts</b></span><span>=  vs ayer</span></div>
+            </div>
+          </div>
+
+          <div className="table-wrap">
+            <div className="table-head">
+              <div>
+                <h2>Alumnos clasificados</h2>
+                <div className="meta"><b>22</b> alumnos analizados · ordenado por score descendente</div>
+              </div>
+              <div className="th-actions">
+                <div className="pill-tabs">
+                  <button className="active">Todos</button>
+                  <button>Alta</button>
+                  <button>Media</button>
+                  <button>Baja</button>
+                </div>
+                <button className="btn ghost sm">Exportar</button>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Síntomas</th>
+                  <th className="num">Score <span className="so">▼</span></th>
+                  <th>Prioridad</th>
+                  <th>Última cita</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ROWS.map((r,i)=><Row key={i} r={r}/>)}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="footnote">
+            <span className="ic">i</span>
+            Los resultados son orientativos y de apoyo al criterio médico. La clasificación no sustituye la evaluación clínica ni constituye un diagnóstico.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+</body>
+</html>

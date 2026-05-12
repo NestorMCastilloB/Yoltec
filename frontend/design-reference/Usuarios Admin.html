@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec Admin · Usuarios</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-300:#3a7d5c; --primary-50:#e8f5ee;
+    --bg:#f8fafc; --surface:#fff;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#eef2f0;
+    --blue-bg:#dbeafe; --blue:#1d4ed8;
+    --danger:#dc2626; --danger-bg:#fef2f2;
+    --gray-dark:#374151; --gray-dark-bg:#e5e7eb;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text)}
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .side{width:220px;background:var(--primary);color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding:22px 0}
+  .side .brand{display:flex;align-items:center;gap:10px;padding:0 22px 24px;font-weight:700;font-size:16px;letter-spacing:-.2px}
+  .side .brand .y{width:28px;height:28px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .side nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;flex:1}
+  .side nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;border-radius:8px;text-decoration:none;cursor:pointer}
+  .side nav a svg{width:18px;height:18px;stroke-width:1.8;flex-shrink:0;opacity:.9}
+  .side nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side nav a.active{background:var(--primary-300);color:#fff;font-weight:600}
+  .side nav a.disabled{color:rgba(255,255,255,.55);cursor:default}
+  .side nav a.disabled:hover{background:transparent;color:rgba(255,255,255,.55)}
+  .side nav a .soon{margin-left:auto;font-size:9.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;background:rgba(255,255,255,.14);color:rgba(255,255,255,.75);padding:2px 6px;border-radius:99px;white-space:nowrap}
+  .side .user{padding:14px 16px;border-top:1px solid rgba(255,255,255,.12);margin:12px 12px 0;display:flex;align-items:center;gap:10px}
+  .side .user .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px}
+  .side .user .nm{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+  .side .user .rl{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+
+  /* Main */
+  .main{flex:1;padding:28px 32px 48px;min-width:0}
+  .hd{margin-bottom:20px}
+  .hd h1{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .toolbar{display:flex;align-items:center;gap:12px}
+  .search{position:relative;flex:1;max-width:520px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-subtle)}
+  .search input{width:100%;height:38px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:0 12px 0 38px;font:500 13px 'Inter',sans-serif;color:var(--text);outline:none}
+  .search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,92,58,.12)}
+  .btn-pri{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;font:600 13px 'Inter',sans-serif;padding:9px 14px;border:0;border-radius:7px;cursor:pointer}
+  .btn-pri:hover{background:var(--primary-600)}
+  .btn-gh{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--text);font:500 13px 'Inter',sans-serif;padding:8px 14px;border:1px solid var(--border);border-radius:7px;cursor:pointer}
+  .btn-gh:hover{background:#fafbfb}
+  .btn-gh svg{stroke-width:2}
+
+  /* Tabs */
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:20px 0 0}
+  .tab{padding:11px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  .tab .ct{display:inline-flex;background:#f1f5f9;color:var(--text-muted);font-size:11px;padding:1px 7px;border-radius:99px;margin-left:6px;font-weight:600}
+  .tab.active .ct{background:var(--primary-50);color:var(--primary)}
+
+  /* Section */
+  .sec{background:#fff;border-radius:0 0 12px 12px;border:1px solid var(--border-soft);border-top:0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;background:#fafbfb;border-bottom:1px solid var(--border-soft)}
+  th:first-child,td:first-child{padding-left:20px;width:36px}
+  td{padding:13px 16px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tr:hover td{background:#fbfcfc}
+
+  input[type=checkbox]{appearance:none;width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;position:relative;vertical-align:middle}
+  input[type=checkbox]:checked{background:var(--primary);border-color:var(--primary)}
+  input[type=checkbox]:checked::after{content:'';position:absolute;top:1px;left:4px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+  .uc{display:flex;align-items:center;gap:10px}
+  .uc .av{width:32px;height:32px;border-radius:50%;background:#e5e7eb;color:#374151;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11.5px;flex-shrink:0}
+  .uc .av.dc{background:#e8f5ee;color:#1a5c3a}
+  .uc .nm{font-weight:600;color:var(--text);font-size:13px;line-height:1.2}
+  .uc .id{font-size:11.5px;color:var(--text-subtle);font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums}
+  .em{color:var(--text-muted);font-size:12.5px}
+  .bd{display:inline-flex;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;letter-spacing:.2px}
+  .bd-al{background:var(--blue-bg);color:var(--blue)}
+  .bd-dc{background:var(--primary-50);color:var(--primary)}
+  .bd-ac{background:var(--primary-50);color:var(--primary)}
+  .bd-su{background:var(--danger-bg);color:var(--danger)}
+  .ls{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .acts{display:flex;gap:14px}
+  .acts a{font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;color:var(--primary)}
+  .acts a.warn{color:var(--danger)}
+  .acts a.gh{color:var(--text-muted)}
+  .acts a:hover{text-decoration:underline}
+
+  /* Footer / pagination */
+  .pag{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border-soft);font-size:12.5px;color:var(--text-muted);font-weight:500}
+  .pag .pgr{display:flex;gap:4px}
+  .pag .pgr button{width:30px;height:30px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:6px;font:500 12.5px 'Inter',sans-serif;cursor:pointer;font-variant-numeric:tabular-nums}
+  .pag .pgr button.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600}
+  .pag .pgr button:hover:not(.active){background:#fafbfb}
+  .pag .pgr button.nav{padding:0 8px;width:auto}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Panel
+      </a>
+      <a class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="3"/><path d="M16 14c2.7.2 5 2.5 5 5.5"/></svg>
+        Usuarios
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>
+        Días especiales
+      </a>
+      <a class="disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>
+        Auditoría
+        <span class="soon">Próximamente</span>
+      </a>
+    </nav>
+    <div class="user">
+      <div class="av">MA</div>
+      <div>
+        <div class="nm">Marco Admin</div>
+        <div class="rl">Administrador</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="hd">
+      <h1>Gestión de usuarios</h1>
+      <div class="toolbar">
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Buscar por nombre, número de control o correo...">
+        </div>
+        <button class="btn-pri">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo usuario
+        </button>
+      </div>
+      <div class="tabs">
+        <div class="tab active">Todos<span class="ct">48</span></div>
+        <div class="tab">Alumnos<span class="ct">42</span></div>
+        <div class="tab">Doctores<span class="ct">5</span></div>
+        <div class="tab">Suspendidos<span class="ct">3</span></div>
+      </div>
+    </div>
+
+    <section class="sec">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox"></th>
+            <th>Usuario</th>
+            <th>Correo institucional</th>
+            <th>Rol</th>
+            <th>Estatus</th>
+            <th>Última sesión</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><div class="uc"><div class="av">NV</div><div><div class="nm">Nestor Valles</div><div class="id">22690495</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b88a8a8e81888c818df8ccdddbced596d5c0">[email&#160;protected]</a></td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Hoy, 10:14</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" checked></td>
+            <td><div class="uc"><div class="av dc">LR</div><div><div class="nm">Dra. Laura Ramírez</div><div class="id">DOC-0014</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bdd9cf93cfdcd0d4cfd8c7fdc9d8decbd093d0c5">[email&#160;protected]</a></td>
+            <td><span class="bd bd-dc">Doctor</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Hoy, 11:42</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><div class="uc"><div class="av">SO</div><div><div class="nm">Sofía Ortega</div><div class="id">22810123</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="586a6a606968696a6b182c3d3b2e35763520">[email&#160;protected]</a></td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-su">Suspendido</span></td>
+            <td class="ls">02 may, 16:08</td>
+            <td><div class="acts"><a>Editar</a><a class="gh">Reactivar</a></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><div class="uc"><div class="av dc">JM</div><div><div class="nm">Dr. Javier Mendoza</div><div class="id">DOC-0021</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4226306c2f272c262d382302362721342f6c2f3a">[email&#160;protected]</a></td>
+            <td><span class="bd bd-dc">Doctor</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Ayer, 18:22</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><div class="uc"><div class="av">AC</div><div><div class="nm">Andrea Castillo</div><div class="id">22745880</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e3c3c393a3b36363e4e7a6b6d7863206376">[email&#160;protected]</a></td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Ayer, 09:47</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td><div class="uc"><div class="av">RG</div><div><div class="nm">Ricardo Galván</div><div class="id">22912034</div></div></div></td>
+            <td class="em"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c2f0f0fbf3f0f2f1f682b6a7a1b4afecafba">[email&#160;protected]</a></td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-su">Suspendido</span></td>
+            <td class="ls">28 abr, 13:55</td>
+            <td><div class="acts"><a>Editar</a><a class="gh">Reactivar</a></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pag">
+        <span>Mostrando 1–6 de 48 usuarios</span>
+        <div class="pgr">
+          <button class="nav">‹ Anterior</button>
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>…</button>
+          <button>8</button>
+          <button class="nav">Siguiente ›</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

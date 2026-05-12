@@ -9,9 +9,13 @@
   </p>
 
   <div *ngIf="isLoadingPrioridad" class="loading">Analizando citas...</div>
-  <div *ngIf="prioridadError" class="alert-error">{{ prioridadError }}</div>
 
-  <div *ngIf="prioridadResumen && !isLoadingPrioridad">
+  <div *ngIf="hasError && !isLoadingPrioridad" class="error-block">
+    <p class="error-msg">{{ errorMessage }}</p>
+    <button class="btn-primary" (click)="reintentar()">Reintentar</button>
+  </div>
+
+  <div *ngIf="prioridadResumen && !isLoadingPrioridad && !hasError">
     <div class="prioridad-resumen">
       <div class="prioridad-badge alta">
         <span class="badge-num">{{ prioridadResumen.resumen.alta }}</span>

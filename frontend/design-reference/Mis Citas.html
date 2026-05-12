@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mis citas</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec;
+    --warn:#f59e0b; --warn-50:#fef3e0;
+    --danger:#dc2626; --danger-50:#fde8e8;
+    --info:#0369a1; --info-50:#e0f2fe;
+    --bg:#f7f9f8; --surface:#fff;
+    --border:#e2e8e5;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body,#app{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit}
+
+  .app{display:flex;min-height:100vh}
+
+  .sb{width:232px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;cursor:pointer}
+  .sb a:hover{background:rgba(255,255,255,.05)}
+  .sb a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb a .ic{font-size:14px;width:16px;text-align:center}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .header{padding:32px 36px 0;background:#fff;border-bottom:1px solid var(--border)}
+  .header .crumb{font-size:12px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:6px}
+  .header h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .header .sub{font-size:13.5px;color:var(--text-muted);margin-bottom:18px}
+  .head-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+
+  .tabs{display:flex;gap:0;border-bottom:1px solid transparent;margin-bottom:-1px}
+  .tabs button{padding:13px 4px;margin-right:24px;font-size:14px;font-weight:500;color:var(--text-muted);border-bottom:2px solid transparent;display:flex;align-items:center;gap:8px}
+  .tabs button .ct{background:var(--bg);color:var(--text-muted);padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .tabs button:hover{color:var(--text)}
+  .tabs button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  .tabs button.active .ct{background:var(--primary-50);color:var(--primary)}
+
+  .btn{padding:9px 14px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn.ghost{color:var(--text-muted)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.danger-ghost{color:var(--danger);background:transparent;padding:6px 10px;font-size:12.5px;border-radius:6px}
+  .btn.danger-ghost:hover{background:var(--danger-50)}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+  .btn .plus{font-size:15px;font-weight:300;line-height:1}
+
+  .content{padding:24px 36px 60px;flex:1}
+
+  /* Filter bar */
+  .filters{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:18px;flex-wrap:wrap}
+  .filters .lab{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-right:4px}
+  .field{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 11px}
+  .field input,.field select{background:transparent;border:none;outline:none;font-size:13px;color:var(--text);min-width:120px}
+  .field .ic{color:var(--text-subtle);font-size:13px}
+  .search{flex:1;min-width:220px}
+  .filters .spacer{flex:1}
+  .filters .reset{font-size:12.5px;color:var(--text-muted);font-weight:500}
+  .filters .reset:hover{color:var(--primary)}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;padding:12px 22px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border)}
+  td{padding:14px 22px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg)}
+  .date-cell{display:flex;align-items:center;gap:11px}
+  .date-cell .d{flex-shrink:0;width:42px;text-align:center;background:var(--primary-50);border-radius:7px;padding:6px 0;color:var(--primary)}
+  .date-cell.past .d{background:var(--bg);color:var(--text-subtle)}
+  .date-cell .d b{display:block;font-size:16px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .date-cell .d span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+  .date-cell .dow b{display:block;color:var(--text);font-size:13px;font-weight:500;text-transform:capitalize}
+  .date-cell .dow span{font-size:11.5px;color:var(--text-subtle)}
+  .hr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text)}
+  .motivo b{display:block;color:var(--text);font-weight:500;font-size:13.5px;margin-bottom:2px}
+  .motivo span{font-size:12px;color:var(--text-subtle)}
+  .b{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;align-items:center;gap:5px}
+  .b.ok{background:var(--primary-50);color:var(--primary)}
+  .b.warn{background:var(--warn-50);color:var(--warn)}
+  .b.cancel{background:var(--danger-50);color:var(--danger)}
+  .b.noshow{background:#f1f5f9;color:#64748b}
+  .b.attended{background:var(--info-50);color:var(--info)}
+  .b .pulse{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  /* Pagination */
+  .pag{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--border);background:#fff}
+  .pag .count{font-size:12.5px;color:var(--text-muted)}
+  .pag .count b{color:var(--text);font-weight:600}
+  .pag .pages{display:flex;gap:4px;align-items:center}
+  .pag button{width:32px;height:32px;border-radius:6px;font-size:13px;color:var(--text-muted);font-weight:500;display:flex;align-items:center;justify-content:center}
+  .pag button:hover{background:var(--bg);color:var(--text)}
+  .pag button.active{background:var(--primary);color:#fff}
+  .pag button:disabled{opacity:.4;cursor:not-allowed}
+
+  /* Empty state */
+  .empty{padding:64px 32px;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px}
+  .empty .illust{width:120px;height:120px;margin:0 auto 18px;position:relative}
+  .empty h3{margin:0 0 6px;font-size:17px;font-weight:600}
+  .empty p{margin:0 auto 20px;font-size:13.5px;color:var(--text-muted);max-width:380px;line-height:1.55}
+
+  /* Toggle switcher (demo only) */
+  .switcher{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;background:#fff;border:1px solid var(--border);border-radius:8px;padding:3px;display:flex;gap:1px;box-shadow:0 6px 16px rgba(26,92,58,.14)}
+  .switcher button{padding:7px 14px;border-radius:5px;font-size:12.5px;font-weight:500;color:var(--text-muted)}
+  .switcher button.active{background:var(--primary);color:#fff}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="switcher">
+  <button id="m1" class="active">Próximas</button>
+  <button id="m2">Pasadas</button>
+  <button id="m3">Canceladas</button>
+  <button id="m4">Vacío</button>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const {useState}=React;
+
+function Sidebar(){
+  const items=[['inicio','Inicio','▦'],['citas','Mis citas','⊞',true],['ia','Pre-evaluación IA','◔'],['rec','Recetas','℞'],['perf','Mi perfil','◉']];
+  return (
+    <aside className="sb">
+      <div className="brand"><div className="y">Y</div><div><b>Yoltec</b><span>Servicio médico</span></div></div>
+      <nav>{items.map(([k,l,i,a])=>(<a key={k} className={a?'active':''}><span className="ic">{i}</span>{l}</a>))}</nav>
+      <div className="user"><div className="av">AP</div><div><b>Ana Pérez García</b><span>22690495</span></div></div>
+    </aside>
+  );
+}
+
+const PROX=[
+  {d:13,m:'MAY',dow:'miércoles',yr:2026,hr:'10:30',motivo:'Control de presión',meta:'Dr. Omar Salas · Consultorio 2',estado:'ok',label:'Confirmada'},
+  {d:18,m:'MAY',dow:'lunes',yr:2026,hr:'09:15',motivo:'Revisión nutricional',meta:'Dra. Daniela Cruz · Consultorio 1',estado:'warn',label:'Pendiente'},
+  {d:25,m:'MAY',dow:'lunes',yr:2026,hr:'13:00',motivo:'Seguimiento migraña',meta:'Dr. Omar Salas · Consultorio 2',estado:'ok',label:'Confirmada'},
+  {d:2,m:'JUN',dow:'martes',yr:2026,hr:'11:00',motivo:'Vacunación influenza',meta:'Enf. Marta Robles · Sala 3',estado:'warn',label:'Pendiente'},
+];
+const PASADAS=[
+  {d:28,m:'ABR',dow:'martes',yr:2026,hr:'09:00',motivo:'Dolor de garganta',meta:'Dr. Omar Salas',diag:'Faringitis aguda',estado:'attended',label:'Atendida'},
+  {d:14,m:'ABR',dow:'martes',yr:2026,hr:'10:30',motivo:'Control general',meta:'Dr. Omar Salas',diag:'Sin hallazgos significativos',estado:'attended',label:'Atendida'},
+  {d:5,m:'MAR',dow:'jueves',yr:2026,hr:'08:30',motivo:'Revisión general',meta:'Dr. Omar Salas',diag:'',estado:'attended',label:'Atendida'},
+  {d:18,m:'FEB',dow:'miércoles',yr:2026,hr:'11:00',motivo:'Consulta nutricional',meta:'Dra. Daniela Cruz',diag:'Plan alimenticio entregado',estado:'attended',label:'Atendida'},
+];
+const CANCEL=[
+  {d:2,m:'ABR',dow:'jueves',yr:2026,hr:'13:20',motivo:'Consulta nutricional',meta:'Cancelada por el alumno',estado:'cancel',label:'Cancelada'},
+  {d:18,m:'MAR',dow:'miércoles',yr:2026,hr:'11:00',motivo:'Dolor de garganta',meta:'Dra. Daniela Cruz',estado:'noshow',label:'No asistió'},
+  {d:12,m:'MAR',dow:'jueves',yr:2026,hr:'09:15',motivo:'Vacunación',meta:'Cancelada por el doctor',estado:'cancel',label:'Cancelada'},
+];
+
+function Filters({mode}){
+  const isPast = mode==='past' || mode==='cancel';
+  return (
+    <div className="filters">
+      <span className="lab">Filtrar</span>
+      <div className="field"><span className="ic">⌕</span><input placeholder="Buscar por motivo o doctor"/></div>
+      <div className="field"><span className="ic">⊞</span><input type="date" defaultValue={isPast?'2026-02-01':'2026-05-11'}/></div>
+      <div className="field"><span className="ic">→</span><input type="date" defaultValue={isPast?'2026-04-30':'2026-06-30'}/></div>
+      {mode==='cancel' && (
+        <div className="field"><select defaultValue=""><option value="">Todos los estatus</option><option>Cancelada</option><option>No asistió</option></select></div>
+      )}
+      <div className="spacer"/>
+      <button className="btn ghost reset">Limpiar</button>
+    </div>
+  );
+}
+
+function Empty(){
+  return (
+    <div className="empty">
+      <div className="illust">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <rect x="14" y="22" width="92" height="84" rx="10" fill="#e8f1ec" stroke="#1a5c3a" strokeWidth="2"/>
+          <rect x="14" y="22" width="92" height="20" rx="10" fill="#1a5c3a"/>
+          <rect x="14" y="34" width="92" height="8" fill="#1a5c3a"/>
+          <circle cx="34" cy="20" r="6" fill="#fff" stroke="#1a5c3a" strokeWidth="2"/>
+          <circle cx="86" cy="20" r="6" fill="#fff" stroke="#1a5c3a" strokeWidth="2"/>
+          <rect x="28" y="14" width="12" height="14" rx="3" fill="#1a5c3a"/>
+          <rect x="80" y="14" width="12" height="14" rx="3" fill="#1a5c3a"/>
+          <line x1="30" y1="58" x2="90" y2="58" stroke="#cdd9d3" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="30" y1="72" x2="74" y2="72" stroke="#cdd9d3" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="30" y1="86" x2="82" y2="86" stroke="#cdd9d3" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="92" cy="92" r="14" fill="#1a5c3a"/>
+          <path d="M92 86v12M86 92h12" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <h3>No tienes citas próximas</h3>
+      <p>Cuando agendes una consulta en el servicio médico aparecerá aquí con su fecha, hora y motivo.</p>
+      <button className="btn primary"><span className="plus">＋</span>Agendar cita</button>
+    </div>
+  );
+}
+
+function Row({c,past}){
+  return (
+    <tr>
+      <td>
+        <div className={'date-cell'+(past?' past':'')}>
+          <div className="d"><b>{String(c.d).padStart(2,'0')}</b><span>{c.m}</span></div>
+          <div className="dow"><b>{c.dow}</b><span>{c.yr}</span></div>
+        </div>
+      </td>
+      <td className="hr">{c.hr}</td>
+      <td className="motivo">
+        <b>{c.motivo}</b>
+        <span>{c.meta}</span>
+        {c.diag && <span style={{display:'block',color:'#7b8f86',fontSize:'11.5px',marginTop:'3px'}}>Diagnóstico: {c.diag}</span>}
+      </td>
+      <td><span className={'b '+c.estado}><span className="pulse"></span>{c.label}</span></td>
+      <td style={{textAlign:'right'}}>
+        {past
+          ? <button className="btn ghost sm">Ver detalle</button>
+          : <button className="btn danger-ghost">Cancelar</button>}
+      </td>
+    </tr>
+  );
+}
+
+function Pag({total}){
+  return (
+    <div className="pag">
+      <div className="count">Mostrando <b>1–{total}</b> de <b>{total}</b> citas</div>
+      <div className="pages">
+        <button disabled>‹</button>
+        <button className="active">1</button>
+        <button>2</button>
+        <button>3</button>
+        <button>›</button>
+      </div>
+    </div>
+  );
+}
+
+function App({mode}){
+  return (
+    <div className="app">
+      <Sidebar/>
+      <div className="main">
+        <div className="header">
+          <div className="head-row">
+            <div>
+              <div className="crumb">Servicio médico · Citas</div>
+              <h1>Mis citas</h1>
+              <div className="sub">Consulta tus citas agendadas y tu historial de consultas pasadas.</div>
+            </div>
+            <div style={{display:'flex',gap:10,marginTop:6}}>
+              <button className="btn secondary">Exportar historial</button>
+              <button className="btn primary"><span className="plus">＋</span>Nueva cita</button>
+            </div>
+          </div>
+          <div className="tabs">
+            <button className={mode==='prox'||mode==='empty'?'active':''}>Próximas <span className="ct">{mode==='empty'?0:PROX.length}</span></button>
+            <button className={mode==='past'?'active':''}>Pasadas <span className="ct">{PASADAS.length}</span></button>
+            <button className={mode==='cancel'?'active':''}>Canceladas <span className="ct">{CANCEL.length}</span></button>
+          </div>
+        </div>
+
+        <div className="content">
+          {mode==='empty' ? (
+            <>
+              <Filters mode="prox"/>
+              <Empty/>
+            </>
+          ) : mode==='past' ? (
+            <>
+              <Filters mode="past"/>
+              <div className="card">
+                <table>
+                  <thead><tr>
+                    <th style={{width:'26%'}}>Fecha</th>
+                    <th style={{width:'10%'}}>Hora</th>
+                    <th>Motivo</th>
+                    <th style={{width:'14%'}}>Estatus</th>
+                    <th style={{width:'14%',textAlign:'right'}}></th>
+                  </tr></thead>
+                  <tbody>{PASADAS.map((c,i)=><Row key={i} c={c} past/>)}</tbody>
+                </table>
+                <Pag total={PASADAS.length}/>
+              </div>
+            </>
+          ) : mode==='cancel' ? (
+            <>
+              <Filters mode="cancel"/>
+              <div className="card">
+                <table>
+                  <thead><tr>
+                    <th style={{width:'26%'}}>Fecha</th>
+                    <th style={{width:'10%'}}>Hora</th>
+                    <th>Motivo</th>
+                    <th style={{width:'14%'}}>Estatus</th>
+                    <th style={{width:'14%',textAlign:'right'}}></th>
+                  </tr></thead>
+                  <tbody>{CANCEL.map((c,i)=><Row key={i} c={c} past/>)}</tbody>
+                </table>
+                <Pag total={CANCEL.length}/>
+              </div>
+            </>
+          ) : (
+            <>
+              <Filters mode="prox"/>
+              <div className="card">
+                <table>
+                  <thead><tr>
+                    <th style={{width:'26%'}}>Fecha</th>
+                    <th style={{width:'10%'}}>Hora</th>
+                    <th>Motivo</th>
+                    <th style={{width:'14%'}}>Estatus</th>
+                    <th style={{width:'14%',textAlign:'right'}}></th>
+                  </tr></thead>
+                  <tbody>{PROX.map((c,i)=><Row key={i} c={c}/>)}</tbody>
+                </table>
+                <Pag total={PROX.length}/>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+let mode='prox';
+const root=ReactDOM.createRoot(document.getElementById('app'));
+const render=()=>root.render(<App mode={mode}/>);
+const setMode=(m,btn)=>{mode=m;document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();};
+document.getElementById('m1').onclick=e=>setMode('prox',e.currentTarget);
+document.getElementById('m2').onclick=e=>setMode('past',e.currentTarget);
+document.getElementById('m3').onclick=e=>setMode('cancel',e.currentTarget);
+document.getElementById('m4').onclick=e=>setMode('empty',e.currentTarget);
+render();
+</script>
+</body>
+</html>

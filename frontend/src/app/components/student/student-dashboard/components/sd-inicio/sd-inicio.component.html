@@ -1,0 +1,35 @@
+<section class="content-section">
+  <div class="welcome-card">
+    <h2>Bienvenido al Sistema del Consultorio</h2>
+
+    <div class="quick-stats">
+      <div class="stat-card">
+        <h3>Próxima Cita</h3>
+        <ng-container *ngIf="nextCitaInfo; else noProximaCita">
+          <p class="stat-value">{{ nextCitaInfo.fecha }}</p>
+          <p class="stat-detail">{{ nextCitaInfo.hora }} hrs</p>
+          <p class="stat-detail" *ngIf="nextCitaInfo.motivo">Motivo: {{ nextCitaInfo.motivo }}</p>
+        </ng-container>
+        <ng-template #noProximaCita>
+          <p class="stat-value">No tienes citas programadas</p>
+        </ng-template>
+      </div>
+
+      <div class="stat-card">
+        <h3>Citas Programadas</h3>
+        <p class="stat-value">{{ totalCitasProgramadas }} {{ totalCitasProgramadas === 1 ? 'cita' : 'citas' }}</p>
+      </div>
+
+      <div class="stat-card" [class.stat-card-alert]="citasPendientesSinEvaluacion > 0">
+        <h3>Pre-evaluación IA</h3>
+        <ng-container *ngIf="citasPendientesSinEvaluacion > 0; else evalAlDia">
+          <p class="stat-value">{{ citasPendientesSinEvaluacion }} pendiente{{ citasPendientesSinEvaluacion > 1 ? 's' : '' }}</p>
+          <button class="btn-ia-inicio" (click)="navegarACitas.emit()">Completar ahora →</button>
+        </ng-container>
+        <ng-template #evalAlDia>
+          <p class="stat-value">✓ Al día</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>

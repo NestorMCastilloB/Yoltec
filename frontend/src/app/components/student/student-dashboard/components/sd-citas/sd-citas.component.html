@@ -1,0 +1,226 @@
+<section class="content-section">
+  <div class="section-header">
+    <h2>Gestión de Citas</h2>
+    <button class="btn-primary" (click)="toggleCreateForm()">
+      {{ showCreateForm ? 'Cerrar formulario' : 'Agendar Nueva Cita' }}
+    </button>
+  </div>
+
+  <div *ngIf="submitMessage" class="alert">{{ submitMessage }}</div>
+
+  <!-- Formulario nueva cita -->
+  <div *ngIf="showCreateForm" class="form-card">
+    <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label>Fecha de la cita</label>
+          <div class="calendar-card">
+            <div class="calendar-header">
+              <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
+              <h4>{{ calendarLabel | titlecase }}</h4>
+              <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
+            </div>
+            <div class="calendar-legend">
+              <span><span class="dot available"></span> Disponible</span>
+              <span><span class="dot partial"></span> Parcial</span>
+              <span><span class="dot full"></span> Sin lugares</span>
+            </div>
+            <div class="calendar-weekdays">
+              <span *ngFor="let day of weekDays">{{ day }}</span>
+            </div>
+            <div class="calendar-grid">
+              <ng-container *ngFor="let week of calendarWeeks">
+                <button type="button" *ngFor="let day of week" class="calendar-day"
+                  [ngClass]="{
+                    outside: !day.isCurrentMonth, today: day.isToday,
+                    selected: isSelectedDate(day.date), unavailable: isDayUnavailable(day),
+                    'status-available': day.availability === 'available',
+                    'status-partial': day.availability === 'partial',
+                    'status-full': day.availability === 'full',
+                    'status-none': day.availability === 'none'
+                  }"
+                  [ngStyle]="getDayStyle(day)"
+                  [attr.aria-pressed]="isSelectedDate(day.date)"
+                  (click)="selectCalendarDay(day)">
+                  <span class="day-number">{{ day.label }}</span>
+                  <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
+                </button>
+              </ng-container>
+            </div>
+          </div>
+          <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
+            <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
+          </div>
+          <input type="hidden" name="fecha_cita" [(ngModel)]="createFormData.fecha_cita" required />
+        </div>
+
+        <div class="form-group full-width">
+          <label>Hora</label>
+          <div class="slots-wrapper" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
+            <div class="slots-legend">
+              <span class="leg-dot free"></span> Libre
+              <span class="leg-dot selected-dot"></span> Seleccionado
+              <span class="leg-dot booked-dot"></span> Ocupado
+            </div>
+            <div class="slots-group">
+              <span class="slots-period">🌅 Mañana</span>
+              <div class="time-slots">
+                <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(0, 16)"
+                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                  [class.booked]="isSlotUnavailable(slot)"
+                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                  (click)="selectTimeSlot(slot)">{{ formatTime(slot) }}</button>
+              </div>
+            </div>
+            <div class="slots-group">
+              <span class="slots-period">🌇 Tarde</span>
+              <div class="time-slots">
+                <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(16)"
+                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                  [class.booked]="isSlotUnavailable(slot)"
+                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)"
+                  (click)="selectTimeSlot(slot)">{{ formatTime(slot) }}</button>
+              </div>
+            </div>
+          </div>
+          <small class="helper-text" *ngIf="!createFormData.fecha_cita">Selecciona un día disponible para ver las horas libres.</small>
+          <small class="helper-text warning" *ngIf="createFormData.fecha_cita && !hasAvailableSlotsForSelectedDate">Este día ya está lleno. Elige otra fecha.</small>
+          <input type="hidden" name="hora_cita" [(ngModel)]="createFormData.hora_cita" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="motivo">Motivo</label>
+        <textarea id="motivo" name="motivo" [(ngModel)]="createFormData.motivo" rows="3" placeholder="Describe brevemente tu motivo" class="motivo-area"></textarea>
+      </div>
+      <button class="btn-primary" type="submit" [disabled]="isSubmitting || createCitaForm.invalid">
+        {{ isSubmitting ? 'Agendando...' : 'Guardar cita' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de citas -->
+  <div class="citas-container">
+    <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
+      <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
+      <div class="citas-layout" *ngIf="!citasError">
+        <div class="citas-column pendientes">
+          <h3>Próximas citas</h3>
+          <ng-container *ngIf="pendingCitas.length > 0; else noPendientes">
+            <div *ngFor="let cita of pendingCitas" class="cita-card">
+              <div class="cita-header">
+                <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
+                <span class="estatus programada">Pendiente</span>
+              </div>
+              <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
+              <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
+              <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
+              <div class="card-actions">
+                <button class="btn-secondary" (click)="onCancelCita(cita)" [disabled]="isSubmitting">
+                  {{ isSubmitting ? 'Cancelando...' : 'Cancelar cita' }}
+                </button>
+                <button class="btn-ia" (click)="toggleChat(cita)" [disabled]="tienePreEvaluacion(cita.id)">
+                  <span *ngIf="!tienePreEvaluacion(cita.id)">🤖 Pre-evaluación IA</span>
+                  <span *ngIf="tienePreEvaluacion(cita.id)">✓ Pre-evaluación completada</span>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noPendientes>
+            <div class="placeholder-card compact"><h4>No tienes citas pendientes</h4><p>Agenda una nueva cita para verla aquí.</p></div>
+          </ng-template>
+        </div>
+
+        <div class="citas-column historial">
+          <h3>Historial reciente</h3>
+          <ng-container *ngIf="handledCitas.length > 0; else noHistorial">
+            <div *ngFor="let cita of handledCitas" class="cita-card"
+                 [class.cancelada]="cita.estatus === 'cancelada'"
+                 [class.no-asistio]="cita.estatus === 'no_asistio'">
+              <div class="cita-header">
+                <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
+                <span class="estatus"
+                      [class.atendida]="cita.estatus === 'atendida'"
+                      [class.cancelada]="cita.estatus === 'cancelada'"
+                      [class.no-asistio]="cita.estatus === 'no_asistio'">
+                  {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' : 'Cancelada' }}
+                </span>
+              </div>
+              <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
+              <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
+              <p class="doctor" *ngIf="cita.doctor">Doctor asignado: {{ cita.doctor.nombre }} {{ cita.doctor.apellido }}</p>
+            </div>
+          </ng-container>
+          <ng-template #noHistorial>
+            <div class="placeholder-card compact"><h4>Sin registros todavía</h4><p>Cuando atiendas o canceles citas aparecerán aquí.</p></div>
+          </ng-template>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #loadingCitas><div class="placeholder-card">Cargando tus citas...</div></ng-template>
+  </div>
+</section>
+
+<!-- Modal Chat IA -->
+<div *ngIf="showPreEvaluacionForm" class="modal-overlay" (click)="toggleChat()">
+  <div class="modal-content pre-evaluacion-modal chat-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>🤖 Pre-evaluación IA</h2>
+        <p class="modal-subtitle" *ngIf="selectedCita">
+          Cita: {{ formatDateDisplay(selectedCita.fecha_cita) }} · {{ formatTime(selectedCita.hora_cita) }} hrs
+        </p>
+      </div>
+      <button class="close-btn" (click)="toggleChat()">×</button>
+    </div>
+
+    <ng-container *ngIf="!resultadoPreEvaluacion">
+      <div class="chat-messages">
+        <div *ngFor="let msg of chatMensajes" class="chat-bubble" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+          <span class="bubble-avatar" *ngIf="msg.role === 'assistant'">🤖</span>
+          <div class="bubble-content">{{ msg.content }}</div>
+          <span class="bubble-avatar user-icon" *ngIf="msg.role === 'user'">👤</span>
+        </div>
+        <div *ngIf="isChatLoading" class="chat-bubble assistant">
+          <span class="bubble-avatar">🤖</span>
+          <div class="bubble-content typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div *ngIf="preEvaluacionError" class="chat-error">⚠️ {{ preEvaluacionError }}</div>
+      <div *ngIf="mensajesUsuario >= 4 && !isChatLoading" class="chat-finalizar-hint">
+        <button class="btn-finalizar" (click)="forzarDiagnostico()">📋 Generar diagnóstico ahora</button>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" [(ngModel)]="chatInput" (keydown)="onChatEnter($event)" placeholder="Escribe tu respuesta..." [disabled]="isChatLoading">
+        <button class="btn-send" (click)="enviarMensaje()" [disabled]="!chatInput.trim() || isChatLoading" title="Enviar">➤</button>
+      </div>
+    </ng-container>
+
+    <div *ngIf="resultadoPreEvaluacion" class="modal-body resultado-container">
+      <div class="resultado-header">
+        <h3>Diagnóstico Preliminar</h3>
+        <div class="confianza-badge" [class]="getConfianzaClass(resultadoPreEvaluacion.confianza)">
+          Confianza: {{ (resultadoPreEvaluacion.confianza * 100).toFixed(0) }}%
+        </div>
+      </div>
+      <div class="diagnostico-principal"><h4>{{ resultadoPreEvaluacion.diagnostico_principal }}</h4></div>
+      <div class="sintomas-detectados" *ngIf="resultadoPreEvaluacion.sintomas_detectados.length > 0">
+        <h5>Síntomas detectados:</h5>
+        <div class="tags">
+          <span *ngFor="let s of resultadoPreEvaluacion.sintomas_detectados" class="tag">{{ s }}</span>
+        </div>
+      </div>
+      <div class="posibles-enfermedades" *ngIf="resultadoPreEvaluacion.posibles_enfermedades.length > 1">
+        <h5>Otras posibilidades:</h5>
+        <ul>
+          <li *ngFor="let e of resultadoPreEvaluacion.posibles_enfermedades.slice(1, 4)">
+            {{ e.enfermedad }} ({{ (e.confianza * 100).toFixed(0) }}%)
+          </li>
+        </ul>
+      </div>
+      <div class="recomendacion"><h5>Recomendación:</h5><p>{{ resultadoPreEvaluacion.recomendacion }}</p></div>
+      <div class="alert info"><strong>Nota:</strong> Este diagnóstico es preliminar y será validado por el doctor durante tu cita.</div>
+      <div class="modal-actions"><button class="btn-primary" (click)="toggleChat()">Cerrar</button></div>
+    </div>
+  </div>
+</div>

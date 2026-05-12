@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Agendar cita</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f5ee;
+    --warn:#f59e0b; --warn-50:#fff7ed;
+    --danger:#dc2626; --danger-50:#fef2f2;
+    --bg:#ffffff; --soft:#f9fafb;
+    --border:#e5e7eb; --border-strong:#d1d5db;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;font-family:'Inter',system-ui,sans-serif;color:var(--text);background:#fff;font-size:14px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+  textarea,input{font-family:inherit}
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sb{width:220px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px}
+  .sb nav{padding:14px 8px;display:flex;flex-direction:column;gap:2px;flex:1}
+  .sb nav a{padding:11px 14px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-radius:7px;cursor:pointer}
+  .sb nav a:hover{background:rgba(255,255,255,.05)}
+  .sb nav a.active{background:var(--primary-50);color:var(--primary);font-weight:600}
+  .sb nav a .ic{font-size:14px;width:16px;text-align:center}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;padding:32px;display:flex;gap:32px;align-items:flex-start}
+  .page-head{margin-bottom:18px}
+  .crumb{font-size:12px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+  h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px}
+
+  /* Calendar column */
+  .cal-col{width:480px;flex-shrink:0}
+  .sec-title{font-size:18px;font-weight:600;margin:0 0 14px}
+  .month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+  .month-nav b{font-size:15px;font-weight:600;letter-spacing:-.1px}
+  .nav-btn{width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;font-weight:600}
+  .nav-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+  .dow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:8px}
+  .dow span{text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;padding:6px 0}
+  .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .day{height:56px;border-radius:8px;border:1px solid var(--border);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 0;cursor:pointer;position:relative;transition:transform .1s}
+  .day:hover{transform:translateY(-1px)}
+  .day .n{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+  .day .d{font-size:9.5px;font-weight:600;margin-top:3px;letter-spacing:.2px}
+  .day.good{border-color:var(--primary)}
+  .day.good .n{color:var(--primary)}
+  .day.good .d{color:var(--primary)}
+  .day.mid{border-color:var(--warn)}
+  .day.mid .n{color:var(--warn)}
+  .day.mid .d{color:var(--warn)}
+  .day.none{background:var(--danger-50);border-color:#fecaca;cursor:not-allowed}
+  .day.none .n{color:var(--danger)}
+  .day.none .d{color:var(--danger)}
+  .day.past{background:var(--soft);border-color:var(--border);cursor:not-allowed}
+  .day.past .n{color:var(--text-subtle)}
+  .day.selected{background:var(--primary-50);border:2px solid var(--primary)}
+  .day.selected .n{color:var(--primary);font-weight:700}
+  .day.selected .d{color:var(--primary);font-weight:700}
+  .day.today::after{content:'';position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;padding:14px;background:var(--soft);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text-muted)}
+  .legend .it{display:flex;align-items:center;gap:7px}
+  .legend .dot{width:10px;height:10px;border-radius:50%}
+  .legend .dot.g{background:var(--primary)}
+  .legend .dot.o{background:var(--warn)}
+  .legend .dot.r{background:var(--danger)}
+  .legend .dot.x{background:var(--text-subtle)}
+
+  /* Slots column */
+  .slot-col{flex:1;min-width:0}
+  .slot-head h2{margin:0 0 4px;font-size:18px;font-weight:600}
+  .slot-head .sub{color:var(--primary);font-size:14px;font-weight:600;margin-bottom:6px}
+  .slot-head .note{font-size:13px;color:var(--text-muted);margin-bottom:18px}
+  .slot-grid{display:grid;grid-template-columns:repeat(3,140px);gap:12px}
+  .slot{border:1px solid var(--border);border-radius:8px;padding:12px;background:#fff;text-align:left;display:flex;flex-direction:column;cursor:pointer;transition:all .12s}
+  .slot:hover{border-color:var(--primary);background:var(--primary-50)}
+  .slot b{font-size:18px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+  .slot span{font-size:12px;color:var(--text-muted);margin-top:2px;font-variant-numeric:tabular-nums}
+  .slot.sel{background:var(--primary);border-color:var(--primary)}
+  .slot.sel b,.slot.sel span{color:#fff}
+  .slot.sel span{color:rgba(255,255,255,.8)}
+  .help{margin-top:18px;display:flex;align-items:flex-start;gap:8px;padding:12px 14px;background:var(--soft);border:1px solid var(--border);border-radius:8px;font-size:12.5px;color:var(--text-muted);max-width:460px}
+  .help b{color:var(--text);font-weight:600}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal{width:440px;max-width:100%;background:#fff;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.25);padding:24px;animation:pop .18s ease-out}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+  .modal h3{margin:0 0 14px;font-size:18px;font-weight:700}
+  .resume{background:var(--primary-50);border:1px solid var(--primary);border-radius:8px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:center;gap:11px;color:var(--primary);font-weight:600;font-size:14px}
+  .resume .ic{width:30px;height:30px;border-radius:7px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .resume small{display:block;font-size:11.5px;font-weight:500;color:var(--primary-600);opacity:.85;letter-spacing:.1px;margin-top:1px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+  label .req{color:var(--danger);margin-left:2px}
+  textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13.5px;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:72px;line-height:1.5}
+  textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,92,58,.12)}
+  .err{font-size:12px;color:var(--danger);margin-top:6px}
+  .mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+  .btn{padding:10px 16px;border-radius:8px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s}
+  .btn.cancel{background:#fff;color:var(--text-muted);border-color:var(--border-strong)}
+  .btn.cancel:hover{background:var(--soft)}
+  .btn.confirm{background:var(--primary);color:#fff;width:160px}
+  .btn.confirm:hover{background:var(--primary-600)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sb">
+    <div class="brand"><div class="y">Y</div><div><b>Yoltec</b><span>Servicio médico</span></div></div>
+    <nav>
+      <a><span class="ic">▦</span>Inicio</a>
+      <a><span class="ic">⊞</span>Mis citas</a>
+      <a class="active"><span class="ic">＋</span>Agendar cita</a>
+      <a><span class="ic">◔</span>Pre-evaluación IA</a>
+      <a><span class="ic">℞</span>Recetas</a>
+      <a><span class="ic">◉</span>Mi perfil</a>
+    </nav>
+    <div class="user"><div class="av">NM</div><div><b>Nestor Castillo</b><span>22690495</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="cal-col">
+      <div class="page-head">
+        <div class="crumb">Agendar cita</div>
+        <h1>Reserva tu consulta</h1>
+      </div>
+      <h2 class="sec-title">Selecciona un día</h2>
+      <div class="month-nav">
+        <button class="nav-btn" aria-label="Mes anterior">‹</button>
+        <b>Mayo 2026</b>
+        <button class="nav-btn" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="dow"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span></div>
+      <div class="grid" id="grid"></div>
+      <div class="legend">
+        <div class="it"><span class="dot g"></span>Buena disponibilidad</div>
+        <div class="it"><span class="dot o"></span>Poca disponibilidad</div>
+        <div class="it"><span class="dot r"></span>Sin disponibilidad</div>
+        <div class="it"><span class="dot x"></span>No disponible</div>
+      </div>
+    </div>
+
+    <div class="slot-col">
+      <div class="slot-head">
+        <h2>Horarios disponibles</h2>
+        <div class="sub">Martes, 13 de mayo 2026</div>
+        <div class="note">Se muestran solo los horarios libres. Los horarios ocupados no aparecen.</div>
+      </div>
+      <div class="slot-grid" id="slots"></div>
+      <div class="help">
+        <span>ⓘ</span><span>Tu cita dura <b>15 minutos</b>. Llega 5 minutos antes al Edificio C, planta baja. Puedes cancelar hasta 2 horas antes desde <b>Mis citas</b>.</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>Confirmar cita</h3>
+    <div class="resume">
+      <div class="ic">⊞</div>
+      <div>Martes 13 de mayo · 09:00 – 09:15<small>Servicio médico universitario · Consultorio 2</small></div>
+    </div>
+    <label>Motivo de la cita<span class="req">*</span></label>
+    <textarea placeholder="Describe brevemente el motivo de tu cita..."></textarea>
+    <div class="err">* Campo obligatorio</div>
+    <div class="mfoot">
+      <button class="btn cancel">Cancelar</button>
+      <button class="btn confirm">Confirmar cita</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Build May 2026 grid — Mon–Sat only (skip Sundays).
+// May 1, 2026 is a Friday. Layout calendar week starting Monday.
+const days = [
+  // [day, type, disp]  types: past, none, good, mid, today, selected
+  [null], [null], [null], [null],
+  [1,'mid',2], [2,'none','Sin disp'],                    // skip Sun
+  [4,'past'], [5,'past'], [6,'past'], [7,'past'], [8,'past'], [9,'past'],
+  [11,'past'], [12,'today',8], [13,'selected','6 disp'], [14,'good',7], [15,'good',9], [16,'mid',3],
+  [18,'good',10], [19,'mid',2], [20,'good',8], [21,'none','Sin disp'], [22,'good',7], [23,'good',9],
+  [25,'good',8], [26,'mid',1], [27,'good',6], [28,'none','Festivo'], [29,'good',8], [30,'mid',2],
+];
+const grid = document.getElementById('grid');
+days.forEach(([d,t,dp])=>{
+  const el = document.createElement(d===null?'div':'button');
+  if(d===null){ el.style.height='56px'; grid.appendChild(el); return; }
+  el.className = 'day ' + (t==='today'?'good today':t==='selected'?'good selected':t);
+  let disp='';
+  if(t==='good'||t==='today'||t==='selected') disp = typeof dp==='string'?dp:dp+' disp';
+  else if(t==='mid') disp = dp+' disp';
+  else if(t==='none') disp = dp;
+  el.innerHTML = '<span class="n">'+d+'</span>' + (disp?'<span class="d">'+disp+'</span>':'');
+  grid.appendChild(el);
+});
+
+// Slots
+const slots = [['08:00','08:15'],['08:15','08:30'],['08:30','08:45'],
+               ['09:00','09:15',true],['09:15','09:30'],
+               ['10:00','10:15'],['10:30','10:45'],['11:00','11:15']];
+const sc = document.getElementById('slots');
+slots.forEach(([from,to,sel])=>{
+  const b = document.createElement('button');
+  b.className = 'slot' + (sel?' sel':'');
+  b.innerHTML = '<b>'+from+'</b><span>– '+to+'</span>';
+  sc.appendChild(b);
+});
+</script>
+</body>
+</html>

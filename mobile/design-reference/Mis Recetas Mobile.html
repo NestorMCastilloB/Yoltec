@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mis Recetas</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-50:#e8f5ee;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#f9fafb;
+    --bg:#f8fafc; --chip-bg:#f3f4f6;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:#0f172a}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px}
+  .phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative;display:flex;flex-direction:column;border:8px solid #111}
+  .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:5}
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:#fff;background:var(--primary);position:relative;z-index:1}
+
+  .hd{background:var(--primary);color:#fff;padding:10px 14px 16px;display:flex;align-items:center;justify-content:center}
+  .hd h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.2px}
+
+  .search-wrap{background:#fff;padding:12px 16px}
+  .search{position:relative}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-subtle)}
+  .search input{width:100%;height:40px;background:var(--chip-bg);border:0;border-radius:8px;padding:0 14px 0 38px;font:500 13.5px 'Inter',sans-serif;color:var(--text);outline:none}
+  .search input::placeholder{color:var(--text-subtle)}
+
+  .list{flex:1;overflow-y:auto;background:var(--bg);padding:16px 16px 88px;display:flex;flex-direction:column;gap:12px}
+
+  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:12px}
+
+  .row-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .date{display:inline-flex;background:var(--chip-bg);color:var(--text-muted);font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;letter-spacing:.3px;font-variant-numeric:tabular-nums}
+  .doc{font-size:12px;color:var(--text-muted);font-weight:500}
+
+  .sep{height:1px;background:var(--border-soft)}
+
+  .meds{display:flex;flex-direction:column;gap:8px}
+  .med{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;line-height:1.4}
+  .med svg{width:14px;height:14px;color:var(--text-muted);flex-shrink:0;margin-top:3px;stroke-width:1.7}
+  .med .name{color:var(--text);font-weight:500}
+  .med .dose{color:var(--text-muted);font-weight:400}
+
+  .notes{font-size:12px;color:var(--text-subtle);font-style:italic;line-height:1.4}
+
+  .detail{display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:none}
+  .detail svg{width:14px;height:14px;stroke-width:2}
+
+  /* Bottom nav */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;height:64px;padding:8px 6px;padding-bottom:18px}
+  .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-subtle);font-size:10px;font-weight:500;text-decoration:none;cursor:pointer}
+  .nav a svg{width:22px;height:22px;stroke-width:1.8}
+  .nav a.active{color:var(--primary);font-weight:600}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:99px;background:#111;z-index:10}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span style="font-size:12px">●●●●● ●</span></div>
+
+  <div class="hd">
+    <h1>Mis Recetas</h1>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input placeholder="Buscar receta o medicamento...">
+    </div>
+  </div>
+
+  <div class="list">
+    <!-- Receta 1 -->
+    <div class="card">
+      <div class="row-top">
+        <span class="date">7 ABR 2026</span>
+        <span class="doc">Dr. Omar Salas</span>
+      </div>
+      <div class="sep"></div>
+      <div class="meds">
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Paracetamol 500 mg</span><span class="dose"> — 1 tableta cada 8 hrs</span></span>
+        </div>
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Amoxicilina 500 mg</span><span class="dose"> — 1 cápsula cada 12 hrs</span></span>
+        </div>
+      </div>
+      <div class="notes">Tomar con alimentos. Suspender si hay reacciones.</div>
+      <div class="sep"></div>
+      <a class="detail">Ver detalle completo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <!-- Receta 2 -->
+    <div class="card">
+      <div class="row-top">
+        <span class="date">22 MAR 2026</span>
+        <span class="doc">Dra. Laura Ramírez</span>
+      </div>
+      <div class="sep"></div>
+      <div class="meds">
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Loratadina 10 mg</span><span class="dose"> — 1 tableta cada 24 hrs</span></span>
+        </div>
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Mometasona spray nasal</span><span class="dose"> — 2 aplicaciones al día</span></span>
+        </div>
+      </div>
+      <div class="notes">Evitar conducir si presenta somnolencia.</div>
+      <div class="sep"></div>
+      <a class="detail">Ver detalle completo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <!-- Receta 3 -->
+    <div class="card">
+      <div class="row-top">
+        <span class="date">14 FEB 2026</span>
+        <span class="doc">Dr. Javier Mendoza</span>
+      </div>
+      <div class="sep"></div>
+      <div class="meds">
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Ibuprofeno 400 mg</span><span class="dose"> — 1 tableta cada 6 hrs</span></span>
+        </div>
+        <div class="med">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <span><span class="name">Omeprazol 20 mg</span><span class="dose"> — 1 cápsula en ayunas</span></span>
+        </div>
+      </div>
+      <div class="notes">Mantener reposo relativo durante 48 horas.</div>
+      <div class="sep"></div>
+      <a class="detail">Ver detalle completo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="nav">
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>
+      Inicio
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+      Citas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>
+      IA
+    </a>
+    <a class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+      Recetas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      Perfil
+    </a>
+  </div>
+  <div class="home-ind"></div>
+</div>
+</body>
+</html>

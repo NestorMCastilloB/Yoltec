@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Iniciar sesión</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb;
+    --soft:#f9fafb;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:#0f172a}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px}
+
+  /* Phone frame for preview */
+  .phone{width:390px;height:844px;background:#fff;border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative;display:flex;flex-direction:column;border:8px solid #111}
+  .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:5}
+  .statusbar{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:#fff;z-index:6}
+  .statusbar .ico{display:flex;gap:6px;font-size:12px}
+
+  /* Top green zone — 35% */
+  .top{flex:35;background:var(--primary);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 28px 56px;position:relative}
+  .logo{width:64px;height:64px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:700;font-size:34px;letter-spacing:-1px;line-height:1;font-family:'Inter',sans-serif;margin-bottom:18px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+  .name{color:#fff;font-size:30px;font-weight:700;letter-spacing:-.6px;margin:0}
+  .tagline{color:rgba(255,255,255,.75);font-size:13px;font-weight:500;margin-top:6px;letter-spacing:.1px}
+
+  /* Bottom white zone — 65% */
+  .bot{flex:65;background:#fff;border-radius:28px 28px 0 0;margin-top:-28px;padding:28px 28px 22px;display:flex;flex-direction:column;position:relative;z-index:2}
+  h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+  .sub{margin-top:6px;font-size:13.5px;color:var(--text-muted);font-weight:500}
+
+  form{margin-top:24px;display:flex;flex-direction:column;gap:14px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  label{font-size:12px;font-weight:600;color:#374151;letter-spacing:.1px}
+  .inp{position:relative}
+  .inp input{width:100%;border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:15px;font-weight:500;color:var(--text);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;font-variant-numeric:tabular-nums}
+  .inp input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,92,58,.12)}
+  .inp input::placeholder{color:var(--text-subtle);font-weight:400}
+  .inp .eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:15px}
+  .inp .eye:hover{background:var(--soft);color:var(--text)}
+
+  .login{margin-top:22px;width:100%;border:none;background:var(--primary);color:#fff;font-size:15px;font-weight:600;padding:14px;border-radius:10px;cursor:pointer;transition:background .15s;font-family:inherit;letter-spacing:.1px}
+  .login:hover{background:var(--primary-600)}
+
+  .forgot{margin-top:18px;text-align:center;font-size:13px;color:var(--primary);font-weight:600;text-decoration:none;cursor:pointer}
+  .forgot:hover{text-decoration:underline}
+
+  .foot{margin-top:auto;text-align:center;padding-top:18px;font-size:11px;color:var(--text-subtle);font-weight:500;letter-spacing:.2px}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:99px;background:#111}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span class="ico">●●●●● ●</span></div>
+
+    <div class="top">
+      <div class="logo">Y</div>
+      <h2 class="name">Yoltec</h2>
+      <div class="tagline">Servicio médico universitario</div>
+    </div>
+
+    <div class="bot">
+      <h1>Iniciar sesión</h1>
+      <div class="sub">Ingresa con tu cuenta institucional</div>
+
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="ctrl">Número de control</label>
+          <div class="inp"><input id="ctrl" type="text" inputmode="numeric" value="22690495" placeholder="Ej. 22690495" autocomplete="username"/></div>
+        </div>
+        <div class="field">
+          <label for="nip">NIP</label>
+          <div class="inp">
+            <input id="nip" type="password" value="••••••" placeholder="••••••" autocomplete="current-password"/>
+            <button type="button" class="eye" id="eye" aria-label="Mostrar/ocultar NIP">◎</button>
+          </div>
+        </div>
+
+        <button type="submit" class="login">Iniciar sesión</button>
+      </form>
+
+      <a class="forgot">¿Olvidaste tu NIP?</a>
+
+      <div class="foot">Yoltec · TecNM Campus Valle de México</div>
+    </div>
+
+    <div class="home-ind"></div>
+  </div>
+
+<script>
+  const nip = document.getElementById('nip');
+  const eye = document.getElementById('eye');
+  eye.addEventListener('click',()=>{
+    nip.type = nip.type==='password' ? 'text' : 'password';
+    eye.textContent = nip.type==='password' ? '◎' : '⊘';
+  });
+</script>
+</body>
+</html>

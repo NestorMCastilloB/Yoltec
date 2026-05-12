@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mis Citas</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-50:#e8f5ee;
+    --danger:#dc2626; --danger-bg:#fef2f2;
+    --gray-bg:#f3f4f6; --gray-text:#6b7280;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#f3f4f6;
+    --bg:#f8fafc;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:#0f172a}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px;gap:24px;flex-wrap:wrap}
+  .phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative;display:flex;flex-direction:column;border:8px solid #111}
+  .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:5}
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:#fff;background:var(--primary);position:relative;z-index:1}
+
+  .hd{background:var(--primary);color:#fff;padding:8px 14px 14px;display:flex;align-items:center;gap:8px}
+  .hd .sp{width:36px;height:36px}
+  .hd h1{flex:1;margin:0;font-size:16px;font-weight:600;text-align:center;letter-spacing:-.2px}
+  .hd .add{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .hd .add:hover{background:rgba(255,255,255,.08)}
+
+  .tabs{background:#fff;border-bottom:1px solid var(--border);display:flex;padding:0 12px;height:46px;align-items:flex-end}
+  .tab{flex:1;text-align:center;padding-bottom:10px;font-size:12.5px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+  .tab .ct{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--gray-bg);color:var(--gray-text);min-width:18px;text-align:center;font-variant-numeric:tabular-nums}
+  .tab.active .ct{background:var(--primary-50);color:var(--primary)}
+  .tab.prox .ct{background:var(--primary-50);color:var(--primary)}
+
+  .scroll{flex:1;overflow-y:auto;background:var(--bg);padding:16px 16px 88px;display:flex;flex-direction:column;gap:12px}
+
+  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .top .dt{font-size:14px;font-weight:600;color:var(--text);text-transform:capitalize}
+  .bd{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;letter-spacing:.3px}
+  .bd-conf{background:var(--primary-50);color:var(--primary)}
+  .bd-pen{background:#fef3e0;color:#b45309}
+  .bd-at{background:var(--primary-50);color:var(--primary)}
+  .bd-can{background:var(--gray-bg);color:var(--gray-text)}
+  .bd-no{background:var(--danger-bg);color:var(--danger)}
+  .time{font-size:20px;font-weight:700;color:var(--primary);margin:6px 0 0;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .time.muted{color:var(--text-muted)}
+  .reason{font-size:13px;color:var(--text-muted);margin-top:2px}
+  .diag{font-size:12.5px;color:var(--text-subtle);margin-top:4px;line-height:1.4}
+  .diag b{color:var(--text-muted);font-weight:600}
+  .sep{height:1px;background:var(--border-soft);margin:12px -16px 0}
+  .cancel{display:block;text-align:right;font-size:13px;color:var(--danger);font-weight:500;margin-top:10px;padding:2px 0;text-decoration:none;cursor:pointer}
+
+  .frame-label{position:absolute;top:-26px;left:0;right:0;text-align:center;color:rgba(255,255,255,.55);font:600 11px 'Inter',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+
+  /* Bottom nav */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;height:64px;padding:8px 6px;padding-bottom:18px}
+  .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-subtle);font-size:10px;font-weight:500;text-decoration:none;cursor:pointer}
+  .nav a svg{width:22px;height:22px;stroke-width:1.8}
+  .nav a.active{color:var(--primary);font-weight:600}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:99px;background:#111;z-index:10}
+</style>
+</head>
+<body>
+
+<!-- Variante: Próximas activa -->
+<div class="phone">
+  <div class="frame-label">Tab · Próximas</div>
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span style="font-size:12px">●●●●● ●</span></div>
+
+  <div class="hd">
+    <div class="sp"></div>
+    <h1>Mis Citas</h1>
+    <div class="add">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active prox">Próximas<span class="ct">2</span></div>
+    <div class="tab">Pasadas</div>
+    <div class="tab">Canceladas</div>
+  </div>
+
+  <div class="scroll">
+    <div class="card">
+      <div class="top">
+        <div class="dt">Miércoles, 14 de mayo</div>
+        <span class="bd bd-conf">CONFIRMADA</span>
+      </div>
+      <div class="time">10:30 hrs</div>
+      <div class="reason">Control de presión · Dr. Omar Salas</div>
+      <div class="sep"></div>
+      <a class="cancel">Cancelar cita</a>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="dt">Martes, 27 de mayo</div>
+        <span class="bd bd-pen">PENDIENTE</span>
+      </div>
+      <div class="time">09:00 hrs</div>
+      <div class="reason">Consulta de seguimiento · Dra. Ramírez</div>
+      <div class="sep"></div>
+      <a class="cancel">Cancelar cita</a>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="nav">
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>
+      Inicio
+    </a>
+    <a class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+      Citas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>
+      IA
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+      Recetas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      Perfil
+    </a>
+  </div>
+  <div class="home-ind"></div>
+</div>
+
+<!-- Variante: Pasadas activa -->
+<div class="phone">
+  <div class="frame-label">Tab · Pasadas</div>
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span style="font-size:12px">●●●●● ●</span></div>
+
+  <div class="hd">
+    <div class="sp"></div>
+    <h1>Mis Citas</h1>
+    <div class="add">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab prox">Próximas<span class="ct">2</span></div>
+    <div class="tab active">Pasadas</div>
+    <div class="tab">Canceladas</div>
+  </div>
+
+  <div class="scroll">
+    <div class="card">
+      <div class="top">
+        <div class="dt">Jueves, 29 de abril</div>
+        <span class="bd bd-at">ATENDIDA</span>
+      </div>
+      <div class="time muted">11:00 hrs</div>
+      <div class="reason">Dolor de garganta · Dra. Ramírez</div>
+      <div class="diag"><b>Diagnóstico:</b> Faringitis aguda</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="dt">Martes, 14 de abril</div>
+        <span class="bd bd-at">ATENDIDA</span>
+      </div>
+      <div class="time muted">10:30 hrs</div>
+      <div class="reason">Control general · Dr. Omar Salas</div>
+      <div class="diag"><b>Diagnóstico:</b> Sin hallazgos significativos</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="dt">Jueves, 02 de abril</div>
+        <span class="bd bd-at">ATENDIDA</span>
+      </div>
+      <div class="time muted">13:20 hrs</div>
+      <div class="reason">Consulta nutricional · Dra. Cruz</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>Inicio</a>
+    <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Citas</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>IA</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Perfil</a>
+  </div>
+  <div class="home-ind"></div>
+</div>
+
+<!-- Variante: Canceladas activa -->
+<div class="phone">
+  <div class="frame-label">Tab · Canceladas</div>
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span style="font-size:12px">●●●●● ●</span></div>
+
+  <div class="hd">
+    <div class="sp"></div>
+    <h1>Mis Citas</h1>
+    <div class="add">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab prox">Próximas<span class="ct">2</span></div>
+    <div class="tab">Pasadas</div>
+    <div class="tab active">Canceladas</div>
+  </div>
+
+  <div class="scroll">
+    <div class="card">
+      <div class="top">
+        <div class="dt">Viernes, 04 de abril</div>
+        <span class="bd bd-can">CANCELADA</span>
+      </div>
+      <div class="time muted">10:00 hrs</div>
+      <div class="reason">Cancelada por el alumno</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="dt">Lunes, 24 de marzo</div>
+        <span class="bd bd-no">NO ASISTIÓ</span>
+      </div>
+      <div class="time muted">08:30 hrs</div>
+      <div class="reason">Revisión general · Dr. Salas</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div class="dt">Miércoles, 12 de marzo</div>
+        <span class="bd bd-can">CANCELADA</span>
+      </div>
+      <div class="time muted">09:15 hrs</div>
+      <div class="reason">Cancelada por el doctor</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>Inicio</a>
+    <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Citas</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>IA</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Perfil</a>
+  </div>
+  <div class="home-ind"></div>
+</div>
+
+</body>
+</html>

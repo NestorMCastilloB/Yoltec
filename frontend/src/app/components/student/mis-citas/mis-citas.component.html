@@ -1,0 +1,133 @@
+<div class="mc-wrapper">
+  <!-- Toast -->
+  <div class="mc-toast" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <!-- Header -->
+  <div class="mc-header">
+    <div class="mc-head-row">
+      <div class="mc-crumb">Servicio médico · Citas</div>
+      <h1 class="mc-title">Mis citas</h1>
+      <p class="mc-sub">Consulta tus citas agendadas y tu historial de consultas pasadas.</p>
+    </div>
+    <div class="mc-tabs">
+      <button *ngFor="let tab of tabs"
+        [class.active]="activeTab === tab.id"
+        (click)="activeTab = tab.id">
+        {{ tab.label }}
+        <span class="mc-tab-count" [class.active]="activeTab === tab.id">{{ getCount(tab.id) }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="mc-content">
+    <!-- Loading -->
+    <div class="mc-loading" *ngIf="isLoading">Cargando citas...</div>
+
+    <!-- Error -->
+    <div class="mc-error" *ngIf="error && !isLoading">
+      <p>{{ error }}</p>
+      <button class="mc-btn mc-btn-primary" (click)="loadCitas()">Reintentar</button>
+    </div>
+
+    <!-- Empty -->
+    <div class="mc-empty" *ngIf="!isLoading && !error && citasActivas.length === 0">
+      <div class="mc-empty-icon">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <rect x="14" y="22" width="92" height="84" rx="10" fill="var(--yol-primary-50)" stroke="var(--yol-primary)" stroke-width="2"/>
+          <rect x="14" y="22" width="92" height="20" rx="10" fill="var(--yol-primary)"/>
+          <rect x="14" y="34" width="92" height="8" fill="var(--yol-primary)"/>
+          <circle cx="34" cy="20" r="6" fill="var(--yol-surface)" stroke="var(--yol-primary)" stroke-width="2"/>
+          <circle cx="86" cy="20" r="6" fill="var(--yol-surface)" stroke="var(--yol-primary)" stroke-width="2"/>
+          <rect x="28" y="14" width="12" height="14" rx="3" fill="var(--yol-primary)"/>
+          <rect x="80" y="14" width="12" height="14" rx="3" fill="var(--yol-primary)"/>
+          <line x1="30" y1="58" x2="90" y2="58" stroke="var(--yol-border)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="30" y1="72" x2="74" y2="72" stroke="var(--yol-border)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="30" y1="86" x2="82" y2="86" stroke="var(--yol-border)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <ng-container [ngSwitch]="activeTab">
+        <h3 *ngSwitchCase="'proximas'">No tienes citas próximas</h3>
+        <h3 *ngSwitchCase="'pasadas'">No tienes citas pasadas</h3>
+        <h3 *ngSwitchCase="'canceladas'">No tienes citas canceladas</h3>
+      </ng-container>
+      <p>{{ activeTab === 'proximas'
+        ? 'Cuando agendes una consulta aparecerá aquí con su fecha, hora y motivo.'
+        : 'No se encontraron citas en esta categoría.' }}</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="mc-card" *ngIf="!isLoading && !error && citasActivas.length > 0">
+      <table class="mc-table">
+        <thead>
+          <tr>
+            <th class="col-fecha">Fecha</th>
+            <th class="col-hora">Hora</th>
+            <th>Motivo</th>
+            <th class="col-estatus">Estatus</th>
+            <th class="col-acciones"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cita of citasActivas">
+            <td>
+              <div class="mc-date-cell" [class.past]="activeTab !== 'proximas'">
+                <div class="mc-date-block">
+                  <b>{{ getDia(cita.fecha_cita) }}</b>
+                  <span>{{ getMes(cita.fecha_cita) }}</span>
+                </div>
+                <div class="mc-date-info">
+                  <b>{{ getDiaSemana(cita.fecha_cita) }}</b>
+                  <span>{{ getAnio(cita.fecha_cita) }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="mc-hora">{{ formatTime(cita.hora_cita) }}</td>
+            <td>
+              <div class="mc-motivo">
+                <b>{{ cita.motivo || 'Sin motivo' }}</b>
+                <span>{{ doctorNombre(cita) }}</span>
+                <span class="mc-diagnostico"
+                  *ngIf="activeTab === 'pasadas' && cita.diagnostico">
+                  Diagnóstico: {{ cita.diagnostico }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="mc-badge" [ngClass]="estatusClass(cita.estatus)">
+                <span class="mc-badge-dot"></span>
+                {{ estatusLabel(cita.estatus) }}
+              </span>
+            </td>
+            <td class="mc-actions-cell">
+              <button *ngIf="activeTab === 'proximas'"
+                class="mc-btn-cancel"
+                (click)="abrirModalCancelar(cita)">
+                Cancelar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal cancelar -->
+  <div class="mc-modal-overlay" *ngIf="citaCancelando" (click)="cerrarModalCancelar()">
+    <div class="mc-modal" (click)="$event.stopPropagation()">
+      <h3>Cancelar cita</h3>
+      <p>¿Estás seguro de que deseas cancelar la cita del
+        <b>{{ getDia(citaCancelando.fecha_cita) }} {{ getMes(citaCancelando.fecha_cita) }} {{ getAnio(citaCancelando.fecha_cita) }}</b>
+        a las <b>{{ formatTime(citaCancelando.hora_cita) }}</b>?</p>
+      <p class="mc-modal-note" *ngIf="citaCancelando.motivo">{{ citaCancelando.motivo }}</p>
+      <div class="mc-modal-actions">
+        <button class="mc-btn mc-btn-ghost" (click)="cerrarModalCancelar()" [disabled]="isCancelling">
+          Volver
+        </button>
+        <button class="mc-btn mc-btn-danger" (click)="confirmarCancelar()" [disabled]="isCancelling">
+          {{ isCancelling ? 'Cancelando...' : 'Sí, cancelar cita' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
