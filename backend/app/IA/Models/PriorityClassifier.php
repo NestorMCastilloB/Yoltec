@@ -1,4 +1,4 @@
-33<?php
+<?php
 
 namespace App\IA\Models;
 
