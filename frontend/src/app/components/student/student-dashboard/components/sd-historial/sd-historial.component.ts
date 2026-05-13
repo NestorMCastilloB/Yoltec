@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -8,7 +8,7 @@ import { ConsultaHistorial, PerfilMedicoService } from '../../../../../services/
 @Component({
   selector: 'app-sd-historial',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule],
   templateUrl: './sd-historial.component.html',
   styles: [`
     .historial-info { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
