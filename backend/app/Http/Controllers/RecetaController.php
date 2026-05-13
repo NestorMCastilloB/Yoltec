@@ -19,7 +19,8 @@ class RecetaController extends Controller
                             ->orderBy('fecha_emision', 'desc')
                             ->get();
         } else {
-            $recetas = Receta::with(['cita', 'alumno'])
+            $recetas = Receta::with(['cita.alumno', 'alumno'])
+                            ->where('doctor_id', $user->id)
                             ->orderBy('fecha_emision', 'desc')
                             ->get();
         }
