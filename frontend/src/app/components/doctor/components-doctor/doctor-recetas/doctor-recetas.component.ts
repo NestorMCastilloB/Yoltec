@@ -143,6 +143,11 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Devuelve alumno directo o anidado en cita como fallback
+  resolveAlumno(r: RecetaItem) {
+    return r.alumno ?? r.cita?.alumno ?? null;
+  }
+
   iniciales(nombre?: string, apellido?: string): string {
     return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || '?';
   }

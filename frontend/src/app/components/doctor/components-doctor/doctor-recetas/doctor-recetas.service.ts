@@ -11,7 +11,7 @@ export interface RecetaItem {
   fecha_emision: string;
   medicamentos: string;
   indicaciones?: string | null;
-  cita?: { id: number; fecha_cita: string; hora_cita: string } | null;
+  cita?: { id: number; fecha_cita: string; hora_cita: string; alumno?: { id: number; nombre: string; apellido: string; numero_control?: string } | null } | null;
   alumno?: { id: number; nombre: string; apellido: string; numero_control?: string } | null;
 }
 
@@ -31,7 +31,7 @@ export interface RecetaPayload {
 
 @Injectable({ providedIn: 'root' })
 export class DoctorRecetasService {
-  private readonly base = `${API_BASE_URL}/doctor/recetas`;
+  private readonly base = `${API_BASE_URL}/recetas`;
 
   constructor(private http: HttpClient) {}
 
