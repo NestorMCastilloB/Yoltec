@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewChecked, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
@@ -15,7 +15,7 @@ Chart.register(...registerables);
   styleUrls: ['./doctor-estadisticas.component.css']
 })
 
-export class DoctorEstadisticasComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class DoctorEstadisticasComponent implements OnInit, OnDestroy {
   @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('doughnutCanvas') doughnutCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -32,13 +32,6 @@ export class DoctorEstadisticasComponent implements OnInit, AfterViewChecked, On
 
   ngOnInit(): void {
     this.loadEstadisticas();
-  }
-
-  ngAfterViewChecked(): void {
-    if (this.estadisticas && !this.chartsRendered && this.barCanvas && this.doughnutCanvas) {
-      this.renderCharts();
-      this.chartsRendered = true;
-    }
   }
 
   ngOnDestroy(): void {
@@ -62,7 +55,17 @@ export class DoctorEstadisticasComponent implements OnInit, AfterViewChecked, On
         }),
         finalize(() => { this.isLoadingEstadisticas = false; })
       )
-      .subscribe(data => { this.estadisticas = data; });
+      .subscribe(data => {
+        this.estadisticas = data;
+        if (data && !this.chartsRendered) {
+          setTimeout(() => {
+            if (this.barCanvas && this.doughnutCanvas) {
+              this.renderCharts();
+              this.chartsRendered = true;
+            }
+          }, 0);
+        }
+      });
   }
 
   private renderCharts(): void {
