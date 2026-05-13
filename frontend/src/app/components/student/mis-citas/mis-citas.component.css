@@ -111,46 +111,27 @@
 .mc-error { color: var(--yol-cancel-text); }
 .mc-error p { margin: 0 0 var(--yol-s-4); }
 
-/* Card / Table */
-.mc-card {
+/* Cards */
+.mc-citas-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yol-s-3);
+}
+
+.mc-cita-card {
   background: var(--yol-surface);
   border: 1px solid var(--yol-border);
   border-radius: var(--yol-r-lg);
-  overflow: hidden;
+  padding: var(--yol-s-5) var(--yol-s-6);
   box-shadow: var(--yol-shadow-xs);
 }
 
-.mc-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--yol-fs-sm);
+.mc-cita-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--yol-s-3);
 }
-
-.mc-table th {
-  text-align: left;
-  padding: 12px 22px;
-  font-size: var(--yol-fs-label);
-  font-weight: 600;
-  color: var(--yol-text-muted);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  background: var(--yol-bg);
-  border-bottom: 1px solid var(--yol-border);
-}
-
-.mc-table td {
-  padding: 14px 22px;
-  border-bottom: 1px solid var(--yol-border);
-  vertical-align: middle;
-}
-
-.mc-table tr:last-child td { border-bottom: none; }
-.mc-table tr:hover td { background: var(--yol-bg); }
-
-.col-fecha { width: 26%; }
-.col-hora { width: 10%; }
-.col-estatus { width: 14%; }
-.col-acciones { width: 12%; text-align: right; }
 
 /* Date cell */
 .mc-date-cell {
@@ -204,31 +185,50 @@
   color: var(--yol-text-subtle);
 }
 
-.mc-hora {
+.mc-cita-hora {
+  font-size: 20px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--yol-text);
+  color: var(--yol-primary);
+  margin-bottom: var(--yol-s-2);
 }
 
-/* Motivo */
-.mc-motivo b {
-  display: block;
-  color: var(--yol-text);
-  font-weight: 500;
-  font-size: var(--yol-fs-sm);
-  margin-bottom: 2px;
-}
-
-.mc-motivo span {
-  display: block;
-  font-size: var(--yol-fs-cap);
+.mc-cita-hora.past {
   color: var(--yol-text-subtle);
 }
 
+.mc-cita-meta {
+  font-size: var(--yol-fs-sm);
+  color: var(--yol-text-muted);
+  margin-bottom: var(--yol-s-1);
+}
+
+.mc-meta-sep { color: var(--yol-text-subtle); }
+
+.mc-cita-doctor { color: var(--yol-text-subtle); }
+
 .mc-diagnostico {
-  margin-top: 3px;
-  color: var(--yol-text-muted) !important;
-  font-style: italic;
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-subtle);
+  margin-top: var(--yol-s-1);
+}
+
+.mc-motivo-cancel {
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-subtle);
+  margin-top: var(--yol-s-1);
+}
+
+.mc-cita-sep {
+  border: none;
+  border-top: 1px solid var(--yol-border);
+  margin: var(--yol-s-4) 0 var(--yol-s-3);
+}
+
+.mc-cita-footer {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 28px;
 }
 
 /* Badges */
@@ -376,7 +376,7 @@
 @media (max-width: 768px) {
   .mc-header { padding: 20px var(--yol-s-4) 0; }
   .mc-content { padding: var(--yol-s-4); }
-  .mc-table th, .mc-table td { padding: 10px 12px; }
+  .mc-cita-card { padding: var(--yol-s-4); }
   .mc-date-info { display: none; }
   .mc-modal { margin: 0 var(--yol-s-4); }
 }
