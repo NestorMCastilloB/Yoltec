@@ -32,7 +32,7 @@
           <div class="perfil-item"><span class="perfil-label">N° Control</span><span>{{ perfilMedico.numero_control }}</span></div>
           <div class="perfil-item"><span class="perfil-label">Email</span><span>{{ perfilMedico.email }}</span></div>
           <div class="perfil-item"><span class="perfil-label">Teléfono</span><span>{{ perfilMedico.telefono || '—' }}</span></div>
-          <div class="perfil-item"><span class="perfil-label">Fecha nacimiento</span><span>{{ perfilMedico.fecha_nacimiento || '—' }}</span></div>
+          <div class="perfil-item"><span class="perfil-label">Fecha nacimiento</span><span>{{ perfilMedico.fecha_nacimiento ? (perfilMedico.fecha_nacimiento | date:'dd/MM/yyyy') : '—' }}</span></div>
         </ng-container>
         <ng-container *ngIf="editandoPersonal">
           <div class="form-group"><label>Nombre</label><input type="text" [(ngModel)]="personalForm.nombre" class="form-input" /></div>

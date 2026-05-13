@@ -1,61 +1,92 @@
-<div class="student-dashboard">
-  <!-- Encabezado -->
-  <header class="dashboard-header">
-    <div class="header-content">
-      <h1>Consultorio Médico</h1>
-      <div class="user-info">
-        <span>Bienvenido, {{ studentName }}</span>
-        <button class="theme-toggle-btn" (click)="themeService.toggle()"
-          [title]="themeService.isDark ? 'Modo claro' : 'Modo oscuro'">
-          {{ themeService.isDark ? '☀️' : '🌙' }}
-        </button>
-        <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+<div class="sd-app">
+
+  <!-- Sidebar -->
+  <aside class="sd-sidebar">
+    <div class="sd-brand">
+      <div class="sd-brand-logo">Y</div>
+      <div>
+        <b>Yoltec</b>
+        <span>Servicio médico</span>
       </div>
     </div>
 
-    <!-- Navegación -->
-    <nav class="dashboard-nav">
-      <button [class.active]="activeSection === 'inicio'" (click)="setActiveSection('inicio')" class="nav-button">Inicio</button>
-      <button [class.active]="activeSection === 'citas'" (click)="setActiveSection('citas')" class="nav-button">Citas</button>
-      <button [class.active]="activeSection === 'bitacora'" (click)="setActiveSection('bitacora')" class="nav-button">Bitácora</button>
-      <button [class.active]="activeSection === 'recetas'" (click)="setActiveSection('recetas')" class="nav-button">Recetas</button>
-      <button [class.active]="activeSection === 'perfil'" (click)="setActiveSection('perfil')" class="nav-button">Mi Perfil Médico</button>
-      <button [class.active]="activeSection === 'pre-evaluacion'" (click)="setActiveSection('pre-evaluacion')" class="nav-button">Pre-evaluacion IA</button>
-      <button [class.active]="activeSection === 'historial'" (click)="setActiveSection('historial')" class="nav-button">Historial</button>
+    <nav class="sd-nav">
+      <a class="sd-nav-item" [class.active]="activeSection === 'inicio'" (click)="setActiveSection('inicio')">
+        <span class="sd-nav-ic">▦</span>Inicio
+      </a>
+      <a class="sd-nav-item" [class.active]="activeSection === 'citas'" (click)="setActiveSection('citas')">
+        <span class="sd-nav-ic">⊞</span>Mis citas
+      </a>
+      <a class="sd-nav-item" [class.active]="activeSection === 'pre-evaluacion'" (click)="setActiveSection('pre-evaluacion')">
+        <span class="sd-nav-ic">◔</span>Pre-evaluación IA
+      </a>
+      <a class="sd-nav-item" [class.active]="activeSection === 'recetas'" (click)="setActiveSection('recetas')">
+        <span class="sd-nav-ic">℞</span>Recetas
+      </a>
+      <a class="sd-nav-item" [class.active]="activeSection === 'perfil'" (click)="setActiveSection('perfil')">
+        <span class="sd-nav-ic">◉</span>Mi perfil
+      </a>
     </nav>
-  </header>
 
-  <!-- Contenido Principal -->
-  <main class="dashboard-content">
-    <app-student-dashboard-inicio
-      *ngIf="activeSection === 'inicio'"
-      (navegarACitas)="setActiveSection('citas')"
-      (navegarAAgendar)="setActiveSection('citas')"
-      (navegarARecetas)="setActiveSection('recetas')">
-    </app-student-dashboard-inicio>
+    <div class="sd-user">
+      <div class="sd-avatar">{{ studentName.charAt(0) }}</div>
+      <div>
+        <b>{{ studentName }}</b>
+        <button class="sd-logout" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </aside>
 
-    <app-mis-citas
-      *ngIf="activeSection === 'citas'">
-    </app-mis-citas>
+  <!-- Área principal -->
+  <div class="sd-main">
 
-    <app-sd-bitacora
-      *ngIf="activeSection === 'bitacora'">
-    </app-sd-bitacora>
+    <!-- Header -->
+    <div class="sd-header">
+      <div class="sd-header-row">
+        <div>
+          <div class="sd-crumb">{{ activeSection | uppercase }}</div>
+          <h1 class="sd-title" *ngIf="activeSection === 'inicio'">
+            Bienvenida, <span>{{ studentName }}</span>
+          </h1>
+          <h1 class="sd-title" *ngIf="activeSection === 'citas'">Mis citas</h1>
+          <h1 class="sd-title" *ngIf="activeSection === 'recetas'">Mis recetas</h1>
+          <h1 class="sd-title" *ngIf="activeSection === 'perfil'">Mi perfil</h1>
+          <h1 class="sd-title" *ngIf="activeSection === 'pre-evaluacion'">Pre-evaluación IA</h1>
+          <h1 class="sd-title" *ngIf="activeSection === 'historial'">Historial</h1>
+        </div>
+        <div class="sd-header-actions">
+          <button class="sd-btn-ghost"
+            (click)="themeService.toggle()"
+            [title]="themeService.isDark ? 'Modo claro' : 'Modo oscuro'">
+            {{ themeService.isDark ? '☀' : '🌙' }}
+          </button>
+          <button class="sd-btn-primary" (click)="setActiveSection('citas')">
+            <span class="sd-plus">＋</span>Nueva cita
+          </button>
+        </div>
+      </div>
+    </div>
 
-    <app-sd-recetas
-      *ngIf="activeSection === 'recetas'">
-    </app-sd-recetas>
+    <!-- Contenido -->
+    <div class="sd-content">
+      <app-student-dashboard-inicio
+        *ngIf="activeSection === 'inicio'"
+        (navegarACitas)="setActiveSection('citas')"
+        (navegarAAgendar)="setActiveSection('citas')"
+        (navegarARecetas)="setActiveSection('recetas')">
+      </app-student-dashboard-inicio>
 
-    <app-sd-perfil
-      *ngIf="activeSection === 'perfil'">
-    </app-sd-perfil>
+      <app-mis-citas *ngIf="activeSection === 'citas'"></app-mis-citas>
+      <app-sd-recetas *ngIf="activeSection === 'recetas'"></app-sd-recetas>
+      <app-sd-perfil *ngIf="activeSection === 'perfil'"></app-sd-perfil>
+      <app-pre-evaluacion-ia *ngIf="activeSection === 'pre-evaluacion'"></app-pre-evaluacion-ia>
+      <app-sd-historial *ngIf="activeSection === 'historial'"></app-sd-historial>
+    </div>
+  </div>
 
-    <app-pre-evaluacion-ia
-      *ngIf="activeSection === 'pre-evaluacion'">
-    </app-pre-evaluacion-ia>
+  <!-- FAB -->
+  <button class="sd-fab" (click)="setActiveSection('citas')">
+    <span class="sd-plus">＋</span>Nueva cita
+  </button>
 
-    <app-sd-historial
-      *ngIf="activeSection === 'historial'">
-    </app-sd-historial>
-  </main>
 </div>
