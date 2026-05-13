@@ -5,6 +5,7 @@ import { Cita, CitaService } from '../../../services/cita.service';
 
 export interface CitaMisCitas extends Cita {
   diagnostico?: string | null;
+  motivo_cancelacion?: string | null;
 }
 
 export interface CitasFiltradas {

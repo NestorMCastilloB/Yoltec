@@ -56,59 +56,48 @@
         : 'No se encontraron citas en esta categoría.' }}</p>
     </div>
 
-    <!-- Tabla -->
-    <div class="mc-card" *ngIf="!isLoading && !error && citasActivas.length > 0">
-      <table class="mc-table">
-        <thead>
-          <tr>
-            <th class="col-fecha">Fecha</th>
-            <th class="col-hora">Hora</th>
-            <th>Motivo</th>
-            <th class="col-estatus">Estatus</th>
-            <th class="col-acciones"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cita of citasActivas">
-            <td>
-              <div class="mc-date-cell" [class.past]="activeTab !== 'proximas'">
-                <div class="mc-date-block">
-                  <b>{{ getDia(cita.fecha_cita) }}</b>
-                  <span>{{ getMes(cita.fecha_cita) }}</span>
-                </div>
-                <div class="mc-date-info">
-                  <b>{{ getDiaSemana(cita.fecha_cita) }}</b>
-                  <span>{{ getAnio(cita.fecha_cita) }}</span>
-                </div>
-              </div>
-            </td>
-            <td class="mc-hora">{{ formatTime(cita.hora_cita) }}</td>
-            <td>
-              <div class="mc-motivo">
-                <b>{{ cita.motivo || 'Sin motivo' }}</b>
-                <span>{{ doctorNombre(cita) }}</span>
-                <span class="mc-diagnostico"
-                  *ngIf="activeTab === 'pasadas' && cita.diagnostico">
-                  Diagnóstico: {{ cita.diagnostico }}
-                </span>
-              </div>
-            </td>
-            <td>
-              <span class="mc-badge" [ngClass]="estatusClass(cita.estatus)">
-                <span class="mc-badge-dot"></span>
-                {{ estatusLabel(cita.estatus) }}
-              </span>
-            </td>
-            <td class="mc-actions-cell">
-              <button *ngIf="activeTab === 'proximas'"
-                class="mc-btn-cancel"
-                (click)="abrirModalCancelar(cita)">
-                Cancelar
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Cards -->
+    <div class="mc-citas-list" *ngIf="!isLoading && !error && citasActivas.length > 0">
+      <div class="mc-cita-card" *ngFor="let cita of citasActivas">
+        <div class="mc-cita-top">
+          <div class="mc-date-cell" [class.past]="activeTab !== 'proximas'">
+            <div class="mc-date-block">
+              <b>{{ getDia(cita.fecha_cita) }}</b>
+              <span>{{ getMes(cita.fecha_cita) }}</span>
+            </div>
+            <div class="mc-date-info">
+              <b>{{ getDiaSemana(cita.fecha_cita) }}</b>
+              <span>{{ getAnio(cita.fecha_cita) }}</span>
+            </div>
+          </div>
+          <span class="mc-badge" [ngClass]="estatusClass(cita.estatus)">
+            <span class="mc-badge-dot"></span>
+            {{ estatusLabel(cita.estatus) }}
+          </span>
+        </div>
+        <div class="mc-cita-hora" [class.past]="activeTab !== 'proximas'">
+          {{ formatTime(cita.hora_cita) }}
+        </div>
+        <div class="mc-cita-meta">
+          {{ cita.motivo || 'Sin motivo' }}
+          <span class="mc-meta-sep"> · </span>
+          <span class="mc-cita-doctor">{{ doctorNombre(cita) }}</span>
+        </div>
+        <div class="mc-diagnostico" *ngIf="activeTab === 'pasadas' && cita.diagnostico">
+          Diagnóstico: {{ cita.diagnostico }}
+        </div>
+        <div class="mc-motivo-cancel" *ngIf="activeTab === 'canceladas' && cita.motivo_cancelacion">
+          {{ cita.motivo_cancelacion }}
+        </div>
+        <hr class="mc-cita-sep">
+        <div class="mc-cita-footer">
+          <button *ngIf="activeTab === 'proximas'"
+            class="mc-btn-cancel"
+            (click)="abrirModalCancelar(cita)">
+            Cancelar cita
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
