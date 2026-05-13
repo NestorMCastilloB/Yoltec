@@ -1,0 +1,156 @@
+<div class="nc-wrap">
+
+  <!-- Cabecera con stepper -->
+  <div class="nc-header">
+    <div class="nc-header-top">
+      <div>
+        <h2>Nueva cita</h2>
+        <p class="nc-sub" *ngIf="currentStep === 1">¿Para qué alumno?</p>
+        <p class="nc-sub" *ngIf="currentStep === 2">Selecciona fecha y horario disponible</p>
+        <p class="nc-sub" *ngIf="currentStep === 3">Cita agendada exitosamente</p>
+      </div>
+    </div>
+    <div class="nc-steps">
+      <div class="nc-step" [class.active]="currentStep === 1" [class.done]="currentStep > 1">
+        <div class="nc-step-n">
+          <svg *ngIf="currentStep > 1" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+          <span *ngIf="currentStep === 1">1</span>
+        </div>
+        <span>Alumno</span>
+      </div>
+      <span class="nc-step-sep">›</span>
+      <div class="nc-step" [class.active]="currentStep === 2" [class.done]="currentStep > 2">
+        <div class="nc-step-n">
+          <svg *ngIf="currentStep > 2" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+          <span *ngIf="currentStep <= 2">2</span>
+        </div>
+        <span>Fecha y hora</span>
+      </div>
+      <span class="nc-step-sep">›</span>
+      <div class="nc-step" [class.active]="currentStep === 3">
+        <div class="nc-step-n">3</div>
+        <span>Confirmado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cuerpo -->
+  <div class="nc-body">
+
+    <!-- Paso 1: Buscar alumno -->
+    <ng-container *ngIf="currentStep === 1">
+      <div class="nc-search-row">
+        <div class="nc-search-field">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input
+            type="text"
+            placeholder="Nombre o número de control"
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="buscar()"
+          />
+        </div>
+        <button class="nc-btn primary" (click)="buscar()" [disabled]="searching || !searchQuery.trim()">
+          {{ searching ? 'Buscando…' : 'Buscar' }}
+        </button>
+      </div>
+
+      <p class="nc-error" *ngIf="searchError">{{ searchError }}</p>
+
+      <ng-container *ngIf="searchResults.length">
+        <div class="nc-list-label">
+          <span>Resultados</span>
+          <span>{{ searchResults.length }} coincidencia{{ searchResults.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="nc-student-list">
+          <div
+            class="nc-student"
+            *ngFor="let r of searchResults"
+            [class.sel]="alumnoSeleccionado?.id === r.id"
+            (click)="seleccionar(r)"
+          >
+            <div class="nc-av">{{ iniciales(r.nombre) }}</div>
+            <div class="nc-who">
+              <b>{{ r.nombre }}</b>
+              <span>{{ r.numero_control }}<ng-container *ngIf="r.carrera"> · {{ r.carrera }}</ng-container></span>
+            </div>
+            <div class="nc-ck" [class.checked]="alumnoSeleccionado?.id === r.id">
+              <svg *ngIf="alumnoSeleccionado?.id === r.id" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- Paso 2: Calendario y slot (delegado a shared/agendar-cita) -->
+    <ng-container *ngIf="currentStep === 2 && alumnoSeleccionado">
+      <app-agendar-cita
+        [modo]="'doctor'"
+        [alumnoId]="alumnoSeleccionado.id"
+        [alumnoInfo]="alumnoSeleccionado"
+        (citaAgendada)="onCitaAgendada($event)"
+      />
+    </ng-container>
+
+    <!-- Paso 3: Éxito -->
+    <ng-container *ngIf="currentStep === 3 && citaConfirmada && alumnoSeleccionado">
+      <div class="nc-success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+      </div>
+      <p class="nc-success-title">Cita agendada</p>
+      <p class="nc-success-sub">Se envió notificación al alumno</p>
+
+      <div class="nc-summary">
+        <div class="nc-summary-row nc-summary-student-row">
+          <span class="nc-summary-k">Alumno</span>
+          <div class="nc-summary-student">
+            <div class="nc-av sm">{{ iniciales(alumnoSeleccionado.nombre) }}</div>
+            <div>
+              <b>{{ alumnoSeleccionado.nombre }}</b>
+              <span>{{ alumnoSeleccionado.numero_control }}<ng-container *ngIf="alumnoSeleccionado.carrera"> · {{ alumnoSeleccionado.carrera }}</ng-container></span>
+            </div>
+          </div>
+        </div>
+        <div class="nc-summary-row">
+          <span class="nc-summary-k">Fecha</span>
+          <span class="nc-summary-v">{{ formatFecha(citaConfirmada.fecha) }}</span>
+        </div>
+        <div class="nc-summary-row" *ngIf="citaConfirmada.hora_inicio">
+          <span class="nc-summary-k">Hora</span>
+          <span class="nc-summary-v">{{ citaConfirmada.hora_inicio }} – {{ citaConfirmada.hora_fin }} hrs</span>
+        </div>
+        <div class="nc-summary-row">
+          <span class="nc-summary-k">Motivo</span>
+          <span class="nc-summary-v">{{ citaConfirmada.motivo }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- Pie de página -->
+  <div class="nc-footer">
+    <ng-container *ngIf="currentStep === 1">
+      <span class="nc-footer-hint">{{ alumnoSeleccionado ? alumnoSeleccionado.nombre + ' seleccionado' : 'Selecciona un alumno para continuar' }}</span>
+      <div class="nc-actions">
+        <button class="nc-btn ghost" (click)="cancelar()">Cancelar</button>
+        <button class="nc-btn primary" [disabled]="!alumnoSeleccionado" (click)="continuar()">Continuar ›</button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="currentStep === 2">
+      <span class="nc-footer-hint"></span>
+      <div class="nc-actions">
+        <button class="nc-btn ghost" (click)="currentStep = 1">‹ Cambiar alumno</button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="currentStep === 3">
+      <span class="nc-footer-hint"></span>
+      <div class="nc-actions">
+        <button class="nc-btn outline" (click)="agendarOtra()">Agendar otra cita</button>
+        <button class="nc-btn primary" (click)="irACitas()">Ir a mis citas</button>
+      </div>
+    </ng-container>
+  </div>
+
+</div>

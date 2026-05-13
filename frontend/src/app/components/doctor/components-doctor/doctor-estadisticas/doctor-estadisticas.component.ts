@@ -1,4 +1,4 @@
-import { Component, AfterViewChecked, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
@@ -12,10 +12,10 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule],
   templateUrl: './doctor-estadisticas.component.html',
-  styleUrls: ['./doctor-estadisticas.component.css']   // ← Agregar
+  styleUrls: ['./doctor-estadisticas.component.css']
 })
 
-export class DoctorEstadisticasComponent implements AfterViewChecked, OnDestroy {
+export class DoctorEstadisticasComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('doughnutCanvas') doughnutCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -29,6 +29,10 @@ export class DoctorEstadisticasComponent implements AfterViewChecked, OnDestroy 
   private destroy$ = new Subject<void>();
 
   constructor(private estadisticasService: EstadisticasService) { }
+
+  ngOnInit(): void {
+    this.loadEstadisticas();
+  }
 
   ngAfterViewChecked(): void {
     if (this.estadisticas && !this.chartsRendered && this.barCanvas && this.doughnutCanvas) {

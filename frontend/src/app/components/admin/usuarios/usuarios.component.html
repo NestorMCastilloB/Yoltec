@@ -1,0 +1,161 @@
+<div class="admin-app">
+  <app-admin-sidebar
+    activeSection="usuarios"
+    [adminName]="adminName"
+    (sectionChange)="onSectionChange($event)"
+    (logoutClick)="logout()">
+  </app-admin-sidebar>
+
+  <main class="admin-main">
+    <div class="page-head">
+      <h1>Gestión de usuarios</h1>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+          </svg>
+          <input [ngModel]="searchTerm" (ngModelChange)="onSearch($event)"
+                 placeholder="Buscar por nombre, número de control o correo…">
+        </div>
+        <button class="btn-pri" (click)="openUserModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Nuevo usuario
+        </button>
+      </div>
+
+      <div class="tabs">
+        <div class="tab" [class.active]="activeTab === 'todos'" (click)="setTab('todos')">
+          Todos<span class="tab-count">{{ counts['todos'] }}</span>
+        </div>
+        <div class="tab" [class.active]="activeTab === 'alumnos'" (click)="setTab('alumnos')">
+          Alumnos<span class="tab-count">{{ counts['alumnos'] }}</span>
+        </div>
+        <div class="tab" [class.active]="activeTab === 'doctores'" (click)="setTab('doctores')">
+          Doctores<span class="tab-count">{{ counts['doctores'] }}</span>
+        </div>
+        <div class="tab" [class.active]="activeTab === 'suspendidos'" (click)="setTab('suspendidos')">
+          Suspendidos<span class="tab-count">{{ counts['suspendidos'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="table-section">
+      <div *ngIf="isLoading" class="loading-row">Cargando usuarios…</div>
+
+      <table *ngIf="!isLoading">
+        <thead>
+          <tr>
+            <th><input type="checkbox" [checked]="allChecked" (change)="toggleAll($any($event.target).checked)"></th>
+            <th>Usuario</th>
+            <th>Correo institucional</th>
+            <th>Rol</th>
+            <th>Estatus</th>
+            <th>Última sesión</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td><input type="checkbox" [checked]="isSelected(u.id)" (change)="toggleOne(u.id, $any($event.target).checked)"></td>
+            <td>
+              <div class="user-cell">
+                <div class="avatar" [class.doctor]="u.rol === 'doctor'">{{ initials(u) }}</div>
+                <div>
+                  <div class="user-name">{{ u.nombre }} {{ u.apellido }}</div>
+                  <div class="user-id">{{ identificador(u) }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="cell-email">{{ u.email }}</td>
+            <td>
+              <span class="badge" [class.badge-alumno]="u.rol === 'alumno'" [class.badge-doctor]="u.rol === 'doctor'">
+                {{ u.rol === 'alumno' ? 'Alumno' : 'Doctor' }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [class.badge-activo]="!u.suspendido" [class.badge-suspendido]="u.suspendido">
+                {{ u.suspendido ? 'Suspendido' : 'Activo' }}
+              </span>
+            </td>
+            <td class="cell-session">{{ formatFecha(u.ultima_sesion) }}</td>
+            <td>
+              <div class="actions">
+                <a (click)="openUserModal(u)">Editar</a>
+                <a *ngIf="!u.suspendido" class="act-warn" (click)="askSuspender(u)">Suspender</a>
+                <a *ngIf="u.suspendido" class="act-muted" (click)="reactivar(u.id)">Reactivar</a>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="usuarios.length === 0">
+            <td colspan="7" class="empty-row">No hay usuarios para mostrar.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination" *ngIf="!isLoading && lastPage > 0">
+        <span>Mostrando {{ from }}–{{ to }} de {{ total }} usuarios</span>
+        <div class="pager">
+          <button class="pager-nav" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹ Anterior</button>
+          <button *ngFor="let p of visiblePages"
+                  [class.active]="p === currentPage"
+                  (click)="goToPage(p)">{{ p }}</button>
+          <button class="pager-nav" [disabled]="currentPage === lastPage" (click)="goToPage(currentPage + 1)">Siguiente ›</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal: confirmar suspensión -->
+<div class="modal-overlay" *ngIf="confirmSuspendId !== null" (click)="cancelSuspender()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>Suspender usuario</h3>
+    <p>¿Suspender a <strong>{{ confirmSuspendNombre }}</strong>? No podrá acceder al sistema.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancelSuspender()">Cancelar</button>
+      <button class="btn-danger" (click)="confirmarSuspender()">Suspender</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: nuevo / editar usuario -->
+<div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>{{ editingUserId ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
+    <form (ngSubmit)="submitUser()">
+      <div class="form-row">
+        <label>Nombre</label>
+        <input [(ngModel)]="userForm.nombre" name="nombre" required placeholder="Nombre">
+      </div>
+      <div class="form-row">
+        <label>Apellido</label>
+        <input [(ngModel)]="userForm.apellido" name="apellido" required placeholder="Apellido">
+      </div>
+      <div class="form-row">
+        <label>Correo</label>
+        <input [(ngModel)]="userForm.email" name="email" type="email" required placeholder="correo@itson.edu.mx">
+      </div>
+      <div class="form-row">
+        <label>Rol</label>
+        <select [(ngModel)]="userForm.rol" name="rol">
+          <option value="alumno">Alumno</option>
+          <option value="doctor">Doctor</option>
+        </select>
+      </div>
+      <div class="form-row" *ngIf="userForm.rol === 'alumno'">
+        <label>Número de control</label>
+        <input [(ngModel)]="userForm.numero_control" name="numero_control" placeholder="22XXXXXX">
+      </div>
+      <div class="form-msg" *ngIf="userMsg">{{ userMsg }}</div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="closeUserModal()">Cancelar</button>
+        <button type="submit" class="btn-pri-sm" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Guardando…' : (editingUserId ? 'Guardar cambios' : 'Crear usuario') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -6,9 +6,12 @@ import { StudentDashboardComponent } from './components/student/student-dashboar
 import { DoctorDashboardComponent } from './components/doctor/doctor-dashboard/doctor-dashboard.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
 import { AdminLoginComponent } from './components/admin/admin-login/admin-login.component';
+import { UsuariosComponent } from './components/admin/usuarios/usuarios.component';
+import { DiasEspecialesComponent } from './components/admin/dias-especiales/dias-especiales.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth.guard';
+import { NuevaCitaDoctorComponent } from './components/doctor/nueva-cita/nueva-cita-doctor.component';
 
 export const routes: Routes = [
   { 
@@ -30,9 +33,15 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: ['alumno'] }
   },
-  { 
-    path: 'doctor-dashboard', 
+  {
+    path: 'doctor-dashboard',
     component: DoctorDashboardComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['doctor'] }
+  },
+  {
+    path: 'doctor/nueva-cita',
+    component: NuevaCitaDoctorComponent,
     canActivate: [AuthGuard],
     data: { roles: ['doctor'] }
   },
@@ -45,6 +54,18 @@ export const routes: Routes = [
   {
     path: 'admin-dashboard',
     component: AdminDashboardComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin-usuarios',
+    component: UsuariosComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin-dias-especiales',
+    component: DiasEspecialesComponent,
     canActivate: [AuthGuard],
     data: { roles: ['admin'] }
   },
