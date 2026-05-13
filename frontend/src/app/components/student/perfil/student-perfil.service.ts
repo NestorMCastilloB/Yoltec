@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { PerfilMedicoService } from '../../../services/perfil-medico.service';
 
 export interface PerfilAlumno {
@@ -25,9 +26,11 @@ export interface PerfilAlumno {
 export class StudentPerfilService {
   constructor(private perfilService: PerfilMedicoService) {}
 
-  // GET /api/perfil-medico
+  // GET /api/perfil-medico — mismo endpoint, distinto contrato de tipo
   getPerfil(): Observable<{ perfil: PerfilAlumno }> {
-    return this.perfilService.getPerfil() as Observable<{ perfil: PerfilAlumno }>;
+    return this.perfilService.getPerfil().pipe(
+      map(res => res as unknown as { perfil: PerfilAlumno })
+    );
   }
 
   // PUT /api/perfil-medico
