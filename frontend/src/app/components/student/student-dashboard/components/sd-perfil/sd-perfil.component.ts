@@ -139,7 +139,6 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   }
 
   revocarTodasSesiones(): void {
-    // Pendiente: agregar revocarTodasSesiones() al PerfilMedicoService
     this.sesionMsg = 'Función no disponible aún.';
   }
 
