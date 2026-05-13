@@ -1,29 +1,67 @@
-<section class="content-section">
-  <div class="section-header"><h2>Mis Recetas Médicas</h2></div>
-
-  <div class="recetas-container">
-    <ng-container *ngIf="!isLoading; else loadingTpl">
-      <div *ngIf="error" class="alert error">{{ error }}</div>
-
-      <div *ngIf="!error && recetas.length === 0" class="placeholder-card">
-        <h3>No tienes recetas registradas</h3>
-        <p>Cuando el doctor expida una receta para ti aparecerá en este apartado.</p>
-      </div>
-
-      <div *ngIf="recetas.length > 0" class="cards-grid">
-        <div *ngFor="let r of recetas" class="receta-card">
-          <div class="receta-header">
-            <h3>{{ r.doctor?.nombre }} {{ r.doctor?.apellido }}</h3>
-            <span class="receta-date">Emitida el {{ formatFecha(r.fecha_emision) }}</span>
-          </div>
-          <p class="receta-detail"><strong>Cita asociada:</strong> {{ formatFecha(r.cita?.fecha_cita || '') }} · {{ r.cita?.hora_cita }} hrs</p>
-          <p class="receta-detail"><strong>Medicamentos:</strong></p>
-          <p class="receta-text">{{ r.medicamentos }}</p>
-          <p class="receta-detail" *ngIf="r.indicaciones"><strong>Indicaciones:</strong></p>
-          <p class="receta-text" *ngIf="r.indicaciones">{{ r.indicaciones }}</p>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #loadingTpl><div class="placeholder-card">Cargando tus recetas...</div></ng-template>
+<section class="recetas-section">
+  <div class="recetas-header">
+    <h2 class="recetas-titulo">Mis Recetas Médicas</h2>
+    <div class="search-box">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        class="search-input"
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por medicamento o doctor…"
+        autocomplete="off"
+      />
+    </div>
   </div>
+
+  <ng-container *ngIf="!isLoading; else loadingTpl">
+    <div *ngIf="error" class="state-card error-state">{{ error }}</div>
+
+    <div *ngIf="!error && recetas.length === 0" class="state-card empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <p>No tienes recetas registradas</p>
+      <span>Cuando el doctor expida una receta aparecerá aquí</span>
+    </div>
+
+    <div *ngIf="!error && recetas.length > 0 && recetasFiltradas.length === 0" class="state-card empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>Sin resultados</p>
+      <span>No hay recetas que coincidan con "{{ busqueda }}"</span>
+    </div>
+
+    <div *ngIf="recetasFiltradas.length > 0" class="recetas-list">
+      <div *ngFor="let r of recetasFiltradas" class="receta-card">
+
+        <div class="card-top">
+          <span class="fecha-chip">{{ formatFecha(r.fecha_emision) }}</span>
+          <span class="doctor-nombre">Dr. {{ r.doctor?.nombre }} {{ r.doctor?.apellido }}</span>
+        </div>
+
+        <hr class="divider" />
+
+        <ul class="med-list">
+          <li *ngFor="let med of parseMedicamentos(r.medicamentos)" class="med-item">
+            <svg class="pill-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v3"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.5-1.5"/></svg>
+            <span class="med-nombre">{{ med.nombre }}</span>
+            <span *ngIf="med.dosis" class="med-dosis">{{ med.dosis }}</span>
+          </li>
+        </ul>
+
+        <p *ngIf="r.indicaciones" class="notas">{{ r.indicaciones }}</p>
+
+        <hr class="divider" />
+
+        <div class="card-footer">
+          <span class="ver-detalle">Ver detalle completo ›</span>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <div class="state-card loading-state">
+      <div class="spinner"></div>
+      <span>Cargando tus recetas…</span>
+    </div>
+  </ng-template>
 </section>

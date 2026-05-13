@@ -1,0 +1,228 @@
+.recetas-section {
+  padding: var(--space-6) var(--space-4);
+  max-width: 720px;
+  background: var(--color-bg, #f7f9f8);
+  border-radius: var(--radius-lg);
+}
+
+/* Header */
+.recetas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.recetas-titulo {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Buscador */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-3);
+  min-width: 220px;
+  transition: border-color 0.2s;
+}
+
+.search-box:focus-within {
+  border-color: var(--color-primary);
+}
+
+.search-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: var(--font-sm);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* States */
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-10) var(--space-6);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.empty-state {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+}
+
+.empty-state svg {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.empty-state span {
+  font-size: var(--font-sm);
+  margin: 0;
+}
+
+.error-state {
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  color: var(--color-error);
+  font-size: var(--font-sm);
+}
+
+.loading-state {
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  gap: var(--space-3);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Lista de cards */
+.recetas-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.receta-card {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 1px 4px rgba(26, 46, 37, 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.receta-card:hover {
+  box-shadow: 0 4px 12px rgba(26, 46, 37, 0.10);
+}
+
+/* Top row */
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.fecha-chip {
+  background: var(--color-bg-secondary, #e8f1ec);
+  color: var(--color-text-secondary, #4a6859);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.doctor-nombre {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: right;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-3) 0;
+}
+
+/* Medicamentos */
+.med-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.med-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pill-icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.med-nombre {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.med-dosis {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  margin-left: var(--space-1);
+}
+
+/* Notas */
+.notas {
+  font-size: var(--font-sm);
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Footer */
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ver-detalle {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-success, #16a34a);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ver-detalle:hover {
+  opacity: 0.75;
+}
