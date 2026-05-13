@@ -1,0 +1,135 @@
+<div class="admin-app">
+  <app-admin-sidebar
+    activeSection="calendario"
+    [adminName]="adminName"
+    (sectionChange)="onSectionChange($event)"
+    (logoutClick)="logout()">
+  </app-admin-sidebar>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Días especiales</h1>
+        <p class="subtitle">Marca días sin atención, horarios reducidos y periodos vacacionales del consultorio</p>
+      </div>
+      <button class="btn-primary" (click)="openModalAgregar()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Agregar día especial
+      </button>
+    </div>
+
+    <div class="cols">
+
+      <!-- Calendario -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Calendario</h2>
+          <div class="month-nav">
+            <button class="nav-btn" (click)="changeMonth(-1)" aria-label="Mes anterior">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="month-label">{{ calLabel | titlecase }}</span>
+            <button class="nav-btn" (click)="changeMonth(1)" aria-label="Mes siguiente">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="cal-grid">
+            <div class="day-header" *ngFor="let d of weekDays">{{ d }}</div>
+            <ng-container *ngFor="let row of calRows">
+              <div class="cal-cell"
+                *ngFor="let day of row"
+                [class.muted]="!day.isCurrentMonth"
+                [class.special]="day.dia"
+                [class.selected]="day.date === selectedDate"
+                (click)="selectDay(day)">
+                <span class="day-num">{{ day.label }}</span>
+                <span class="day-tag" *ngIf="day.dia && day.isCurrentMonth">{{ day.dia.motivo }}</span>
+              </div>
+            </ng-container>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="swatch"></span>
+              Día especial
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabla de días registrados -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Días registrados</h2>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && dias.length === 0">
+          Sin días especiales registrados.
+        </div>
+
+        <div class="loading-row" *ngIf="isLoading">
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+        </div>
+
+        <table *ngIf="!isLoading && dias.length > 0">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Motivo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dia of dias">
+              <td class="td-date">{{ formatFecha(dia.fecha) }}</td>
+              <td class="td-motivo">{{ dia.motivo }}</td>
+              <td class="td-action">
+                <button class="btn-delete" (click)="askEliminar(dia)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Agregar día especial -->
+<div class="modal-backdrop" *ngIf="showModalAgregar" (click)="closeModalAgregar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Agregar día especial</h3>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" [(ngModel)]="form.fecha">
+    </div>
+    <div class="field">
+      <label>Motivo</label>
+      <input type="text" [(ngModel)]="form.motivo" placeholder="ej. Día del maestro" maxlength="120">
+    </div>
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="closeModalAgregar()">Cancelar</button>
+      <button class="btn-primary" [disabled]="isSubmitting" (click)="submitAgregar()">
+        {{ isSubmitting ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal-backdrop" *ngIf="confirmDeleteId" (click)="cancelEliminar()">
+  <div class="modal modal-sm" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">¿Eliminar día especial?</h3>
+    <p class="modal-desc">Se eliminará <strong>{{ confirmDeleteMotivo }}</strong>. Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancelEliminar()">Cancelar</button>
+      <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>

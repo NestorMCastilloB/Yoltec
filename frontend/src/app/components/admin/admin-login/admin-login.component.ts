@@ -1,50 +1,81 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth.service';
-import { catchError, finalize, takeUntil } from 'rxjs/operators';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { API_BASE_URL } from '../../../services/api-config';
 
 @Component({
   selector: 'app-admin-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './admin-login.component.html',
   styleUrls: ['./admin-login.component.css']
 })
 export class AdminLoginComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
 
-  isLoading = false;
-  errorMessage: string | null = null;
+  form: FormGroup;
   showPassword = false;
+  isLoading = false;
+  toast: string | null = null;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  credentials = { identificador: '', password: '' };
+  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
+    this.form = this.fb.group({
+      usuario: ['', Validators.required],
+      password: ['', Validators.required]
+    });
+  }
 
-  constructor(private router: Router, private authService: AuthService) {}
-
-  togglePassword() {
+  togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit() {
-    this.isLoading = true;
-    this.errorMessage = null;
+  onSubmit(): void {
+    if (this.form.invalid || this.isLoading) return;
 
-    this.authService.login(this.credentials.identificador, this.credentials.password, 'admin')
+    this.isLoading = true;
+    this.toast = null;
+
+    const body = {
+      identificador: this.form.value.usuario,
+      password: this.form.value.password,
+      tipo_usuario: 'admin'
+    };
+
+    this.http.post<{ token: string; user: { tipo: string } }>(`${API_BASE_URL}/login`, body)
       .pipe(
         takeUntil(this.destroy$),
-        catchError(error => {
-          this.errorMessage = 'Credenciales inválidas';
-          return of(null);
-        }),
         finalize(() => { this.isLoading = false; })
       )
-      .subscribe({ next: () => {} });
+      .subscribe({
+        next: (res) => {
+          localStorage.setItem('auth_token', res.token);
+          this.router.navigate(['/admin-dashboard']);
+        },
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 401) {
+            this.mostrarToast('Credenciales incorrectas');
+          } else if (err.status === 403) {
+            this.mostrarToast('Sin permisos de administrador');
+          } else {
+            this.mostrarToast('Error al conectar con el servidor');
+          }
+        }
+      });
   }
 
-  ngOnDestroy() {
+  private mostrarToast(mensaje: string): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toast = mensaje;
+    this.toastTimer = setTimeout(() => { this.toast = null; }, 4000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
     this.destroy$.next();
     this.destroy$.complete();
   }

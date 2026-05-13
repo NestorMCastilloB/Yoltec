@@ -11,7 +11,7 @@ import { PerfilMedicoService } from '../../../services/perfil-medico.service';
 import { ThemeService } from '../../../services/theme.service';
 
 import { StudentDashboardInicioComponent } from '../dashboard/student-dashboard.component';
-import { SdCitasComponent } from './components/sd-citas/sd-citas.component';
+import { MisCitasComponent } from '../mis-citas/mis-citas.component';
 import { SdBitacoraComponent } from './components/sd-bitacora/sd-bitacora.component';
 import { SdRecetasComponent } from './components/sd-recetas/sd-recetas.component';
 import { SdPerfilComponent } from './components/sd-perfil/sd-perfil.component';
@@ -24,7 +24,7 @@ import { PreEvaluacionIaComponent } from '../pre-evaluacion-ia/pre-evaluacion-ia
   imports: [
     CommonModule,
     StudentDashboardInicioComponent,
-    SdCitasComponent,
+    MisCitasComponent,
     SdBitacoraComponent,
     SdRecetasComponent,
     SdPerfilComponent,

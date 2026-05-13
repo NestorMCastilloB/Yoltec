@@ -1,29 +1,74 @@
-<div class="admin-login-bg">
-  <div class="admin-login-card">
-    <div class="admin-login-head">
-      <div class="lock-icon">&#9919;</div>
-      <p>Acceso restringido</p>
+<div class="page-bg">
+
+  <!-- Toast -->
+  <div class="toast" *ngIf="toast" role="alert">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ toast }}
+  </div>
+
+  <!-- Logo sobre la card -->
+  <div class="brand">
+    <div class="brand-y">Y</div>
+    <span class="brand-name">Yoltec</span>
+  </div>
+
+  <div class="card">
+    <div class="divider"></div>
+
+    <div class="card-header">
+      <h1>Panel de administración</h1>
+      <p>Acceso restringido al personal autorizado</p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" #adminForm="ngForm">
-      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <!-- Alert área restringida -->
+    <div class="alert-admin">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>Área administrativa — solo personal autorizado</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="field">
-        <label>Usuario</label>
-        <input type="text" [(ngModel)]="credentials.identificador" name="identificador"
-          placeholder="Identificador" required autocomplete="username">
+        <label for="usuario">Usuario</label>
+        <input
+          id="usuario"
+          type="text"
+          formControlName="usuario"
+          placeholder="Tu nombre de usuario"
+          autocomplete="username">
       </div>
+
       <div class="field">
-        <label>Contraseña</label>
+        <label for="password">Contraseña</label>
         <div class="pass-wrap">
-          <input [type]="showPassword ? 'text' : 'password'"
-            [(ngModel)]="credentials.password" name="password"
-            placeholder="Contraseña" required autocomplete="current-password">
-          <button type="button" class="eye" (click)="togglePassword()">&#9919;</button>
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Tu contraseña"
+            autocomplete="current-password">
+          <button type="button" class="eye-btn" (click)="togglePassword()" [attr.aria-label]="showPassword ? 'Ocultar' : 'Mostrar'">
+            <svg *ngIf="!showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg *ngIf="showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <button type="submit" class="login-btn" [disabled]="isLoading">
-        {{ isLoading ? 'Verificando...' : 'Iniciar sesión' }}
+
+      <button type="submit" class="btn-ingresar" [disabled]="form.invalid || isLoading">
+        {{ isLoading ? 'Verificando...' : 'Ingresar' }}
       </button>
     </form>
+
+    <p class="footer-note">Todos los accesos son registrados en bitácora de auditoría</p>
   </div>
 </div>

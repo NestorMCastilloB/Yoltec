@@ -1,0 +1,174 @@
+<!-- Toast -->
+<div class="ac-toast" *ngIf="toastMsg">{{ toastMsg }}</div>
+
+<!-- ── Step 1: Buscar alumno (solo doctor) ─────────────────── -->
+<div class="ac-buscar" *ngIf="modo === 'doctor' && currentStep === 1">
+  <div class="ac-buscar-head">
+    <h2>Buscar alumno</h2>
+    <p class="ac-buscar-sub">Ingresa el número de control o nombre del alumno</p>
+  </div>
+  <div class="ac-buscar-form">
+    <input
+      class="ac-input"
+      type="text"
+      placeholder="Ej. 22690495 o Nestor Castillo"
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="buscarAlumno()"
+    />
+    <button class="ac-btn-primary" (click)="buscarAlumno()" [disabled]="searching">
+      {{ searching ? 'Buscando…' : 'Buscar' }}
+    </button>
+  </div>
+  <p class="ac-error" *ngIf="searchError">{{ searchError }}</p>
+  <div class="ac-results" *ngIf="searchResults.length">
+    <button
+      class="ac-result-item"
+      *ngFor="let r of searchResults"
+      (click)="seleccionarAlumno(r)"
+    >
+      <span class="ac-result-name">{{ r.nombre }}</span>
+      <span class="ac-result-meta">{{ r.numero_control }}<ng-container *ngIf="r.carrera"> · {{ r.carrera }}</ng-container></span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Step 2 + 3: Calendario y slots ─────────────────────── -->
+<div class="ac-layout" *ngIf="currentStep === 2 || currentStep === 3">
+
+  <!-- Alumno seleccionado (modo doctor) -->
+  <div class="ac-alumno-chip" *ngIf="modo === 'doctor' && alumnoSeleccionado">
+    <span class="ac-alumno-label">Alumno:</span>
+    <strong>{{ alumnoSeleccionado.nombre }}</strong>
+    <span class="ac-alumno-nc">{{ alumnoSeleccionado.numero_control }}</span>
+    <button class="ac-chip-change" (click)="currentStep = 1">Cambiar</button>
+  </div>
+
+  <!-- Columna calendario -->
+  <div class="ac-cal-col">
+    <h2 class="ac-sec-title">Selecciona un día</h2>
+
+    <div class="ac-month-nav">
+      <button class="ac-nav-btn" (click)="mesAnterior()" aria-label="Mes anterior">‹</button>
+      <b>{{ mesLabel }}</b>
+      <button class="ac-nav-btn" (click)="mesSiguiente()" aria-label="Mes siguiente">›</button>
+    </div>
+
+    <div class="ac-dow">
+      <span>Lun</span><span>Mar</span><span>Mié</span>
+      <span>Jue</span><span>Vie</span><span>Sáb</span>
+    </div>
+
+    <div class="ac-grid" *ngIf="!loadingDisp">
+      <ng-container *ngFor="let cell of gridDays">
+        <div *ngIf="cell.empty" class="ac-day-empty"></div>
+        <button
+          *ngIf="!cell.empty"
+          class="ac-day"
+          [class.good]="cell.status === 'good'"
+          [class.mid]="cell.status === 'mid'"
+          [class.none]="cell.status === 'none'"
+          [class.past]="cell.status === 'past'"
+          [class.today]="cell.isToday"
+          [class.selected]="cell.dateStr === fechaSeleccionada"
+          [disabled]="cell.status === 'past' || cell.status === 'none'"
+          (click)="seleccionarDia(cell)"
+          [attr.aria-label]="cell.dateStr"
+        >
+          <span class="ac-day-n">{{ cell.day }}</span>
+          <span class="ac-day-d" *ngIf="cell.status === 'good' || cell.status === 'mid'">
+            {{ cell.libres }} disp
+          </span>
+          <span class="ac-day-d" *ngIf="cell.status === 'none' && !cell.isToday">Sin disp</span>
+        </button>
+      </ng-container>
+    </div>
+
+    <div class="ac-grid-loading" *ngIf="loadingDisp">Cargando disponibilidad…</div>
+
+    <div class="ac-legend">
+      <div class="ac-legend-item"><span class="ac-dot good"></span>Buena disponibilidad</div>
+      <div class="ac-legend-item"><span class="ac-dot mid"></span>Poca disponibilidad</div>
+      <div class="ac-legend-item"><span class="ac-dot none"></span>Sin disponibilidad</div>
+      <div class="ac-legend-item"><span class="ac-dot past"></span>No disponible</div>
+    </div>
+  </div>
+
+  <!-- Columna slots -->
+  <div class="ac-slot-col">
+    <div class="ac-slot-head" *ngIf="fechaSeleccionada; else sinFecha">
+      <h2>Horarios disponibles</h2>
+      <div class="ac-slot-fecha">{{ fechaLabel }}</div>
+      <p class="ac-slot-note">Se muestran solo los horarios libres.</p>
+    </div>
+    <ng-template #sinFecha>
+      <div class="ac-slot-placeholder">
+        <span class="ac-placeholder-icon">📅</span>
+        <p>Selecciona un día en el calendario para ver los horarios disponibles.</p>
+      </div>
+    </ng-template>
+
+    <div class="ac-slot-loading" *ngIf="loadingSlots">Cargando horarios…</div>
+
+    <div class="ac-slot-grid" *ngIf="fechaSeleccionada && !loadingSlots && slots.length">
+      <button
+        class="ac-slot"
+        *ngFor="let slot of slots"
+        [class.selected]="slotSeleccionado?.id === slot.id"
+        (click)="seleccionarSlot(slot)"
+      >
+        <b>{{ slot.hora_inicio }}</b>
+        <span>– {{ slot.hora_fin }}</span>
+      </button>
+    </div>
+
+    <div class="ac-no-slots" *ngIf="fechaSeleccionada && !loadingSlots && !slots.length">
+      No hay horarios disponibles para este día.
+    </div>
+
+    <div class="ac-help" *ngIf="fechaSeleccionada">
+      <span>ⓘ</span>
+      <span>Tu cita dura <b>15 minutos</b>. Llega 5 minutos antes al Edificio C, planta baja. Puedes cancelar hasta 2 horas antes desde <b>Mis citas</b>.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Step 3: Modal confirmación ─────────────────────────── -->
+<div class="ac-overlay" *ngIf="currentStep === 3" (click)="cerrarModal()" role="dialog" aria-modal="true">
+  <div class="ac-modal" (click)="$event.stopPropagation()">
+    <h3>Confirmar cita</h3>
+
+    <div class="ac-resume">
+      <div class="ac-resume-icon">⊞</div>
+      <div>
+        {{ slotResumen }}
+        <small>Servicio médico universitario · Consultorio 2</small>
+      </div>
+    </div>
+
+    <div *ngIf="modo === 'doctor' && alumnoSeleccionado" class="ac-resume ac-resume-alumno">
+      <div class="ac-resume-icon">👤</div>
+      <div>
+        {{ alumnoSeleccionado.nombre }}
+        <small>{{ alumnoSeleccionado.numero_control }}</small>
+      </div>
+    </div>
+
+    <label class="ac-label">
+      Motivo de la cita<span class="ac-req">*</span>
+    </label>
+    <textarea
+      class="ac-textarea"
+      [(ngModel)]="motivo"
+      placeholder="Describe brevemente el motivo de tu cita…"
+      rows="3"
+    ></textarea>
+    <p class="ac-error" *ngIf="motivoError">{{ motivoError }}</p>
+
+    <div class="ac-modal-foot">
+      <button class="ac-btn-cancel" (click)="cerrarModal()">Cancelar</button>
+      <button class="ac-btn-primary" (click)="confirmarCita()" [disabled]="confirmando">
+        {{ confirmando ? 'Confirmando…' : 'Confirmar cita' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -16,16 +16,17 @@
 
 - [x] `student/mis-citas/` — 3 tabs: Próximas, Pasadas, Canceladas
 - [x] `student/dashboard/` — bienvenida + próxima cita + accesos rápidos
-- [ ] `shared/agendar-cita/` — @Input() modo alumno/doctor + paso buscar alumno
+- [x] `shared/agendar-cita/` — @Input() modo alumno/doctor + paso buscar alumno
 - [x] `student/pre-evaluacion-ia/` — chat + resultados
-- [ ] `student/perfil/` — info médica + foto editable
+- [x] `student/perfil/` — info médica + foto editable
 
 ## Frontend — Correcciones doctor (prioridad alta)
 
 - [x] `doctor/prioridad-ia/` — manejar error PHP, botón reintentar
-- [ ] `doctor/estadisticas/` — cargar en ngOnInit, skeleton loader
-- [ ] `doctor/pre-evaluaciones/` — validar/descartar con modal
-- [ ] `doctor/recetas/` — rediseño lista + drawer detalle
+- [x] `doctor/estadisticas/` — cargar en ngOnInit, skeleton loader
+- [x] `doctor/pre-evaluaciones/` — validar/descartar con modal
+- [x] `doctor/recetas/` — rediseño lista + drawer detalle
+- [x] `doctor/nueva-cita/` — flujo 3 pasos: buscar alumno → calendario → confirmado
 
 ## Frontend — Bugs (prioridad alta)
 
@@ -65,3 +66,7 @@
 - [x] Graphify instalado y configurado
 - [x] CLAUDE.md optimizados (v3)
 - [x] Design System completo web + móvil en Claude Design
+- [x] Login Admin — ReactiveForm, toast 401/403, diseño card con alert rojo
+- [x] Panel Admin — sidebar verde, stats con skeleton, CRUD usuarios/calendario
+- [x] Usuarios Admin
+- [x] Días Especiales Admin

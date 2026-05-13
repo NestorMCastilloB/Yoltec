@@ -7,18 +7,24 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { AdminService, Alumno, Doctor } from '../../../services/admin.service';
 import { CalendarioAdminService, DiaEspecial, TIPO_LABELS } from '../../../services/calendario-admin.service';
+import { AdminDashboardService, AdminStats } from '../dashboard/admin-dashboard.service';
+import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminSidebarComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  activeSection = 'alumnos';
+  activeSection = 'panel';
   adminName = 'Administrador';
+
+  // Métricas del panel de inicio
+  stats: AdminStats | null = null;
+  isLoadingStats = false;
 
   // Alumnos
   alumnos: Alumno[] = [];
@@ -51,6 +57,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   doctorMsg: string | null = null;
   isSubmittingDoctor = false;
   doctorForm = { username: '', nombre: '', apellido: '', email: '', password: '', telefono: '' };
+  usersTab: 'alumnos' | 'doctores' = 'alumnos';
 
   // Confirmación de borrado
   confirmDeleteId: number | null = null;
@@ -63,7 +70,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   calWeeks: { date: string; label: number; isCurrentMonth: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
-  // Formulario de día especial
   showDiaForm = false;
   diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
   diaMsg: string | null = null;
@@ -73,13 +79,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private adminService: AdminService,
-    private calendarioService: CalendarioAdminService
+    private calendarioService: CalendarioAdminService,
+    private dashboardService: AdminDashboardService
   ) {}
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.adminName = user ? `${user.nombre} ${user.apellido}` : 'Administrador';
-    this.loadAlumnos();
+    this.loadStats();
   }
 
   ngOnDestroy(): void {
@@ -89,14 +96,37 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   setSection(section: string): void {
     this.activeSection = section;
-    if (section === 'alumnos') this.loadAlumnos();
-    if (section === 'doctores') this.loadDoctores();
-    if (section === 'calendario') this.loadCalendario();
+    if (section === 'panel') this.loadStats();
+    if (section === 'usuarios') { this.usersTab = 'alumnos'; this.loadAlumnos(); }
+    if (section === 'calendario') this.router.navigate(['/admin-dias-especiales']);
+  }
+
+  setUsersTab(tab: 'alumnos' | 'doctores'): void {
+    this.usersTab = tab;
+    if (tab === 'alumnos') this.loadAlumnos();
+    else this.loadDoctores();
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // ===== PANEL =====
+
+  loadStats(): void {
+    this.isLoadingStats = true;
+    this.dashboardService.getStats()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of(null)),
+        finalize(() => { this.isLoadingStats = false; })
+      )
+      .subscribe(data => { this.stats = data; });
+  }
+
+  get fechaHoy(): string {
+    return new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
   }
 
   // ===== ALUMNOS =====
@@ -155,12 +185,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$),
       catchError(err => {
         const errors = err?.error?.errors;
-        if (errors) {
-          const first = Object.values(errors)[0] as string[];
-          this.alumnoMsg = first[0];
-        } else {
-          this.alumnoMsg = err?.error?.message || 'Error al guardar alumno.';
-        }
+        this.alumnoMsg = errors ? (Object.values(errors)[0] as string[])[0] : (err?.error?.message || 'Error al guardar alumno.');
         return of(null);
       }),
       finalize(() => { this.isSubmittingAlumno = false; })
@@ -239,6 +264,34 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.doctorMsg = null;
   }
 
+  submitDoctor(): void {
+    this.isSubmittingDoctor = true;
+    this.doctorMsg = null;
+    const payload = { ...this.doctorForm };
+    if (!payload.password) delete (payload as any).password;
+    if (!payload.telefono) delete (payload as any).telefono;
+
+    const req$ = this.editingDoctorId
+      ? this.adminService.updateDoctor(this.editingDoctorId, payload)
+      : this.adminService.createDoctor(payload);
+
+    req$.pipe(
+      takeUntil(this.destroy$),
+      catchError(err => {
+        const errors = err?.error?.errors;
+        this.doctorMsg = errors ? (Object.values(errors)[0] as string[])[0] : (err?.error?.message || 'Error al guardar doctor.');
+        return of(null);
+      }),
+      finalize(() => { this.isSubmittingDoctor = false; })
+    ).subscribe(res => {
+      if (res) {
+        this.doctorMsg = this.editingDoctorId ? 'Doctor actualizado.' : 'Doctor creado.';
+        this.loadDoctores();
+        setTimeout(() => this.closeDoctorForm(), 1200);
+      }
+    });
+  }
+
   // ===== CALENDARIO =====
 
   get calLabel(): string {
@@ -290,21 +343,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   openDiaForm(fecha?: string): void {
     this.diaMsg = null;
     this.diaForm = { fecha: fecha ?? '', tipo: 'holiday', etiqueta: '' };
-    // Si ya existe un día especial en esa fecha, pre-carga los datos
     if (fecha) {
       const existing = this.diasEspeciales.find(d => d.fecha === fecha);
-      if (existing) {
-        this.diaForm.tipo = existing.tipo;
-        this.diaForm.etiqueta = existing.etiqueta ?? '';
-      }
+      if (existing) { this.diaForm.tipo = existing.tipo; this.diaForm.etiqueta = existing.etiqueta ?? ''; }
     }
     this.showDiaForm = true;
   }
 
-  closeDiaForm(): void {
-    this.showDiaForm = false;
-    this.diaMsg = null;
-  }
+  closeDiaForm(): void { this.showDiaForm = false; this.diaMsg = null; }
 
   submitDia(): void {
     if (!this.diaForm.fecha) { this.diaMsg = 'Selecciona una fecha.'; return; }
@@ -315,11 +361,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         return of(null);
       }), finalize(() => this.isSubmittingDia = false))
       .subscribe(res => {
-        if (res) {
-          this.diaMsg = 'Guardado.';
-          this.loadCalendario();
-          setTimeout(() => this.closeDiaForm(), 800);
-        }
+        if (res) { this.diaMsg = 'Guardado.'; this.loadCalendario(); setTimeout(() => this.closeDiaForm(), 800); }
       });
   }
 
@@ -327,38 +369,5 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.calendarioService.deleteDia(id)
       .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
       .subscribe(() => this.loadCalendario());
-  }
-
-  submitDoctor(): void {
-    this.isSubmittingDoctor = true;
-    this.doctorMsg = null;
-    const payload = { ...this.doctorForm };
-    if (!payload.password) delete (payload as any).password;
-    if (!payload.telefono) delete (payload as any).telefono;
-
-    const req$ = this.editingDoctorId
-      ? this.adminService.updateDoctor(this.editingDoctorId, payload)
-      : this.adminService.createDoctor(payload);
-
-    req$.pipe(
-      takeUntil(this.destroy$),
-      catchError(err => {
-        const errors = err?.error?.errors;
-        if (errors) {
-          const first = Object.values(errors)[0] as string[];
-          this.doctorMsg = first[0];
-        } else {
-          this.doctorMsg = err?.error?.message || 'Error al guardar doctor.';
-        }
-        return of(null);
-      }),
-      finalize(() => { this.isSubmittingDoctor = false; })
-    ).subscribe(res => {
-      if (res) {
-        this.doctorMsg = this.editingDoctorId ? 'Doctor actualizado.' : 'Doctor creado.';
-        this.loadDoctores();
-        setTimeout(() => this.closeDoctorForm(), 1200);
-      }
-    });
   }
 }

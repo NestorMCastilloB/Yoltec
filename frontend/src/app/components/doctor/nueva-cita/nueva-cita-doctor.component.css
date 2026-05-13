@@ -1,0 +1,417 @@
+.nc-wrap {
+  background: var(--yol-surface);
+  border-radius: var(--yol-r-lg);
+  box-shadow: var(--yol-shadow-md);
+  display: flex;
+  flex-direction: column;
+  max-width: 580px;
+  width: 100%;
+  margin: var(--yol-s-7) auto;
+  overflow: hidden;
+}
+
+/* ── Cabecera ─────────────────────────────────── */
+.nc-header {
+  padding: var(--yol-s-5) var(--yol-s-6) 0;
+  border-bottom: 1px solid var(--yol-border);
+}
+
+.nc-header h2 {
+  margin: 0 0 var(--yol-s-1);
+  font-size: var(--yol-fs-h1);
+  font-weight: 700;
+  color: var(--yol-text);
+  letter-spacing: -.3px;
+}
+
+.nc-sub {
+  margin: 0 0 var(--yol-s-4);
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-muted);
+}
+
+/* Stepper */
+.nc-steps {
+  display: flex;
+  align-items: center;
+  gap: var(--yol-s-2);
+  padding-bottom: var(--yol-s-4);
+  margin-top: var(--yol-s-1);
+}
+
+.nc-step {
+  display: flex;
+  align-items: center;
+  gap: var(--yol-s-2);
+  font-size: var(--yol-fs-cap);
+  font-weight: 500;
+  color: var(--yol-text-subtle);
+}
+
+.nc-step-n {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--yol-bg);
+  border: 1px solid var(--yol-border);
+  color: var(--yol-text-subtle);
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nc-step.active {
+  color: var(--yol-primary);
+  font-weight: 600;
+}
+
+.nc-step.active .nc-step-n {
+  background: var(--yol-primary);
+  border-color: var(--yol-primary);
+  color: #fff;
+}
+
+.nc-step.done {
+  color: var(--yol-text);
+}
+
+.nc-step.done .nc-step-n {
+  background: var(--yol-primary-50);
+  border-color: var(--yol-primary);
+  color: var(--yol-primary);
+}
+
+.nc-step-sep {
+  color: var(--yol-text-subtle);
+  font-size: 13px;
+  margin: 0 2px;
+}
+
+/* ── Cuerpo ───────────────────────────────────── */
+.nc-body {
+  padding: var(--yol-s-5) var(--yol-s-6);
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Campo de búsqueda */
+.nc-search-row {
+  display: flex;
+  gap: var(--yol-s-2);
+  margin-bottom: var(--yol-s-4);
+}
+
+.nc-search-field {
+  position: relative;
+  flex: 1;
+}
+
+.nc-search-field svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--yol-text-subtle);
+  pointer-events: none;
+}
+
+.nc-search-field input {
+  width: 100%;
+  height: 42px;
+  background: var(--yol-bg);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  padding: 0 var(--yol-s-4) 0 38px;
+  font: 500 var(--yol-fs-sm) var(--yol-font);
+  color: var(--yol-text);
+  outline: none;
+}
+
+.nc-search-field input:focus {
+  border-color: var(--yol-primary);
+  background: var(--yol-surface);
+  box-shadow: 0 0 0 3px var(--yol-primary-50);
+}
+
+.nc-search-field input::placeholder {
+  color: var(--yol-text-subtle);
+  font-weight: 400;
+}
+
+/* Etiqueta de lista */
+.nc-list-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--yol-text-subtle);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin: var(--yol-s-4) 2px var(--yol-s-2);
+}
+
+.nc-list-label span:last-child {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--yol-fs-cap);
+}
+
+/* Lista de alumnos */
+.nc-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yol-s-1);
+}
+
+.nc-student {
+  display: flex;
+  align-items: center;
+  gap: var(--yol-s-3);
+  padding: 10px 12px;
+  border-radius: var(--yol-r-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s;
+}
+
+.nc-student:hover {
+  background: var(--yol-bg);
+  border-color: var(--yol-border);
+}
+
+.nc-student.sel {
+  background: var(--yol-primary-50);
+  border-color: #d1e3d8;
+}
+
+/* Avatar iniciales */
+.nc-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--yol-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  letter-spacing: .3px;
+}
+
+.nc-av.sm {
+  width: 32px;
+  height: 32px;
+  font-size: 11.5px;
+}
+
+.nc-who {
+  flex: 1;
+  min-width: 0;
+}
+
+.nc-who b {
+  display: block;
+  font-size: var(--yol-fs-sm);
+  font-weight: 600;
+  color: var(--yol-text);
+  letter-spacing: -.1px;
+}
+
+.nc-who span {
+  display: block;
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-subtle);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nc-ck {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--yol-border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.nc-ck.checked {
+  background: var(--yol-primary);
+  border-color: var(--yol-primary);
+}
+
+/* Error */
+.nc-error {
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-danger);
+  margin: 0 0 var(--yol-s-3);
+}
+
+/* ── Paso 3: Éxito ────────────────────────────── */
+.nc-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--yol-s-4) auto var(--yol-s-3);
+}
+
+.nc-success-title {
+  text-align: center;
+  font-size: var(--yol-fs-h2);
+  font-weight: 700;
+  color: var(--yol-text);
+  margin: 0 0 var(--yol-s-1);
+}
+
+.nc-success-sub {
+  text-align: center;
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-muted);
+  margin: 0 0 var(--yol-s-5);
+}
+
+/* Resumen */
+.nc-summary {
+  background: var(--yol-bg);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  overflow: hidden;
+}
+
+.nc-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px var(--yol-s-4);
+  border-bottom: 1px solid var(--yol-border);
+  font-size: var(--yol-fs-sm);
+}
+
+.nc-summary-row:last-child {
+  border-bottom: 0;
+}
+
+.nc-summary-k {
+  color: var(--yol-text-subtle);
+  font-weight: 500;
+  font-size: var(--yol-fs-cap);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  flex-shrink: 0;
+  margin-right: var(--yol-s-4);
+}
+
+.nc-summary-v {
+  color: var(--yol-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.nc-summary-student-row {
+  align-items: flex-start;
+}
+
+.nc-summary-student {
+  display: flex;
+  align-items: center;
+  gap: var(--yol-s-3);
+}
+
+.nc-summary-student b {
+  display: block;
+  font-size: var(--yol-fs-sm);
+  font-weight: 600;
+  color: var(--yol-text);
+}
+
+.nc-summary-student span {
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Pie de página ────────────────────────────── */
+.nc-footer {
+  padding: var(--yol-s-4) var(--yol-s-6);
+  border-top: 1px solid var(--yol-border);
+  background: var(--yol-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--yol-s-3);
+}
+
+.nc-footer-hint {
+  font-size: var(--yol-fs-cap);
+  color: var(--yol-text-subtle);
+}
+
+.nc-actions {
+  display: flex;
+  gap: var(--yol-s-2);
+}
+
+/* Botones */
+.nc-btn {
+  padding: 9px var(--yol-s-4);
+  border-radius: var(--yol-r);
+  font: 600 var(--yol-fs-sm) var(--yol-font);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yol-s-2);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: background .12s, border-color .12s;
+}
+
+.nc-btn.primary {
+  background: var(--yol-primary);
+  color: #fff;
+}
+
+.nc-btn.primary:hover:not(:disabled) {
+  background: var(--yol-primary-600);
+}
+
+.nc-btn.primary:disabled {
+  background: var(--yol-border);
+  color: var(--yol-text-subtle);
+  cursor: not-allowed;
+}
+
+.nc-btn.ghost {
+  background: transparent;
+  color: var(--yol-text-muted);
+}
+
+.nc-btn.ghost:hover {
+  background: var(--yol-surface);
+  color: var(--yol-text);
+}
+
+.nc-btn.outline {
+  background: var(--yol-surface);
+  color: var(--yol-primary);
+  border-color: var(--yol-primary);
+}
+
+.nc-btn.outline:hover {
+  background: var(--yol-primary-50);
+}

@@ -4,7 +4,15 @@
     <button class="btn-primary" (click)="loadEstadisticas()">Actualizar</button>
   </div>
 
-  <div *ngIf="isLoadingEstadisticas" class="loading">⏳ Cargando estadísticas...</div>
+  <ng-container *ngIf="isLoadingEstadisticas">
+    <div class="skeleton-resumen">
+      <div class="skeleton skeleton-card" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+    <div class="skeleton-charts">
+      <div class="skeleton skeleton-chart"></div>
+      <div class="skeleton skeleton-chart"></div>
+    </div>
+  </ng-container>
   <div *ngIf="estadisticasError" class="alert-error">{{ estadisticasError }}</div>
 
   <div *ngIf="estadisticas && !isLoadingEstadisticas">

@@ -30,7 +30,9 @@ export interface AlumnoBusqueda {
   carrera?: string;
 }
 
-const API = 'http://localhost:8000/api';
+import { API_BASE_URL } from '../../../services/api-config';
+
+const API = API_BASE_URL;
 
 @Injectable({ providedIn: 'root' })
 export class AgendarCitaService {

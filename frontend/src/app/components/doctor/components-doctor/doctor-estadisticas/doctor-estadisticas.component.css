@@ -305,3 +305,45 @@ body.dark-mode .estat-card.tasa .estat-label {
     padding: 1rem 0.7rem;
   }
 }
+
+/* ===== SKELETON LOADER ===== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.skeleton {
+  background: var(--border-light);
+  border-radius: 22px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.skeleton-card {
+  flex: 1;
+  min-width: 130px;
+  height: 110px;
+}
+
+.skeleton-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.skeleton-chart {
+  height: 300px;
+}
+
+@media (max-width: 768px) {
+  .skeleton-charts {
+    grid-template-columns: 1fr;
+  }
+}

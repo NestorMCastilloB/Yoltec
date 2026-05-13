@@ -1,140 +1,242 @@
-<div class="pre-evaluaciones-wrapper">
-  <div class="section-header">
-    <h2>🤖 Pre-evaluaciones IA Pendientes</h2>
-    <span *ngIf="totalPendientes > 0" class="badge-primary">{{ totalPendientes }} pendientes</span>
-  </div>
+<div class="pe-wrapper">
 
-  <div class="pre-evaluaciones-container">
-    <ng-container *ngIf="!isLoadingPreEvaluaciones; else loadingPreEvaluaciones">
-      <div *ngIf="preEvaluacionesError" class="alert error">{{ preEvaluacionesError }}</div>
-
-      <div *ngIf="!preEvaluacionesError && preEvaluaciones.length === 0" class="placeholder-card">
-        <h3>No hay pre-evaluaciones pendientes</h3>
-        <p>Cuando los alumnos completen sus evaluaciones IA, aparecerán aquí para su revisión.</p>
+  <!-- Header con tabs -->
+  <div class="pe-header">
+    <div class="head-row">
+      <div>
+        <div class="crumb">Panel médico · Pre-evaluaciones</div>
+        <h1>Pre-evaluaciones IA</h1>
+        <p class="sub">Valida si el diagnóstico sugerido por la IA coincidió con el diagnóstico real de la consulta. Esto entrena al modelo.</p>
       </div>
-
-      <div *ngIf="preEvaluaciones.length > 0" class="pre-evaluaciones-grid">
-        <article *ngFor="let preEval of preEvaluaciones" class="data-card pre-evaluacion-card">
-          <header class="card-header">
-            <div class="card-title">
-              <h4>{{ preEval.cita?.alumno?.nombre }} {{ preEval.cita?.alumno?.apellido }}</h4>
-              <p class="card-caption" *ngIf="preEval.cita">
-                {{ formatDateDisplay(preEval.cita.fecha_cita) }} · {{ formatTime(preEval.cita.hora_cita) }} hrs
-              </p>
-            </div>
-            <span class="badge-pill" [class]="getConfianzaClass(preEval.confianza)">
-              {{ (preEval.confianza * 100).toFixed(0) }}% confianza
-            </span>
-          </header>
-          <div class="card-body">
-            <div class="diagnostico-sugerido">
-              <strong>Diagnóstico IA:</strong> {{ preEval.diagnostico_sugerido }}
-            </div>
-            <div class="sintomas-tags" *ngIf="preEval.sintomas_detectados.length > 0">
-              <span *ngFor="let sintoma of preEval.sintomas_detectados" class="tag">{{ sintoma }}</span>
-            </div>
-            <div class="card-actions">
-              <button class="btn-primary" (click)="openPreEvaluacionModal(preEval)">Revisar y validar</button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </ng-container>
-    <ng-template #loadingPreEvaluaciones>
-      <div class="placeholder-card">Cargando pre-evaluaciones...</div>
-    </ng-template>
-
-    <div *ngIf="preEvaluacionesHistorial.length > 0" class="historial-preevaluaciones">
-      <h3>Historial revisadas</h3>
-      <div class="pre-evaluaciones-grid">
-        <article *ngFor="let preEval of preEvaluacionesHistorial" class="data-card pre-evaluacion-card historial-card">
-          <header class="card-header">
-            <div class="card-title">
-              <h4>{{ preEval.cita?.alumno?.nombre }} {{ preEval.cita?.alumno?.apellido }}</h4>
-              <p class="card-caption" *ngIf="preEval.cita">
-                {{ formatDateDisplay(preEval.cita.fecha_cita) }} · {{ formatTime(preEval.cita.hora_cita) }} hrs
-              </p>
-            </div>
-            <span class="badge-pill"
-              [class]="preEval.estatus_validacion === 'validado' ? 'badge-success' : 'badge-error'">
-              {{ preEval.estatus_validacion === 'validado' ? '✓ Validado' : '✗ Descartado' }}
-            </span>
-          </header>
-          <div class="card-body">
-            <div class="diagnostico-sugerido">
-              <strong>Diagnóstico IA:</strong> {{ preEval.diagnostico_sugerido }}
-            </div>
-            <div *ngIf="preEval.comentario_doctor" class="comentario-doctor">
-              <strong>Comentario:</strong> {{ preEval.comentario_doctor }}
-            </div>
-          </div>
-        </article>
-      </div>
+    </div>
+    <div class="tabs">
+      <button [class.active]="tab === 'pendientes'" (click)="tab = 'pendientes'">
+        Pendientes de validar
+        <span class="ct red">{{ totalPendientes }}</span>
+      </button>
+      <button [class.active]="tab === 'historial'" (click)="tab = 'historial'">
+        Historial
+        <span class="ct gray">{{ historial.length }}</span>
+      </button>
     </div>
   </div>
 
-  <!-- Modal: Validar Pre-evaluación -->
-  <div *ngIf="showPreEvaluacionModal" class="modal-overlay" (click)="closePreEvaluacionModal()">
-    <div class="modal-content pre-evaluacion-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>🤖 Validar Pre-evaluación IA</h2>
-        <button class="close-btn" (click)="closePreEvaluacionModal()">×</button>
+  <!-- Contenido -->
+  <div class="pe-content">
+
+    <!-- Estado de carga -->
+    <div *ngIf="cargando" class="estado-vacio">
+      <p>Cargando pre-evaluaciones...</p>
+    </div>
+
+    <!-- Error global -->
+    <div *ngIf="error && !cargando" class="alerta-error">{{ error }}</div>
+
+    <!-- Tab: Pendientes -->
+    <ng-container *ngIf="tab === 'pendientes' && !cargando">
+      <div *ngIf="pendientes.length === 0 && !error" class="estado-vacio">
+        <div class="vacio-icono">◔</div>
+        <h3>Sin pendientes</h3>
+        <p>Cuando los alumnos envíen pre-evaluaciones, aparecerán aquí.</p>
       </div>
 
-      <div class="modal-body" *ngIf="selectedPreEvaluacion">
-        <div class="alumno-info">
-          <h4>{{ selectedPreEvaluacion.cita?.alumno?.nombre }} {{ selectedPreEvaluacion.cita?.alumno?.apellido }}</h4>
-          <p>No. Control: {{ selectedPreEvaluacion.cita?.alumno?.numero_control }}</p>
-          <p>Cita: {{ formatDateDisplay(selectedPreEvaluacion.cita?.fecha_cita || '') }} · {{
-            formatTime(selectedPreEvaluacion.cita?.hora_cita || '') }} hrs</p>
+      <div *ngFor="let pe of pendientes" class="pcard">
+        <div class="pc-head">
+          <div class="av">{{ iniciales(pe) }}</div>
+          <div class="who">
+            <b>{{ nombreCompleto(pe) }}</b>
+            <span>No. {{ pe.cita?.alumno?.numero_control ?? '—' }}</span>
+          </div>
+          <div class="meta">
+            <b>ID {{ pe.id }}</b>
+            Enviada: {{ formatFecha(pe.created_at) }}
+          </div>
+          <span class="badge badge-warn">
+            <span class="pulse"></span>Pendiente
+          </span>
         </div>
 
-        <div class="diagnostico-ia-section">
-          <h3>Diagnóstico sugerido por IA</h3>
-          <div class="confianza-badge" [class]="getConfianzaClass(selectedPreEvaluacion.confianza)">
-            Confianza: {{ (selectedPreEvaluacion.confianza * 100).toFixed(0) }}%
-          </div>
-          <p class="diagnostico-text">{{ selectedPreEvaluacion.diagnostico_sugerido }}</p>
-
-          <div class="sintomas-section" *ngIf="selectedPreEvaluacion.sintomas_detectados.length > 0">
-            <h4>Síntomas detectados:</h4>
-            <div class="tags">
-              <span *ngFor="let sintoma of selectedPreEvaluacion.sintomas_detectados" class="tag">{{ sintoma }}</span>
+        <div class="pc-body">
+          <div class="pc-section">
+            <h3>Síntomas detectados</h3>
+            <div class="chips">
+              <span *ngFor="let s of pe.sintomas_detectados" class="chip">{{ s }}</span>
+              <span *ngIf="pe.sintomas_detectados.length === 0" class="chip-empty">Sin síntomas registrados</span>
             </div>
           </div>
-
-          <div class="respuestas-section">
-            <h4>Respuestas del alumno:</h4>
-            <div class="respuestas-list">
-              <div *ngFor="let item of selectedPreEvaluacion.respuestas | keyvalue" class="respuesta-item">
-                <span class="respuesta-key">{{ item.key }}:</span>
-                <span class="respuesta-value">{{ item.value }}</span>
+          <div class="pc-section">
+            <h3>Diagnóstico sugerido por IA</h3>
+            <div class="dx-list">
+              <div class="dx">
+                <div class="dx-row">
+                  <span class="dx-nombre">{{ pe.diagnostico_sugerido }}</span>
+                  <span class="dx-pct">{{ (pe.confianza * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="bar">
+                  <div class="fill" [style.width.%]="pe.confianza * 100"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="validacion-form">
-          <h3>Validación del Doctor</h3>
-          <div class="form-group">
-            <label for="comentario">Comentario (opcional):</label>
-            <textarea id="comentario" [(ngModel)]="comentarioValidacion" rows="3"
-              placeholder="Agrega observaciones sobre la evaluación..."></textarea>
+        <div class="pc-real">
+          <h3>Diagnóstico real de la consulta</h3>
+          <div class="real-val muted">
+            Pendiente de consulta.
+            <ng-container *ngIf="pe.cita">
+              Cita: <b>{{ formatFecha(pe.cita.fecha_cita) }}</b>.
+            </ng-container>
           </div>
         </div>
 
-        <div *ngIf="preEvaluacionesError" class="alert error">{{ preEvaluacionesError }}</div>
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="closePreEvaluacionModal()">Cancelar</button>
-          <button class="btn-danger" (click)="validarPreEvaluacion('descartar')" [disabled]="isSubmittingValidacion">
-            {{ isSubmittingValidacion ? 'Procesando...' : 'Descartar' }}
-          </button>
-          <button class="btn-success" (click)="validarPreEvaluacion('validar')" [disabled]="isSubmittingValidacion">
-            {{ isSubmittingValidacion ? 'Procesando...' : 'Validar diagnóstico' }}
-          </button>
+        <div class="pc-foot">
+          <p class="hint">Una vez atendida la consulta, valida o descarta para entrenar la <b>IA</b>.</p>
+          <div class="actions">
+            <button class="btn btn-danger-outline" (click)="abrirDescartar(pe)">✕ Descartar</button>
+            <button class="btn btn-primary" (click)="abrirValidar(pe)">✓ Validar</button>
+          </div>
         </div>
+      </div>
+    </ng-container>
+
+    <!-- Tab: Historial -->
+    <ng-container *ngIf="tab === 'historial' && !cargando">
+      <div class="filters">
+        <span class="lab">Filtrar</span>
+        <div class="ffld">
+          <span class="fic">⌕</span>
+          <input [(ngModel)]="filtroBusqueda" placeholder="Alumno o No. control" />
+        </div>
+        <div class="ffld">
+          <select [(ngModel)]="filtroEstatus">
+            <option value="">Todos los estatus</option>
+            <option value="validado">Validadas</option>
+            <option value="descartado">Descartadas</option>
+          </select>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+
+      <div *ngIf="historialFiltrado.length === 0" class="estado-vacio">
+        <div class="vacio-icono">≡</div>
+        <h3>Sin resultados</h3>
+        <p>No hay pre-evaluaciones en el historial con los filtros actuales.</p>
+      </div>
+
+      <div *ngFor="let pe of historialFiltrado" class="pcard">
+        <div class="pc-head">
+          <div class="av">{{ iniciales(pe) }}</div>
+          <div class="who">
+            <b>{{ nombreCompleto(pe) }}</b>
+            <span>No. {{ pe.cita?.alumno?.numero_control ?? '—' }}</span>
+          </div>
+          <div class="meta">
+            <b>ID {{ pe.id }}</b>
+            Enviada: {{ formatFecha(pe.created_at) }}
+            <ng-container *ngIf="pe.fecha_validacion"><br/>Revisada: {{ formatFecha(pe.fecha_validacion) }}</ng-container>
+          </div>
+          <span *ngIf="pe.estatus_validacion === 'validado'" class="badge badge-ok">
+            <span class="pulse"></span>Validada
+          </span>
+          <span *ngIf="pe.estatus_validacion === 'descartado'" class="badge badge-danger">
+            <span class="pulse"></span>Descartada
+          </span>
+        </div>
+
+        <div class="pc-body">
+          <div class="pc-section">
+            <h3>Síntomas detectados</h3>
+            <div class="chips">
+              <span *ngFor="let s of pe.sintomas_detectados" class="chip">{{ s }}</span>
+              <span *ngIf="pe.sintomas_detectados.length === 0" class="chip-empty">Sin síntomas registrados</span>
+            </div>
+          </div>
+          <div class="pc-section">
+            <h3>Diagnóstico sugerido por IA</h3>
+            <div class="dx-list">
+              <div class="dx">
+                <div class="dx-row">
+                  <span class="dx-nombre">{{ pe.diagnostico_sugerido }}</span>
+                  <span class="dx-pct">{{ (pe.confianza * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="bar">
+                  <div class="fill" [style.width.%]="pe.confianza * 100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pc-real">
+          <h3>Comentario del doctor</h3>
+          <div *ngIf="pe.comentario_doctor" class="real-val">{{ pe.comentario_doctor }}</div>
+          <div *ngIf="!pe.comentario_doctor" class="real-val muted">Sin comentario.</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Modal: Validar -->
+  <div *ngIf="modalValidar" class="modal-overlay" (click)="cerrarValidar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>Confirmar validación</h2>
+        <button class="close-btn" (click)="cerrarValidar()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-sub">
+          ¿El diagnóstico <b>{{ modalValidar.diagnostico_sugerido }}</b> coincidió con el resultado real de la consulta
+          de <b>{{ nombreCompleto(modalValidar) }}</b>?
+        </p>
+        <div class="form-group">
+          <label>Comentario (opcional)</label>
+          <textarea [(ngModel)]="comentarioValidar" rows="3"
+            placeholder="Observaciones sobre la evaluación..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" (click)="cerrarValidar()">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarValidar()" [disabled]="enviando">
+          {{ enviando ? 'Validando...' : '✓ Confirmar validación' }}
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- Modal: Descartar -->
+  <div *ngIf="modalDescartar" class="modal-overlay" (click)="cerrarDescartar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>Descartar diagnóstico IA</h2>
+        <button class="close-btn" (click)="cerrarDescartar()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-sub">
+          Indica por qué el diagnóstico sugerido <b>no coincidió</b> con la consulta de
+          <b>{{ nombreCompleto(modalDescartar) }}</b>.
+        </p>
+        <div class="form-group" [class.has-error]="motivoError">
+          <label>Motivo <span class="req">*</span></label>
+          <textarea [(ngModel)]="motivoDescartar" rows="4"
+            placeholder="Describe el diagnóstico real o por qué difiere..."
+            (input)="motivoError = false"></textarea>
+          <span *ngIf="motivoError" class="campo-error">Mínimo 10 caracteres requeridos.</span>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" (click)="cerrarDescartar()">Cancelar</button>
+        <button class="btn btn-danger-outline" (click)="confirmarDescartar()" [disabled]="enviando">
+          {{ enviando ? 'Descartando...' : '✕ Descartar diagnóstico' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div *ngIf="toast" class="toast" [class.toast-ok]="toast.tipo === 'ok'" [class.toast-error]="toast.tipo === 'error'">
+    {{ toast.mensaje }}
+  </div>
+
 </div>
