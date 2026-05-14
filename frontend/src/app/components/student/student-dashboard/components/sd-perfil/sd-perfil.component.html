@@ -5,7 +5,6 @@
   <!-- ── Columna izquierda: identity card ── -->
   <div class="sp-card">
     <div class="sp-id-body">
-      <!-- Avatar / foto -->
       <div class="sp-avatar">
         <img *ngIf="fotoPreview || perfilMedico.foto_perfil"
              [src]="fotoPreview || perfilMedico.foto_perfil"
@@ -43,53 +42,67 @@
   <!-- ── Columna derecha: tabs ── -->
   <div class="sp-card">
     <div class="sp-tabs">
-      <button class="sp-tab" [class.active]="activeTab === 'personal'" (click)="activeTab = 'personal'">Información personal</button>
-      <button class="sp-tab" [class.active]="activeTab === 'medico'"   (click)="activeTab = 'medico'">Información médica</button>
-      <button class="sp-tab" [class.active]="activeTab === 'seguridad'" (click)="activeTab = 'seguridad'">Seguridad</button>
+      <button class="sp-tab" [class.active]="activeTab === 'personal'"       (click)="activeTab = 'personal'">Personal</button>
+      <button class="sp-tab" [class.active]="activeTab === 'medico'"         (click)="activeTab = 'medico'">Médico</button>
+      <button class="sp-tab" [class.active]="activeTab === 'seguridad'"      (click)="activeTab = 'seguridad'">Seguridad</button>
+      <button class="sp-tab" [class.active]="activeTab === 'notificaciones'" (click)="activeTab = 'notificaciones'">Notificaciones</button>
     </div>
 
     <!-- TAB: personal -->
     <div *ngIf="activeTab === 'personal'">
       <div class="sp-section">
         <div class="sp-section-title">Datos personales</div>
+
+        <!-- Aviso campos bloqueados -->
+        <div class="sp-notice sp-notice-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Los datos de identidad (nombre, número de control, fecha de nacimiento) solo pueden modificarse a través de la Oficina Escolar.
+        </div>
+
         <div *ngIf="personalMsg" class="sp-msg" [class.ok]="!personalMsg.includes('Error')" [class.err]="personalMsg.includes('Error')">{{ personalMsg }}</div>
 
+        <!-- Campos bloqueados -->
+        <div class="sp-row sp-row-locked">
+          <span class="sp-lab">Nombre completo</span>
+          <span class="sp-val">{{ perfilMedico.nombre }} {{ perfilMedico.apellido }}</span>
+          <span class="sp-lock-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+        </div>
+        <div class="sp-row sp-row-locked">
+          <span class="sp-lab">N° de control</span>
+          <span class="sp-val">{{ perfilMedico.numero_control }}</span>
+          <span class="sp-lock-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+        </div>
+        <div class="sp-row sp-row-locked">
+          <span class="sp-lab">Fecha de nacimiento</span>
+          <span class="sp-val" [class.muted]="!perfilMedico.fecha_nacimiento">
+            {{ perfilMedico.fecha_nacimiento ? (perfilMedico.fecha_nacimiento | date:'dd/MM/yyyy') : 'Sin registrar' }}
+          </span>
+          <span class="sp-lock-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+        </div>
+
+        <!-- Campos editables -->
         <ng-container *ngIf="!editandoPersonal">
-          <div class="sp-row">
-            <span class="sp-lab">Nombre completo</span>
-            <span class="sp-val">{{ perfilMedico.nombre }} {{ perfilMedico.apellido }}</span>
-            <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
-          </div>
-          <div class="sp-row">
-            <span class="sp-lab">N° de control</span>
-            <span class="sp-val">{{ perfilMedico.numero_control }}</span>
-            <span></span>
-          </div>
           <div class="sp-row">
             <span class="sp-lab">Email</span>
             <span class="sp-val">{{ perfilMedico.email }}</span>
-            <span></span>
+            <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
           </div>
           <div class="sp-row">
             <span class="sp-lab">Teléfono</span>
             <span class="sp-val" [class.muted]="!perfilMedico.telefono">{{ perfilMedico.telefono || 'Sin registrar' }}</span>
             <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
           </div>
-          <div class="sp-row">
-            <span class="sp-lab">Fecha de nacimiento</span>
-            <span class="sp-val" [class.muted]="!perfilMedico.fecha_nacimiento">
-              {{ perfilMedico.fecha_nacimiento ? (perfilMedico.fecha_nacimiento | date:'dd/MM/yyyy') : 'Sin registrar' }}
-            </span>
-            <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
-          </div>
         </ng-container>
 
         <ng-container *ngIf="editandoPersonal">
-          <div class="sp-form-group"><label>Nombre</label><input class="sp-input" type="text" [(ngModel)]="personalForm.nombre" /></div>
-          <div class="sp-form-group"><label>Apellido</label><input class="sp-input" type="text" [(ngModel)]="personalForm.apellido" /></div>
           <div class="sp-form-group"><label>Email</label><input class="sp-input" type="email" [(ngModel)]="personalForm.email" /></div>
           <div class="sp-form-group"><label>Teléfono</label><input class="sp-input" type="text" [(ngModel)]="personalForm.telefono" placeholder="Opcional" /></div>
-          <div class="sp-form-group"><label>Fecha de nacimiento</label><input class="sp-input" type="date" [(ngModel)]="personalForm.fecha_nacimiento" /></div>
           <div class="sp-form-actions">
             <button class="sp-btn-primary" (click)="submitDatosPersonales()" [disabled]="isSubmittingPersonal">
               {{ isSubmittingPersonal ? 'Guardando...' : 'Guardar cambios' }}
@@ -103,9 +116,8 @@
     <!-- TAB: médico -->
     <div *ngIf="activeTab === 'medico'">
       <div class="sp-section">
-        <div class="sp-section-title">Información médica</div>
+        <div class="sp-section-title">Tipo de sangre</div>
         <div *ngIf="perfilMsg" class="sp-msg" [class.ok]="!perfilMsg.includes('Error')" [class.err]="perfilMsg.includes('Error')">{{ perfilMsg }}</div>
-
         <div class="sp-form-group">
           <label>Tipo de sangre</label>
           <select class="sp-select" [(ngModel)]="perfilForm.tipo_sangre">
@@ -113,30 +125,56 @@
             <option *ngFor="let t of ['A+','A-','B+','B-','AB+','AB-','O+','O-']" [value]="t">{{ t }}</option>
           </select>
         </div>
-        <div class="sp-form-group">
-          <label>Alergias</label>
-          <textarea class="sp-textarea" [(ngModel)]="perfilForm.alergias" placeholder="Ej: Penicilina, polen..."></textarea>
-        </div>
-        <div class="sp-form-group">
-          <label>Enfermedades crónicas</label>
-          <textarea class="sp-textarea" [(ngModel)]="perfilForm.enfermedades_cronicas" placeholder="Ej: Diabetes, hipertensión..."></textarea>
-        </div>
         <div class="sp-form-actions">
           <button class="sp-btn-primary" (click)="submitPerfil()" [disabled]="isSubmittingPerfil">
-            {{ isSubmittingPerfil ? 'Guardando...' : 'Guardar cambios' }}
+            {{ isSubmittingPerfil ? 'Guardando...' : 'Guardar' }}
           </button>
+        </div>
+      </div>
+
+      <div class="sp-section">
+        <div class="sp-section-title">Información clínica</div>
+        <div class="sp-notice sp-notice-warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Estos campos solo pueden ser modificados por el personal médico.
+        </div>
+        <div class="sp-locked-field">
+          <div class="sp-locked-label">Alergias conocidas</div>
+          <div class="sp-locked-value" [class.muted]="!perfilMedico.alergias">
+            {{ perfilMedico.alergias || 'Sin registrar' }}
+          </div>
+        </div>
+        <div class="sp-locked-field">
+          <div class="sp-locked-label">Enfermedades crónicas</div>
+          <div class="sp-locked-value" [class.muted]="!perfilMedico.enfermedades_cronicas">
+            {{ perfilMedico.enfermedades_cronicas || 'Sin registrar' }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- TAB: seguridad -->
     <div *ngIf="activeTab === 'seguridad'">
-      <!-- Cambiar contraseña -->
       <div class="sp-section">
         <div class="sp-section-title">Cambiar contraseña</div>
         <div *ngIf="passwordMsg" class="sp-msg" [class.ok]="passwordMsg.includes('correctamente')" [class.err]="!passwordMsg.includes('correctamente')">{{ passwordMsg }}</div>
         <div class="sp-form-group"><label>Contraseña actual</label><input class="sp-input" type="password" [(ngModel)]="passwordForm.password_actual" placeholder="Tu contraseña actual" /></div>
-        <div class="sp-form-group"><label>Nueva contraseña</label><input class="sp-input" type="password" [(ngModel)]="passwordForm.password_nuevo" placeholder="Mínimo 8 caracteres" /></div>
+        <div class="sp-form-group">
+          <label>Nueva contraseña</label>
+          <input class="sp-input" type="password" [(ngModel)]="passwordForm.password_nuevo" placeholder="Mínimo 8 caracteres" />
+          <div class="sp-strength-wrap" *ngIf="passwordForm.password_nuevo">
+            <div class="sp-strength-bar">
+              <div class="sp-strength-fill" [ngClass]="strengthClass" [style.width.%]="strengthPercent"></div>
+            </div>
+            <span class="sp-strength-label" [ngClass]="strengthClass">{{ strengthLabel }}</span>
+          </div>
+          <ul class="sp-strength-hints" *ngIf="passwordForm.password_nuevo">
+            <li [class.ok]="passwordForm.password_nuevo.length >= 8">Mínimo 8 caracteres</li>
+            <li [class.ok]="hasUppercase">Mayúscula (A–Z)</li>
+            <li [class.ok]="hasNumber">Número (0–9)</li>
+            <li [class.ok]="hasSymbol">Símbolo (!@#...)</li>
+          </ul>
+        </div>
         <div class="sp-form-group"><label>Confirmar contraseña</label><input class="sp-input" type="password" [(ngModel)]="passwordForm.password_nuevo_confirmation" /></div>
         <div class="sp-form-actions">
           <button class="sp-btn-primary" (click)="submitCambiarPassword()"
@@ -146,7 +184,6 @@
         </div>
       </div>
 
-      <!-- Sesiones activas -->
       <div class="sp-section">
         <div class="sp-section-title">Sesiones activas</div>
         <div *ngIf="sesionMsg" class="sp-msg ok">{{ sesionMsg }}</div>
@@ -170,6 +207,58 @@
         <button *ngIf="mostrarTodasSesiones && sesiones.length > 5" class="sp-edit" (click)="mostrarTodasSesiones = false" style="margin-top:8px;display:block">
           Mostrar menos
         </button>
+      </div>
+    </div>
+
+    <!-- TAB: notificaciones -->
+    <div *ngIf="activeTab === 'notificaciones'">
+      <div class="sp-section">
+        <div class="sp-section-title">Citas médicas</div>
+        <div class="sp-toggle-row">
+          <div>
+            <div class="sp-toggle-label">Recordatorio por email</div>
+            <div class="sp-toggle-desc">Recibirás un correo 24h antes de tu cita</div>
+          </div>
+          <button class="sp-toggle" [class.on]="notifForm.email_citas" (click)="toggleNotif('email_citas')">
+            <span class="sp-toggle-thumb"></span>
+          </button>
+        </div>
+        <div class="sp-toggle-row">
+          <div>
+            <div class="sp-toggle-label">Recordatorio por notificación</div>
+            <div class="sp-toggle-desc">Disponible en la app móvil</div>
+          </div>
+          <button class="sp-toggle" [class.on]="notifForm.push_citas" (click)="toggleNotif('push_citas')">
+            <span class="sp-toggle-thumb"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sp-section">
+        <div class="sp-section-title">Recetas y resultados</div>
+        <div class="sp-toggle-row">
+          <div>
+            <div class="sp-toggle-label">Aviso de nueva receta</div>
+            <div class="sp-toggle-desc">Email cuando el médico expida una receta</div>
+          </div>
+          <button class="sp-toggle" [class.on]="notifForm.email_recetas" (click)="toggleNotif('email_recetas')">
+            <span class="sp-toggle-thumb"></span>
+          </button>
+        </div>
+        <div class="sp-toggle-row">
+          <div>
+            <div class="sp-toggle-label">Recordatorios de tratamiento</div>
+            <div class="sp-toggle-desc">Toma de medicamentos según indicaciones</div>
+          </div>
+          <button class="sp-toggle" [class.on]="notifForm.push_recordatorios" (click)="toggleNotif('push_recordatorios')">
+            <span class="sp-toggle-thumb"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sp-notice sp-notice-info" style="margin: 0 var(--yol-s-5) var(--yol-s-5)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Las preferencias se guardan en este dispositivo. Las notificaciones push requieren la app móvil Yoltec.
       </div>
     </div>
   </div>

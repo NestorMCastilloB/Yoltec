@@ -14,7 +14,7 @@ import { PerfilMedico, PerfilMedicoService, SesionActiva } from '../../../../../
   styleUrls: ['./sd-perfil.component.css'],
 })
 export class SdPerfilComponent implements OnInit, OnDestroy {
-  activeTab: 'personal' | 'medico' | 'seguridad' = 'personal';
+  activeTab: 'personal' | 'medico' | 'seguridad' | 'notificaciones' = 'personal';
 
   perfilMedico: PerfilMedico | null = null;
   isLoadingPerfil = false;
@@ -26,7 +26,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   isUploadingFoto = false;
   fotoMsg: string | null = null;
 
-  personalForm = { nombre: '', apellido: '', email: '', telefono: '', fecha_nacimiento: '' };
+  personalForm = { email: '', telefono: '' };
   isSubmittingPersonal = false;
   personalMsg: string | null = null;
   editandoPersonal = false;
@@ -40,6 +40,13 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   sesionMsg: string | null = null;
   mostrarTodasSesiones = false;
 
+  notifForm = {
+    email_citas: true,
+    push_citas: false,
+    email_recetas: true,
+    push_recordatorios: true
+  };
+
   private destroy$ = new Subject<void>();
 
   constructor(private perfilMedicoService: PerfilMedicoService) {}
@@ -47,6 +54,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadPerfil();
     this.loadSesiones();
+    this.loadNotifPrefs();
   }
 
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -78,11 +86,8 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   startEditPersonal(): void {
     if (!this.perfilMedico) return;
     this.personalForm = {
-      nombre: this.perfilMedico.nombre,
-      apellido: this.perfilMedico.apellido,
       email: this.perfilMedico.email,
-      telefono: this.perfilMedico.telefono ?? '',
-      fecha_nacimiento: this.perfilMedico.fecha_nacimiento ?? ''
+      telefono: this.perfilMedico.telefono ?? ''
     };
     this.editandoPersonal = true;
     this.personalMsg = null;
@@ -148,5 +153,43 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   get iniciales(): string {
     if (!this.perfilMedico) return '?';
     return `${this.perfilMedico.nombre[0]}${this.perfilMedico.apellido[0]}`;
+  }
+
+  get hasUppercase(): boolean { return /[A-Z]/.test(this.passwordForm.password_nuevo); }
+  get hasNumber():    boolean { return /[0-9]/.test(this.passwordForm.password_nuevo); }
+  get hasSymbol():    boolean { return /[^A-Za-z0-9]/.test(this.passwordForm.password_nuevo); }
+
+  get strengthPercent(): number {
+    const p = this.passwordForm.password_nuevo;
+    let score = 0;
+    if (p.length >= 8) score += 25;
+    if (this.hasUppercase) score += 25;
+    if (this.hasNumber)    score += 25;
+    if (this.hasSymbol)    score += 25;
+    return score;
+  }
+
+  get strengthClass(): string {
+    const s = this.strengthPercent;
+    if (s <= 25) return 'weak';
+    if (s <= 50) return 'fair';
+    if (s <= 75) return 'good';
+    return 'strong';
+  }
+
+  get strengthLabel(): string {
+    return { weak: 'Débil', fair: 'Regular', good: 'Buena', strong: 'Fuerte' }[this.strengthClass] ?? '';
+  }
+
+  toggleNotif(key: keyof typeof this.notifForm): void {
+    this.notifForm[key] = !this.notifForm[key];
+    localStorage.setItem('yoltec_notif', JSON.stringify(this.notifForm));
+  }
+
+  private loadNotifPrefs(): void {
+    const saved = localStorage.getItem('yoltec_notif');
+    if (saved) {
+      try { this.notifForm = { ...this.notifForm, ...JSON.parse(saved) }; } catch {}
+    }
   }
 }
