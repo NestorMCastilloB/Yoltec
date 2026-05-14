@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Inicio</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f5ee;
+    --danger:#dc2626;
+    --bg:#f8fafc; --surface:#fff;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#2d3144; --border-soft:#eef2f0;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:#0f172a}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px}
+  .phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative;display:flex;flex-direction:column;border:8px solid #111}
+  .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:5}
+  .statusbar{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;color:#fff;background:var(--primary);position:relative;z-index:1}
+
+  .hd{background:var(--primary);color:#fff;padding:8px 20px 22px;display:flex;align-items:flex-start;justify-content:space-between}
+  .hd h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+  .hd .sub{font-size:12.5px;color:rgba(255,255,255,.75);font-weight:500;margin-top:4px;text-transform:capitalize}
+  .bell{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  .scroll{flex:1;overflow-y:auto;padding:16px 16px 88px;display:flex;flex-direction:column;gap:20px}
+
+  /* Next appointment card */
+  .next{background:#1a1d27;border-radius:12px;padding:16px;border-left:3px solid var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.06)}
+  .badge{display:inline-flex;font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-50);padding:3px 9px;border-radius:999px;letter-spacing:.4px}
+  .next .date{font-size:15px;font-weight:600;margin-top:10px;text-transform:capitalize}
+  .next .time{font-size:22px;font-weight:700;color:var(--primary);margin-top:2px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .next .reason{font-size:13px;color:var(--text-muted);margin-top:4px}
+  .sep{height:1px;background:var(--border-soft);margin:14px -16px 0}
+  .cancel{display:block;text-align:right;font-size:13px;color:var(--danger);font-weight:500;margin-top:10px;padding:2px 0;text-decoration:none;cursor:pointer}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{background:#1a1d27;border-radius:10px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .stat .l{font-size:11.5px;color:var(--text-muted);font-weight:500;letter-spacing:.2px}
+  .stat .v{font-size:24px;font-weight:700;margin-top:4px;letter-spacing:-.5px;line-height:1}
+
+  .sec-t{font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:.6px;text-transform:uppercase;margin:0 0 12px}
+
+  .qg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .q{aspect-ratio:1;border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 1px 2px rgba(0,0,0,.05);cursor:pointer;transition:transform .12s}
+  .q:active{transform:scale(.98)}
+  .q .ic{width:34px;height:34px}
+  .q .lbl{font-size:14px;font-weight:600;color:var(--text);line-height:1.2}
+  .q1{background:#f0faf4}
+  .q1 .ic{color:var(--primary)}
+  .q2{background:#f0f4ff}
+  .q2 .ic{color:#3850c2}
+  .q3{background:#fffbf0}
+  .q3 .ic{color:#a86f00}
+  .q4{background:#f3f3f4}
+  .q4 .ic{color:#3b4252}
+
+  /* Bottom nav */
+  .nav{position:absolute;bottom:0;left:0;right:0;background:#1a1d27;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 6px 22px}
+  .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-subtle);font-size:10.5px;font-weight:500;text-decoration:none;cursor:pointer}
+  .nav a svg{width:22px;height:22px;stroke-width:1.8}
+  .nav a.active{color:var(--primary);font-weight:600}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:99px;background:#111;z-index:10}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar"><span>9:41</span><span style="font-size:12px">●●●●● ●</span></div>
+
+  <div class="hd">
+    <div>
+      <h1>Hola, Nestor</h1>
+      <div class="sub">Lunes, 11 de mayo 2026</div>
+    </div>
+    <div class="bell">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16v-5a6 6 0 1 0-12 0v5l-1.5 2h15L18 16Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <!-- Next appointment -->
+    <div class="next">
+      <span class="badge">CONFIRMADA</span>
+      <div class="date">Miércoles, 14 de mayo</div>
+      <div class="time">10:30 hrs</div>
+      <div class="reason">Control de presión</div>
+      <div class="sep"></div>
+      <a class="cancel">Cancelar cita</a>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="row">
+      <div class="stat"><div class="l">Citas este mes</div><div class="v">3</div></div>
+      <div class="stat"><div class="l">Última visita</div><div class="v">29 abr</div></div>
+    </div>
+
+    <!-- Quick access -->
+    <div>
+      <h3 class="sec-t">Acceso rápido</h3>
+      <div class="qg">
+        <div class="q q1">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+          <div class="lbl">Agendar cita</div>
+        </div>
+        <div class="q q2">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/><rect x="10" y="10" width="4" height="4"/></svg>
+          <div class="lbl">Pre-evaluación IA</div>
+        </div>
+        <div class="q q3">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          <div class="lbl">Mis recetas</div>
+        </div>
+        <div class="q q4">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <div class="lbl">Mi perfil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="nav">
+    <a class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>
+      Inicio
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+      Citas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>
+      IA
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+      Recetas
+    </a>
+    <a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      Perfil
+    </a>
+  </div>
+  <div class="home-ind"></div>
+</div>
+
+<style id="__dark-mode-overrides">
+:root{--bg:#0f1117 !important;--surface:#1a1d27 !important;--soft:#252836 !important;--text:#f9fafb !important;--text-muted:#9ca3af !important;--text-subtle:#6b7280 !important;--border:#2d3144 !important;--border-soft:#252836 !important;--border-strong:#3a4055 !important;--primary-50:#1e3a2a !important;--primary-100:#1e3a2a !important;--primary-300:#214d33 !important;--gray-bg:#252836 !important;--gray-text:#9ca3af !important;--danger-bg:#2a1518 !important;--danger-50:#2a1518 !important;--warn-50:#2d2410 !important;--info-50:#122738 !important;}
+html,body{background:#0f1117 !important;color:#f9fafb !important}
+.phone{background:#0f1117 !important;border-color:#000 !important;box-shadow:0 30px 80px rgba(0,0,0,.55) !important}
+.notch{background:#000 !important}
+.statusbar{color:#f9fafb !important}
+.card,.modal-wrap,.table-wrap,.tabs,.nav,.search-wrap,.header,.pag,.pagination,.summary,.summary .r,.empty,.field,.filters,.tab,.cal-nav button{background-color:#1a1d27 !important;color:#f9fafb !important}
+.sb,.side,.sidebar,aside{background:#0d2018 !important;color:#f9fafb !important}
+input,select,textarea{background:#252836 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+input::placeholder,textarea::placeholder{color:#6b7280 !important}
+table{background:#1a1d27 !important;color:#f9fafb !important}
+th{background:#0f1117 !important;color:#9ca3af !important;border-color:#2d3144 !important}
+td{border-color:#2d3144 !important;color:#f9fafb !important}
+tr:hover td{background:#252836 !important}
+hr,.sep{border-color:#2d3144 !important;background:#2d3144 !important}
+.btn.primary{background:#1a5c3a !important;color:#fff !important}
+.btn.secondary,.btn.outline,.btn.gray,.btn.ghost{background:#1a1d27 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+.av,.avatar{background:#1a5c3a !important;color:#fff !important}
+.card,.modal-wrap,.table-wrap{box-shadow:0 1px 3px rgba(0,0,0,.3) !important}
+</style>
+</body>
+</html>

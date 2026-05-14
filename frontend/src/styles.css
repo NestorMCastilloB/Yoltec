@@ -86,6 +86,31 @@
   --yol-duration-slow:   250ms;
 }
 
+/* Dark mode — token overrides globales */
+html.dark {
+  --yol-bg:              #0a1a10;
+  --yol-surface:         #111d14;
+  --yol-border:          #2a4030;
+
+  --yol-text:            #e8f5ee;
+  --yol-text-muted:      #5a7a6a;
+  --yol-text-subtle:     #3d5c4a;
+
+  --yol-primary-50:      #0f2d1a;
+
+  --yol-ok-surface:      #0f2d1a;
+  --yol-ok-text:         #86efac;
+  --yol-warn-surface:    #2d1800;
+  --yol-warn-text:       #f9a825;
+  --yol-cancel-surface:  #2d0a0a;
+  --yol-cancel-text:     #ef9a9a;
+  --yol-pending-surface: #1a2e25;
+  --yol-pending-text:    #86efac;
+
+  --yol-ia-soft:         #0d1b3e;
+  --yol-ia-text:         #93c5fd;
+}
+
 html, body {
   margin: 0;
   padding: 0;

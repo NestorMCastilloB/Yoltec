@@ -16,7 +16,7 @@
 
 /* ===== PANEL IZQUIERDO (oscuro) ===== */
 .welcome-panel {
-  background: var(--yol-text);
+  background: #1A2E25;
   position: relative;
   display: flex;
   align-items: center;

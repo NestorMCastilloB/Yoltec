@@ -181,7 +181,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
     return { weak: 'Débil', fair: 'Regular', good: 'Buena', strong: 'Fuerte' }[this.strengthClass] ?? '';
   }
 
-  toggleNotif(key: keyof typeof this.notifForm): void {
+  toggleNotif(key: 'email_citas' | 'push_citas' | 'email_recetas' | 'push_recordatorios'): void {
     this.notifForm[key] = !this.notifForm[key];
     localStorage.setItem('yoltec_notif', JSON.stringify(this.notifForm));
   }
