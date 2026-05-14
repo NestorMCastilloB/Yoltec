@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Inicio</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec;
+    --warn:#f59e0b; --warn-50:#fef3e0;
+    --danger:#dc2626; --danger-50:#fde8e8;
+    --bg:#f7f9f8; --surface:#ffffff;
+    --border:#2d3144; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body,#app{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar (same as agendar) */
+  .sb{width:232px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#1a1d27;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;letter-spacing:-.5px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px;letter-spacing:.3px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;text-decoration:none;cursor:pointer}
+  .sb a:hover{background:rgba(255,255,255,.05)}
+  .sb a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb a .ic{font-size:14px;width:16px;text-align:center;opacity:.95}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .header{padding:32px 36px 8px;background:#1a1d27;border-bottom:1px solid var(--border)}
+  .header .crumb{font-size:12px;color:var(--text-subtle);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+  .header h1{margin:0 0 6px;font-size:26px;font-weight:700;letter-spacing:-.5px}
+  .header h1 span{color:var(--primary)}
+  .header .date{font-size:13.5px;color:var(--text-muted);text-transform:capitalize}
+  .header .actions{position:absolute;right:36px;top:32px;display:flex;gap:10px}
+
+  .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+  .btn{padding:10px 16px;border-radius:7px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.secondary{background:#1a1d27;color:var(--primary);border:1px solid var(--primary)}
+  .btn.secondary:hover{background:var(--primary-50)}
+  .btn.ghost{color:var(--text-muted)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.danger-ghost{color:var(--danger);background:transparent;padding:6px 10px;font-size:12.5px;font-weight:600;border-radius:6px}
+  .btn.danger-ghost:hover{background:var(--danger-50)}
+  .btn.sm{padding:6px 12px;font-size:12.5px}
+  .btn .plus{font-size:16px;font-weight:300;line-height:1}
+
+  .content{padding:24px 36px 60px;flex:1}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px}
+  .kpi{background:#1a1d27;border:1px solid var(--border);border-radius:10px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;position:relative;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+  .kpi .lbl{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+  .kpi .lbl .ic{width:24px;height:24px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px}
+  .kpi .v{font-size:34px;font-weight:700;line-height:1;letter-spacing:-.8px;color:var(--text)}
+  .kpi .v small{font-size:14px;color:var(--text-muted);font-weight:500;margin-left:6px}
+  .kpi .sub{font-size:12.5px;color:var(--text-subtle)}
+  .kpi .sub b{color:var(--text-muted);font-weight:600}
+  .kpi.accent{border-left:3px solid var(--primary)}
+
+  /* Sections */
+  .section{margin-bottom:28px}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .section-head h2{margin:0;font-size:17px;font-weight:600;letter-spacing:-.2px}
+  .section-head .link{font-size:12.5px;color:var(--primary);font-weight:600}
+  .section-head .link:hover{text-decoration:underline}
+
+  .card{background:#1a1d27;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;padding:13px 22px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border)}
+  td{padding:14px 22px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg)}
+  .date-cell{display:flex;align-items:center;gap:11px}
+  .date-cell .d{flex-shrink:0;width:42px;text-align:center;background:var(--primary-50);border-radius:7px;padding:6px 0;color:var(--primary)}
+  .date-cell .d b{display:block;font-size:16px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .date-cell .d span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+  .date-cell .dow{font-size:11.5px;color:var(--text-subtle);text-transform:capitalize}
+  .date-cell .dow b{display:block;color:var(--text);font-size:13px;font-weight:500;text-transform:capitalize}
+  .hr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text)}
+  .motivo{color:var(--text-muted)}
+  .motivo b{display:block;color:var(--text);font-weight:500;font-size:13.5px;margin-bottom:2px}
+  .motivo span{font-size:12px;color:var(--text-subtle)}
+  .b{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;align-items:center;gap:5px}
+  .b.ok{background:var(--primary-50);color:var(--primary)}
+  .b.warn{background:var(--warn-50);color:var(--warn)}
+  .b .pulse{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  /* Empty state */
+  .empty{padding:48px 32px;text-align:center}
+  .empty .ic{width:56px;height:56px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+  .empty h3{margin:0 0 6px;font-size:16px;font-weight:600}
+  .empty p{margin:0 0 18px;font-size:13.5px;color:var(--text-muted);max-width:380px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+  /* Two-column lower: tips + recetas mini */
+  .row2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+  .panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .panel-head h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.1px}
+  .recetas-list{padding:6px 0}
+  .receta-row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border)}
+  .receta-row:last-child{border-bottom:none}
+  .receta-row .ic{width:36px;height:36px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .receta-row .info{flex:1;min-width:0}
+  .receta-row .info b{display:block;font-size:13.5px;font-weight:600;margin-bottom:2px}
+  .receta-row .info span{font-size:12px;color:var(--text-subtle)}
+  .receta-row .days{font-size:12px;color:var(--text-muted);font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+  .receta-row .days b{display:block;color:var(--primary);font-weight:700;font-size:13px}
+
+  /* Tip card */
+  .tip{padding:20px 22px;display:flex;gap:16px;align-items:flex-start}
+  .tip .ic-big{width:44px;height:44px;border-radius:10px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .tip h4{margin:0 0 6px;font-size:14.5px;font-weight:600}
+  .tip p{margin:0 0 12px;font-size:13px;color:var(--text-muted);line-height:1.55}
+  .tip .actions{display:flex;gap:8px}
+
+  /* Floating CTA */
+  .fab{position:fixed;right:32px;bottom:32px;background:var(--primary);color:#fff;border-radius:999px;padding:14px 22px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(26,92,58,.32);cursor:pointer;z-index:50;transition:all .15s}
+  .fab:hover{background:var(--primary-600);box-shadow:0 10px 28px rgba(26,92,58,.4);transform:translateY(-1px)}
+  .fab .plus{font-size:18px;font-weight:300;line-height:1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DOWS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const TODAY = new Date(2026,4,11); // 11 may 2026 — lunes
+
+function Sidebar(){
+  const items=[
+    ['inicio','Inicio','▦',true],
+    ['citas','Mis citas','⊞'],
+    ['ia','Pre-evaluación IA','◔'],
+    ['rec','Recetas','℞'],
+    ['perf','Mi perfil','◉'],
+  ];
+  return (
+    <aside className="sb">
+      <div className="brand">
+        <div className="y">Y</div>
+        <div><b>Yoltec</b><span>Servicio médico</span></div>
+      </div>
+      <nav>{items.map(([k,l,i,a])=>(<a key={k} className={a?'active':''}><span className="ic">{i}</span>{l}</a>))}</nav>
+      <div className="user">
+        <div className="av">AP</div>
+        <div><b>Ana Pérez García</b><span>22690495</span></div>
+      </div>
+    </aside>
+  );
+}
+
+function App({empty}){
+  const dateStr = `${DOWS[TODAY.getDay()]} ${TODAY.getDate()} de ${MONTHS[TODAY.getMonth()]} de ${TODAY.getFullYear()}`;
+  const citas=[
+    {d:13,m:'MAY',dow:'miércoles',hr:'10:30',motivo:'Control de presión',meta:'Dr. Omar Salas · Consultorio 2',estado:'ok',label:'Confirmada'},
+    {d:18,m:'MAY',dow:'lunes',hr:'09:15',motivo:'Revisión nutricional',meta:'Dra. Daniela Cruz · Consultorio 1',estado:'warn',label:'Pendiente'},
+    {d:25,m:'MAY',dow:'lunes',hr:'13:00',motivo:'Seguimiento migraña',meta:'Dr. Omar Salas · Consultorio 2',estado:'ok',label:'Confirmada'},
+  ];
+  const showEmpty = !!empty;
+
+  return (
+    <div className="app">
+      <Sidebar/>
+      <div className="main">
+        <div className="header">
+          <div className="header-row">
+            <div>
+              <div className="crumb">Inicio</div>
+              <h1>Bienvenida, <span>Ana</span></h1>
+              <div className="date">{dateStr}</div>
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button className="btn ghost">Notificaciones · 2</button>
+              <button className="btn primary"><span className="plus">＋</span>Nueva cita</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="content">
+          <div className="kpis">
+            <div className="kpi accent">
+              <div className="lbl"><span className="ic">⊞</span>Próximas citas</div>
+              <div className="v">3<small>esta semana</small></div>
+              <div className="sub">Próxima: <b>miércoles 13 may, 10:30</b></div>
+            </div>
+            <div className="kpi">
+              <div className="lbl"><span className="ic">⚲</span>Última visita</div>
+              <div className="v">28<small>abr 2026</small></div>
+              <div className="sub">Faringitis aguda · <b>Atendida</b></div>
+            </div>
+            <div className="kpi">
+              <div className="lbl"><span className="ic">℞</span>Recetas activas</div>
+              <div className="v">2<small>vigentes</small></div>
+              <div className="sub">Próxima a vencer en <b>3 días</b></div>
+            </div>
+          </div>
+
+          <div className="section">
+            <div className="section-head">
+              <h2>Próximas citas</h2>
+              {!showEmpty && <a className="link">Ver todas →</a>}
+            </div>
+            <div className="card">
+              {showEmpty ? (
+                <div className="empty">
+                  <div className="ic">⊞</div>
+                  <h3>No tienes citas agendadas</h3>
+                  <p>Cuando agendes una consulta en el servicio médico aparecerá aquí con su fecha, hora y motivo.</p>
+                  <button className="btn primary"><span className="plus">＋</span>Agendar cita</button>
+                </div>
+              ) : (
+                <table>
+                  <thead><tr>
+                    <th style={{width:'26%'}}>Fecha</th>
+                    <th style={{width:'10%'}}>Hora</th>
+                    <th>Motivo</th>
+                    <th style={{width:'14%'}}>Estatus</th>
+                    <th style={{width:'14%',textAlign:'right'}}></th>
+                  </tr></thead>
+                  <tbody>
+                    {citas.map((c,i)=>(
+                      <tr key={i}>
+                        <td>
+                          <div className="date-cell">
+                            <div className="d"><b>{c.d}</b><span>{c.m}</span></div>
+                            <div className="dow"><b>{c.dow}</b>2026</div>
+                          </div>
+                        </td>
+                        <td className="hr">{c.hr}</td>
+                        <td className="motivo"><b>{c.motivo}</b><span>{c.meta}</span></td>
+                        <td><span className={'b '+c.estado}><span className="pulse"></span>{c.label}</span></td>
+                        <td style={{textAlign:'right'}}><button className="btn danger-ghost">Cancelar</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          <div className="section">
+            <div className="row2">
+              <div className="card">
+                <div className="panel-head"><h3>Tu salud esta semana</h3></div>
+                <div className="tip">
+                  <div className="ic-big">♥</div>
+                  <div>
+                    <h4>Recordatorio: control de presión</h4>
+                    <p>Tu última toma fue hace 18 días. El doctor recomendó un control quincenal. Puedes agendar una cita rápida de 15 minutos.</p>
+                    <div className="actions">
+                      <button className="btn primary sm"><span className="plus">＋</span>Agendar control</button>
+                      <button className="btn ghost sm">Recordarme después</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="card">
+                <div className="panel-head">
+                  <h3>Recetas activas</h3>
+                  <a className="link">Ver todas →</a>
+                </div>
+                <div className="recetas-list">
+                  <div className="receta-row">
+                    <div className="ic">℞</div>
+                    <div className="info"><b>Paracetamol 500 mg</b><span>Cada 8 hrs · 5 días</span></div>
+                    <div className="days"><b>3 días</b>restantes</div>
+                  </div>
+                  <div className="receta-row">
+                    <div className="ic">℞</div>
+                    <div className="info"><b>Amoxicilina 500 mg</b><span>Cada 12 hrs · 7 días</span></div>
+                    <div className="days"><b>5 días</b>restantes</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button className="fab"><span className="plus">＋</span>Nueva cita</button>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+
+<style id="__dark-mode-overrides">
+:root{--bg:#0f1117 !important;--surface:#1a1d27 !important;--soft:#252836 !important;--text:#f9fafb !important;--text-muted:#9ca3af !important;--text-subtle:#6b7280 !important;--border:#2d3144 !important;--border-soft:#252836 !important;--border-strong:#3a4055 !important;--primary-50:#1e3a2a !important;--primary-100:#1e3a2a !important;--primary-300:#214d33 !important;--gray-bg:#252836 !important;--gray-text:#9ca3af !important;--danger-bg:#2a1518 !important;--danger-50:#2a1518 !important;--warn-50:#2d2410 !important;--info-50:#122738 !important;}
+html,body{background:#0f1117 !important;color:#f9fafb !important}
+.phone{background:#0f1117 !important;border-color:#000 !important;box-shadow:0 30px 80px rgba(0,0,0,.55) !important}
+.notch{background:#000 !important}
+.statusbar{color:#f9fafb !important}
+.card,.modal-wrap,.table-wrap,.tabs,.nav,.search-wrap,.header,.pag,.pagination,.summary,.summary .r,.empty,.field,.filters,.tab,.cal-nav button{background-color:#1a1d27 !important;color:#f9fafb !important}
+.sb,.side,.sidebar,aside{background:#0d2018 !important;color:#f9fafb !important}
+input,select,textarea{background:#252836 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+input::placeholder,textarea::placeholder{color:#6b7280 !important}
+table{background:#1a1d27 !important;color:#f9fafb !important}
+th{background:#0f1117 !important;color:#9ca3af !important;border-color:#2d3144 !important}
+td{border-color:#2d3144 !important;color:#f9fafb !important}
+tr:hover td{background:#252836 !important}
+hr,.sep{border-color:#2d3144 !important;background:#2d3144 !important}
+.btn.primary{background:#1a5c3a !important;color:#fff !important}
+.btn.secondary,.btn.outline,.btn.gray,.btn.ghost{background:#1a1d27 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+.av,.avatar{background:#1a5c3a !important;color:#fff !important}
+.card,.modal-wrap,.table-wrap{box-shadow:0 1px 3px rgba(0,0,0,.3) !important}
+</style>
+</body>
+</html>

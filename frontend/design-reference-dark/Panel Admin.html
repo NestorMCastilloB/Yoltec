@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec Admin · Panel</title>
+<link rel="icon" href="assets/favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-300:#3a7d5c; --primary-50:#e8f5ee;
+    --bg:#f8fafc; --surface:#fff;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#2d3144; --border-soft:#eef2f0;
+    --blue-bg:#dbeafe; --blue:#1d4ed8;
+    --danger:#dc2626; --danger-bg:#fef2f2;
+    --gray-dark:#374151; --gray-dark-bg:#2d3144;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text)}
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .side{width:220px;background:var(--primary);color:#fff;display:flex;flex-direction:column;flex-shrink:0;padding:22px 0}
+  .side .brand{display:flex;align-items:center;gap:10px;padding:0 22px 24px;font-weight:700;font-size:16px;letter-spacing:-.2px}
+  .side .brand .y{width:28px;height:28px;border-radius:7px;background:#1a1d27;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .side nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;flex:1}
+  .side nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;border-radius:8px;text-decoration:none;cursor:pointer}
+  .side nav a svg{width:18px;height:18px;stroke-width:1.8;flex-shrink:0;opacity:.9}
+  .side nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side nav a.active{background:var(--primary-300);color:#fff;font-weight:600}
+  .side .user{padding:14px 16px;border-top:1px solid rgba(255,255,255,.12);margin:12px 12px 0;display:flex;align-items:center;gap:10px}
+  .side .user .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px}
+  .side .user .nm{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+  .side .user .rl{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+
+  /* Main */
+  .main{flex:1;padding:28px 32px 48px;min-width:0}
+  .hd{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px}
+  .hd h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .hd .dt{font-size:13px;color:var(--text-muted);text-transform:capitalize;font-weight:500}
+
+  /* Stat row */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+  .stat{background:#1a1d27;border-radius:12px;padding:18px 20px;box-shadow:0 1px 2px rgba(15,23,42,.04);border:1px solid var(--border-soft)}
+  .stat .l{font-size:12px;font-weight:500;color:var(--text-muted);letter-spacing:.1px}
+  .stat .v{font-size:28px;font-weight:700;margin-top:8px;letter-spacing:-.6px;line-height:1}
+  .stat .sub{font-size:12px;color:var(--text-subtle);margin-top:6px;font-weight:500}
+
+  /* Section card */
+  .sec{background:#1a1d27;border-radius:12px;border:1px solid var(--border-soft);box-shadow:0 1px 2px rgba(15,23,42,.04);margin-bottom:20px}
+  .sec-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border-soft)}
+  .sec-hd h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.2px}
+  .sec-hd .sub{font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500}
+  .btn-pri{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;font:600 12.5px 'Inter',sans-serif;padding:8px 14px;border:0;border-radius:7px;cursor:pointer}
+  .btn-pri:hover{background:var(--primary-600)}
+  .btn-out{display:inline-flex;align-items:center;gap:6px;background:#1a1d27;color:var(--primary);font:600 12.5px 'Inter',sans-serif;padding:7px 14px;border:1px solid var(--primary);border-radius:7px;cursor:pointer}
+  .btn-out:hover{background:var(--primary-50)}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:11px 20px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;background:#fafbfb;border-bottom:1px solid var(--border-soft)}
+  td{padding:13px 20px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .uc{display:flex;align-items:center;gap:10px}
+  .uc .av{width:30px;height:30px;border-radius:50%;background:#2d3144;color:#374151;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11.5px}
+  .uc .nm{font-weight:600;color:var(--text);font-size:13px}
+  .em{color:var(--text-muted);font-size:12.5px}
+  .bd{display:inline-flex;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;letter-spacing:.2px}
+  .bd-al{background:var(--blue-bg);color:var(--blue)}
+  .bd-dc{background:var(--primary-50);color:var(--primary)}
+  .bd-ad{background:var(--gray-dark-bg);color:var(--gray-dark)}
+  .bd-ac{background:var(--primary-50);color:var(--primary)}
+  .bd-su{background:var(--danger-bg);color:var(--danger)}
+  .ls{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .acts{display:flex;gap:14px}
+  .acts a{font-size:12.5px;font-weight:500;color:var(--primary);cursor:pointer;text-decoration:none}
+  .acts a.warn{color:var(--danger)}
+  .acts a:hover{text-decoration:underline}
+
+  /* Days list */
+  .days{padding:6px 0}
+  .day{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border-soft)}
+  .day:last-child{border-bottom:0}
+  .day .dn{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+  .day .dn .mo{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;display:block;letter-spacing:.4px;margin-top:1px}
+  .day .nm{font-size:13.5px;font-weight:500;color:var(--text)}
+  .day .ty{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:5px}
+  .ty-f{background:#fef3c7;color:#92400e}
+  .ty-r{background:#dbeafe;color:#1d4ed8}
+  .ty-v{background:var(--primary-50);color:var(--primary)}
+  .sec-ft{padding:14px 20px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end}
+
+  /* Audit */
+  .audit{padding:4px 0}
+  .ar{display:grid;grid-template-columns:140px 180px 1fr;gap:16px;padding:11px 20px;border-bottom:1px solid var(--border-soft);font-size:13px;align-items:center}
+  .ar:last-child{border-bottom:0}
+  .ts{font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;font-weight:500}
+  .au{font-weight:600;color:var(--text);font-size:12.5px}
+  .au .role{font-size:11px;font-weight:500;color:var(--text-muted);display:block;margin-top:1px}
+  .act{font-size:12.5px;color:var(--text)}
+  .act .em{color:var(--primary);font-weight:600}
+  .lk{display:inline-flex;font-size:12.5px;font-weight:600;color:var(--primary);padding:12px 20px;cursor:pointer;text-decoration:none;align-items:center;gap:5px}
+  .lk:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Panel
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="3"/><path d="M16 14c2.7.2 5 2.5 5 5.5"/></svg>
+        Usuarios
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>
+        Días especiales
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>
+        Auditoría
+      </a>
+    </nav>
+    <div class="user">
+      <div class="av">MA</div>
+      <div>
+        <div class="nm">Marco Admin</div>
+        <div class="rl">Administrador</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="hd">
+      <h1>Panel de administración</h1>
+      <div class="dt">Lunes, 11 de mayo 2026</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="l">Total usuarios</div>
+        <div class="v">1,247</div>
+        <div class="sub">1,198 alumnos · 49 doctores</div>
+      </div>
+      <div class="stat">
+        <div class="l">Citas hoy</div>
+        <div class="v">38</div>
+        <div class="sub">14 completadas · 24 pendientes</div>
+      </div>
+      <div class="stat">
+        <div class="l">Alumnos activos</div>
+        <div class="v">892</div>
+        <div class="sub">Últimos 30 días</div>
+      </div>
+      <div class="stat">
+        <div class="l">Último acceso</div>
+        <div class="v">11:42</div>
+        <div class="sub">dr.ramirez@tecvm.mx</div>
+      </div>
+    </div>
+
+    <!-- Users table -->
+    <section class="sec">
+      <div class="sec-hd">
+        <div>
+          <h2>Gestión de usuarios</h2>
+          <div class="sub">Alumnos, doctores y personal administrativo del sistema</div>
+        </div>
+        <button class="btn-pri">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo usuario
+        </button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estatus</th><th>Última sesión</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="uc"><div class="av">NV</div><div class="nm">Nestor Valles</div></div></td>
+            <td class="em">22690495@tecvm.mx</td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Hoy, 10:14</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><div class="uc"><div class="av" style="background:#e8f5ee;color:#1a5c3a">LR</div><div class="nm">Dra. Laura Ramírez</div></div></td>
+            <td class="em">dr.ramirez@tecvm.mx</td>
+            <td><span class="bd bd-dc">Doctor</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Hoy, 11:42</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+          <tr>
+            <td><div class="uc"><div class="av">SO</div><div class="nm">Sofía Ortega</div></div></td>
+            <td class="em">22810123@tecvm.mx</td>
+            <td><span class="bd bd-al">Alumno</span></td>
+            <td><span class="bd bd-su">Suspendido</span></td>
+            <td class="ls">02 may, 16:08</td>
+            <td><div class="acts"><a>Editar</a><a>Reactivar</a></div></td>
+          </tr>
+          <tr>
+            <td><div class="uc"><div class="av" style="background:#e8f5ee;color:#1a5c3a">JM</div><div class="nm">Dr. Javier Mendoza</div></div></td>
+            <td class="em">dr.mendoza@tecvm.mx</td>
+            <td><span class="bd bd-dc">Doctor</span></td>
+            <td><span class="bd bd-ac">Activo</span></td>
+            <td class="ls">Ayer, 18:22</td>
+            <td><div class="acts"><a>Editar</a><a class="warn">Suspender</a></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Two-column row -->
+    <section class="sec">
+      <div class="sec-hd">
+        <div>
+          <h2>Días especiales próximos</h2>
+          <div class="sub">Festivos, horarios reducidos y periodos vacacionales</div>
+        </div>
+      </div>
+      <div class="days">
+        <div class="day">
+          <div class="dn">15<span class="mo">May 2026</span></div>
+          <div class="nm">Día del Maestro</div>
+          <span class="ty ty-f">Festivo</span>
+        </div>
+        <div class="day">
+          <div class="dn">22<span class="mo">May 2026</span></div>
+          <div class="nm">Horario reducido — Junta académica</div>
+          <span class="ty ty-r">Reducido</span>
+        </div>
+        <div class="day">
+          <div class="dn">15<span class="mo">Jun – 28 Jul</span></div>
+          <div class="nm">Periodo vacacional de verano</div>
+          <span class="ty ty-v">Vacaciones</span>
+        </div>
+      </div>
+      <div class="sec-ft">
+        <button class="btn-out">Gestionar calendario</button>
+      </div>
+    </section>
+
+    <!-- Audit -->
+    <section class="sec">
+      <div class="sec-hd">
+        <div>
+          <h2>Bitácora de auditoría reciente</h2>
+          <div class="sub">Acciones registradas en las últimas horas</div>
+        </div>
+      </div>
+      <div class="audit">
+        <div class="ar">
+          <span class="ts">Hoy, 11:42</span>
+          <div class="au">Dra. Laura Ramírez<span class="role">Doctor</span></div>
+          <div class="act">Inició sesión desde <span class="em">192.168.10.34</span></div>
+        </div>
+        <div class="ar">
+          <span class="ts">Hoy, 11:18</span>
+          <div class="au">Marco Admin<span class="role">Administrador</span></div>
+          <div class="act">Suspendió cuenta de alumno <span class="em">Sofía Ortega</span></div>
+        </div>
+        <div class="ar">
+          <span class="ts">Hoy, 10:54</span>
+          <div class="au">Dr. Javier Mendoza<span class="role">Doctor</span></div>
+          <div class="act">Modificó receta del expediente <span class="em">#28104</span></div>
+        </div>
+        <div class="ar">
+          <span class="ts">Hoy, 10:14</span>
+          <div class="au">Nestor Valles<span class="role">Alumno</span></div>
+          <div class="act">Agendó cita para el <span class="em">14 de mayo, 10:30</span></div>
+        </div>
+      </div>
+      <a class="lk">Ver bitácora completa
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </section>
+  </main>
+</div>
+
+<style id="__dark-mode-overrides">
+:root{--bg:#0f1117 !important;--surface:#1a1d27 !important;--soft:#252836 !important;--text:#f9fafb !important;--text-muted:#9ca3af !important;--text-subtle:#6b7280 !important;--border:#2d3144 !important;--border-soft:#252836 !important;--border-strong:#3a4055 !important;--primary-50:#1e3a2a !important;--primary-100:#1e3a2a !important;--primary-300:#214d33 !important;--gray-bg:#252836 !important;--gray-text:#9ca3af !important;--danger-bg:#2a1518 !important;--danger-50:#2a1518 !important;--warn-50:#2d2410 !important;--info-50:#122738 !important;}
+html,body{background:#0f1117 !important;color:#f9fafb !important}
+.phone{background:#0f1117 !important;border-color:#000 !important;box-shadow:0 30px 80px rgba(0,0,0,.55) !important}
+.notch{background:#000 !important}
+.statusbar{color:#f9fafb !important}
+.card,.modal-wrap,.table-wrap,.tabs,.nav,.search-wrap,.header,.pag,.pagination,.summary,.summary .r,.empty,.field,.filters,.tab,.cal-nav button{background-color:#1a1d27 !important;color:#f9fafb !important}
+.sb,.side,.sidebar,aside{background:#0d2018 !important;color:#f9fafb !important}
+input,select,textarea{background:#252836 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+input::placeholder,textarea::placeholder{color:#6b7280 !important}
+table{background:#1a1d27 !important;color:#f9fafb !important}
+th{background:#0f1117 !important;color:#9ca3af !important;border-color:#2d3144 !important}
+td{border-color:#2d3144 !important;color:#f9fafb !important}
+tr:hover td{background:#252836 !important}
+hr,.sep{border-color:#2d3144 !important;background:#2d3144 !important}
+.btn.primary{background:#1a5c3a !important;color:#fff !important}
+.btn.secondary,.btn.outline,.btn.gray,.btn.ghost{background:#1a1d27 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+.av,.avatar{background:#1a5c3a !important;color:#fff !important}
+.card,.modal-wrap,.table-wrap{box-shadow:0 1px 3px rgba(0,0,0,.3) !important}
+</style>
+</body>
+</html>
