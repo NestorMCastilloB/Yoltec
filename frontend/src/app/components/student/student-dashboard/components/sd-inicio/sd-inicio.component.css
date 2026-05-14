@@ -304,3 +304,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Dark mode ──────────────────────────────────── */
+:host-context(.dark) .kpi-card              { background: #1a2e25; border-color: #2a4030; }
+:host-context(.dark) .kpi-card.highlighted  { border-color: #166534; }
+:host-context(.dark) .kpi-icon              { background: #0f2d1a; color: #86efac; }
+:host-context(.dark) .kpi-value             { color: #e8f5ee; }
+:host-context(.dark) .kpi-label             { color: #5a7a6a; }
+:host-context(.dark) .section-card          { background: #1a2e25; border-color: #2a4030; }
+:host-context(.dark) .section-title         { color: #e8f5ee; }
+:host-context(.dark) .citas-table th        { background: #0f1a15; color: #5a7a6a; border-color: #2a4030; }
+:host-context(.dark) .citas-table td        { border-color: #2a4030; color: #e8f5ee; }
+:host-context(.dark) .citas-table tr:hover td { background: #0f2d1a; }
+:host-context(.dark) .date-day              { background: #0f2d1a; color: #86efac; }
+:host-context(.dark) .empty-row td,
+:host-context(.dark) .no-data-msg           { color: #5a7a6a; }
+:host-context(.dark) .receta-item           { border-color: #2a4030; }
+:host-context(.dark) .receta-med            { color: #e8f5ee; }
+:host-context(.dark) .receta-date,
+:host-context(.dark) .receta-doctor         { color: #5a7a6a; }

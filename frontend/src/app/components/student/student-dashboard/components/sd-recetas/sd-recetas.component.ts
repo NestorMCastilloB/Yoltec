@@ -18,6 +18,7 @@ export class SdRecetasComponent implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
   busqueda = '';
+  recetaDetalle: Receta | null = null;
 
   get recetasFiltradas(): Receta[] {
     const q = this.busqueda.toLowerCase().trim();
@@ -54,6 +55,9 @@ export class SdRecetasComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$), catchError(() => { this.error = 'Error al cargar recetas.'; return of([]); }), finalize(() => this.isLoading = false))
       .subscribe((data: Receta[]) => this.recetas = data);
   }
+
+  abrirDetalle(r: Receta): void { this.recetaDetalle = r; }
+  cerrarDetalle(): void { this.recetaDetalle = null; }
 
   formatFecha(fecha: string): string {
     const d = new Date(fecha);

@@ -288,3 +288,11 @@
     padding: 16px 20px 80px;
   }
 }
+
+/* ── Dark mode ──────────────────────────────────── */
+:host-context(.dark) .sd-app    { background: #0a1a10; }
+:host-context(.dark) .sd-main   { background: #0a1a10; }
+:host-context(.dark) .sd-header { background: #111d14; border-color: #1e3a22; }
+:host-context(.dark) .sd-crumb  { color: #5a7a6a; }
+:host-context(.dark) .sd-title  { color: #e8f5ee; }
+:host-context(.dark) .sd-title span { color: #86efac; }

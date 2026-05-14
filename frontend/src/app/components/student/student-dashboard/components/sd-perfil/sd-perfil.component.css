@@ -293,3 +293,199 @@
 @media (max-width: 900px) {
   .sp-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Campos bloqueados ──────────────────────────── */
+.sp-row-locked {
+  opacity: .75;
+  cursor: default;
+}
+
+.sp-lock-icon {
+  display: flex;
+  align-items: center;
+  color: var(--yol-text-muted);
+}
+
+.sp-lock-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.sp-locked-field {
+  background: var(--yol-bg);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  padding: var(--yol-s-3) var(--yol-s-4);
+  margin-bottom: var(--yol-s-2);
+}
+
+.sp-locked-label {
+  font-size: var(--yol-fs-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--yol-text-muted);
+  margin-bottom: 4px;
+}
+
+.sp-locked-value {
+  font-size: var(--yol-fs-sm);
+  color: var(--yol-text);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.sp-locked-value.muted { color: var(--yol-text-muted); font-style: italic; }
+
+/* ── Notices ────────────────────────────────────── */
+.sp-notice {
+  display: flex;
+  gap: var(--yol-s-2);
+  align-items: flex-start;
+  font-size: var(--yol-fs-sm);
+  line-height: 1.5;
+  padding: var(--yol-s-3) var(--yol-s-4);
+  border-radius: var(--yol-r-md);
+  margin-bottom: var(--yol-s-3);
+  border: 1px solid transparent;
+}
+
+.sp-notice svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.sp-notice-info {
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
+  border-color: var(--yol-border);
+}
+
+.sp-notice-warn {
+  background: var(--yol-warn-surface);
+  color: var(--yol-warn);
+  border-color: #fde68a;
+}
+
+/* ── Password strength ──────────────────────────── */
+.sp-strength-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--yol-s-2);
+  margin-top: var(--yol-s-2);
+}
+
+.sp-strength-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--yol-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sp-strength-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .3s ease, background .3s ease;
+}
+
+.sp-strength-fill.weak   { background: var(--yol-danger); }
+.sp-strength-fill.fair   { background: var(--yol-warn); }
+.sp-strength-fill.good   { background: #22c55e; }
+.sp-strength-fill.strong { background: var(--yol-primary); }
+
+.sp-strength-label {
+  font-size: var(--yol-fs-label);
+  font-weight: 700;
+  min-width: 48px;
+}
+.sp-strength-label.weak   { color: var(--yol-danger); }
+.sp-strength-label.fair   { color: var(--yol-warn); }
+.sp-strength-label.good   { color: #22c55e; }
+.sp-strength-label.strong { color: var(--yol-primary); }
+
+.sp-strength-hints {
+  list-style: none;
+  padding: 0;
+  margin: var(--yol-s-2) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.sp-strength-hints li {
+  font-size: var(--yol-fs-label);
+  color: var(--yol-text-muted);
+  padding-left: 14px;
+  position: relative;
+}
+
+.sp-strength-hints li::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  font-size: 9px;
+  top: 2px;
+  color: var(--yol-text-muted);
+}
+
+.sp-strength-hints li.ok { color: var(--yol-primary); font-weight: 600; }
+.sp-strength-hints li.ok::before { content: '●'; color: var(--yol-primary); }
+
+/* ── Toggles (notificaciones) ───────────────────── */
+.sp-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--yol-s-3) 0;
+  border-bottom: 1px solid var(--yol-border);
+  gap: var(--yol-s-4);
+}
+
+.sp-toggle-row:last-of-type { border-bottom: none; }
+
+.sp-toggle-label {
+  font-size: var(--yol-fs-sm);
+  font-weight: 600;
+  color: var(--yol-text);
+}
+
+.sp-toggle-desc {
+  font-size: var(--yol-fs-label);
+  color: var(--yol-text-muted);
+  margin-top: 2px;
+}
+
+.sp-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: var(--yol-border);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--yol-duration-normal);
+}
+
+.sp-toggle.on { background: var(--yol-primary); }
+
+.sp-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--yol-duration-normal);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+
+.sp-toggle.on .sp-toggle-thumb { transform: translateX(20px); }
+
+/* ── Dark mode additions ────────────────────────── */
+:host-context(.dark) .sp-locked-field { background: #0f1a15; border-color: #2a4030; }
+:host-context(.dark) .sp-notice-info  { background: #0f2d1a; border-color: #166534; color: #86efac; }
+:host-context(.dark) .sp-notice-warn  { background: #2d2310; border-color: #92400e; color: #fcd34d; }
+:host-context(.dark) .sp-strength-bar { background: #2a4030; }
+:host-context(.dark) .sp-toggle       { background: #2a4030; }
+:host-context(.dark) .sp-toggle-row   { border-color: #2a4030; }
