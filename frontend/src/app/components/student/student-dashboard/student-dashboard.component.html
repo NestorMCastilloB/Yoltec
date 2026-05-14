@@ -52,7 +52,6 @@
           <h1 class="sd-title" *ngIf="activeSection === 'recetas'">Mis recetas</h1>
           <h1 class="sd-title" *ngIf="activeSection === 'perfil'">Mi perfil</h1>
           <h1 class="sd-title" *ngIf="activeSection === 'pre-evaluacion'">Pre-evaluación IA</h1>
-          <h1 class="sd-title" *ngIf="activeSection === 'historial'">Historial</h1>
         </div>
         <div class="sd-header-actions">
           <button class="sd-btn-ghost"
@@ -69,18 +68,17 @@
 
     <!-- Contenido -->
     <div class="sd-content">
-      <app-student-dashboard-inicio
+      <app-sd-inicio
         *ngIf="activeSection === 'inicio'"
         (navegarACitas)="setActiveSection('citas')"
         (navegarAAgendar)="setActiveSection('citas')"
         (navegarARecetas)="setActiveSection('recetas')">
-      </app-student-dashboard-inicio>
+      </app-sd-inicio>
 
       <app-mis-citas *ngIf="activeSection === 'citas'"></app-mis-citas>
       <app-sd-recetas *ngIf="activeSection === 'recetas'"></app-sd-recetas>
       <app-sd-perfil *ngIf="activeSection === 'perfil'"></app-sd-perfil>
       <app-pre-evaluacion-ia *ngIf="activeSection === 'pre-evaluacion'"></app-pre-evaluacion-ia>
-      <app-sd-historial *ngIf="activeSection === 'historial'"></app-sd-historial>
     </div>
   </div>
 

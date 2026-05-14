@@ -4,11 +4,51 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Cita;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
+    // ===== STATS =====
+
+    public function getStats()
+    {
+        $hoy = now()->toDateString();
+        $hace30 = now()->subDays(30)->toDateString();
+
+        $totalAlumnos  = User::where('tipo', 'alumno')->count();
+        $totalDoctores = User::where('tipo', 'doctor')->count();
+
+        $citasHoy          = Cita::whereDate('fecha_cita', $hoy)->count();
+        $citasCompletadas  = Cita::whereDate('fecha_cita', $hoy)->where('estatus', 'atendida')->count();
+        $citasPendientes   = Cita::whereDate('fecha_cita', $hoy)->whereIn('estatus', ['programada', 'pendiente'])->count();
+
+        $alumnosActivos = Cita::where('fecha_cita', '>=', $hace30)
+            ->whereNotNull('alumno_id')
+            ->distinct('alumno_id')
+            ->count('alumno_id');
+
+        $ultimoToken = DB::table('personal_access_tokens')
+            ->join('users', 'tokenable_id', '=', 'users.id')
+            ->orderByDesc('personal_access_tokens.created_at')
+            ->select('personal_access_tokens.created_at', 'users.email')
+            ->first();
+
+        return response()->json([
+            'total_usuarios'        => $totalAlumnos + $totalDoctores,
+            'total_alumnos'         => $totalAlumnos,
+            'total_doctores'        => $totalDoctores,
+            'citas_hoy'             => $citasHoy,
+            'citas_completadas_hoy' => $citasCompletadas,
+            'citas_pendientes_hoy'  => $citasPendientes,
+            'alumnos_activos'       => $alumnosActivos,
+            'ultimo_acceso_hora'    => $ultimoToken ? \Carbon\Carbon::parse($ultimoToken->created_at)->format('H:i') : null,
+            'ultimo_acceso_email'   => $ultimoToken?->email,
+        ]);
+    }
+
     // ===== ALUMNOS =====
 
     public function indexAlumnos(Request $request)

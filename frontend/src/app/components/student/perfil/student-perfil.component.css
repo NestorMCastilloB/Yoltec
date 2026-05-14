@@ -336,7 +336,7 @@
 }
 .sp-btn:disabled { opacity: 0.55; cursor: default; }
 
-.sp-btn-primary { background: var(--yol-primary); color: #fff; }
+.sp-btn-primary { background: var(--yol-primary); color: var(--yol-surface); }
 .sp-btn-primary:hover:not(:disabled) { background: var(--yol-primary-600); }
 
 .sp-btn-secondary {
@@ -441,5 +441,4 @@
   .sp-grid3 { grid-template-columns: 1fr; gap: 14px; padding: 16px; }
   .sp-full { grid-column: 1; }
   .sp-card-head { padding: 14px 16px; }
-  .sp-actions-bar { flex-direction: row-reverse; }
 }
