@@ -5,11 +5,21 @@
   <!-- Header -->
   <div class="mc-header">
     <div class="mc-head-row">
-      <div class="mc-crumb">Servicio médico · Citas</div>
-      <h1 class="mc-title">Mis citas</h1>
-      <p class="mc-sub">Consulta tus citas agendadas y tu historial de consultas pasadas.</p>
+      <div>
+        <div class="mc-crumb">Servicio médico · Citas</div>
+        <h1 class="mc-title">{{ showAgendar ? 'Nueva cita' : 'Mis citas' }}</h1>
+        <p class="mc-sub" *ngIf="!showAgendar">Consulta tus citas agendadas y tu historial de consultas pasadas.</p>
+      </div>
+      <div class="mc-head-actions">
+        <button *ngIf="!showAgendar" class="mc-btn mc-btn-primary" (click)="showAgendar = true">
+          <span>＋</span> Nueva cita
+        </button>
+        <button *ngIf="showAgendar" class="mc-btn mc-btn-ghost" (click)="showAgendar = false">
+          ← Volver
+        </button>
+      </div>
     </div>
-    <div class="mc-tabs">
+    <div class="mc-tabs" *ngIf="!showAgendar">
       <button *ngFor="let tab of tabs"
         [class.active]="activeTab === tab.id"
         (click)="activeTab = tab.id">
@@ -17,6 +27,11 @@
         <span class="mc-tab-count" [class.active]="activeTab === tab.id">{{ getCount(tab.id) }}</span>
       </button>
     </div>
+  </div>
+
+  <!-- Agendar cita -->
+  <div class="mc-content" *ngIf="showAgendar">
+    <app-agendar-cita modo="alumno" (citaAgendada)="onCitaAgendada()"></app-agendar-cita>
   </div>
 
   <!-- Content -->
