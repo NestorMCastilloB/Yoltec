@@ -9,7 +9,6 @@ import { SdInicioComponent } from './components/sd-inicio/sd-inicio.component';
 import { MisCitasComponent } from '../mis-citas/mis-citas.component';
 import { SdRecetasComponent } from './components/sd-recetas/sd-recetas.component';
 import { SdPerfilComponent } from './components/sd-perfil/sd-perfil.component';
-import { SdHistorialComponent } from './components/sd-historial/sd-historial.component';
 import { PreEvaluacionIaComponent } from '../pre-evaluacion-ia/pre-evaluacion-ia.component';
 
 @Component({
@@ -21,7 +20,6 @@ import { PreEvaluacionIaComponent } from '../pre-evaluacion-ia/pre-evaluacion-ia
     MisCitasComponent,
     SdRecetasComponent,
     SdPerfilComponent,
-    SdHistorialComponent,
     PreEvaluacionIaComponent,
   ],
   templateUrl: './student-dashboard.component.html',

@@ -297,8 +297,6 @@
 
 .mc-btn-cancel:hover { background: var(--yol-cancel-surface); }
 
-.mc-actions-cell { text-align: right; }
-
 /* Empty */
 .mc-empty {
   padding: 64px var(--yol-s-7);
@@ -371,6 +369,33 @@
   justify-content: flex-end;
   margin-top: 20px;
 }
+
+/* Dark mode */
+:host-context(.dark) .mc-header,
+:host-context(.dark) .mc-cita-card,
+:host-context(.dark) .mc-modal { background: #1a2e25; border-color: #2a4030; }
+:host-context(.dark) .mc-title { color: #e8f5ee; }
+:host-context(.dark) .mc-sub,
+:host-context(.dark) .mc-cita-meta,
+:host-context(.dark) .mc-cita-doctor { color: #a8c4b4; }
+:host-context(.dark) .mc-crumb,
+:host-context(.dark) .mc-date-info span,
+:host-context(.dark) .mc-meta-sep,
+:host-context(.dark) .mc-diagnostico,
+:host-context(.dark) .mc-motivo-cancel { color: #7b9e8c; }
+:host-context(.dark) .mc-date-info b { color: #e8f5ee; }
+:host-context(.dark) .mc-tab-count { background: #0f1a15; }
+:host-context(.dark) .mc-empty {
+  background: #1a2e25;
+  border-color: #2a4030;
+}
+:host-context(.dark) .mc-empty h3 { color: #e8f5ee; }
+:host-context(.dark) .mc-empty p { color: #a8c4b4; }
+:host-context(.dark) .mc-cita-sep { border-top-color: #2a4030; }
+:host-context(.dark) .mc-modal h3 { color: #e8f5ee; }
+:host-context(.dark) .mc-modal p { color: #a8c4b4; }
+:host-context(.dark) .mc-btn-ghost { color: #a8c4b4; }
+:host-context(.dark) .mc-btn-ghost:hover { background: #0f1a15; }
 
 /* Responsive */
 @media (max-width: 768px) {
