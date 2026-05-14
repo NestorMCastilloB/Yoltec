@@ -56,6 +56,8 @@ export class SdRecetasComponent implements OnInit, OnDestroy {
   }
 
   formatFecha(fecha: string): string {
-    return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(fecha));
+    const d = new Date(fecha);
+    const mes = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][d.getMonth()];
+    return `${d.getDate()} ${mes} ${d.getFullYear()}`;
   }
 }

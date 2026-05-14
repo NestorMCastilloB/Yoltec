@@ -1,8 +1,5 @@
 .recetas-section {
-  padding: var(--space-6) var(--space-4);
-  max-width: 720px;
-  background: var(--color-bg, #f7f9f8);
-  border-radius: var(--radius-lg);
+  max-width: 880px;
 }
 
 /* Header */
@@ -10,52 +7,49 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: var(--yol-s-4);
+  margin-bottom: var(--yol-s-5);
   flex-wrap: wrap;
 }
 
 .recetas-titulo {
-  font-size: var(--font-xl);
+  font-size: var(--yol-fs-h1);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--yol-text);
   margin: 0;
 }
 
 /* Buscador */
 .search-box {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: var(--space-2) var(--space-3);
-  min-width: 220px;
-  transition: border-color 0.2s;
-}
-
-.search-box:focus-within {
-  border-color: var(--color-primary);
-}
-
-.search-icon {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
-.search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: var(--font-sm);
-  color: var(--color-text-primary);
+  position: relative;
+  max-width: 340px;
   width: 100%;
 }
 
-.search-input::placeholder {
-  color: var(--color-text-muted);
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--yol-text-subtle);
+  pointer-events: none;
 }
+
+.search-input {
+  width: 100%;
+  height: 40px;
+  background: var(--yol-bg);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  padding: 0 14px 0 38px;
+  font: 500 var(--yol-fs-sm) var(--yol-font);
+  color: var(--yol-text);
+  outline: none;
+  transition: border-color var(--yol-duration-normal);
+}
+
+.search-input::placeholder { color: var(--yol-text-subtle); }
+.search-input:focus { border-color: var(--yol-primary); box-shadow: 0 0 0 3px var(--yol-primary-50); }
 
 /* States */
 .state-card {
@@ -63,108 +57,83 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-10) var(--space-6);
-  border-radius: var(--radius-lg);
+  gap: var(--yol-s-2);
+  padding: var(--yol-s-8) var(--yol-s-6);
+  background: var(--yol-surface);
+  border-radius: var(--yol-r-lg);
   text-align: center;
+  box-shadow: var(--yol-shadow-xs);
 }
 
-.empty-state {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-muted);
-}
+.empty-state { color: var(--yol-text-muted); }
+.empty-state svg { color: var(--yol-text-subtle); opacity: .6; }
+.empty-state p { font-size: var(--yol-fs-body); font-weight: 600; color: var(--yol-text); margin: 0; }
+.empty-state span { font-size: var(--yol-fs-sm); color: var(--yol-text-muted); margin: 0; }
 
-.empty-state svg {
-  color: var(--color-text-muted);
-  opacity: 0.5;
-}
+.error-state { background: var(--yol-cancel-surface); color: var(--yol-danger); font-size: var(--yol-fs-sm); }
 
-.empty-state p {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.empty-state span {
-  font-size: var(--font-sm);
-  margin: 0;
-}
-
-.error-state {
-  background: color-mix(in srgb, var(--color-error) 10%, transparent);
-  color: var(--color-error);
-  font-size: var(--font-sm);
-}
-
-.loading-state {
-  color: var(--color-text-muted);
-  font-size: var(--font-sm);
-  gap: var(--space-3);
-}
+.loading-state { color: var(--yol-text-muted); font-size: var(--yol-fs-sm); gap: var(--yol-s-3); }
 
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border: 2px solid var(--yol-border);
+  border-top-color: var(--yol-primary);
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin .7s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Lista de cards */
+/* Lista */
 .recetas-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--yol-s-4);
 }
 
 .receta-card {
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  box-shadow: 0 1px 4px rgba(26, 46, 37, 0.05);
-  transition: box-shadow 0.2s;
+  background: var(--yol-surface);
+  border-radius: var(--yol-r-lg);
+  padding: var(--yol-s-5);
+  box-shadow: var(--yol-shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--yol-s-3);
 }
 
-.receta-card:hover {
-  box-shadow: 0 4px 12px rgba(26, 46, 37, 0.10);
-}
+.receta-card:hover { box-shadow: var(--yol-shadow-sm); }
 
 /* Top row */
 .card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--yol-s-3);
 }
 
 .fecha-chip {
-  background: var(--color-bg-secondary, #e8f1ec);
-  color: var(--color-text-secondary, #4a6859);
-  font-size: var(--font-xs);
+  background: var(--yol-bg);
+  color: var(--yol-text-muted);
+  font-size: var(--yol-fs-label);
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: var(--yol-r-pill);
+  letter-spacing: .4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .doctor-nombre {
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  text-align: right;
+  font-size: var(--yol-fs-sm);
+  font-weight: 500;
+  color: var(--yol-text-muted);
 }
 
 /* Divider */
 .divider {
   border: none;
-  border-top: 1px solid var(--color-border);
-  margin: var(--space-3) 0;
+  border-top: 1px solid var(--yol-bg);
+  margin: 0;
 }
 
 /* Medicamentos */
@@ -174,55 +143,52 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--yol-s-2);
 }
 
 .med-item {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  align-items: flex-start;
+  gap: var(--yol-s-2);
+  font-size: var(--yol-fs-body);
+  line-height: 1.4;
 }
 
-.pill-icon {
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.med-nombre {
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.med-dosis {
-  font-size: var(--font-xs);
-  color: var(--color-text-muted);
-  margin-left: var(--space-1);
-}
+.pill-icon { color: var(--yol-text-subtle); flex-shrink: 0; margin-top: 2px; }
+.med-nombre { font-weight: 500; color: var(--yol-text); }
+.med-dosis { color: var(--yol-text-muted); font-weight: 400; }
 
 /* Notas */
 .notas {
-  font-size: var(--font-sm);
+  font-size: var(--yol-fs-sm);
   font-style: italic;
-  color: var(--color-text-secondary);
+  color: var(--yol-text-subtle);
   margin: 0;
   line-height: 1.5;
 }
 
 /* Footer */
-.card-footer {
-  display: flex;
-  justify-content: flex-end;
-}
+.card-footer { display: flex; justify-content: flex-end; }
 
 .ver-detalle {
-  font-size: var(--font-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--yol-fs-sm);
   font-weight: 600;
-  color: var(--color-success, #16a34a);
+  color: var(--yol-primary);
   cursor: pointer;
-  transition: opacity 0.15s;
 }
 
-.ver-detalle:hover {
-  opacity: 0.75;
-}
+.ver-detalle:hover { text-decoration: underline; }
+
+/* Dark */
+:host-context(.dark) .receta-card { background: #1a2e25; }
+:host-context(.dark) .fecha-chip { background: #0f1a15; color: #7b9e8c; }
+:host-context(.dark) .med-nombre { color: #e8f5ee; }
+:host-context(.dark) .doctor-nombre,
+:host-context(.dark) .med-dosis { color: #a8c4b4; }
+:host-context(.dark) .notas,
+:host-context(.dark) .pill-icon { color: #5a7a6a; }
+:host-context(.dark) .divider { border-top-color: #2a4030; }
+:host-context(.dark) .state-card { background: #1a2e25; }

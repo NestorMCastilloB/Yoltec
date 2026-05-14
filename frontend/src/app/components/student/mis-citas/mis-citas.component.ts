@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { MisCitasService, CitaMisCitas } from './mis-citas.service';
+import { AgendarCitaComponent } from '../../shared/agendar-cita/agendar-cita.component';
 
 type TabId = 'proximas' | 'pasadas' | 'canceladas';
 
 @Component({
   selector: 'app-mis-citas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AgendarCitaComponent],
   templateUrl: './mis-citas.component.html',
   styleUrls: ['./mis-citas.component.css'],
 })
@@ -28,6 +29,8 @@ export class MisCitasComponent implements OnInit, OnDestroy {
   error: string | null = null;
   mensaje: string | null = null;
 
+  showAgendar = false;
+
   citaCancelando: CitaMisCitas | null = null;
   isCancelling = false;
 
@@ -38,6 +41,12 @@ export class MisCitasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void { this.loadCitas(); }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+  onCitaAgendada(): void {
+    this.showAgendar = false;
+    this.loadCitas();
+    this.mostrarMensaje('Cita agendada correctamente.');
+  }
 
   loadCitas(): void {
     this.isLoading = true;

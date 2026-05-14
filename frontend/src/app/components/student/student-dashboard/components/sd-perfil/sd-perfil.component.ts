@@ -11,12 +11,11 @@ import { PerfilMedico, PerfilMedicoService, SesionActiva } from '../../../../../
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './sd-perfil.component.html',
-  styles: [`
-    .perfil-item { display: flex; flex-direction: column; margin-bottom: 0.75rem; }
-    .perfil-label { font-size: 0.75rem; font-weight: 600; color: var(--yol-text-subtle, #6b7280); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
-  `],
+  styleUrls: ['./sd-perfil.component.css'],
 })
 export class SdPerfilComponent implements OnInit, OnDestroy {
+  activeTab: 'personal' | 'medico' | 'seguridad' = 'personal';
+
   perfilMedico: PerfilMedico | null = null;
   isLoadingPerfil = false;
   perfilMsg: string | null = null;

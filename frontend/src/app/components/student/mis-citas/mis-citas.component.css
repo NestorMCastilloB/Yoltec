@@ -28,7 +28,8 @@
   padding: var(--yol-s-7) var(--yol-s-7) 0;
 }
 
-.mc-head-row { margin-bottom: 18px; }
+.mc-head-row { margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.mc-head-actions { flex-shrink: 0; padding-top: 4px; }
 
 .mc-crumb {
   font-size: var(--yol-fs-cap);
