@@ -4,23 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\TwoFactorCode;
-use App\Models\TrustedDevice;
-use App\Mail\TwoFactorCodeMail;
+use App\Services\Auth2FAService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    const CODE_DURATION = 10;
-    const DEVICE_TRUST_DAYS = 30;
-    const MAX_LOGIN_ATTEMPTS = 5;
-    const LOCKOUT_MINUTES = 15;
+    private const MAX_ATTEMPTS    = 5;
+    private const LOCKOUT_MINUTES = 15;
+
+    public function __construct(private Auth2FAService $twoFA) {}
 
     public function login(Request $request)
     {
@@ -32,93 +28,52 @@ class AuthController extends Controller
             'recordar_por'  => 'nullable|integer|in:1440,2880,7200,10080,20160,43200',
         ]);
 
-        $tipoUsuario  = $request->tipo_usuario;
+        $tipo          = $request->tipo_usuario;
         $identificador = $request->identificador;
-        $password      = $request->password;
-
-        // Verificar bloqueo temporal por intentos fallidos
-        $lockKey = "login_lockout_{$tipoUsuario}_{$identificador}";
-        $attemptsKey = "login_attempts_{$tipoUsuario}_{$identificador}";
+        $lockKey       = "login_lockout_{$tipo}_{$identificador}";
+        $attemptsKey   = "login_attempts_{$tipo}_{$identificador}";
 
         if (Cache::has($lockKey)) {
-            $minutosRestantes = (int) ceil(Cache::get($lockKey, 0) / 60);
+            $minutos = (int) ceil(Cache::get($lockKey, 0) / 60);
             return response()->json([
-                'message' => "Cuenta bloqueada temporalmente por demasiados intentos fallidos. Intenta de nuevo en {$minutosRestantes} minuto(s).",
-                'locked' => true,
-                'retry_after' => $minutosRestantes,
+                'message'     => "Cuenta bloqueada. Intenta de nuevo en {$minutos} minuto(s).",
+                'locked'      => true,
+                'retry_after' => $minutos,
             ], 429);
         }
 
-        // Buscar usuario según tipo
-        if ($tipoUsuario === 'alumno') {
-            $user = User::where('numero_control', $identificador)->where('tipo', 'alumno')->first();
-            if (!$user || !Hash::check($password, $user->nip)) {
-                return $this->handleFailedLogin($attemptsKey, $lockKey);
-            }
-        } elseif ($tipoUsuario === 'admin') {
-            $user = User::where('username', $identificador)->where('tipo', 'admin')->first();
-            if (!$user || !Hash::check($password, $user->password)) {
-                return $this->handleFailedLogin($attemptsKey, $lockKey);
-            }
-        } else {
-            $user = User::where('username', $identificador)->where('tipo', 'doctor')->first();
-            if (!$user || !Hash::check($password, $user->password)) {
-                return $this->handleFailedLogin($attemptsKey, $lockKey);
-            }
+        $user = match ($tipo) {
+            'alumno' => User::where('numero_control', $identificador)->where('tipo', 'alumno')->first(),
+            'admin'  => User::where('username', $identificador)->where('tipo', 'admin')->first(),
+            default  => User::where('username', $identificador)->where('tipo', 'doctor')->first(),
+        };
+
+        $campoPassword = ($tipo === 'alumno') ? 'nip' : 'password';
+
+        if (!$user || !Hash::check($request->password, $user->{$campoPassword})) {
+            return $this->handleFailedLogin($attemptsKey, $lockKey);
         }
 
-        // Login exitoso: limpiar intentos fallidos
         Cache::forget($attemptsKey);
+        $recordarPor = $request->input('recordar_por', 1440);
 
-        $recordarPor = $request->input('recordar_por', 1440); // minutos, default 1 día
-
-        // Alumnos: nunca requieren 2FA
-        if ($tipoUsuario === 'alumno' || config('app.env') === 'local') {
+        if ($tipo === 'alumno' || config('app.env') === 'local') {
             return $this->successResponse($user, $recordarPor);
         }
 
-        // Doctores y admins en producción: verificar dispositivo de confianza
-        $deviceToken = $request->device_token;
-        if ($deviceToken) {
-            $trusted = TrustedDevice::where('user_id', $user->id)
-                ->where('device_token', $deviceToken)
-                ->where('expires_at', '>', Carbon::now())
-                ->first();
-
-            if ($trusted) {
-                // Renovar expiración y devolver token directamente
-                $trusted->update(['expires_at' => Carbon::now()->addDays(self::DEVICE_TRUST_DAYS)]);
-                return $this->successResponse($user, $recordarPor);
-            }
+        if ($this->twoFA->isTrustedDevice($user, $request->device_token)) {
+            return $this->successResponse($user, $recordarPor);
         }
 
-        // Guardar duración elegida para usarla al verificar 2FA
         Cache::put("pending_recordar_{$user->id}", $recordarPor, 600);
-
-        // Sin dispositivo de confianza: enviar código 2FA
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-        TwoFactorCode::create([
-            'user_id'    => $user->id,
-            'code'       => Hash::make($code),
-            'expires_at' => Carbon::now()->addMinutes(self::CODE_DURATION),
-            'used'       => false,
-        ]);
-
-        try {
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
-            \Log::info('Email 2FA enviado', ['user_id' => $user->id]);
-        } catch (\Exception $e) {
-            \Log::error('SMTP ERROR 2FA: ' . $e->getMessage());
-            error_log('SMTP ERROR 2FA: ' . $e->getMessage());
-        }
+        $emailEnmascarado = $this->twoFA->sendCode($user);
 
         return response()->json([
             'message'      => 'Código de verificación enviado',
             'requires_2fa' => true,
             'user_id'      => $user->id,
-            'email_masked' => $this->maskEmail($user->email),
-        ], 200);
+            'email_masked' => $emailEnmascarado,
+        ]);
     }
 
     public function verifyTwoFactor(Request $request)
@@ -133,53 +88,20 @@ class AuthController extends Controller
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
-        $twoFactorCode = null;
-        $pendingCodes = TwoFactorCode::where('user_id', $user->id)
-            ->where('used', false)
-            ->where('expires_at', '>', Carbon::now())
-            ->get();
-
-        foreach ($pendingCodes as $pending) {
-            if (Hash::check($request->code, $pending->code)) {
-                $twoFactorCode = $pending;
-                break;
-            }
-        }
+        $twoFactorCode = $this->twoFA->verifyCode($user, $request->code);
 
         if (!$twoFactorCode) {
-            $this->logFailed2FA($user, $request->code);
+            Log::warning('2FA fallido', ['user_id' => $user->id, 'ip' => $request->ip()]);
             return response()->json(['message' => 'Código inválido o expirado', 'requires_2fa' => true], 401);
         }
 
-        $twoFactorCode->update(['used' => true]);
+        $deviceToken = $this->twoFA->confirmAndCreateDevice($twoFactorCode, $user);
+        $recordarPor = Cache::pull("pending_recordar_{$user->id}", 1440);
 
-        // Limpiar códigos viejos
-        TwoFactorCode::where('user_id', $user->id)
-            ->where('created_at', '<', Carbon::now()->subHour())
-            ->delete();
-
-        // Generar device_token de confianza (30 días)
-        $deviceToken = Str::random(64);
-        TrustedDevice::create([
-            'user_id'      => $user->id,
-            'device_token' => $deviceToken,
-            'expires_at'   => Carbon::now()->addDays(self::DEVICE_TRUST_DAYS),
-        ]);
-
-        // Limpiar dispositivos viejos del usuario
-        TrustedDevice::where('user_id', $user->id)
-            ->where('expires_at', '<', Carbon::now())
-            ->delete();
-
-        // Recuperar duración del token de la sesión pendiente (guardada en caché)
-        $recordarPor = Cache::get("pending_recordar_{$user->id}", 1440);
-        Cache::forget("pending_recordar_{$user->id}");
-
-        $response = $this->successResponse($user, $recordarPor);
-        $data = $response->getData(true);
+        $data = $this->successResponse($user, $recordarPor)->getData(true);
         $data['device_token'] = $deviceToken;
 
-        return response()->json($data, 200);
+        return response()->json($data);
     }
 
     public function resendTwoFactor(Request $request)
@@ -191,50 +113,36 @@ class AuthController extends Controller
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
-        $cacheKey = "2fa_resend_{$user->id}";
+        $cacheKey    = "2fa_resend_{$user->id}";
         $resendCount = Cache::get($cacheKey, 0);
 
         if ($resendCount >= 3) {
             return response()->json(['message' => 'Demasiados intentos. Espera 10 minutos.'], 429);
         }
 
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-        TwoFactorCode::create([
-            'user_id'    => $user->id,
-            'code'       => Hash::make($code),
-            'expires_at' => Carbon::now()->addMinutes(self::CODE_DURATION),
-            'used'       => false,
-        ]);
-
         Cache::put($cacheKey, $resendCount + 1, 600);
-
-        try {
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
-        } catch (\Exception $e) {
-            \Log::error('Error reenviando email 2FA: ' . $e->getMessage());
-        }
+        $emailEnmascarado = $this->twoFA->sendCode($user);
 
         return response()->json([
             'message'      => 'Nuevo código enviado',
-            'email_masked' => $this->maskEmail($user->email),
-        ], 200);
+            'email_masked' => $emailEnmascarado,
+        ]);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Sesión cerrada exitosamente'], 200);
+        return response()->json(['message' => 'Sesión cerrada exitosamente']);
     }
 
     public function me(Request $request)
     {
-        return response()->json(['user' => $request->user()], 200);
+        return response()->json(['user' => $request->user()]);
     }
 
-    private function successResponse(User $user, int $minutosExpiracion = 1440)
+    private function successResponse(User $user, int $minutos = 1440)
     {
-        $token = $user->createToken('auth_token', ['*'], Carbon::now()->addMinutes($minutosExpiracion))->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], Carbon::now()->addMinutes($minutos))->plainTextToken;
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
@@ -249,20 +157,7 @@ class AuthController extends Controller
             ],
             'token' => $token,
             'tipo'  => $user->tipo,
-        ], 200);
-    }
-
-    private function maskEmail(string $email): string
-    {
-        $parts = explode('@', $email);
-        $name  = $parts[0];
-        $domain = $parts[1] ?? '';
-
-        $maskedName = substr($name, 0, 2) . str_repeat('*', max(0, strlen($name) - 2));
-        $domainParts = explode('.', $domain);
-        $maskedDomain = substr($domainParts[0], 0, 1) . str_repeat('*', max(0, strlen($domainParts[0]) - 1));
-
-        return $maskedName . '@' . $maskedDomain . '.' . ($domainParts[1] ?? 'com');
+        ]);
     }
 
     private function handleFailedLogin(string $attemptsKey, string $lockKey)
@@ -270,36 +165,24 @@ class AuthController extends Controller
         $attempts = Cache::get($attemptsKey, 0) + 1;
         Cache::put($attemptsKey, $attempts, self::LOCKOUT_MINUTES * 60);
 
-        if ($attempts >= self::MAX_LOGIN_ATTEMPTS) {
+        if ($attempts >= self::MAX_ATTEMPTS) {
             $lockSeconds = self::LOCKOUT_MINUTES * 60;
             Cache::put($lockKey, $lockSeconds, $lockSeconds);
             Cache::forget($attemptsKey);
 
-            \Log::warning('Cuenta bloqueada por intentos fallidos', [
-                'ip' => request()->ip(),
-                'attempts' => $attempts,
-            ]);
+            Log::warning('Cuenta bloqueada', ['ip' => request()->ip(), 'attempts' => $attempts]);
 
             return response()->json([
-                'message' => 'Cuenta bloqueada temporalmente por demasiados intentos fallidos. Intenta de nuevo en ' . self::LOCKOUT_MINUTES . ' minuto(s).',
-                'locked' => true,
+                'message'     => 'Cuenta bloqueada por demasiados intentos. Intenta en ' . self::LOCKOUT_MINUTES . ' minuto(s).',
+                'locked'      => true,
                 'retry_after' => self::LOCKOUT_MINUTES,
             ], 429);
         }
 
-        $restantes = self::MAX_LOGIN_ATTEMPTS - $attempts;
-
+        $restantes = self::MAX_ATTEMPTS - $attempts;
         return response()->json([
-            'message' => "Las credenciales son incorrectas. Te quedan {$restantes} intento(s) antes del bloqueo temporal.",
+            'message'            => "Credenciales incorrectas. Te quedan {$restantes} intento(s).",
             'attempts_remaining' => $restantes,
         ], 422);
-    }
-
-    private function logFailed2FA(User $user, string $code): void
-    {
-        \Log::warning('2FA fallido', [
-            'user_id' => $user->id,
-            'ip'      => request()->ip(),
-        ]);
     }
 }

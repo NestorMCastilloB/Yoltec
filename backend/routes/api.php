@@ -91,11 +91,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pre-evaluaciones IA
     Route::post('/pre-evaluacion/chat', [PreEvaluacionIAController::class, 'chat']);
     Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
-    Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
     Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);
     Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
     Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
-    Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
+    Route::middleware('role:doctor')->group(function () {
+        Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
+        Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
+    });
 
     // Estadísticas — solo doctor
     Route::middleware('role:doctor')->get('/estadisticas', [EstadisticasController::class, 'index']);

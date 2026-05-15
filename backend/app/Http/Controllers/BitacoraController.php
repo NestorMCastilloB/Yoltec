@@ -37,14 +37,10 @@ class BitacoraController extends Controller
         return response()->json(['bitacoras' => $bitacoras], 200);
     }
 
-    // Crear bitácora (solo doctor)
+    // Crear bitácora (solo doctor — protegido por role:doctor middleware)
     public function store(Request $request)
     {
         $user = $request->user();
-
-        if (!$user->esDoctor()) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
 
         $validated = $request->validate([
             'cita_id' => 'required|exists:citas,id',
@@ -70,7 +66,7 @@ class BitacoraController extends Controller
     }
 
     // Ver bitácora
-    public function show(Request $request, $id)
+    public function show(Request $request, int $id)
     {
         $user = $request->user();
         $bitacora = Bitacora::with(['cita', 'alumno', 'doctor'])->findOrFail($id);
@@ -83,15 +79,9 @@ class BitacoraController extends Controller
         return response()->json($bitacora, 200);
     }
 
-    // Actualizar bitácora (solo doctor)
-    public function update(Request $request, $id)
+    // Actualizar bitácora (solo doctor — protegido por role:doctor middleware)
+    public function update(Request $request, int $id)
     {
-        $user = $request->user();
-
-        if (!$user->esDoctor()) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $bitacora = Bitacora::findOrFail($id);
 
         $validated = $request->validate([

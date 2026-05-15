@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Cita;
 use App\Models\Bitacora;
 use Carbon\Carbon;
@@ -10,13 +9,9 @@ use Illuminate\Support\Facades\Cache;
 
 class EstadisticasController extends Controller
 {
-    public function index(Request $request)
+    // Solo doctor — protegido por role:doctor middleware
+    public function index()
     {
-        $user = $request->user();
-        if ($user->tipo !== 'doctor') {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $data = Cache::remember('estadisticas', 1800, fn () => $this->calcular());
 
         return response()->json($data);
