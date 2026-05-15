@@ -79,7 +79,8 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
       catchError(() => of([])),
       finalize(() => { this.isLoading = false; })
     ).subscribe(data => {
-      this.dias = data;
+      // Backend cast 'date' serializa como ISO — normalizar a YYYY-MM-DD
+      this.dias = data.map(d => ({ ...d, fecha: (d.fecha || '').split('T')[0] }));
       this.buildCalGrid();
     });
   }
@@ -197,9 +198,11 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   // ===== HELPERS =====
 
-  // Convierte YYYY-MM-DD a formato legible en español
+  // Convierte YYYY-MM-DD (o ISO) a formato legible en español
   formatFecha(fecha: string): string {
-    const [y, m, d] = fecha.split('-').map(Number);
+    if (!fecha) return '';
+    const [y, m, d] = fecha.split('T')[0].split('-').map(Number);
+    if (!y || !m || !d) return fecha;
     return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d));
   }
 
