@@ -119,6 +119,8 @@
 .grid-cita.ok     { background: var(--yol-ok-surface);     color: var(--yol-primary); border-left-color: var(--yol-primary); }
 .grid-cita.warn   { background: var(--yol-warn-surface);   color: var(--yol-warn);    border-left-color: var(--yol-warn); }
 .grid-cita.cancel { background: var(--yol-cancel-surface); color: var(--yol-danger);  border-left-color: var(--yol-danger); }
+.grid-cita-dim { opacity: .25; filter: grayscale(.8); }
+.grid-cita-dim:hover { opacity: .5; }
 
 /* ── Encabezado de sección ──────────────────────── */
 .section-header {
