@@ -202,6 +202,13 @@
 .cal-cell.muted { background: #fafbfb; }
 .cal-cell.muted .day-num { color: #9ca3af; }
 
+.cal-cell.past {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.cal-cell.past .day-num { color: #9ca3af; text-decoration: line-through; }
+
 .cal-cell.special {
   background: #fee2e2;
   border-color: #fecaca;
@@ -256,6 +263,11 @@
   background: #fee2e2;
   border: 1px solid #fecaca;
   flex-shrink: 0;
+}
+
+.swatch.swatch-past {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
 }
 
 /* Tabla */

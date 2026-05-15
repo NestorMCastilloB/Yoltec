@@ -43,6 +43,7 @@
               <div class="cal-cell"
                 *ngFor="let day of row"
                 [class.muted]="!day.isCurrentMonth"
+                [class.past]="day.isPast && !day.dia"
                 [class.special]="day.dia"
                 [class.selected]="day.date === selectedDate"
                 (click)="selectDay(day)">
@@ -55,6 +56,10 @@
             <div class="legend-item">
               <span class="swatch"></span>
               Día especial
+            </div>
+            <div class="legend-item">
+              <span class="swatch swatch-past"></span>
+              Día pasado (no editable)
             </div>
           </div>
         </div>
