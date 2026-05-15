@@ -76,7 +76,7 @@ class PreEvaluacionIAController extends Controller
         return response()->json(['pre_evaluaciones' => $preEvaluaciones]);
     }
 
-    public function show(Request $request, int $id)
+    public function show(Request $request, $id)
     {
         $user          = $request->user();
         $preEvaluacion = PreEvaluacionIA::with(['cita', 'alumno', 'doctorValidador'])->findOrFail($id);
@@ -89,7 +89,7 @@ class PreEvaluacionIAController extends Controller
     }
 
     // Solo doctor — ruta protegida por role:doctor middleware
-    public function validar(Request $request, int $id)
+    public function validar(Request $request, $id)
     {
         $request->validate([
             'accion'     => 'required|in:validar,descartar',

@@ -75,7 +75,7 @@ class RecetaController extends Controller
     }
 
     // Ver receta
-    public function show(Request $request, int $id)
+    public function show(Request $request, $id)
     {
         $user = $request->user();
         $receta = Receta::with(['cita', 'alumno', 'doctor'])->findOrFail($id);
@@ -89,7 +89,7 @@ class RecetaController extends Controller
     }
 
     // Actualizar receta (solo doctor — protegido por role:doctor middleware)
-    public function update(Request $request, int $id)
+    public function update(Request $request, $id)
     {
         $user   = $request->user();
         $receta = Receta::findOrFail($id);
