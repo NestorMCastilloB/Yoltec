@@ -66,7 +66,7 @@ class BitacoraController extends Controller
     }
 
     // Ver bitácora
-    public function show(Request $request, int $id)
+    public function show(Request $request, $id)
     {
         $user = $request->user();
         $bitacora = Bitacora::with(['cita', 'alumno', 'doctor'])->findOrFail($id);
@@ -80,7 +80,7 @@ class BitacoraController extends Controller
     }
 
     // Actualizar bitácora (solo doctor — protegido por role:doctor middleware)
-    public function update(Request $request, int $id)
+    public function update(Request $request, $id)
     {
         $bitacora = Bitacora::findOrFail($id);
 

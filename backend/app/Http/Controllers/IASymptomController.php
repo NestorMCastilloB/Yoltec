@@ -18,7 +18,7 @@ class IASymptomController extends Controller
     }
 
     // POST /api/ia/symptoms/iniciar/{citaId}
-    public function iniciar(Request $request, int $citaId)
+    public function iniciar(Request $request, $citaId)
     {
         $user = $request->user();
         $cita = Cita::findOrFail($citaId);
@@ -35,7 +35,7 @@ class IASymptomController extends Controller
     }
 
     // POST /api/ia/symptoms/evaluar/{citaId}
-    public function evaluar(Request $request, int $citaId)
+    public function evaluar(Request $request, $citaId)
     {
         $user = $request->user();
         $cita = Cita::findOrFail($citaId);
@@ -57,7 +57,7 @@ class IASymptomController extends Controller
     }
 
     // GET /api/ia/symptoms/resultado/{citaId}
-    public function obtenerResultado(Request $request, int $citaId)
+    public function obtenerResultado(Request $request, $citaId)
     {
         $user = $request->user();
         $cita = Cita::findOrFail($citaId);
@@ -95,7 +95,7 @@ class IASymptomController extends Controller
     }
 
     // POST /api/ia/symptoms/validar/{preEvaluacionId} — solo doctor (role:doctor middleware)
-    public function validar(Request $request, int $preEvaluacionId)
+    public function validar(Request $request, $preEvaluacionId)
     {
         $validated = $request->validate([
             'diagnostico_correcto' => 'nullable|string',
@@ -126,7 +126,7 @@ class IASymptomController extends Controller
     }
 
     // DELETE /api/ia/symptoms/{citaId}
-    public function cancelar(Request $request, int $citaId)
+    public function cancelar(Request $request, $citaId)
     {
         $user = $request->user();
         $cita = Cita::findOrFail($citaId);

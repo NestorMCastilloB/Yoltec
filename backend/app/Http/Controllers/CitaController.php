@@ -99,7 +99,7 @@ class CitaController extends Controller
         return response()->json(['message' => 'Cita agendada exitosamente', 'cita' => $cita], 201);
     }
 
-    public function show(Request $request, int $id)
+    public function show(Request $request, $id)
     {
         $user = $request->user();
         $cita = Cita::with(['alumno', 'doctor', 'bitacora', 'receta'])->findOrFail($id);
@@ -111,7 +111,7 @@ class CitaController extends Controller
         return response()->json($cita);
     }
 
-    public function cancelar(Request $request, int $id)
+    public function cancelar(Request $request, $id)
     {
         $user = $request->user();
         $cita = Cita::findOrFail($id);
@@ -142,7 +142,7 @@ class CitaController extends Controller
     }
 
     // Solo doctor — ruta protegida por role:doctor middleware
-    public function atender(Request $request, int $id)
+    public function atender(Request $request, $id)
     {
         $cita = Cita::findOrFail($id);
         $cita->update([
@@ -155,7 +155,7 @@ class CitaController extends Controller
     }
 
     // Solo doctor — ruta protegida por role:doctor middleware
-    public function reprogramar(Request $request, int $id)
+    public function reprogramar(Request $request, $id)
     {
         $cita = Cita::findOrFail($id);
 
@@ -196,7 +196,7 @@ class CitaController extends Controller
     }
 
     // Solo doctor — ruta protegida por role:doctor middleware
-    public function noAsistio(Request $request, int $id)
+    public function noAsistio($id)
     {
         $cita = Cita::findOrFail($id);
 
