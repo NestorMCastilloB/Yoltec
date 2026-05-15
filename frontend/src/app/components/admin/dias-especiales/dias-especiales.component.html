@@ -48,7 +48,7 @@
                 [class.selected]="day.date === selectedDate"
                 (click)="selectDay(day)">
                 <span class="day-num">{{ day.label }}</span>
-                <span class="day-tag" *ngIf="day.dia && day.isCurrentMonth">{{ day.dia.motivo }}</span>
+                <span class="day-tag" *ngIf="day.dia && day.isCurrentMonth">{{ day.dia.etiqueta || tipoLabel(day.dia.tipo) }}</span>
               </div>
             </ng-container>
           </div>
@@ -85,14 +85,16 @@
           <thead>
             <tr>
               <th>Fecha</th>
-              <th>Motivo</th>
+              <th>Tipo</th>
+              <th>Etiqueta</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let dia of dias">
               <td class="td-date">{{ formatFecha(dia.fecha) }}</td>
-              <td class="td-motivo">{{ dia.motivo }}</td>
+              <td class="td-motivo">{{ tipoLabel(dia.tipo) }}</td>
+              <td class="td-motivo">{{ dia.etiqueta || '—' }}</td>
               <td class="td-action">
                 <button class="btn-delete" (click)="askEliminar(dia)">Eliminar</button>
               </td>
@@ -114,8 +116,14 @@
       <input type="date" [(ngModel)]="form.fecha">
     </div>
     <div class="field">
-      <label>Motivo</label>
-      <input type="text" [(ngModel)]="form.motivo" placeholder="ej. Día del maestro" maxlength="120">
+      <label>Tipo</label>
+      <select [(ngModel)]="form.tipo">
+        <option *ngFor="let t of tiposDia" [value]="t.value">{{ t.label }}</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Etiqueta <span class="field-hint">(opcional)</span></label>
+      <input type="text" [(ngModel)]="form.etiqueta" placeholder="ej. Día del maestro" maxlength="200">
     </div>
     <p class="form-error" *ngIf="formError">{{ formError }}</p>
     <div class="modal-actions">
@@ -131,7 +139,7 @@
 <div class="modal-backdrop" *ngIf="confirmDeleteId" (click)="cancelEliminar()">
   <div class="modal modal-sm" (click)="$event.stopPropagation()">
     <h3 class="modal-title">¿Eliminar día especial?</h3>
-    <p class="modal-desc">Se eliminará <strong>{{ confirmDeleteMotivo }}</strong>. Esta acción no se puede deshacer.</p>
+    <p class="modal-desc">Se eliminará <strong>{{ confirmDeleteEtiqueta }}</strong>. Esta acción no se puede deshacer.</p>
     <div class="modal-actions">
       <button class="btn-ghost" (click)="cancelEliminar()">Cancelar</button>
       <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>

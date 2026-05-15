@@ -1,17 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+
+export type TipoDiaEspecial = 'holiday' | 'vacation' | 'reduced';
 
 export interface DiaEspecialItem {
   id: number;
   fecha: string;
-  motivo: string;
+  tipo: TipoDiaEspecial;
+  etiqueta: string | null;
+}
+
+export interface DiaEspecialPayload {
+  fecha: string;
+  tipo: TipoDiaEspecial;
+  etiqueta?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class DiasEspecialesService {
-  private base = `${environment.apiUrl}/admin/dias-especiales`;
+  private base = `${environment.apiUrl}/admin/calendario`;
 
   constructor(private http: HttpClient) {}
 
@@ -20,17 +30,20 @@ export class DiasEspecialesService {
     return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
   }
 
-  // GET /api/admin/dias-especiales → lista completa
-  getDias(): Observable<DiaEspecialItem[]> {
-    return this.http.get<DiaEspecialItem[]>(this.base, this.headers());
+  // GET /api/admin/calendario?month=X&year=Y → días del mes
+  getDias(month: number, year: number): Observable<DiaEspecialItem[]> {
+    const params = new HttpParams().set('month', month).set('year', year);
+    return this.http.get<{ dias: DiaEspecialItem[] }>(this.base, { ...this.headers(), params })
+      .pipe(map(res => res.dias));
   }
 
-  // POST /api/admin/dias-especiales → agregar
-  agregar(fecha: string, motivo: string): Observable<DiaEspecialItem> {
-    return this.http.post<DiaEspecialItem>(this.base, { fecha, motivo }, this.headers());
+  // POST /api/admin/calendario → registra/actualiza día especial
+  agregar(payload: DiaEspecialPayload): Observable<DiaEspecialItem> {
+    return this.http.post<{ dia: DiaEspecialItem }>(this.base, payload, this.headers())
+      .pipe(map(res => res.dia));
   }
 
-  // DELETE /api/admin/dias-especiales/{id} → eliminar
+  // DELETE /api/admin/calendario/{id} → eliminar
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`, this.headers());
   }
