@@ -30,7 +30,7 @@
     <div class="kpi-ic">◷</div>
     <div>
       <div class="kpi-lbl">Pendientes</div>
-      <div class="kpi-v">{{ pendingCitas.length }}</div>
+      <div class="kpi-v">{{ hayFiltroActivo ? filteredPendingCitas.length : pendingCitas.length }}</div>
     </div>
   </div>
   <div class="kpi kpi-danger">
@@ -88,6 +88,7 @@
           <td *ngFor="let day of weekGridDays" class="cell-slot" [class.cell-today]="day.isToday">
             <div *ngFor="let cita of getCitasForSlot(day.date, hour)"
                  class="grid-cita" [ngClass]="getGridCitaClass(cita)"
+                 [class.grid-cita-dim]="hayFiltroActivo && !citaMatchaFiltro(cita)"
                  (click)="openDrawer(cita)">
               {{ getGridCitaName(cita) }}
             </div>

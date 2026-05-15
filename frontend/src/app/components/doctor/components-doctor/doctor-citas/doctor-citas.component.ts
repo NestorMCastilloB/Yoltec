@@ -128,6 +128,16 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   get filteredPendingCitas(): Cita[] { return this.filterCitas(this.pendingCitas); }
   get filteredHandledCitas(): Cita[] { return this.filterCitas(this.handledCitas); }
 
+  // True si hay algún filtro activo — usado para atenuar el calendario
+  get hayFiltroActivo(): boolean {
+    return !!(this.searchCitas.trim() || this.filtroEstatus || this.filtroFechaDesde || this.filtroFechaHasta);
+  }
+
+  // True si la cita matchea los filtros activos — para atenuar grid semanal
+  citaMatchaFiltro(cita: Cita): boolean {
+    return this.filterCitas([cita]).length > 0;
+  }
+
   get pagedHandledCitas(): Cita[] {
     const start = (this.historialPagina - 1) * this.historialPorPagina;
     return this.filteredHandledCitas.slice(start, start + this.historialPorPagina);
