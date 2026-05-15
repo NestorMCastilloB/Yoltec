@@ -92,9 +92,9 @@
 }
 
 .sd-nav-ic {
-  font-size: 14px;
-  width: 16px;
-  text-align: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
   opacity: .95;
 }
 
