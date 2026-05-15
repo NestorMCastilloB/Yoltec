@@ -98,11 +98,29 @@
             <span class="sp-val" [class.muted]="!perfilMedico.telefono">{{ perfilMedico.telefono || 'Sin registrar' }}</span>
             <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
           </div>
+          <div class="sp-row">
+            <span class="sp-lab">Género</span>
+            <span class="sp-val" [class.muted]="!perfilMedico.genero">
+              {{ perfilMedico.genero === 'masculino' ? 'Masculino' :
+                 perfilMedico.genero === 'femenino' ? 'Femenino' :
+                 perfilMedico.genero === 'otro' ? 'Otro' : 'Sin registrar' }}
+            </span>
+            <a class="sp-edit" (click)="startEditPersonal()">Editar</a>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="editandoPersonal">
           <div class="sp-form-group"><label>Email</label><input class="sp-input" type="email" [(ngModel)]="personalForm.email" /></div>
           <div class="sp-form-group"><label>Teléfono</label><input class="sp-input" type="text" [(ngModel)]="personalForm.telefono" placeholder="Opcional" /></div>
+          <div class="sp-form-group">
+            <label>Género</label>
+            <select class="sp-select" [(ngModel)]="personalForm.genero">
+              <option value="">No especificar</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
           <div class="sp-form-actions">
             <button class="sp-btn-primary" (click)="submitDatosPersonales()" [disabled]="isSubmittingPersonal">
               {{ isSubmittingPersonal ? 'Guardando...' : 'Guardar cambios' }}

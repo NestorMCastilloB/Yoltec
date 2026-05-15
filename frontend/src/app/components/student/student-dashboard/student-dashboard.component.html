@@ -29,10 +29,9 @@
     </nav>
 
     <div class="sd-user">
-      <div class="sd-avatar">{{ studentName.charAt(0) }}</div>
+      <div class="sd-avatar">{{ studentInitial }}</div>
       <div>
         <b>{{ studentName }}</b>
-        <button class="sd-logout" (click)="logout()">Cerrar sesión</button>
       </div>
     </div>
   </aside>
@@ -45,42 +44,67 @@
       <div class="sd-header-row">
         <div>
           <div class="sd-crumb">{{ activeSection | uppercase }}</div>
-          <h1 class="sd-title" *ngIf="activeSection === 'inicio'">
-            Bienvenida, <span>{{ studentName }}</span>
-          </h1>
-          <h1 class="sd-title" *ngIf="activeSection === 'citas'">Mis citas</h1>
-          <h1 class="sd-title" *ngIf="activeSection === 'recetas'">Mis recetas</h1>
-          <h1 class="sd-title" *ngIf="activeSection === 'perfil'">Mi perfil</h1>
-          <h1 class="sd-title" *ngIf="activeSection === 'pre-evaluacion'">Pre-evaluación IA</h1>
+          @if (activeSection === 'inicio') {
+            <h1 class="sd-title">{{ saludoBienvenida }}, <span>{{ studentName }}</span></h1>
+          }
+          @if (activeSection === 'citas') {
+            <h1 class="sd-title">Mis citas</h1>
+          }
+          @if (activeSection === 'recetas') {
+            <h1 class="sd-title">Mis recetas</h1>
+          }
+          @if (activeSection === 'perfil') {
+            <h1 class="sd-title">Mi perfil</h1>
+          }
+          @if (activeSection === 'pre-evaluacion') {
+            <h1 class="sd-title">Pre-evaluación IA</h1>
+          }
         </div>
         <div class="sd-header-actions">
-          <button class="sd-btn-ghost"
-            (click)="themeService.toggle()"
-            [title]="themeService.isDark ? 'Modo claro' : 'Modo oscuro'">
-            {{ themeService.isDark ? '☀' : '🌙' }}
-          </button>
           <button class="sd-btn-primary" (click)="setActiveSection('citas')">
-            <span class="sd-plus">＋</span>Nueva cita
+            <span class="sd-plus">+</span>Nueva cita
           </button>
+          <div class="sd-user-menu-wrap">
+            <button class="sd-user-trigger" (click)="toggleUserMenu()">
+              <div class="sd-user-avatar-sm">{{ studentInitial }}</div>
+              <span class="sd-chevron" [class.open]="userMenuOpen">▾</span>
+            </button>
+            @if (userMenuOpen) {
+              <div class="sd-user-dropdown">
+                <div class="sd-user-dropdown-header">
+                  <b>{{ studentName }}</b>
+                  <span>Alumno</span>
+                </div>
+                <div class="sd-user-dropdown-divider"></div>
+                <button class="sd-user-dropdown-item" (click)="themeService.toggle()">
+                  <span>{{ themeService.isDark ? 'Modo claro' : 'Modo oscuro' }}</span>
+                  <span class="sd-theme-dot" [class.dark]="themeService.isDark"></span>
+                </button>
+                <div class="sd-user-dropdown-divider"></div>
+                <button class="sd-user-dropdown-item danger" (click)="logout()">
+                  Cerrar sesión
+                </button>
+              </div>
+            }
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Contenido -->
     <div class="sd-content">
-      <app-sd-inicio
-        *ngIf="activeSection === 'inicio'"
-        (navegarACitas)="setActiveSection('citas')"
-        (navegarAAgendar)="setActiveSection('citas')"
-        (navegarARecetas)="setActiveSection('recetas')">
-      </app-sd-inicio>
-
-      <app-mis-citas *ngIf="activeSection === 'citas'"></app-mis-citas>
-      <app-sd-recetas *ngIf="activeSection === 'recetas'"></app-sd-recetas>
-      <app-sd-perfil *ngIf="activeSection === 'perfil'"></app-sd-perfil>
-      <app-pre-evaluacion-ia *ngIf="activeSection === 'pre-evaluacion'"></app-pre-evaluacion-ia>
+      @if (activeSection === 'inicio') {
+        <app-sd-inicio
+          (navegarACitas)="setActiveSection('citas')"
+          (navegarAAgendar)="setActiveSection('citas')"
+          (navegarARecetas)="setActiveSection('recetas')">
+        </app-sd-inicio>
+      }
+      @if (activeSection === 'citas') { <app-mis-citas></app-mis-citas> }
+      @if (activeSection === 'recetas') { <app-sd-recetas></app-sd-recetas> }
+      @if (activeSection === 'perfil') { <app-sd-perfil></app-sd-perfil> }
+      @if (activeSection === 'pre-evaluacion') { <app-pre-evaluacion-ia></app-pre-evaluacion-ia> }
     </div>
   </div>
-
 
 </div>

@@ -26,7 +26,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
   isUploadingFoto = false;
   fotoMsg: string | null = null;
 
-  personalForm = { email: '', telefono: '' };
+  personalForm = { email: '', telefono: '', genero: '' };
   isSubmittingPersonal = false;
   personalMsg: string | null = null;
   editandoPersonal = false;
@@ -87,7 +87,8 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
     if (!this.perfilMedico) return;
     this.personalForm = {
       email: this.perfilMedico.email,
-      telefono: this.perfilMedico.telefono ?? ''
+      telefono: this.perfilMedico.telefono ?? '',
+      genero: this.perfilMedico.genero ?? ''
     };
     this.editandoPersonal = true;
     this.personalMsg = null;
