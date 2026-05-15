@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { PerfilMedico, PerfilMedicoService, SesionActiva } from '../../../../../services/perfil-medico.service';
+import { AuthService } from '../../../../../services/auth.service';
 
 @Component({
   selector: 'app-sd-perfil',
@@ -49,7 +50,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private perfilMedicoService: PerfilMedicoService) {}
+  constructor(private perfilMedicoService: PerfilMedicoService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadPerfil();
@@ -101,7 +102,14 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
     this.personalMsg = null;
     this.perfilMedicoService.updateDatosPersonales(this.personalForm)
       .pipe(takeUntil(this.destroy$), catchError(err => { this.personalMsg = err?.error?.message || 'Error al guardar.'; return of(null); }), finalize(() => this.isSubmittingPersonal = false))
-      .subscribe((res: any) => { if (res) { this.personalMsg = 'Datos actualizados correctamente.'; this.editandoPersonal = false; this.loadPerfil(); } });
+      .subscribe((res: any) => {
+        if (res) {
+          this.personalMsg = 'Datos actualizados correctamente.';
+          this.editandoPersonal = false;
+          this.loadPerfil();
+          this.authService.updateCurrentUser({ genero: this.personalForm.genero as any });
+        }
+      });
   }
 
   submitCambiarPassword(): void {

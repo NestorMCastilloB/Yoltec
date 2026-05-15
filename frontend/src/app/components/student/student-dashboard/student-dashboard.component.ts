@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { ThemeService } from '../../../services/theme.service';
 
@@ -40,9 +41,10 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
-    this.studentName = user ? `${user.nombre} ${user.apellido}` : 'Alumno';
-    this.saludoBienvenida = user?.genero === 'femenino' ? 'Bienvenida' : 'Bienvenido';
+    this.authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
+      this.studentName = user ? `${user.nombre} ${user.apellido}` : 'Alumno';
+      this.saludoBienvenida = (user as any)?.genero === 'femenino' ? 'Bienvenida' : 'Bienvenido';
+    });
   }
 
   ngOnDestroy(): void {
