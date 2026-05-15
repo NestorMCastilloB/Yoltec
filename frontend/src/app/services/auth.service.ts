@@ -225,6 +225,15 @@ export class AuthService implements OnDestroy {
   private setUser(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
+
+  // Actualizar campos del user en localStorage y emitir cambio (sin re-login)
+  updateCurrentUser(partial: Partial<User>): void {
+    const current = this.getCurrentUser();
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    this.setUser(updated);
+    this.userSubject.next(updated);
+  }
   
   // Obtener el usuario almacenado en el almacenamiento local
   private getStoredUser(): User | null {
