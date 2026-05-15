@@ -13,14 +13,15 @@ class AutoCancelarCitasPasadas extends Command
 
     public function handle(): void
     {
-        $now = Carbon::now();
+        // Grace period 15 min: la cita se marca como "no asistió" 15 min después de la hora agendada
+        $cutoff = Carbon::now()->subMinutes(15);
 
         $affected = Cita::where('estatus', 'programada')
-            ->where(function ($query) use ($now) {
-                $query->where('fecha_cita', '<', $now->toDateString())
-                    ->orWhere(function ($sub) use ($now) {
-                        $sub->where('fecha_cita', $now->toDateString())
-                            ->where('hora_cita', '<=', $now->format('H:i'));
+            ->where(function ($query) use ($cutoff) {
+                $query->where('fecha_cita', '<', $cutoff->toDateString())
+                    ->orWhere(function ($sub) use ($cutoff) {
+                        $sub->where('fecha_cita', $cutoff->toDateString())
+                            ->where('hora_cita', '<=', $cutoff->format('H:i'));
                     });
             })
             ->update(['estatus' => 'no_asistio']);

@@ -81,6 +81,17 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   filtroFechaDesde = '';
   filtroFechaHasta = '';
 
+  // Paginación client-side del historial
+  historialPagina = 1;
+  readonly historialPorPagina = 10;
+
+  // Drawer de detalle
+  drawerCita: Cita | null = null;
+  drawerCitaAbierto = false;
+
+  // Modal nueva cita — pasos
+  createStep: 1 | 2 | 3 = 1;
+
   // Modal reprogramar
   showReprogramarModal = false;
   reprogramarCitaId: number | null = null;
@@ -117,6 +128,37 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   get filteredPendingCitas(): Cita[] { return this.filterCitas(this.pendingCitas); }
   get filteredHandledCitas(): Cita[] { return this.filterCitas(this.handledCitas); }
 
+  get pagedHandledCitas(): Cita[] {
+    const start = (this.historialPagina - 1) * this.historialPorPagina;
+    return this.filteredHandledCitas.slice(start, start + this.historialPorPagina);
+  }
+
+  get totalPaginasHistorial(): number {
+    return Math.max(1, Math.ceil(this.filteredHandledCitas.length / this.historialPorPagina));
+  }
+
+  cambiarPaginaHistorial(p: number): void {
+    if (p < 1 || p > this.totalPaginasHistorial) return;
+    this.historialPagina = p;
+  }
+
+  get citasHoy(): number {
+    return this.citas.filter(c => c.fecha_cita === this.today).length;
+  }
+
+  get proximaCitaObj(): Cita | null {
+    return this.pendingCitas.find(c => c.fecha_cita >= this.today) ?? null;
+  }
+
+  get canceladasMes(): number {
+    const ahora = new Date();
+    return this.citas.filter(c => {
+      if (c.estatus !== 'cancelada') return false;
+      const [y, m] = c.fecha_cita.split('-').map(Number);
+      return y === ahora.getFullYear() && (m ?? 0) === ahora.getMonth() + 1;
+    }).length;
+  }
+
   private filterCitas(citas: Cita[]): Cita[] {
     let result = citas;
     const q = this.searchCitas.trim().toLowerCase();
@@ -143,6 +185,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     this.filtroFechaDesde = '';
     this.filtroFechaHasta = '';
     this.searchCitas = '';
+    this.historialPagina = 1;
   }
 
   get calendarLabel(): string {
@@ -164,6 +207,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
 
   toggleCreateForm(): void {
     this.showCreateForm = !this.showCreateForm;
+    this.createStep = 1;
     this.submitMessage = null;
     if (this.showCreateForm) {
       this.loadAvailability();
@@ -191,8 +235,9 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   }
 
   onCreateCita(form: NgForm): void {
-    if (form.invalid || !this.createFormData.numero_control?.trim()) {
-      this.submitMessage = 'Ingresa el número de control del alumno.';
+    const noCtrl = this.createFormData.numero_control?.trim();
+    if (!noCtrl || !this.createFormData.fecha_cita || !this.createFormData.hora_cita) {
+      this.submitMessage = 'Completa todos los campos requeridos.';
       return;
     }
 
@@ -206,7 +251,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
       fecha_cita: this.createFormData.fecha_cita!,
       hora_cita: normalizedTime,
       motivo: this.createFormData.motivo || undefined,
-      numero_control: this.createFormData.numero_control.trim()
+      numero_control: (this.createFormData.numero_control ?? '').trim()
     };
 
     this.isSubmitting = true;
@@ -229,7 +274,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
       )
       .subscribe(response => {
         if (response?.cita) {
-          this.submitMessage = 'Cita agendada correctamente.';
+          this.createStep = 1;
           this.loadCitas();
           this.loadAvailability();
           this.resetForm();
@@ -371,6 +416,72 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
           this.closeReprogramar();
         }
       });
+  }
+
+  // === Drawer de detalle ===
+
+  openDrawer(cita: Cita): void {
+    this.drawerCita = cita;
+    this.drawerCitaAbierto = true;
+  }
+
+  closeDrawer(): void {
+    this.drawerCita = null;
+    this.drawerCitaAbierto = false;
+  }
+
+  drawerAtender(cita: Cita): void {
+    this.closeDrawer();
+    this.onMarkAsAttended(cita);
+  }
+
+  drawerCancelar(cita: Cita): void {
+    this.closeDrawer();
+    this.onCancelCita(cita);
+  }
+
+  drawerNoAsistio(cita: Cita): void {
+    this.closeDrawer();
+    this.onMarkAsNoShow(cita);
+  }
+
+  drawerReprogramar(cita: Cita): void {
+    this.closeDrawer();
+    this.openReprogramar(cita);
+  }
+
+  stepNext(): void {
+    if (this.createStep === 1) {
+      if (!this.createFormData.numero_control?.trim()) {
+        this.submitMessage = 'Ingresa el número de control del alumno.';
+        return;
+      }
+      this.submitMessage = null;
+      this.createStep = 2;
+    } else if (this.createStep === 2) {
+      if (!this.createFormData.fecha_cita) {
+        this.submitMessage = 'Selecciona una fecha.';
+        return;
+      }
+      if (!this.createFormData.hora_cita) {
+        this.submitMessage = 'Selecciona una hora.';
+        return;
+      }
+      this.submitMessage = null;
+      this.createStep = 3;
+    }
+  }
+
+  stepBack(): void {
+    if (this.createStep > 1) this.createStep = (this.createStep - 1) as 1 | 2 | 3;
+    this.submitMessage = null;
+  }
+
+  formatFechaCorta(fecha: string): string {
+    if (!fecha) return '—';
+    const [y, m, d] = fecha.split('-').map(Number);
+    return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+      .format(new Date(y, (m ?? 1) - 1, d ?? 1)).toUpperCase();
   }
 
   // === Vista semanal ===

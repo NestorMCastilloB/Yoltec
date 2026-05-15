@@ -8,7 +8,7 @@ use App\Models\Cita;
 use Illuminate\Http\Request;
 class RecetaController extends Controller
 {
-    // Listar recetas
+    // Listar recetas — alumno recibe array plano, doctor recibe paginación (15/pag)
     public function index(Request $request)
     {
         $user = $request->user();
@@ -18,29 +18,28 @@ class RecetaController extends Controller
                             ->with(['cita', 'doctor'])
                             ->orderBy('fecha_emision', 'desc')
                             ->get();
-        } else {
-            $search = trim($request->input('search', ''));
-            $query = Receta::with([
-                               'cita:id,fecha_cita,hora_cita,alumno_id',
-                               'cita.alumno:id,nombre,apellido,numero_control',
-                               'alumno:id,nombre,apellido,numero_control',
-                           ])
-                           ->where('doctor_id', $user->id);
-
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('alumno', fn ($u) =>
-                        $u->where('nombre', 'ILIKE', "%{$search}%")
-                          ->orWhere('apellido', 'ILIKE', "%{$search}%")
-                          ->orWhere('numero_control', 'ILIKE', "%{$search}%")
-                    )->orWhere('medicamentos', 'ILIKE', "%{$search}%");
-                });
-            }
-
-            $recetas = $query->orderBy('fecha_emision', 'desc')->get();
+            return response()->json($recetas, 200);
         }
 
-        return response()->json($recetas, 200);
+        $search = trim($request->input('search', ''));
+        $query = Receta::with([
+                           'cita:id,fecha_cita,hora_cita,alumno_id',
+                           'cita.alumno:id,nombre,apellido,numero_control',
+                           'alumno:id,nombre,apellido,numero_control',
+                       ])
+                       ->where('doctor_id', $user->id);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('alumno', fn ($u) =>
+                    $u->where('nombre', 'ILIKE', "%{$search}%")
+                      ->orWhere('apellido', 'ILIKE', "%{$search}%")
+                      ->orWhere('numero_control', 'ILIKE', "%{$search}%")
+                )->orWhere('medicamentos', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        return response()->json($query->orderBy('fecha_emision', 'desc')->paginate(15), 200);
     }
 
     // Crear receta (solo doctor — protegido por role:doctor middleware)
