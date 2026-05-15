@@ -24,12 +24,12 @@ class CitaController extends Controller
 
         if ($user->esAlumno()) {
             $citas = Cita::where('alumno_id', $user->id)
-                        ->with(['doctor'])
+                        ->with(['doctor:id,nombre,apellido,username'])
                         ->orderBy('fecha_cita', 'desc')
                         ->orderBy('hora_cita', 'desc')
                         ->get();
         } else {
-            $citas = Cita::with(['alumno'])
+            $citas = Cita::with(['alumno:id,nombre,apellido,numero_control'])
                         ->orderBy('fecha_cita', 'desc')
                         ->orderBy('hora_cita', 'desc')
                         ->get();
@@ -51,62 +51,43 @@ class CitaController extends Controller
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = (clone $start)->endOfMonth();
 
-        $citas = Cita::whereBetween('fecha_cita', [$start->toDateString(), $end->toDateString()])
-            ->where('estatus', 'programada')
-            ->get();
+        $days = Cache::remember("disp_{$year}_{$month}", 900, function () use ($start, $end, $year, $month) {
+            $citas = Cita::whereBetween('fecha_cita', [$start->toDateString(), $end->toDateString()])
+                ->where('estatus', 'programada')
+                ->select('fecha_cita', 'hora_cita')
+                ->get();
 
-        $grouped = [];
-        foreach ($citas as $cita) {
-            // "fecha_cita" está casteada como Carbon en el modelo, así que
-            // la normalizamos a string (Y-m-d) para usarla como llave de arreglo.
-            $dateKey = $cita->fecha_cita instanceof Carbon
-                ? $cita->fecha_cita->toDateString()
-                : (string) $cita->fecha_cita;
+            $grouped = [];
+            foreach ($citas as $cita) {
+                $dateKey = $cita->fecha_cita instanceof Carbon
+                    ? $cita->fecha_cita->toDateString()
+                    : (string) $cita->fecha_cita;
 
-            $normalizedHour = Carbon::parse($cita->hora_cita)->format('H:i');
-            $grouped[$dateKey][] = $normalizedHour;
-        }
+                $grouped[$dateKey][] = Carbon::parse($cita->hora_cita)->format('H:i');
+            }
 
-        $types = config('clinic.types', []);
+            $types = config('clinic.types', []);
+            $result = [];
+            foreach ($grouped as $date => $slots) {
+                $result[$date] = ['date' => $date, 'taken_slots' => array_values(array_unique($slots)), 'special' => null];
+            }
 
-        $days = [];
-        foreach ($grouped as $date => $slots) {
-            $uniqueSlots = array_values(array_unique($slots));
-            $days[$date] = [
-                'date' => $date,
-                'taken_slots' => $uniqueSlots,
-                'special' => null,
-            ];
-        }
+            foreach (DiaEspecial::whereYear('fecha', $year)->whereMonth('fecha', $month)->get() as $dia) {
+                $date = $dia->fecha->toDateString();
+                $result[$date] = array_merge($result[$date] ?? ['date' => $date, 'taken_slots' => [], 'special' => null], [
+                    'special' => [
+                        'type'   => $dia->tipo,
+                        'label'  => $dia->etiqueta,
+                        'status' => $types[$dia->tipo]['status'] ?? 'full',
+                        'color'  => $types[$dia->tipo]['color'] ?? '#ef5350',
+                    ],
+                ]);
+            }
 
-        // Leer días especiales de la BD (en lugar del config estático)
-        $diasEspeciales = DiaEspecial::whereYear('fecha', $year)
-            ->whereMonth('fecha', $month)
-            ->get();
+            return array_values($result);
+        });
 
-        foreach ($diasEspeciales as $dia) {
-            $date = $dia->fecha->toDateString();
-            $type = $dia->tipo;
-
-            $days[$date] = array_merge($days[$date] ?? [
-                'date' => $date,
-                'taken_slots' => [],
-                'special' => null,
-            ], [
-                'special' => [
-                    'type' => $type,
-                    'label' => $dia->etiqueta,
-                    'status' => $types[$type]['status'] ?? 'full',
-                    'color' => $types[$type]['color'] ?? '#ef5350',
-                ],
-            ]);
-        }
-
-        return response()->json([
-            'month' => $month,
-            'year' => $year,
-            'days' => array_values($days),
-        ]);
+        return response()->json(['month' => $month, 'year' => $year, 'days' => $days]);
     }
 
     // Crear cita
@@ -177,7 +158,9 @@ class CitaController extends Controller
             ], 422);
         }
 
-        $cita->load(['alumno', 'doctor']);
+        $cita->load(['alumno:id,nombre,apellido,numero_control,fcm_token', 'doctor:id,nombre,apellido']);
+        $fechaCita = Carbon::parse($cita->fecha_cita);
+        Cache::forget("disp_{$fechaCita->year}_{$fechaCita->month}");
 
         // Notificación push al alumno
         if ($cita->alumno?->fcm_token) {
@@ -226,7 +209,9 @@ class CitaController extends Controller
             ], 400);
         }
 
+        $mes = Carbon::parse($cita->fecha_cita);
         $cita->update(['estatus' => 'cancelada']);
+        Cache::forget("disp_{$mes->year}_{$mes->month}");
         $cita->load('alumno');
 
         // Notificación push al alumno
@@ -307,11 +292,15 @@ class CitaController extends Controller
             return response()->json(['message' => 'El horario seleccionado ya no está disponible.'], 422);
         }
 
+        $mesAnterior = Carbon::parse($cita->fecha_cita);
         $cita->update([
             'fecha_cita' => $validated['fecha_cita'],
             'hora_cita'  => $validated['hora_cita'],
         ]);
-        $cita->load(['alumno', 'doctor']);
+        $mesNuevo = Carbon::parse($validated['fecha_cita']);
+        Cache::forget("disp_{$mesAnterior->year}_{$mesAnterior->month}");
+        Cache::forget("disp_{$mesNuevo->year}_{$mesNuevo->month}");
+        $cita->load(['alumno:id,nombre,apellido,numero_control,fcm_token', 'doctor:id,nombre,apellido']);
 
         if ($cita->alumno?->fcm_token) {
             (new FcmService())->send(

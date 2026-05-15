@@ -19,10 +19,25 @@ class RecetaController extends Controller
                             ->orderBy('fecha_emision', 'desc')
                             ->get();
         } else {
-            $recetas = Receta::with(['cita.alumno', 'alumno'])
-                            ->where('doctor_id', $user->id)
-                            ->orderBy('fecha_emision', 'desc')
-                            ->get();
+            $search = trim($request->input('search', ''));
+            $query = Receta::with([
+                               'cita:id,fecha_cita,hora_cita,alumno_id',
+                               'cita.alumno:id,nombre,apellido,numero_control',
+                               'alumno:id,nombre,apellido,numero_control',
+                           ])
+                           ->where('doctor_id', $user->id);
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('alumno', fn ($u) =>
+                        $u->where('nombre', 'ILIKE', "%{$search}%")
+                          ->orWhere('apellido', 'ILIKE', "%{$search}%")
+                          ->orWhere('numero_control', 'ILIKE', "%{$search}%")
+                    )->orWhere('medicamentos', 'ILIKE', "%{$search}%");
+                });
+            }
+
+            $recetas = $query->orderBy('fecha_emision', 'desc')->get();
         }
 
         return response()->json($recetas, 200);

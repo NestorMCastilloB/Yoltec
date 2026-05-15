@@ -14,8 +14,8 @@ class BitacoraController extends Controller
         $user = $request->user();
 
         $query = $user->esAlumno()
-            ? Bitacora::where('alumno_id', $user->id)->with(['cita', 'doctor'])
-            : Bitacora::with(['cita', 'alumno']);
+            ? Bitacora::where('alumno_id', $user->id)->with(['cita:id,fecha_cita,hora_cita,motivo', 'doctor:id,nombre,apellido'])
+            : Bitacora::with(['cita:id,fecha_cita,hora_cita,motivo,alumno_id', 'alumno:id,nombre,apellido,numero_control']);
 
         if ($request->filled('fecha_desde')) {
             $query->whereDate('created_at', '>=', $request->fecha_desde);
