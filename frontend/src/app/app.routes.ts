@@ -2,20 +2,13 @@ import { Routes } from '@angular/router';
 import { SplashScreenComponent } from './components/login/splash-screen/splash-screen.component';
 import { LoginComponent } from './components/login/login/login.component';
 import { Verify2faComponent } from './components/login/verify-2fa/verify-2fa.component';
-import { StudentDashboardComponent } from './components/student/student-dashboard/student-dashboard.component';
-import { DoctorDashboardComponent } from './components/doctor/doctor-dashboard/doctor-dashboard.component';
-import { AdminDashboardComponent } from './components/admin/admin-dashboard/admin-dashboard.component';
-import { AdminLoginComponent } from './components/admin/admin-login/admin-login.component';
-import { UsuariosComponent } from './components/admin/usuarios/usuarios.component';
-import { DiasEspecialesComponent } from './components/admin/dias-especiales/dias-especiales.component';
 import { ForgotPasswordComponent } from './components/login/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/login/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth.guard';
-import { NuevaCitaDoctorComponent } from './components/doctor/nueva-cita/nueva-cita-doctor.component';
 
 export const routes: Routes = [
-  { 
-    path: '', 
+  {
+    path: '',
     component: SplashScreenComponent,
     pathMatch: 'full'
   },
@@ -27,45 +20,45 @@ export const routes: Routes = [
     path: 'verify-2fa',
     component: Verify2faComponent
   },
-  { 
-    path: 'student-dashboard', 
-    component: StudentDashboardComponent,
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+  {
+    path: 'student-dashboard',
+    loadComponent: () => import('./components/student/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent),
     canActivate: [AuthGuard],
     data: { roles: ['alumno'] }
   },
   {
     path: 'doctor-dashboard',
-    component: DoctorDashboardComponent,
+    loadComponent: () => import('./components/doctor/doctor-dashboard/doctor-dashboard.component').then(m => m.DoctorDashboardComponent),
     canActivate: [AuthGuard],
     data: { roles: ['doctor'] }
   },
   {
     path: 'doctor/nueva-cita',
-    component: NuevaCitaDoctorComponent,
+    loadComponent: () => import('./components/doctor/nueva-cita/nueva-cita-doctor.component').then(m => m.NuevaCitaDoctorComponent),
     canActivate: [AuthGuard],
     data: { roles: ['doctor'] }
   },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'acceso-gestion',
-    component: AdminLoginComponent
+    loadComponent: () => import('./components/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },
   {
     path: 'admin-dashboard',
-    component: AdminDashboardComponent,
+    loadComponent: () => import('./components/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
     canActivate: [AuthGuard],
     data: { roles: ['admin'] }
   },
   {
     path: 'admin-usuarios',
-    component: UsuariosComponent,
+    loadComponent: () => import('./components/admin/usuarios/usuarios.component').then(m => m.UsuariosComponent),
     canActivate: [AuthGuard],
     data: { roles: ['admin'] }
   },
   {
     path: 'admin-dias-especiales',
-    component: DiasEspecialesComponent,
+    loadComponent: () => import('./components/admin/dias-especiales/dias-especiales.component').then(m => m.DiasEspecialesComponent),
     canActivate: [AuthGuard],
     data: { roles: ['admin'] }
   },

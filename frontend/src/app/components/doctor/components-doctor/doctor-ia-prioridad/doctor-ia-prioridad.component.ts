@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { IaPriorityService, ResumenPrioridad, ClasificacionPrioridad } from '../../../../services/ia-priority.service';
@@ -7,7 +8,7 @@ import { IaPriorityService, ResumenPrioridad, ClasificacionPrioridad } from '../
 @Component({
   selector: 'app-doctor-ia-prioridad',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './doctor-ia-prioridad.component.html',
   styleUrls: ['./doctor-ia-prioridad.component.css']
 })
@@ -19,6 +20,7 @@ export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
   errorMessage = '';
 
   filtroActivo: 'todas' | 'alta' | 'media' | 'baja' = 'todas';
+  busqueda = '';
   expandedCards = new Set<number>();
 
   private destroy$ = new Subject<void>();
@@ -61,8 +63,14 @@ export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
 
   get citasFiltradas(): ClasificacionPrioridad[] {
     if (!this.prioridadResumen) return [];
-    if (this.filtroActivo === 'todas') return this.prioridadResumen.citas;
-    return this.prioridadResumen.citas.filter(c => c.prioridad === this.filtroActivo);
+    const busq = this.busqueda.toLowerCase().trim();
+    return this.prioridadResumen.citas.filter(c => {
+      if (this.filtroActivo !== 'todas' && c.prioridad !== this.filtroActivo) return false;
+      if (!busq) return true;
+      const nombre = `${c.cita.alumno.nombre ?? ''} ${c.cita.alumno.apellido ?? ''}`.toLowerCase();
+      const ctrl = c.cita.alumno.numero_control?.toLowerCase() ?? '';
+      return nombre.includes(busq) || ctrl.includes(busq);
+    });
   }
 
   setFiltro(filtro: 'todas' | 'alta' | 'media' | 'baja'): void {

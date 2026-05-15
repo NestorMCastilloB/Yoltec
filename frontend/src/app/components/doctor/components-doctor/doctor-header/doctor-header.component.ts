@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../../services/theme.service';
 
 @Component({
   selector: 'app-doctor-header',
@@ -15,15 +16,22 @@ export class DoctorHeaderComponent {
   @Output() sectionChange = new EventEmitter<string>();
   @Output() logoutEvent = new EventEmitter<void>();
   @Output() exportEvent = new EventEmitter<void>();
-  @Output() searchEvent = new EventEmitter<string>();
 
-  onSearch(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.searchEvent.emit(value);
+  userMenuOpen = false;
+
+  constructor(public themeService: ThemeService) {}
+
+  toggleUserMenu(): void { this.userMenuOpen = !this.userMenuOpen; }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (!(e.target as Element).closest('.user-menu-wrap')) {
+      this.userMenuOpen = false;
+    }
   }
 
   private sectionMap: Record<string, { crumb: string; title: string; showExport: boolean; primaryAction?: string }> = {
-    'inicio':            { crumb: 'Inicio · Panel',           title: 'Panel del consultorio', showExport: true,  primaryAction: '+ Nueva cita' },
+    'inicio':            { crumb: 'Inicio · Panel',           title: 'Panel del consultorio', showExport: false, primaryAction: '+ Nueva cita' },
     'citas':             { crumb: 'Citas · Calendario',       title: 'Citas',                 showExport: false, primaryAction: '+ Nueva cita' },
     'bitacoras':         { crumb: 'Bitácoras · Historial',    title: 'Bitácoras',             showExport: true },
     'recetas':           { crumb: 'Recetas · Listado',        title: 'Recetas',               showExport: false },

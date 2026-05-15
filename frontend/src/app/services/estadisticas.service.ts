@@ -21,11 +21,18 @@ export interface ResumenEstados {
   no_asistio: number;
 }
 
+export interface DxFrecuente {
+  diagnostico: string;
+  total: number;
+  pct: number;
+}
+
 export interface Estadisticas {
   citas_por_mes: MesStats[];
   resumen_estados: ResumenEstados;
   tasa_asistencia: number;
   total_citas: number;
+  diagnosticos_frecuentes: DxFrecuente[];
 }
 
 @Injectable({ providedIn: 'root' })
