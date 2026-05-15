@@ -24,6 +24,9 @@ class Receta {
       medicamentos = meds
           .map((m) => Medicamento.fromJson(m as Map<String, dynamic>))
           .toList();
+    } else if (meds is String && meds.isNotEmpty) {
+      // Backend almacena medicamentos como texto plano — mostrar como entrada única
+      medicamentos = [Medicamento(nombre: meds, dosis: '', frecuencia: '', duracion: '')];
     }
 
     final doctor = json['doctor'] as Map<String, dynamic>?;
