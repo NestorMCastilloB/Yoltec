@@ -88,16 +88,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/recetas/{id}', [RecetaController::class, 'update']);
     });
 
-    // Pre-evaluaciones IA
+    // Pre-evaluaciones IA — rutas estáticas ANTES del wildcard {id}
     Route::post('/pre-evaluacion/chat', [PreEvaluacionIAController::class, 'chat']);
     Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
     Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);
     Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
-    Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
     Route::middleware('role:doctor')->group(function () {
         Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
         Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
     });
+    Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
 
     // Estadísticas — solo doctor
     Route::middleware('role:doctor')->get('/estadisticas', [EstadisticasController::class, 'index']);
