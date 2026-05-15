@@ -98,4 +98,26 @@ class CitaService
             ->when($exceptId, fn($q) => $q->where('id', '!=', $exceptId))
             ->exists();
     }
+
+    // Marca como "no asistió" citas vencidas (grace 15 min). Throttled a 1 ejecución/5min vía caché
+    // para evitar update masivo en cada request. Fallback al scheduler cuando éste no corre (Render).
+    public function marcarPasadasComoNoAsistio(): void
+    {
+        if (Cache::has('auto_no_asistio_lock')) {
+            return;
+        }
+        Cache::put('auto_no_asistio_lock', true, 300);
+
+        $cutoff = Carbon::now()->subMinutes(15);
+
+        Cita::where('estatus', 'programada')
+            ->where(function ($query) use ($cutoff) {
+                $query->where('fecha_cita', '<', $cutoff->toDateString())
+                    ->orWhere(function ($sub) use ($cutoff) {
+                        $sub->where('fecha_cita', $cutoff->toDateString())
+                            ->where('hora_cita', '<=', $cutoff->format('H:i'));
+                    });
+            })
+            ->update(['estatus' => 'no_asistio']);
+    }
 }
