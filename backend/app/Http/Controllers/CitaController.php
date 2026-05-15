@@ -17,6 +17,9 @@ class CitaController extends Controller
 
     public function index(Request $request)
     {
+        // Lazy fallback al scheduler (Render free tier no ejecuta cron)
+        $this->citaService->marcarPasadasComoNoAsistio();
+
         $user = $request->user();
 
         $citas = $user->esAlumno()
