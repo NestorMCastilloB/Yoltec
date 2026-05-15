@@ -12,6 +12,7 @@ interface CalDay {
   date: string;
   label: number;
   isCurrentMonth: boolean;
+  isPast: boolean;
   dia: DiaEspecialItem | null;
 }
 
@@ -95,6 +96,9 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
     const daysBack = dow === 0 ? 6 : dow - 1;
     const cursor = new Date(year, month, 1 - daysBack);
 
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
     const diasMap = new Map(this.dias.map(d => [d.fecha, d]));
     const rows: CalDay[][] = [];
 
@@ -103,7 +107,13 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
       for (let d = 0; d < 7; d++) {
         if (cursor.getDay() !== 0) {
           const ds = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-          row.push({ date: ds, label: cursor.getDate(), isCurrentMonth: cursor.getMonth() === month, dia: diasMap.get(ds) ?? null });
+          row.push({
+            date: ds,
+            label: cursor.getDate(),
+            isCurrentMonth: cursor.getMonth() === month,
+            isPast: ds < todayStr,
+            dia: diasMap.get(ds) ?? null
+          });
         }
         cursor.setDate(cursor.getDate() + 1);
       }
@@ -113,6 +123,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
   }
 
   selectDay(day: CalDay): void {
+    if (day.isPast && !day.dia) return;
     this.selectedDate = day.date;
     this.openModalAgregar(day.date);
   }

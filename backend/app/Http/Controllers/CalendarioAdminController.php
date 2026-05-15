@@ -29,9 +29,11 @@ class CalendarioAdminController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'fecha'   => 'required|date',
+            'fecha'   => 'required|date|after_or_equal:today',
             'tipo'    => 'required|in:holiday,vacation,reduced',
             'etiqueta' => 'nullable|string|max:200',
+        ], [
+            'fecha.after_or_equal' => 'No se pueden registrar días especiales en fechas pasadas.',
         ]);
 
         $dia = DiaEspecial::updateOrCreate(
