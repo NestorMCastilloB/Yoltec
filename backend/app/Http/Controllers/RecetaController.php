@@ -43,14 +43,10 @@ class RecetaController extends Controller
         return response()->json($recetas, 200);
     }
 
-    // Crear receta (solo doctor)
+    // Crear receta (solo doctor — protegido por role:doctor middleware)
     public function store(Request $request)
     {
         $user = $request->user();
-
-        if (!$user->esDoctor()) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
 
         $validated = $request->validate([
             'cita_id' => 'required|exists:citas,id',
@@ -79,7 +75,7 @@ class RecetaController extends Controller
     }
 
     // Ver receta
-    public function show(Request $request, $id)
+    public function show(Request $request, int $id)
     {
         $user = $request->user();
         $receta = Receta::with(['cita', 'alumno', 'doctor'])->findOrFail($id);
@@ -92,15 +88,10 @@ class RecetaController extends Controller
         return response()->json($receta, 200);
     }
 
-    // Actualizar receta (solo doctor)
-    public function update(Request $request, $id)
+    // Actualizar receta (solo doctor — protegido por role:doctor middleware)
+    public function update(Request $request, int $id)
     {
-        $user = $request->user();
-
-        if (!$user->esDoctor()) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
+        $user   = $request->user();
         $receta = Receta::findOrFail($id);
 
         if ($receta->doctor_id !== $user->id) {
