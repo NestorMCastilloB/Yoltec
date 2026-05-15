@@ -6,7 +6,7 @@ import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
-import { DiasEspecialesService, DiaEspecialItem } from './dias-especiales.service';
+import { DiasEspecialesService, DiaEspecialItem, TipoDiaEspecial } from './dias-especiales.service';
 
 interface CalDay {
   date: string;
@@ -38,13 +38,20 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   // Modal agregar
   showModalAgregar = false;
-  form = { fecha: '', motivo: '' };
+  form: { fecha: string; tipo: TipoDiaEspecial; etiqueta: string } = { fecha: '', tipo: 'holiday', etiqueta: '' };
   formError: string | null = null;
   isSubmitting = false;
 
+  // Catálogo de tipos para el select
+  readonly tiposDia: { value: TipoDiaEspecial; label: string }[] = [
+    { value: 'holiday',  label: 'Festivo (sin atención)' },
+    { value: 'vacation', label: 'Vacaciones (sin atención)' },
+    { value: 'reduced',  label: 'Horario reducido' },
+  ];
+
   // Modal eliminar
   confirmDeleteId: number | null = null;
-  confirmDeleteMotivo = '';
+  confirmDeleteEtiqueta = '';
 
   constructor(
     private router: Router,
@@ -65,7 +72,9 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   loadDias(): void {
     this.isLoading = true;
-    this.service.getDias().pipe(
+    const month = this.calCurrentMonth.getMonth() + 1;
+    const year = this.calCurrentMonth.getFullYear();
+    this.service.getDias(month, year).pipe(
       takeUntil(this.destroy$),
       catchError(() => of([])),
       finalize(() => { this.isLoading = false; })
@@ -86,7 +95,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
       this.calCurrentMonth.getFullYear(),
       this.calCurrentMonth.getMonth() + dir, 1
     );
-    this.buildCalGrid();
+    this.loadDias();
   }
 
   private buildCalGrid(): void {
@@ -132,7 +141,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   openModalAgregar(fecha = ''): void {
     this.formError = null;
-    this.form = { fecha, motivo: '' };
+    this.form = { fecha, tipo: 'holiday', etiqueta: '' };
     this.showModalAgregar = true;
   }
 
@@ -144,10 +153,14 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   submitAgregar(): void {
     if (!this.form.fecha) { this.formError = 'Selecciona una fecha.'; return; }
-    if (this.form.motivo.trim().length < 3) { this.formError = 'El motivo debe tener al menos 3 caracteres.'; return; }
+    if (!this.form.tipo) { this.formError = 'Selecciona el tipo de día.'; return; }
     this.isSubmitting = true;
     this.formError = null;
-    this.service.agregar(this.form.fecha, this.form.motivo.trim()).pipe(
+    this.service.agregar({
+      fecha: this.form.fecha,
+      tipo: this.form.tipo,
+      etiqueta: this.form.etiqueta.trim() || null,
+    }).pipe(
       takeUntil(this.destroy$),
       catchError(err => { this.formError = err?.error?.message ?? 'Error al guardar.'; return of(null); }),
       finalize(() => { this.isSubmitting = false; })
@@ -160,12 +173,16 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   askEliminar(dia: DiaEspecialItem): void {
     this.confirmDeleteId = dia.id;
-    this.confirmDeleteMotivo = dia.motivo;
+    this.confirmDeleteEtiqueta = dia.etiqueta || this.tipoLabel(dia.tipo);
   }
 
   cancelEliminar(): void {
     this.confirmDeleteId = null;
-    this.confirmDeleteMotivo = '';
+    this.confirmDeleteEtiqueta = '';
+  }
+
+  tipoLabel(tipo: TipoDiaEspecial): string {
+    return this.tiposDia.find(t => t.value === tipo)?.label ?? tipo;
   }
 
   confirmarEliminar(): void {
