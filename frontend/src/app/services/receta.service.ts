@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { API_BASE_URL } from './api-config';
 
 export interface Receta {
@@ -45,17 +46,37 @@ export interface CreateRecetaPayload {
 export class RecetaService {
   private readonly baseUrl = `${API_BASE_URL}/recetas`;
 
+  private recetasCache: Receta[] | null = null;
+  private recetasCacheExpiry = 0;
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000;
+
   constructor(private http: HttpClient) {}
 
   getRecetas(): Observable<Receta[]> {
-    return this.http.get<Receta[]>(this.baseUrl);
+    if (this.recetasCache && Date.now() < this.recetasCacheExpiry) {
+      return of(this.recetasCache);
+    }
+    return this.http.get<Receta[]>(this.baseUrl).pipe(
+      tap(recetas => {
+        this.recetasCache = recetas;
+        this.recetasCacheExpiry = Date.now() + this.CACHE_TTL_MS;
+      })
+    );
+  }
+
+  invalidarRecetas(): void {
+    this.recetasCache = null;
   }
 
   createReceta(payload: CreateRecetaPayload): Observable<{ message: string; receta: Receta }> {
-    return this.http.post<{ message: string; receta: Receta }>(this.baseUrl, payload);
+    return this.http.post<{ message: string; receta: Receta }>(this.baseUrl, payload).pipe(
+      tap(() => { this.recetasCache = null; })
+    );
   }
 
   updateReceta(id: number, payload: CreateRecetaPayload): Observable<{ message: string; receta: Receta }> {
-    return this.http.put<{ message: string; receta: Receta }>(`${this.baseUrl}/${id}`, payload);
+    return this.http.put<{ message: string; receta: Receta }>(`${this.baseUrl}/${id}`, payload).pipe(
+      tap(() => { this.recetasCache = null; })
+    );
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { API_BASE_URL } from './api-config';
 
 export interface Bitacora {
@@ -55,23 +55,39 @@ export interface CreateBitacoraPayload {
 export class BitacoraService {
   private readonly baseUrl = `${API_BASE_URL}/bitacoras`;
 
+  private bitacorasCache: Bitacora[] | null = null;
+  private bitacorasCacheExpiry = 0;
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000;
+
   constructor(private http: HttpClient) {}
 
-  getBitacoras(filtros?: { fecha_desde?: string; fecha_hasta?: string; alumno?: string }): Observable<Bitacora[]> {
-    let params: Record<string, string> = {};
-    if (filtros?.fecha_desde) params['fecha_desde'] = filtros.fecha_desde;
-    if (filtros?.fecha_hasta) params['fecha_hasta'] = filtros.fecha_hasta;
-    if (filtros?.alumno) params['alumno'] = filtros.alumno;
-    return this.http.get<{ bitacoras: Bitacora[] }>(this.baseUrl, { params }).pipe(
-      map(res => res.bitacoras ?? [])
+  // Carga todas las bitácoras sin filtros y cachea; el filtrado ocurre en el componente
+  getBitacoras(): Observable<Bitacora[]> {
+    if (this.bitacorasCache && Date.now() < this.bitacorasCacheExpiry) {
+      return of(this.bitacorasCache);
+    }
+    return this.http.get<{ bitacoras: Bitacora[] }>(this.baseUrl).pipe(
+      map(res => res.bitacoras ?? []),
+      tap(bitacoras => {
+        this.bitacorasCache = bitacoras;
+        this.bitacorasCacheExpiry = Date.now() + this.CACHE_TTL_MS;
+      })
     );
   }
 
+  invalidarBitacoras(): void {
+    this.bitacorasCache = null;
+  }
+
   createBitacora(payload: CreateBitacoraPayload): Observable<{ message: string; bitacora: Bitacora }> {
-    return this.http.post<{ message: string; bitacora: Bitacora }>(this.baseUrl, payload);
+    return this.http.post<{ message: string; bitacora: Bitacora }>(this.baseUrl, payload).pipe(
+      tap(() => { this.bitacorasCache = null; })
+    );
   }
 
   updateBitacora(id: number, payload: Partial<CreateBitacoraPayload>): Observable<{ message: string; bitacora: Bitacora }> {
-    return this.http.put<{ message: string; bitacora: Bitacora }>(`${this.baseUrl}/${id}`, payload);
+    return this.http.put<{ message: string; bitacora: Bitacora }>(`${this.baseUrl}/${id}`, payload).pipe(
+      tap(() => { this.bitacorasCache = null; })
+    );
   }
 }

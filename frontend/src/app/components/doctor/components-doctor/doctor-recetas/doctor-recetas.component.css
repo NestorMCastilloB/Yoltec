@@ -117,7 +117,7 @@
   background: var(--yol-primary-50);
   box-shadow: inset 3px 0 0 var(--yol-primary);
 }
-.rx-row.sel:hover { background: #d5e8db; }
+.rx-row.sel:hover { background: var(--yol-primary-50); }
 
 /* Avatar */
 .av {
@@ -134,7 +134,8 @@
   flex-shrink: 0;
 }
 
-.who b { display: block; font-size: 14px; font-weight: 600; color: var(--yol-text); }
+.who { min-width: 0; }
+.who b { display: block; font-size: 14px; font-weight: 600; color: var(--yol-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .who span { display: block; font-size: 12.5px; color: var(--yol-text-subtle); margin-top: 1px; }
 
 /* Badge fecha */
@@ -424,16 +425,36 @@
   margin-bottom: 10px;
 }
 
-.med-block {
-  border: 1px solid var(--yol-border);
-  border-radius: var(--yol-r-lg);
-  padding: 13px 14px;
-  font-size: 13px;
-  color: var(--yol-text);
-  line-height: 1.65;
-  white-space: pre-wrap;
+.med-cards { display: flex; flex-direction: column; gap: 6px; }
+
+.med-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--yol-surface);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
 }
+
+.med-num {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.med-text { font-size: 13px; color: var(--yol-text); line-height: 1.45; }
+
+.med-empty { font-size: 12.5px; color: var(--yol-text-subtle); text-align: center; padding: 10px; }
 
 .obs-block {
   font-size: 12.5px;

@@ -263,7 +263,7 @@ def train_model(X: np.ndarray, y_enc: np.ndarray, le: LabelEncoder):
 
 
 def main():
-    dataset_path = '../archive/Final_Augmented_dataset_Diseases_and_Symptoms.csv'
+    dataset_path = 'data/Final_Augmented_dataset_Diseases_and_Symptoms.csv'
 
     X_real, y_real = load_and_prepare(dataset_path)
 

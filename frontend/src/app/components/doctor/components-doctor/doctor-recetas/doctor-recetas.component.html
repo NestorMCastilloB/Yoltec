@@ -122,7 +122,13 @@
 
       <div class="d-section">
         <div class="d-section-head">Medicamentos prescritos</div>
-        <div class="med-block">{{ recetaSel.medicamentos }}</div>
+        <div class="med-cards">
+          <div class="med-card" *ngFor="let med of todosMeds(recetaSel.medicamentos); let i = index">
+            <span class="med-num">{{ i + 1 }}</span>
+            <span class="med-text">{{ med }}</span>
+          </div>
+          <div class="med-empty" *ngIf="!todosMeds(recetaSel.medicamentos).length">Sin medicamentos registrados</div>
+        </div>
       </div>
 
       <div class="d-section" *ngIf="recetaSel.indicaciones">

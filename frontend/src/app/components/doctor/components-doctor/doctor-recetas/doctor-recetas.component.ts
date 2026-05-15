@@ -152,17 +152,26 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
     return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || '?';
   }
 
-  // Primeros 2 medicamentos (separados por salto de línea)
-  medsMostrados(meds: string): string[] {
+  medsMostrados(meds: string | null | undefined): string[] {
+    if (!meds?.trim()) return [];
     return meds.split('\n').map(m => m.trim()).filter(Boolean).slice(0, 2);
   }
 
-  medsExtra(meds: string): number {
+  medsExtra(meds: string | null | undefined): number {
+    if (!meds?.trim()) return 0;
     return Math.max(0, meds.split('\n').filter(m => m.trim()).length - 2);
   }
 
+  // Lista completa para el drawer
+  todosMeds(meds: string | null | undefined): string[] {
+    if (!meds?.trim()) return [];
+    return meds.split('\n').map(m => m.trim()).filter(Boolean);
+  }
+
   formatFecha(fecha: string): string {
-    const [y, m, d] = fecha.split('-').map(Number);
+    if (!fecha) return '—';
+    const datePart = fecha.split('T')[0] ?? fecha;
+    const [y, m, d] = datePart.split('-').map(Number);
     return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
       .format(new Date(y, (m ?? 1) - 1, d ?? 1)).toUpperCase();
   }

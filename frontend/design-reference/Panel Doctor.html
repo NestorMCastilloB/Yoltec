@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Panel (Doctor)</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f5ee; --primary-100:#d1e3d8;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#f3f4f6;
+    --bg:#f8fafc; --chip-bg:#f3f4f6; --soft:#f9fafb;
+    --danger:#dc2626; --danger-50:#fef2f2;
+    --warn:#b45309; --warn-50:#fef3c7;
+    --info:#1d4ed8; --info-50:#dbeafe;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+  .app{display:flex;min-height:100vh}
+
+  .sb{width:240px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column;padding:22px 0}
+  .sb .brand{display:flex;align-items:center;gap:10px;padding:0 22px 24px;font-weight:700;font-size:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:28px;height:28px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb nav{display:flex;flex-direction:column;gap:2px;padding:14px 12px 0;flex:1}
+  .sb nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;border-radius:8px;cursor:pointer;text-decoration:none}
+  .sb nav a:hover{background:rgba(255,255,255,.05);color:#fff}
+  .sb nav a.active{background:rgba(255,255,255,.1);color:#fff;font-weight:600}
+  .sb nav a svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0}
+  .sb nav a .ct{margin-left:auto;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:99px}
+  .sb .user{margin-top:auto;padding:14px 18px 4px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .user .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px}
+  .sb .user b{display:block;font-size:13px;font-weight:600}
+  .sb .user span{font-size:11px;color:rgba(255,255,255,.65)}
+
+  .main{flex:1;min-width:0;padding:28px 32px 32px}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:14px;flex-wrap:wrap}
+  .crumb{font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+  h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.5px}
+  h1 span{color:var(--primary)}
+  .sub{font-size:13.5px;color:var(--text-muted);margin-top:4px;text-transform:capitalize}
+
+  .btn{padding:9px 14px;border-radius:7px;font:600 13px 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.outline{background:#fff;color:var(--primary);border-color:var(--primary)}
+  .btn.outline:hover{background:var(--primary-50)}
+  .btn.ghost{color:var(--text-muted);background:transparent;border-color:var(--border)}
+  .btn.ghost:hover{background:var(--chip-bg);color:var(--text)}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .kpi{background:#fff;border:1px solid var(--border-soft);border-radius:12px;padding:16px 18px;display:flex;gap:14px;align-items:center}
+  .kpi .ic{width:42px;height:42px;border-radius:10px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .kpi .ic svg{width:18px;height:18px;stroke-width:1.8}
+  .kpi .lbl{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .kpi .v{font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1;margin-top:4px;font-variant-numeric:tabular-nums}
+  .kpi.warn .ic{background:var(--warn-50);color:var(--warn)}
+  .kpi.info .ic{background:var(--info-50);color:var(--info)}
+  .kpi.danger .ic{background:var(--danger-50);color:var(--danger)}
+
+  /* Hero — próxima cita */
+  .hero{background:linear-gradient(135deg,#144a2e,#1a5c3a 60%,#246e48);color:#fff;border-radius:14px;padding:22px 24px;display:flex;align-items:center;gap:22px;margin-bottom:16px;box-shadow:0 6px 24px rgba(20,74,46,.18)}
+  .hero .av{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;flex-shrink:0;border:2px solid rgba(255,255,255,.18)}
+  .hero .who{flex:1;min-width:0}
+  .hero .label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;display:inline-flex;align-items:center;gap:6px}
+  .hero .label::before{content:'';width:6px;height:6px;border-radius:50%;background:#86efac;box-shadow:0 0 0 4px rgba(134,239,172,.18)}
+  .hero .name{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px}
+  .hero .meta{font-size:13px;color:rgba(255,255,255,.78);font-weight:500}
+  .hero .meta b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+  .hero .time-block{display:flex;align-items:baseline;gap:10px;margin-right:10px}
+  .hero .time-block .t{font-size:38px;font-weight:700;letter-spacing:-1.2px;line-height:1;font-variant-numeric:tabular-nums}
+  .hero .time-block .in{font-size:12px;color:rgba(255,255,255,.78);font-weight:500;text-align:right}
+  .hero .actions{display:flex;gap:8px;flex-shrink:0}
+  .hero .btn-w{background:#fff;color:var(--primary);font:600 13px 'Inter',sans-serif;padding:9px 14px;border-radius:7px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:0}
+  .hero .btn-w:hover{background:#e8f5ee}
+  .hero .btn-w.outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+  .hero .btn-w.outline:hover{background:rgba(255,255,255,.1)}
+
+  /* Layout */
+  .row{display:grid;gap:16px;margin-bottom:16px}
+  .row.r-2{grid-template-columns:1.5fr 1fr}
+  .row.r-3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:#fff;border:1px solid var(--border-soft);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+  .card-h{padding:14px 18px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .card-h h2{margin:0;font-size:14px;font-weight:600;letter-spacing:-.1px}
+  .card-h .meta{font-size:11.5px;color:var(--text-subtle);font-weight:500}
+  .card-h a{font-size:12px;color:var(--primary);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+  .card-h a:hover{text-decoration:underline}
+  .card-h a svg{width:12px;height:12px;stroke-width:2}
+
+  /* Agenda timeline (compact) */
+  .ag{display:flex;flex-direction:column}
+  .slot{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:0 18px;border-bottom:1px solid var(--border-soft);min-height:56px}
+  .slot:last-child{border-bottom:none}
+  .slot .h{padding-top:13px;font-size:12px;color:var(--text-muted);font-weight:600;font-variant-numeric:tabular-nums}
+  .slot .h small{display:block;font-size:10.5px;color:var(--text-subtle);font-weight:500;margin-top:2px}
+  .sc{margin:9px 0;padding:9px 12px;border-radius:8px;border-left:3px solid var(--primary);background:var(--primary-50);display:flex;align-items:center;gap:10px}
+  .sc.warn{border-left-color:var(--warn);background:var(--warn-50)}
+  .sc.info{border-left-color:var(--info);background:var(--info-50)}
+  .sc.now{box-shadow:inset 0 0 0 2px var(--primary)}
+  .sc .av{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10.5px;flex-shrink:0}
+  .sc.warn .av{background:var(--warn)}
+  .sc.info .av{background:var(--info)}
+  .sc .who{flex:1;min-width:0}
+  .sc .who b{display:block;font-size:13px;font-weight:600;color:var(--text)}
+  .sc .who span{display:block;font-size:11.5px;color:var(--text-muted)}
+  .sc .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;background:rgba(26,92,58,.18);color:var(--primary)}
+  .sc.warn .badge{background:rgba(180,83,9,.18);color:var(--warn)}
+  .sc.info .badge{background:rgba(29,78,216,.18);color:var(--info)}
+
+  /* Activity feed */
+  .feed{display:flex;flex-direction:column}
+  .fi{display:grid;grid-template-columns:28px 1fr auto;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border-soft)}
+  .fi:last-child{border-bottom:none}
+  .fi .ic{width:28px;height:28px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .fi .ic svg{width:13px;height:13px;stroke-width:1.8}
+  .fi.warn .ic{background:var(--warn-50);color:var(--warn)}
+  .fi.info .ic{background:var(--info-50);color:var(--info)}
+  .fi .lab b{display:block;font-size:13px;font-weight:600;color:var(--text)}
+  .fi .lab span{font-size:11.5px;color:var(--text-muted)}
+  .fi .t{font-size:11px;color:var(--text-subtle);font-weight:500;font-variant-numeric:tabular-nums;text-align:right;align-self:center}
+
+  /* Quick actions */
+  .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 18px}
+  .qa{padding:12px;border:1px solid var(--border-soft);border-radius:9px;display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;color:inherit;background:#fff}
+  .qa:hover{border-color:var(--primary);background:var(--primary-50)}
+  .qa .ic{width:32px;height:32px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .qa .ic svg{width:15px;height:15px;stroke-width:1.8}
+  .qa b{display:block;font-size:13px;font-weight:600}
+  .qa span{font-size:11.5px;color:var(--text-muted)}
+
+  /* Pre-eval mini list */
+  .pe{display:flex;flex-direction:column}
+  .pe-i{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--border-soft)}
+  .pe-i:last-child{border-bottom:none}
+  .pe-i .av{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+  .pe-i .who{flex:1;min-width:0}
+  .pe-i .who b{display:block;font-size:13px;font-weight:600}
+  .pe-i .who span{font-size:11.5px;color:var(--text-muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+  .pe-i .b{display:inline-flex;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;background:var(--danger-50);color:#991b1b}
+  .pe-i .b.media{background:var(--warn-50);color:var(--warn)}
+
+  /* Mini chart in card */
+  .mini-chart{padding:14px 18px}
+  .mini-chart .nums{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .mini-chart .nums .v{font-size:26px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .mini-chart .nums .delta{font-size:12px;font-weight:600;color:var(--primary)}
+  .spark{width:100%;height:60px;display:block}
+
+  .scope{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;margin:24px 32px 6px;padding-top:8px}
+  .scope::after{content:'';height:1px;background:var(--border);flex:1;width:160px;display:inline-block;margin-left:8px}
+
+  /* DARK */
+  .dark{background:#0f1117;color:#f9fafb}
+  .dark .sb{background:#0d2018}
+  .dark h1,.dark .kpi .v,.dark .card-h h2,.dark .fi .lab b,.dark .pe-i .who b,.dark .sc .who b,.dark .qa b,.dark .mini-chart .nums .v{color:#f9fafb}
+  .dark h1 span{color:#86efac}
+  .dark .crumb,.dark .sub,.dark .card-h .meta,.dark .fi .lab span,.dark .pe-i .who span,.dark .sc .who span,.dark .qa span,.dark .kpi .lbl,.dark .fi .t,.dark .slot .h,.dark .slot .h small{color:#9ca3af}
+  .dark .card,.dark .kpi,.dark .qa{background:#1a1d27;border-color:#2d3144;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .dark .card-h,.dark .slot,.dark .fi,.dark .pe-i{border-color:#2d3144}
+  .dark .sc{background:#143324;border-left-color:#86efac}
+  .dark .sc .av{background:#86efac;color:#0d2018}
+  .dark .sc .badge{background:rgba(134,239,172,.16);color:#86efac}
+  .dark .sc.warn{background:#3a2614;border-left-color:#fbbf24}
+  .dark .sc.warn .av{background:#fbbf24;color:#3a2614}
+  .dark .sc.warn .badge{background:rgba(251,191,36,.16);color:#fbbf24}
+  .dark .sc.info{background:#12233a;border-left-color:#93c5fd}
+  .dark .sc.info .av{background:#93c5fd;color:#12233a}
+  .dark .sc.info .badge{background:rgba(147,197,253,.16);color:#93c5fd}
+  .dark .sc.now{box-shadow:inset 0 0 0 2px #86efac}
+  .dark .kpi .ic{background:#143324;color:#86efac}
+  .dark .kpi.warn .ic{background:#3a2614;color:#fbbf24}
+  .dark .kpi.info .ic{background:#12233a;color:#93c5fd}
+  .dark .kpi.danger .ic{background:#3a1f1f;color:#fca5a5}
+  .dark .fi .ic{background:#143324;color:#86efac}
+  .dark .fi.warn .ic{background:#3a2614;color:#fbbf24}
+  .dark .fi.info .ic{background:#12233a;color:#93c5fd}
+  .dark .pe-i .av{background:#1a5c3a}
+  .dark .pe-i .b{background:#3a1f1f;color:#fca5a5}
+  .dark .pe-i .b.media{background:#3a2614;color:#fbbf24}
+  .dark .qa .ic{background:#143324;color:#86efac}
+  .dark .qa:hover{border-color:#86efac;background:#143324}
+  .dark .card-h a,.dark .mini-chart .nums .delta{color:#86efac}
+  .dark .btn.outline{background:#1a1d27;color:#86efac;border-color:#86efac}
+  .dark .btn.outline:hover{background:#143324}
+  .dark .btn.ghost{background:#1a1d27;color:#9ca3af;border-color:#2d3144}
+  .dark .btn.ghost:hover{background:#252836;color:#f9fafb}
+  .dark .btn.primary{background:#1a5c3a}
+  .dark .scope{color:#9ca3af}
+  .dark .scope::after{background:#2d3144}
+</style>
+</head>
+<body>
+
+<!-- LIGHT -->
+<div class="scope">Modo claro</div>
+<div class="app" style="border-bottom:1px solid var(--border)">
+  <aside class="sb">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Panel</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Citas</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>Bitácoras</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>Pre-evaluaciones<span class="ct">3</span></a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg>Prioridad IA</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l9-7 9 7v11"/><path d="M9 21v-7h6v7"/></svg>Estadísticas</a>
+    </nav>
+    <div class="user">
+      <div class="av">OG</div>
+      <div><b>Dr. Omar González</b><span>Médico general</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="head">
+      <div>
+        <div class="crumb">Panel</div>
+        <h1>Buenos días, <span>Dr. González</span></h1>
+        <div class="sub">jueves 14 de mayo 2026 · 7 citas programadas hoy</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost">Ver calendario</button>
+        <button class="btn primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nueva cita</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div>
+        <div><div class="lbl">Citas hoy</div><div class="v">7</div></div>
+      </div>
+      <div class="kpi info">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div><div class="lbl">Próxima cita</div><div class="v">10:30</div></div>
+      </div>
+      <div class="kpi warn">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg></div>
+        <div><div class="lbl">Pre-evaluaciones</div><div class="v">3</div></div>
+      </div>
+      <div class="kpi">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="3"/><path d="M16 14c2.7.2 5 2.5 5 5.5"/></svg></div>
+        <div><div class="lbl">Atendidos mes</div><div class="v">182</div></div>
+      </div>
+    </div>
+
+    <!-- Hero próxima cita -->
+    <div class="hero">
+      <div class="av">NC</div>
+      <div class="who">
+        <div class="label">Próxima cita · en 8 min</div>
+        <div class="name">Nestor Castillo Vázquez</div>
+        <div class="meta">22690495 · Ing. Sistemas · 6° · <b>Renovación de receta · asma</b></div>
+      </div>
+      <div class="time-block">
+        <div class="t">10:30</div>
+        <div class="in">15 min<br>Consultorio 2</div>
+      </div>
+      <div class="actions">
+        <button class="btn-w outline">Expediente</button>
+        <button class="btn-w">Iniciar consulta</button>
+      </div>
+    </div>
+
+    <div class="row r-2">
+      <div class="card">
+        <div class="card-h">
+          <h2>Agenda de hoy</h2>
+          <a>Ver todas <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="ag">
+          <div class="slot">
+            <div class="h">09:00<small>15 min</small></div>
+            <div class="sc">
+              <div class="av">AP</div>
+              <div class="who"><b>Ana Pérez García</b><span>Control post-tratamiento</span></div>
+              <span class="badge">Atendida</span>
+            </div>
+          </div>
+          <div class="slot">
+            <div class="h">10:30<small>15 min</small></div>
+            <div class="sc now">
+              <div class="av">NC</div>
+              <div class="who"><b>Nestor Castillo</b><span>Renovación de receta · asma</span></div>
+              <span class="badge">Próxima</span>
+            </div>
+          </div>
+          <div class="slot">
+            <div class="h">11:00<small>15 min</small></div>
+            <div class="sc warn">
+              <div class="av">LM</div>
+              <div class="who"><b>Luis Mora Hernández</b><span>Pre-evaluación IA pendiente</span></div>
+              <span class="badge">Por confirmar</span>
+            </div>
+          </div>
+          <div class="slot">
+            <div class="h">11:30<small>15 min</small></div>
+            <div class="sc">
+              <div class="av">DC</div>
+              <div class="who"><b>Daniela Castro Ríos</b><span>Dolor de cabeza recurrente</span></div>
+              <span class="badge">Confirmada</span>
+            </div>
+          </div>
+          <div class="slot">
+            <div class="h">13:00<small>15 min</small></div>
+            <div class="sc info">
+              <div class="av">JC</div>
+              <div class="who"><b>Javier Casanova López</b><span>Primera consulta · revisión</span></div>
+              <span class="badge">Nuevo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-h"><h2>Pre-evaluaciones IA</h2><a>Revisar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+          <div class="pe">
+            <div class="pe-i">
+              <div class="av">LF</div>
+              <div class="who"><b>Lucía Fuentes</b><span>Dolor abdominal FID 6/10, náusea…</span></div>
+              <span class="b">Alta</span>
+            </div>
+            <div class="pe-i">
+              <div class="av">RM</div>
+              <div class="who"><b>Raúl Mendoza</b><span>Cefalea pulsátil con fotofobia…</span></div>
+              <span class="b media">Media</span>
+            </div>
+            <div class="pe-i">
+              <div class="av">KB</div>
+              <div class="who"><b>Karla Bárcenas</b><span>Dolor lumbar mecánico 4 días…</span></div>
+              <span class="b media">Media</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h2>Citas atendidas — 7 días</h2><span class="meta">vs. semana pasada</span></div>
+          <div class="mini-chart">
+            <div class="nums"><span class="v">48</span><span class="delta">▲ +9% vs sem. pasada</span></div>
+            <svg class="spark" viewBox="0 0 200 60" preserveAspectRatio="none">
+              <defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#1a5c3a" stop-opacity=".24"/><stop offset="100%" stop-color="#1a5c3a" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,42 L33,35 L66,28 L100,32 L133,22 L166,18 L200,12" fill="none" stroke="#1a5c3a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M0,42 L33,35 L66,28 L100,32 L133,22 L166,18 L200,12 L200,60 L0,60 Z" fill="url(#sg)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row r-2">
+      <div class="card">
+        <div class="card-h"><h2>Actividad reciente</h2></div>
+        <div class="feed">
+          <div class="fi">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+            <div class="lab"><b>Cita atendida</b><span>Ana Pérez García · receta emitida</span></div>
+            <span class="t">09:42</span>
+          </div>
+          <div class="fi info">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg></div>
+            <div class="lab"><b>Receta firmada</b><span>Salbutamol inhalador · Nestor Castillo</span></div>
+            <span class="t">09:18</span>
+          </div>
+          <div class="fi warn">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg></div>
+            <div class="lab"><b>Nueva pre-evaluación IA</b><span>Lucía Fuentes · prioridad alta</span></div>
+            <span class="t">08:54</span>
+          </div>
+          <div class="fi">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></svg></div>
+            <div class="lab"><b>Bitácora guardada</b><span>Daniela Castro · cefalea tensional</span></div>
+            <span class="t">Ayer</span>
+          </div>
+          <div class="fi">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div>
+            <div class="lab"><b>Cita reagendada</b><span>Karla Bárcenas · 15 may 11:00</span></div>
+            <span class="t">Ayer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>Acciones rápidas</h2></div>
+        <div class="qa-grid">
+          <a class="qa">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v4M10 16h4"/></svg></div>
+            <div><b>Nueva cita</b><span>Agendar para un alumno</span></div>
+          </a>
+          <a class="qa">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg></div>
+            <div><b>Emitir receta</b><span>Crear receta médica</span></div>
+          </a>
+          <a class="qa">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg></div>
+            <div><b>Nueva bitácora</b><span>Registrar consulta</span></div>
+          </a>
+          <a class="qa">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+            <div><b>Buscar alumno</b><span>Por nombre o control</span></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DARK -->
+<div class="dark">
+  <div class="scope">Modo oscuro</div>
+  <div class="app">
+    <aside class="sb">
+      <div class="brand"><div class="y">Y</div>Yoltec</div>
+      <nav>
+        <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Panel</a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Citas</a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>Bitácoras</a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>Pre-evaluaciones<span class="ct">3</span></a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg>Prioridad IA</a>
+        <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l9-7 9 7v11"/><path d="M9 21v-7h6v7"/></svg>Estadísticas</a>
+      </nav>
+      <div class="user">
+        <div class="av">OG</div>
+        <div><b>Dr. Omar González</b><span>Médico general</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="head">
+        <div>
+          <div class="crumb">Panel</div>
+          <h1>Buenos días, <span>Dr. González</span></h1>
+          <div class="sub">jueves 14 de mayo 2026 · 7 citas programadas hoy</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost">Ver calendario</button>
+          <button class="btn primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nueva cita</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><div><div class="lbl">Citas hoy</div><div class="v">7</div></div></div>
+        <div class="kpi info"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><div class="lbl">Próxima cita</div><div class="v">10:30</div></div></div>
+        <div class="kpi warn"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg></div><div><div class="lbl">Pre-evaluaciones</div><div class="v">3</div></div></div>
+        <div class="kpi"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="3"/><path d="M16 14c2.7.2 5 2.5 5 5.5"/></svg></div><div><div class="lbl">Atendidos mes</div><div class="v">182</div></div></div>
+      </div>
+
+      <div class="hero" style="background:linear-gradient(135deg,#0d2018,#143324 60%,#1a5c3a)">
+        <div class="av">NC</div>
+        <div class="who">
+          <div class="label">Próxima cita · en 8 min</div>
+          <div class="name">Nestor Castillo Vázquez</div>
+          <div class="meta">22690495 · Ing. Sistemas · 6° · <b>Renovación de receta · asma</b></div>
+        </div>
+        <div class="time-block">
+          <div class="t">10:30</div>
+          <div class="in">15 min<br>Consultorio 2</div>
+        </div>
+        <div class="actions">
+          <button class="btn-w outline">Expediente</button>
+          <button class="btn-w">Iniciar consulta</button>
+        </div>
+      </div>
+
+      <div class="row r-2">
+        <div class="card">
+          <div class="card-h"><h2>Agenda de hoy</h2><a>Ver todas <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+          <div class="ag">
+            <div class="slot"><div class="h">09:00<small>15 min</small></div><div class="sc"><div class="av">AP</div><div class="who"><b>Ana Pérez García</b><span>Control post-tratamiento</span></div><span class="badge">Atendida</span></div></div>
+            <div class="slot"><div class="h">10:30<small>15 min</small></div><div class="sc now"><div class="av">NC</div><div class="who"><b>Nestor Castillo</b><span>Renovación de receta · asma</span></div><span class="badge">Próxima</span></div></div>
+            <div class="slot"><div class="h">11:00<small>15 min</small></div><div class="sc warn"><div class="av">LM</div><div class="who"><b>Luis Mora Hernández</b><span>Pre-evaluación IA pendiente</span></div><span class="badge">Por confirmar</span></div></div>
+            <div class="slot"><div class="h">11:30<small>15 min</small></div><div class="sc"><div class="av">DC</div><div class="who"><b>Daniela Castro Ríos</b><span>Dolor de cabeza recurrente</span></div><span class="badge">Confirmada</span></div></div>
+            <div class="slot"><div class="h">13:00<small>15 min</small></div><div class="sc info"><div class="av">JC</div><div class="who"><b>Javier Casanova López</b><span>Primera consulta · revisión</span></div><span class="badge">Nuevo</span></div></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-h"><h2>Pre-evaluaciones IA</h2><a>Revisar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a></div>
+            <div class="pe">
+              <div class="pe-i"><div class="av">LF</div><div class="who"><b>Lucía Fuentes</b><span>Dolor abdominal FID 6/10, náusea…</span></div><span class="b">Alta</span></div>
+              <div class="pe-i"><div class="av">RM</div><div class="who"><b>Raúl Mendoza</b><span>Cefalea pulsátil con fotofobia…</span></div><span class="b media">Media</span></div>
+              <div class="pe-i"><div class="av">KB</div><div class="who"><b>Karla Bárcenas</b><span>Dolor lumbar mecánico 4 días…</span></div><span class="b media">Media</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><h2>Citas atendidas — 7 días</h2><span class="meta">vs. semana pasada</span></div>
+            <div class="mini-chart">
+              <div class="nums"><span class="v">48</span><span class="delta">▲ +9% vs sem. pasada</span></div>
+              <svg class="spark" viewBox="0 0 200 60" preserveAspectRatio="none">
+                <defs><linearGradient id="sg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#86efac" stop-opacity=".24"/><stop offset="100%" stop-color="#86efac" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0,42 L33,35 L66,28 L100,32 L133,22 L166,18 L200,12" fill="none" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M0,42 L33,35 L66,28 L100,32 L133,22 L166,18 L200,12 L200,60 L0,60 Z" fill="url(#sg2)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row r-2">
+        <div class="card">
+          <div class="card-h"><h2>Actividad reciente</h2></div>
+          <div class="feed">
+            <div class="fi"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div class="lab"><b>Cita atendida</b><span>Ana Pérez García · receta emitida</span></div><span class="t">09:42</span></div>
+            <div class="fi info"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg></div><div class="lab"><b>Receta firmada</b><span>Salbutamol inhalador · Nestor Castillo</span></div><span class="t">09:18</span></div>
+            <div class="fi warn"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg></div><div class="lab"><b>Nueva pre-evaluación IA</b><span>Lucía Fuentes · prioridad alta</span></div><span class="t">08:54</span></div>
+            <div class="fi"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></svg></div><div class="lab"><b>Bitácora guardada</b><span>Daniela Castro · cefalea tensional</span></div><span class="t">Ayer</span></div>
+            <div class="fi"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><div class="lab"><b>Cita reagendada</b><span>Karla Bárcenas · 15 may 11:00</span></div><span class="t">Ayer</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h2>Acciones rápidas</h2></div>
+          <div class="qa-grid">
+            <a class="qa"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v4M10 16h4"/></svg></div><div><b>Nueva cita</b><span>Agendar para un alumno</span></div></a>
+            <a class="qa"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg></div><div><b>Emitir receta</b><span>Crear receta médica</span></div></a>
+            <a class="qa"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg></div><div><b>Nueva bitácora</b><span>Registrar consulta</span></div></a>
+            <a class="qa"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><div><b>Buscar alumno</b><span>Por nombre o control</span></div></a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

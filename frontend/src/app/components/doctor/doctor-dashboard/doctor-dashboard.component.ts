@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -33,6 +33,8 @@ import { DoctorFichaPacienteComponent } from '../components-doctor/doctor-ficha-
   styleUrls: ['./doctor-dashboard.component.css']
 })
 export class DoctorDashboardComponent implements OnInit {
+  @ViewChild(DoctorBitacorasComponent) private bitacorasRef?: DoctorBitacorasComponent;
+
   activeSection = 'inicio';
   doctorName = 'Doctor';
   totalPendientes = 0;
@@ -63,14 +65,8 @@ export class DoctorDashboardComponent implements OnInit {
     this.activeSection = 'ficha-paciente';
   }
 
-  searchTerm = '';
-
-  onSearch(term: string): void {
-    this.searchTerm = term;
-  }
-
   onExport(): void {
-    // Delegado a la sección activa en futuras iteraciones
+    this.bitacorasRef?.exportarCsv();
   }
 
   logout(): void {
