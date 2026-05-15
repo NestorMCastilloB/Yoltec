@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -28,6 +28,8 @@ import { PreEvaluacionIaComponent } from '../pre-evaluacion-ia/pre-evaluacion-ia
 export class StudentDashboardComponent implements OnInit, OnDestroy {
   activeSection = 'inicio';
   studentName = '';
+  saludoBienvenida = 'Bienvenido';
+  userMenuOpen = false;
 
   private destroy$ = new Subject<void>();
 
@@ -40,6 +42,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.studentName = user ? `${user.nombre} ${user.apellido}` : 'Alumno';
+    this.saludoBienvenida = user?.genero === 'femenino' ? 'Bienvenida' : 'Bienvenido';
   }
 
   ngOnDestroy(): void {
@@ -47,8 +50,17 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  setActiveSection(section: string): void {
-    this.activeSection = section;
+  get studentInitial(): string { return this.studentName.charAt(0).toUpperCase(); }
+
+  setActiveSection(section: string): void { this.activeSection = section; }
+
+  toggleUserMenu(): void { this.userMenuOpen = !this.userMenuOpen; }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (!(e.target as Element).closest('.sd-user-menu-wrap')) {
+      this.userMenuOpen = false;
+    }
   }
 
   logout(): void {

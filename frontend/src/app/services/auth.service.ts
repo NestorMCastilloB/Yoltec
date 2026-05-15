@@ -13,6 +13,7 @@ interface User {
   tipo: string;
   numero_control?: string;
   username?: string;
+  genero?: 'masculino' | 'femenino' | 'otro' | null;
 }
 
 interface LoginResponse {
