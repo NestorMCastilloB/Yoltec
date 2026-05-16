@@ -23,21 +23,32 @@ class EnsureAdminEmailForResendSeeder extends Seeder
             return;
         }
 
-        // Gmail acepta +alias: nespiolin05+admin@gmail.com llega al mismo inbox.
-        // Esto evita violar el UNIQUE de users.email cuando hay >1 usuario admin/doctor.
+        // Resend (free tier) rechaza aliases +tag@gmail.com, solo acepta el email exacto.
+        // Solo admin recibe el email verificado; doctores quedan con alias (no podrán hacer 2FA
+        // en prod hasta verificar dominio en Resend, pero no es bloqueante para la demo).
         [$local, $domain] = explode('@', $target, 2);
 
-        $usuarios = User::whereIn('tipo', ['admin', 'doctor'])->get();
-        $updated = 0;
-        foreach ($usuarios as $u) {
-            $slug = $u->username ?: ($u->tipo . $u->id);
-            $nuevoEmail = "{$local}+{$slug}@{$domain}";
-            if ($u->email !== $nuevoEmail) {
-                $u->update(['email' => $nuevoEmail]);
-                $updated++;
-            }
+        // 1) Liberar el target si lo tiene otro user (alias previo del propio admin o ex-admin).
+        User::where('email', $target)
+            ->update(['email' => "{$local}+freed-" . now()->timestamp . "@{$domain}"]);
+
+        // 2) Asignar el target al admin.
+        $admin = User::where('tipo', 'admin')->first();
+        if ($admin && $admin->email !== $target) {
+            $admin->update(['email' => $target]);
+            Log::info("EnsureAdminEmailForResendSeeder: admin {$admin->id} actualizado a {$target}");
+        } else {
+            Log::info("EnsureAdminEmailForResendSeeder: admin ya tiene {$target}");
         }
 
-        Log::info("EnsureAdminEmailForResendSeeder: actualizados {$updated} usuarios admin/doctor (alias de {$target})");
+        // 3) Doctores: asignar aliases únicos solo si todavía no los tienen.
+        $doctores = User::where('tipo', 'doctor')->get();
+        foreach ($doctores as $doc) {
+            $slug = $doc->username ?: ('doctor' . $doc->id);
+            $aliasEmail = "{$local}+{$slug}@{$domain}";
+            if ($doc->email !== $aliasEmail) {
+                $doc->update(['email' => $aliasEmail]);
+            }
+        }
     }
 }
