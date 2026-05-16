@@ -18,13 +18,20 @@ export interface CitasFiltradas {
 export class MisCitasService {
   constructor(private citaService: CitaService) {}
 
-  // Obtiene citas y las separa por estatus para las 3 tabs
+  // Obtiene citas y las separa por estatus. Próximas asc por fecha+hora; pasadas/canceladas desc
   getCitasFiltradas(): Observable<CitasFiltradas> {
+    const key = (c: Cita) => `${(c.fecha_cita || '').split('T')[0]} ${c.hora_cita || ''}`;
     return this.citaService.getCitas().pipe(
       map(citas => ({
-        proximas: citas.filter(c => c.estatus === 'programada' || c.estatus === 'confirmada'),
-        pasadas: citas.filter(c => c.estatus === 'atendida'),
-        canceladas: citas.filter(c => c.estatus === 'cancelada' || c.estatus === 'no_asistio'),
+        proximas: citas
+          .filter(c => c.estatus === 'programada' || c.estatus === 'confirmada')
+          .sort((a, b) => key(a).localeCompare(key(b))),
+        pasadas: citas
+          .filter(c => c.estatus === 'atendida')
+          .sort((a, b) => key(b).localeCompare(key(a))),
+        canceladas: citas
+          .filter(c => c.estatus === 'cancelada' || c.estatus === 'no_asistio')
+          .sort((a, b) => key(b).localeCompare(key(a))),
       }))
     );
   }

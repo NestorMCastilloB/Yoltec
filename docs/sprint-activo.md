@@ -8,69 +8,73 @@
 
 ## Tarea actual
 
-**Qué:** —
-**Archivo:** —
-**Problema:** —
-**Esperado:** —
+**Qué:** Diagnosticar por qué la IA no funciona en el alumno web
+**Archivo:** `frontend/src/app/components/student/pre-evaluacion-ia/`, `backend/app/Http/Controllers/PreEvaluacionIAController.php`, `IA/main.py`
+**Problema:** El alumno no puede usar el chat de pre-evaluación IA — desconocemos si es timeout, CORS, env var, o token Groq
+**Esperado:** Identificar la causa raíz con DevTools + logs Render → fix mínimo
 
 ---
 
-## Backend — Bloque 1: Commit de pendientes (inmediato)
+# FASE 3 — Web funcional end-to-end (junio 2026)
 
-Hay 5 archivos del backend modificados sin commitear. Revisar y commitear antes de continuar.
-
-- [ ] Revisar y commitear: `BitacoraController.php`, `CitaController.php`, `EstadisticasController.php`, `RecetaController.php`, `Receta.php`
+Objetivo: web (admin + doctor + alumno + IA) funcional en producción sin bugs bloqueantes.
 
 ---
 
-## Backend — Bloque 2: Seguridad (prioridad alta)
+## Bloque 1 — IA Web operativa (PRIORIDAD MÁXIMA)
 
-- [ ] **Middleware `CheckRole`** — crear `app/Http/Middleware/CheckRole.php` y aplicar en `routes/api.php`:
-  - Rutas solo-doctor: `cancelar`, `atender`, `no-asistio`, `reprogramar`, `bitacoras store/update`, `recetas store/update`, `ia/priority/*`, `ia/symptoms/validar`, `estadisticas`
-  - Rutas solo-alumno: ninguna aún, pero dejar el middleware listo
-- [ ] **Race condition en citas** — `CitaController::store()`: envolver verificación de slot + inserción en `DB::transaction()` con `lockForUpdate()`
-- [ ] **Eliminar `CorsMiddleware.php` custom** si existe (tiene ngrok hardcodeado) — CORS ya está correcto en `config/cors.php`
-- [ ] **Rate limiting** en `/verify-2fa` y `/resend-2fa` — agregar `throttle:5,1` en `routes/api.php`
-
----
-
-## Backend — Bloque 3: Refactorizar Controllers → Services (prioridad media)
-
-Regla: Controllers < 80L, lógica de negocio en `app/Services/`. Ver `backend/CLAUDE.md`.
-
-- [ ] `PreEvaluacionIAController` (364L) → extraer a `PreEvaluacionService`
-- [ ] `CitaController` (343L) → extraer a `CitaService`
-- [ ] `AuthController` (305L) → extraer lógica 2FA a `Auth2FAService`
-- [ ] `IASymptomController` (216L) → extraer a `IASymptomService`
+- [ ] **Diagnosticar IA alumno**: abrir DevTools en alumno → click "Pre-evaluación IA" → ver Network. Posibles causas:
+  - Backend timeout (IA en cold start Render ~50s, backend timeout 20s)
+  - `IA_SERVICE_URL` mal configurado en Render panel (sigue apuntando a localhost)
+  - Groq API key vencido/inválido
+  - CORS en IA bloqueando origin de Vercel
+- [ ] **Fix encontrado**: aplicar el cambio mínimo según el diagnóstico
+- [ ] **Loading state UX**: mientras IA está cold-starting, mostrar "Conectando con el asistente (puede tardar 30s la primera vez)"
+- [ ] **Sincronizar** `IA/enfermedades_config.json` con `IA/feature_names.json` (si están desfasados)
 
 ---
 
-## Backend — Bloque 4: Ajustes funcionales (prioridad media)
+## Bloque 2 — IA hardening (después del bloque 1)
 
-- [ ] **Estadísticas doctor** — verificar que `EstadisticasController` retorna los campos que usa el frontend rediseñado (diagnósticos, evolución mensual, distribución motivos)
-- [ ] **Bitácora CSV export** — verificar si `BitacoraController::index()` soporta `?formato=csv` o falta implementarlo
-- [ ] **Recetas** — confirmar que los campos del response de `RecetaController` coinciden con el frontend rediseñado (alumno y doctor)
-- [ ] **FK cascading en citas** — migración incremental `ON DELETE CASCADE` en pre_evaluaciones, bitácoras y consultas que referencian `citas`
-
----
-
-## Backend — Bloque 5: Producción (prioridad baja)
-
-- [ ] `IA_SERVICE_URL` en Render apunta a `localhost` → cambiar a `https://yoltec-ia.onrender.com` (variable de entorno en panel de Render, no código)
-- [ ] Verificar que responses de citas, recetas y perfil son compatibles con Flutter (consumidos por mobile)
+- [ ] **Rate limiting** con `slowapi`: 5 req/min por IP en `/chat`
+- [ ] **Validación input** `max_length=5000` en `ChatMessage.content`
+- [ ] **CORS middleware** FastAPI con orígenes explícitos (Vercel + localhost)
+- [ ] **Health endpoint** `/health` que retorne `{status:'ok', model:'loaded'}` — usado por keep-alive de Render
 
 ---
 
-## IA (pendiente)
+## Bloque 3 — Backend hardening pendiente
 
-- [ ] Rate limiting `slowapi` 5 req/min
-- [ ] Validación input `max_length=5000`
-- [ ] CORS middleware
-- [ ] Sincronizar `enfermedades_config.json` con `feature_names.json`
+- [ ] **Middleware `CheckRole`** auditar `routes/api.php` — verificar que TODAS las rutas sensibles tienen `role:doctor` o `role:admin`
+- [ ] **Eliminar `CorsMiddleware.php`** custom si existe (ngrok hardcodeado) — CORS ya está en `config/cors.php`
+- [ ] **Rate limiting** en `/verify-2fa` y `/resend-2fa` — confirmar que `throttle:5,1` está aplicado
 
 ---
 
-## Mobile — después de backend (pendiente)
+## Bloque 4 — Pruebas end-to-end (smoke test antes de entregar)
+
+Todas en producción (Vercel + Render).
+
+- [ ] **Admin**: login → crear alumno → crear doctor → marcar día festivo → marcar día reducido con cierre 12:00
+- [ ] **Alumno**: login → agendar cita en día reducido con hora antes de 12:00 (debe permitir) → intentar a 12:30 (debe rechazar) → cancelar
+- [ ] **Alumno**: pre-evaluación IA → chat completo → ver diagnóstico → ver pre-evaluación en perfil
+- [ ] **Doctor**: login → ver cita programada → atender → llenar consulta → emitir receta
+- [ ] **Doctor**: bitácora con filtros → exportar CSV
+- [ ] **Doctor**: estadísticas → ver gráficos cargados
+- [ ] **Doctor**: prioridad IA → ver score → reintento si falla
+
+---
+
+## Bloque 5 — Performance y polish (si hay tiempo)
+
+- [ ] **Keep-alive Render**: cron-job.org cada 10 min ping a backend + IA para evitar cold starts
+- [ ] **Refactor** `PreEvaluacionIAController` (>300L) → extraer a service
+- [ ] **Refactor** `CitaController` → mover lógica restante a `CitaService`
+- [ ] **Documentar** endpoints reales del backend (descartar zombies como `/api/slots` viejos)
+
+---
+
+## Mobile — fuera de fase 3, post-semestre
 
 - [ ] Mis Citas: 3 tabs (Próximas, Pasadas, Canceladas)
 - [ ] Perfil: sin tabs duplicadas, foto editable
@@ -82,38 +86,65 @@ Regla: Controllers < 80L, lógica de negocio en `app/Services/`. Ver `backend/CL
 
 ## Completados
 
-### Frontend — Admin
+### Fase 2 — Polish, fixes y features (mayo 2026)
+
+#### Sesión 2026-05-15/16 — PRs #22-#28 mergeados
+- [x] **PR #22** Filtro citas doctor atenúa calendario semanal + KPI Pendientes filtrado
+- [x] **PR #23** Iconos SVG inline en sidebar doctor + alumno (reemplazo de Unicode tofu) + fix `doctor-header.ts` con themeService/userMenuOpen
+- [x] **PR #24** Campo `genero` en users + saludo dinámico Bienvenido/a + reactivo (sin re-login) vía `AuthService.updateCurrentUser`
+- [x] **PR #25** Polish completo Design System v2 (admin, doctor, alumno — 38 archivos, ~4300 líneas) + fix admin-dashboard días pasados
+- [x] **PR #26** Bloqueo de días pasados en calendario de días especiales (admin) + selector de tipo + tabla con etiqueta + fix routing `/admin/calendario`
+- [x] **PR #27** Backend rechaza días `holiday/vacation` en `validarHorario` + invalidación de cache disponibilidad + banner aviso para días reducidos
+- [x] **PR #28** Hora de cierre configurable en días reducidos + bloqueo de slots posteriores + fix completo del componente shared agendar-cita (endpoints zombi → endpoints reales) + endpoint `/api/alumnos/buscar` + FCM defer para acelerar agendar/cancelar/reprogramar
+- [x] Auto-cancelación de citas pasadas (lazy fallback al scheduler de Render que no corre cron) — `CitaService::marcarPasadasComoNoAsistio()`
+- [x] Migración FK CASCADE en `bitacoras` y `recetas` referenciando `citas`
+- [x] Paginación en historial de citas doctor (client-side 10/página) + paginación recetas doctor (backend 15/página)
+- [x] Migración `add_genero_to_users` + `add_hora_cierre_to_dias_especiales`
+
+#### Frontend — Admin
 - [x] Login Admin — ReactiveForm, toast 401/403, diseño DS v2
 - [x] Panel Admin — sidebar, stats con skeleton, preview usuarios + días próximos (forkJoin)
 - [x] Usuarios Admin — tabs Todos/Alumnos/Doctores, búsqueda unificada, tabla con rol-badge
-- [x] Días Especiales Admin — calendario Lun-Sáb, colores por tipo (festivo/vacaciones/reducido), formulario inline
-- [x] Optimizaciones admin-dashboard: OnPush, cache de datos, getters→propiedades, memoización Intl
+- [x] Días Especiales Admin — calendario Lun-Sáb, colores por tipo, formulario inline
+- [x] Optimizaciones admin-dashboard: OnPush, cache de datos, getters→propiedades
 
-### Frontend — Doctor
-- [x] `doctor/citas/` — rediseño DS v2
+#### Frontend — Doctor
+- [x] `doctor/citas/` — rediseño DS v2 + filtro atenúa calendario
 - [x] `doctor/prioridad-ia/` — manejo error PHP, botón reintentar
 - [x] `doctor/estadisticas/` — ngOnInit + skeleton loader
 - [x] `doctor/pre-evaluaciones/` — validar/descartar con modal
-- [x] `doctor/recetas/` — lista + drawer detalle
+- [x] `doctor/recetas/` — lista + drawer detalle + paginación
 - [x] `doctor/nueva-cita/` — flujo 3 pasos
 - [x] `doctor/bitacoras/` — rediseño DS v2
+- [x] `doctor/header/` — sidebar SVG + user dropdown + modo oscuro
 
-### Frontend — Alumno
+#### Frontend — Alumno
 - [x] `student/mis-citas/` — 3 tabs: Próximas, Pasadas, Canceladas
-- [x] `student/dashboard/` — bienvenida + próxima cita + accesos rápidos
-- [x] `shared/agendar-cita/` — @Input() modo alumno/doctor + paso buscar alumno
-- [x] `student/pre-evaluacion-ia/` — chat + resultados
-- [x] `student/perfil/` — info médica + foto editable
+- [x] `student/dashboard/` — bienvenida dinámica + próxima cita + accesos rápidos + sidebar SVG
+- [x] `shared/agendar-cita/` — funcional alumno+doctor con endpoints reales
+- [x] `student/pre-evaluacion-ia/` — UI lista (pendiente diagnóstico funcional → ver Bloque 1)
+- [x] `student/perfil/` — info médica + foto editable + selector género
 
-### Frontend — Bugs resueltos
+#### Frontend — Bugs resueltos (fase 1-2)
 - [x] `user.service.ts` key `'token'` → `'auth_token'`
 - [x] `doctor-header` key `'theme'` → `'dark_mode'`
 - [x] Login: media query móvil
 - [x] 2FA: regex `/^\d{6}$/`
 - [x] `setTimeout(1200)` doctor-citas → cerrar en HTTP response
 
-### Setup y transversal
+#### Backend
+- [x] Auto-cancelación citas pasadas con cache throttle 5min
+- [x] FK CASCADE bitacoras/recetas → citas
+- [x] Validación días especiales en `validarHorario`
+- [x] Hora de cierre para días reducidos
+- [x] Endpoint `/api/alumnos/buscar` (doctor)
+- [x] FCM defer post-response (acelera agendar ~2-5s)
+- [x] Cache invalidation al guardar/borrar día especial
+- [x] Fix routing `/admin/dias-especiales` → `/admin/calendario`
+
+#### Setup y transversal
 - [x] Graphify instalado y configurado
 - [x] CLAUDE.md optimizados (v3)
 - [x] Design System v2 — tokens.css, fuentes locales, dark mode
 - [x] Migración Railway → Render (backend + IA), Vercel (frontend)
+- [x] Migraciones de BD: `add_genero_to_users`, `add_hora_cierre_to_dias_especiales`, `add_cascade_fk_to_bitacoras_recetas`

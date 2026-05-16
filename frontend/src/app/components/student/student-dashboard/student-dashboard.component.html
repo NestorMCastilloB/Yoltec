@@ -103,7 +103,7 @@
       @if (activeSection === 'citas') { <app-mis-citas></app-mis-citas> }
       @if (activeSection === 'recetas') { <app-sd-recetas></app-sd-recetas> }
       @if (activeSection === 'perfil') { <app-sd-perfil></app-sd-perfil> }
-      @if (activeSection === 'pre-evaluacion') { <app-pre-evaluacion-ia></app-pre-evaluacion-ia> }
+      @if (activeSection === 'pre-evaluacion') { <app-pre-evaluacion-ia (solicitaAgendar)="setActiveSection('citas')"></app-pre-evaluacion-ia> }
     </div>
   </div>
 
