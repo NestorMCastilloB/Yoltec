@@ -40,10 +40,11 @@ class CitaService
                 $date = $dia->fecha->toDateString();
                 $result[$date] = array_merge($result[$date] ?? ['date' => $date, 'taken_slots' => [], 'special' => null], [
                     'special' => [
-                        'type'   => $dia->tipo,
-                        'label'  => $dia->etiqueta,
-                        'status' => $types[$dia->tipo]['status'] ?? 'full',
-                        'color'  => $types[$dia->tipo]['color'] ?? '#ef5350',
+                        'type'        => $dia->tipo,
+                        'label'       => $dia->etiqueta,
+                        'status'      => $types[$dia->tipo]['status'] ?? 'full',
+                        'color'       => $types[$dia->tipo]['color'] ?? '#ef5350',
+                        'hora_cierre' => $dia->hora_cierre ? substr((string) $dia->hora_cierre, 0, 5) : null,
                     ],
                 ]);
             }
@@ -67,6 +68,12 @@ class CitaService
             if ($status === 'full') {
                 $motivo = $dia->etiqueta ?: ($dia->tipo === 'vacation' ? 'vacaciones' : 'festivo');
                 return "Este día no hay atención ({$motivo}).";
+            }
+            if ($status === 'partial' && $dia->hora_cierre) {
+                $cierre = substr((string) $dia->hora_cierre, 0, 5);
+                if ($hora >= $cierre) {
+                    return "Hoy la atención es hasta las {$cierre}. Elige una hora anterior.";
+                }
             }
         }
         return null;

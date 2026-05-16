@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class DiaEspecial extends Model
 {
     protected $table = 'dias_especiales';
-    protected $fillable = ['fecha', 'tipo', 'etiqueta'];
+    protected $fillable = ['fecha', 'tipo', 'etiqueta', 'hora_cierre'];
     protected $casts = ['fecha' => 'date'];
 }
