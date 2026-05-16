@@ -13,18 +13,20 @@ class EnsureAdminEmailForResendSeeder extends Seeder
 {
     public function run(): void
     {
-        if (config('app.env') !== 'production') {
+        $mailer = config('mail.default');
+        $target = env('RESEND_VERIFIED_EMAIL', 'nespiolin05@gmail.com');
+
+        Log::info("EnsureAdminEmailForResendSeeder: mailer={$mailer}, target={$target}");
+
+        if ($mailer !== 'resend') {
+            Log::info('EnsureAdminEmailForResendSeeder: skip (mailer no es resend)');
             return;
         }
-
-        $target = env('RESEND_VERIFIED_EMAIL', 'nespiolin05@gmail.com');
 
         $updated = User::whereIn('tipo', ['admin', 'doctor'])
             ->where('email', '!=', $target)
             ->update(['email' => $target]);
 
-        if ($updated > 0) {
-            Log::info("EnsureAdminEmailForResendSeeder: actualizados {$updated} usuarios admin/doctor a {$target}");
-        }
+        Log::info("EnsureAdminEmailForResendSeeder: actualizados {$updated} usuarios admin/doctor a {$target}");
     }
 }
