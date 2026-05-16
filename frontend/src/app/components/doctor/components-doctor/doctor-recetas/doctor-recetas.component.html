@@ -41,10 +41,10 @@
          *ngFor="let r of recetas"
          [class.sel]="recetaSel?.id === r.id"
          (click)="abrirVista(r)">
-      <div class="av">{{ iniciales(r.alumno?.nombre, r.alumno?.apellido) }}</div>
+      <div class="av">{{ iniciales(resolveAlumno(r)?.nombre, resolveAlumno(r)?.apellido) }}</div>
       <div class="who">
-        <b>{{ r.alumno?.nombre }} {{ r.alumno?.apellido }}</b>
-        <span>No. {{ r.alumno?.numero_control ?? '—' }}</span>
+        <b>{{ resolveAlumno(r)?.nombre }} {{ resolveAlumno(r)?.apellido }}</b>
+        <span>No. {{ resolveAlumno(r)?.numero_control ?? '—' }}</span>
       </div>
       <span class="badge-fecha">
         <span class="dot"></span>Emitida {{ formatFecha(r.fecha_emision) }}
@@ -98,11 +98,11 @@
 
     <div class="drawer-body">
       <div class="d-patient">
-        <div class="av">{{ iniciales(recetaSel.alumno?.nombre, recetaSel.alumno?.apellido) }}</div>
+        <div class="av">{{ iniciales(resolveAlumno(recetaSel)?.nombre, resolveAlumno(recetaSel)?.apellido) }}</div>
         <div class="d-patient-info">
-          <b>{{ recetaSel.alumno?.nombre }} {{ recetaSel.alumno?.apellido }}</b>
+          <b>{{ resolveAlumno(recetaSel)?.nombre }} {{ resolveAlumno(recetaSel)?.apellido }}</b>
           <span class="d-patient-sub">
-            Matrícula <b>{{ recetaSel.alumno?.numero_control ?? '—' }}</b>
+            Matrícula <b>{{ resolveAlumno(recetaSel)?.numero_control ?? '—' }}</b>
           </span>
         </div>
       </div>

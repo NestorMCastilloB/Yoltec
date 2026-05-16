@@ -1,254 +1,433 @@
-<div class="citas-wrapper">
+<!-- Overlay para drawer -->
+<div class="overlay" *ngIf="drawerCitaAbierto" (click)="closeDrawer()"></div>
 
-  <!-- Mensajes -->
-  <div *ngIf="submitMessage" class="alert">{{ submitMessage }}</div>
+<!-- ===== HEADER ===== -->
+<div class="citas-header">
+  <div>
+    <div class="crumb">Servicio médico · Citas</div>
+    <h1>Gestión de citas</h1>
+  </div>
+  <button class="btn-primary" (click)="toggleCreateForm()">+ Nueva cita</button>
+</div>
 
-  <!-- ===== CALENDARIO SEMANAL ===== -->
-  <div class="week-grid-card">
-    <div class="week-grid-header">
-      <h2>{{ weekLabel }}</h2>
-      <div class="week-nav">
-        <button class="btn-week" (click)="goToThisWeek()">Hoy</button>
-        <button class="btn-week" (click)="changeWeek(-1)">‹</button>
-        <button class="btn-week" (click)="changeWeek(1)">›</button>
-      </div>
-    </div>
-    <div class="week-grid-table-wrap">
-      <table class="week-grid-table">
-        <thead>
-          <tr>
-            <th class="col-hora">Hora</th>
-            <th *ngFor="let day of weekGridDays" [class.col-today]="day.isToday">
-              {{ day.label }}
-              <span *ngIf="day.isToday" class="today-dot">hoy</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let hour of hourGridSlots">
-            <td class="cell-hora">{{ hour | number:'2.0-0' }}:00</td>
-            <td *ngFor="let day of weekGridDays" class="cell-slot" [class.cell-today]="day.isToday">
-              <div *ngFor="let cita of getCitasForSlot(day.date, hour)"
-                   class="grid-cita" [ngClass]="getGridCitaClass(cita)"
-                   (click)="cita.alumno ? openFicha.emit(cita.alumno.id) : null">
-                {{ getGridCitaName(cita) }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<!-- ===== KPI BAR ===== -->
+<div class="kpis" *ngIf="!isLoadingCitas && citas.length > 0">
+  <div class="kpi">
+    <div class="kpi-ic">▦</div>
+    <div>
+      <div class="kpi-lbl">Citas hoy</div>
+      <div class="kpi-v">{{ citasHoy }}</div>
     </div>
   </div>
-
-  <!-- ===== SECCIÓN EXPANDIBLE: AGENDAR + LISTA ===== -->
-  <div class="section-header">
-    <h2>Gestión de Citas</h2>
-    <button class="btn-primary" (click)="toggleCreateForm()">
-      {{ showCreateForm ? 'Cerrar formulario' : 'Agendar Nueva Cita' }}
-    </button>
+  <div class="kpi kpi-info">
+    <div class="kpi-ic">◔</div>
+    <div>
+      <div class="kpi-lbl">Próxima cita</div>
+      <div class="kpi-v">{{ proximaCitaObj ? formatTime(proximaCitaObj.hora_cita) : '—' }}</div>
+    </div>
   </div>
-
-  <!-- Formulario de creación -->
-  <div *ngIf="showCreateForm" class="form-card">
-    <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="numeroControl">Número de control del alumno</label>
-          <input type="text" id="numeroControl" name="numero_control" [(ngModel)]="createFormData.numero_control"
-            required placeholder="Ej. A12345678" />
-        </div>
-        <div class="form-group full-width">
-          <label>Fecha de la cita</label>
-          <div class="calendar-card">
-            <div class="calendar-header">
-              <button type="button" class="calendar-nav" (click)="changeMonth(-1)"
-                [disabled]="isCurrentMonth">‹</button>
-              <h4>{{ calendarLabel | titlecase }}</h4>
-              <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
-            </div>
-            <div class="calendar-legend">
-              <span><span class="dot available"></span> Disponible</span>
-              <span><span class="dot partial"></span> Parcial</span>
-              <span><span class="dot full"></span> Sin lugares</span>
-            </div>
-            <div class="calendar-weekdays">
-              <span *ngFor="let day of weekDays">{{ day }}</span>
-            </div>
-            <div class="calendar-grid">
-              <ng-container *ngFor="let week of calendarWeeks">
-                <button type="button" *ngFor="let day of week" class="calendar-day" [ngClass]="{
-                  outside: !day.isCurrentMonth,
-                  today: day.isToday,
-                  selected: isSelectedDate(day.date),
-                  unavailable: isDayUnavailable(day),
-                  'status-available': day.availability === 'available',
-                  'status-partial': day.availability === 'partial',
-                  'status-full': day.availability === 'full',
-                  'status-none': day.availability === 'none'
-                }" [ngStyle]="getDayStyle(day)" [attr.aria-pressed]="isSelectedDate(day.date)"
-                  (click)="selectCalendarDay(day)">
-                  <span class="day-number">{{ day.label }}</span>
-                  <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
-                </button>
-              </ng-container>
-            </div>
-          </div>
-          <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
-            <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
-          </div>
-          <input type="hidden" id="fechaCita" name="fecha_cita" [(ngModel)]="createFormData.fecha_cita" required />
-        </div>
-        <div class="form-group full-width">
-          <label>Hora</label>
-          <div class="slots-wrapper" [class.disabled]="!createFormData.fecha_cita || !hasAvailableSlotsForSelectedDate">
-            <div class="slots-legend">
-              <span class="leg-dot free"></span> Libre
-              <span class="leg-dot selected-dot"></span> Seleccionado
-              <span class="leg-dot booked-dot"></span> Ocupado
-            </div>
-            <div class="slots-group">
-              <span class="slots-period">🌅 Mañana</span>
-              <div class="time-slots">
-                <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(0, 16)"
-                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
-                  [class.booked]="isSlotUnavailable(slot)"
-                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
-                  {{ formatTime(slot) }}
-                </button>
-              </div>
-            </div>
-            <div class="slots-group">
-              <span class="slots-period">🌇 Tarde</span>
-              <div class="time-slots">
-                <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(16)"
-                  [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
-                  [class.booked]="isSlotUnavailable(slot)"
-                  [disabled]="!createFormData.fecha_cita || isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
-                  {{ formatTime(slot) }}
-                </button>
-              </div>
-            </div>
-          </div>
-          <small class="helper-text" *ngIf="!createFormData.fecha_cita">
-            Selecciona un día disponible para ver las horas libres.
-          </small>
-          <small class="helper-text warning" *ngIf="createFormData.fecha_cita && !hasAvailableSlotsForSelectedDate">
-            Este día ya no tiene espacios disponibles.
-          </small>
-          <input type="hidden" id="horaCita" name="hora_cita" [(ngModel)]="createFormData.hora_cita" required />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="motivo">Motivo</label>
-        <textarea id="motivo" name="motivo" [(ngModel)]="createFormData.motivo" rows="3"
-          placeholder="Describe el motivo de la consulta"></textarea>
-      </div>
-
-      <button class="btn-primary" type="submit" [disabled]="isSubmitting || createCitaForm.invalid">
-        {{ isSubmitting ? 'Agendando...' : 'Guardar cita' }}
-      </button>
-    </form>
+  <div class="kpi kpi-warn">
+    <div class="kpi-ic">◷</div>
+    <div>
+      <div class="kpi-lbl">Pendientes</div>
+      <div class="kpi-v">{{ hayFiltroActivo ? filteredPendingCitas.length : pendingCitas.length }}</div>
+    </div>
   </div>
-
-  <!-- Barra de búsqueda y filtros -->
-  <div class="search-bar">
-    <input type="text" [(ngModel)]="searchCitas" placeholder="Buscar por alumno, número de control o motivo..."
-      class="search-input">
-    <button *ngIf="searchCitas" class="search-clear" (click)="searchCitas = ''">✕</button>
+  <div class="kpi kpi-danger">
+    <div class="kpi-ic">✕</div>
+    <div>
+      <div class="kpi-lbl">Canceladas este mes</div>
+      <div class="kpi-v">{{ canceladasMes }}</div>
+    </div>
   </div>
+</div>
 
-  <div class="filtros-bar">
-    <select [(ngModel)]="filtroEstatus" class="filtro-select">
-      <option value="">Todos los estatus</option>
+<!-- ===== PRÓXIMA CITA HERO ===== -->
+<div class="proxima-hero" *ngIf="proximaCitaObj && !isLoadingCitas">
+  <div class="av av-hero">{{ getGridCitaInitials(proximaCitaObj) }}</div>
+  <div class="proxima-info">
+    <div class="proxima-label">Próxima cita</div>
+    <div class="proxima-name">{{ getGridCitaName(proximaCitaObj) }}</div>
+    <div class="proxima-meta">
+      No. {{ proximaCitaObj.alumno?.numero_control ?? '—' }} · {{ formatFechaCorta(proximaCitaObj.fecha_cita) }}
+    </div>
+  </div>
+  <div class="proxima-hora-block">
+    <div class="hora-big">{{ formatTime(proximaCitaObj.hora_cita) }}</div>
+  </div>
+  <div class="proxima-actions">
+    <button class="btn-hero-outline" *ngIf="proximaCitaObj.alumno"
+      (click)="openPerfilAlumno(proximaCitaObj.alumno.id)">Expediente</button>
+    <button class="btn-hero-white" (click)="drawerAtender(proximaCitaObj)">Iniciar consulta</button>
+  </div>
+</div>
+
+<!-- ===== SEMANA GRID (agenda) ===== -->
+<div class="week-grid-card">
+  <div class="week-grid-header">
+    <h2>{{ weekLabel }}</h2>
+    <div class="week-nav">
+      <button class="btn-week" (click)="goToThisWeek()">Hoy</button>
+      <button class="btn-week" (click)="changeWeek(-1)">‹</button>
+      <button class="btn-week" (click)="changeWeek(1)">›</button>
+    </div>
+  </div>
+  <div class="week-grid-table-wrap">
+    <table class="week-grid-table">
+      <thead>
+        <tr>
+          <th class="col-hora">Hora</th>
+          <th *ngFor="let day of weekGridDays" [class.col-today]="day.isToday">
+            {{ day.label }}<span *ngIf="day.isToday" class="today-dot">hoy</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let hour of hourGridSlots">
+          <td class="cell-hora">{{ hour | number:'2.0-0' }}:00</td>
+          <td *ngFor="let day of weekGridDays" class="cell-slot" [class.cell-today]="day.isToday">
+            <div *ngFor="let cita of getCitasForSlot(day.date, hour)"
+                 class="grid-cita" [ngClass]="getGridCitaClass(cita)"
+                 [class.grid-cita-dim]="hayFiltroActivo && !citaMatchaFiltro(cita)"
+                 (click)="openDrawer(cita)">
+              {{ getGridCitaName(cita) }}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== BUSCADOR + FILTROS ===== -->
+<div class="citas-search-bar">
+  <span class="search-ic">⌕</span>
+  <input placeholder="Buscar por alumno, No. control o motivo…"
+         [(ngModel)]="searchCitas" />
+  <div class="filtros-inline">
+    <select [(ngModel)]="filtroEstatus" class="filtro-select-sm">
+      <option value="">Todos los estados</option>
       <option value="programada">Programada</option>
       <option value="atendida">Atendida</option>
       <option value="cancelada">Cancelada</option>
       <option value="no_asistio">No asistió</option>
     </select>
-    <input type="date" [(ngModel)]="filtroFechaDesde" class="filtro-fecha">
-    <input type="date" [(ngModel)]="filtroFechaHasta" class="filtro-fecha">
-    <button class="btn-limpiar" (click)="limpiarFiltros()"
-      *ngIf="filtroEstatus || filtroFechaDesde || filtroFechaHasta || searchCitas">
-      Limpiar filtros
-    </button>
-  </div>
-
-  <!-- Contenedor de citas -->
-  <div class="citas-container">
-    <ng-container *ngIf="!isLoadingCitas; else loadingCitas">
-      <div *ngIf="citasError" class="alert error">{{ citasError }}</div>
-
-      <div class="citas-layout" *ngIf="!citasError">
-        <!-- Columna de próximas citas -->
-        <div class="citas-column pendientes">
-          <h3>Próximas citas</h3>
-          <ng-container *ngIf="filteredPendingCitas.length > 0; else noPendientesDoctor">
-            <div *ngFor="let cita of filteredPendingCitas" class="cita-card">
-              <div class="cita-header">
-                <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
-                <span class="estatus programada">Programada</span>
-              </div>
-              <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
-              <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
-              <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
-              <div class="card-actions">
-                <button class="btn-atender" (click)="onMarkAsAttended(cita)" [disabled]="isSubmitting">Atender</button>
-                <button class="btn-reprogramar" (click)="openReprogramar(cita)" [disabled]="isSubmitting">Reprogramar</button>
-                <button class="btn-no-show" (click)="onMarkAsNoShow(cita)" [disabled]="isSubmitting">No asistió</button>
-                <button class="btn-cancelar" (click)="onCancelCita(cita)" [disabled]="isSubmitting">Cancelar</button>
-                <button class="btn-perfil-alumno" *ngIf="cita.alumno" (click)="openPerfilAlumno(cita.alumno.id)">Ver perfil</button>
-              </div>
-            </div>
-          </ng-container>
-          <ng-template #noPendientesDoctor>
-            <div class="placeholder-card compact">
-              <h4>No hay citas pendientes</h4>
-              <p>Cuando agendes citas para los alumnos aparecerán aquí.</p>
-            </div>
-          </ng-template>
-        </div>
-
-
-        <!-- Columna de historial -->
-        <div class="citas-column historial">
-          <h3>Historial reciente</h3>
-          <ng-container *ngIf="filteredHandledCitas.length > 0; else noHistorialDoctor">
-            <div *ngFor="let cita of filteredHandledCitas" class="cita-card"
-              [class.cancelada]="cita.estatus === 'cancelada'" [class.no-asistio]="cita.estatus === 'no_asistio'">
-              <div class="cita-header">
-                <h4>{{ formatDateDisplay(cita.fecha_cita) }}</h4>
-                <span class="estatus" [class.atendida]="cita.estatus === 'atendida'"
-                  [class.cancelada]="cita.estatus === 'cancelada'" [class.no-asistio]="cita.estatus === 'no_asistio'">
-                  {{ cita.estatus === 'atendida' ? 'Atendida' : cita.estatus === 'no_asistio' ? 'No asistió' :
-                  'Cancelada'
-                  }}
-                </span>
-              </div>
-              <p class="hora">{{ formatTime(cita.hora_cita) }} hrs</p>
-              <p class="motivo" *ngIf="cita.motivo">Motivo: {{ cita.motivo }}</p>
-              <p class="alumno" *ngIf="cita.alumno">Alumno: {{ cita.alumno.nombre }} {{ cita.alumno.apellido }}</p>
-              <div class="card-actions" *ngIf="cita.alumno">
-                <button class="btn-perfil-alumno" (click)="openPerfilAlumno(cita.alumno.id)">Ver perfil</button>
-              </div>
-            </div>
-          </ng-container>
-          <ng-template #noHistorialDoctor>
-            <div class="placeholder-card compact">
-              <h4>Sin historial todavía</h4>
-              <p>Cuando atiendas o canceles citas aparecerán en esta sección.</p>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #loadingCitas>
-      <div class="placeholder-card">Cargando lista de citas...</div>
-    </ng-template>
+    <input type="date" [(ngModel)]="filtroFechaDesde" class="filtro-fecha-sm">
+    <input type="date" [(ngModel)]="filtroFechaHasta" class="filtro-fecha-sm">
+    <button class="btn-limpiar-sm"
+      *ngIf="filtroEstatus || filtroFechaDesde || filtroFechaHasta || searchCitas"
+      (click)="limpiarFiltros()">Limpiar</button>
   </div>
 </div>
 
-<!-- Modal: Registrar consulta -->
+<!-- Loading / Error -->
+<div *ngIf="isLoadingCitas" class="placeholder">Cargando citas…</div>
+<div *ngIf="citasError" class="msg-error">{{ citasError }}</div>
+
+<!-- ===== LISTA DE CITAS ===== -->
+<div class="table-wrap" *ngIf="!isLoadingCitas && !citasError">
+
+  <!-- Pendientes -->
+  <div class="table-section-head" *ngIf="filteredPendingCitas.length > 0">
+    <span><b>{{ filteredPendingCitas.length }}</b> cita{{ filteredPendingCitas.length !== 1 ? 's' : '' }} pendiente{{ filteredPendingCitas.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <div class="cita-row"
+       *ngFor="let c of filteredPendingCitas"
+       (click)="openDrawer(c)"
+       [class.sel]="drawerCita?.id === c.id">
+    <div class="av">{{ getGridCitaInitials(c) }}</div>
+    <div class="who">
+      <b>{{ getGridCitaName(c) }}</b>
+      <span>No. {{ c.alumno?.numero_control ?? '—' }}</span>
+    </div>
+    <span class="badge-fecha">
+      <span class="dot-verde"></span>{{ formatFechaCorta(c.fecha_cita) }} · {{ formatTime(c.hora_cita) }}
+    </span>
+    <span class="estatus-chip chip-programada">Programada</span>
+    <div class="motivo-col">{{ c.motivo || 'Sin motivo' }}</div>
+    <div class="row-actions" (click)="$event.stopPropagation()">
+      <button class="btn-sm btn-primary-full" (click)="onMarkAsAttended(c)">Atender</button>
+      <button class="btn-sm btn-outline" (click)="openDrawer(c)">Ver detalle</button>
+    </div>
+  </div>
+
+  <!-- Historial -->
+  <div class="table-section-head historial-head" *ngIf="filteredHandledCitas.length > 0">
+    <span><b>{{ filteredHandledCitas.length }}</b> cita{{ filteredHandledCitas.length !== 1 ? 's' : '' }} en historial</span>
+  </div>
+
+  <div class="cita-row"
+       *ngFor="let c of pagedHandledCitas"
+       (click)="openDrawer(c)"
+       [class.sel]="drawerCita?.id === c.id">
+    <div class="av av-muted">{{ getGridCitaInitials(c) }}</div>
+    <div class="who">
+      <b>{{ getGridCitaName(c) }}</b>
+      <span>No. {{ c.alumno?.numero_control ?? '—' }}</span>
+    </div>
+    <span class="badge-fecha badge-fecha-muted">
+      {{ formatFechaCorta(c.fecha_cita) }} · {{ formatTime(c.hora_cita) }}
+    </span>
+    <span class="estatus-chip"
+      [ngClass]="{
+        'chip-atendida':   c.estatus === 'atendida',
+        'chip-cancelada':  c.estatus === 'cancelada',
+        'chip-no-asistio': c.estatus === 'no_asistio'
+      }">
+      {{ c.estatus === 'atendida' ? 'Atendida' : c.estatus === 'cancelada' ? 'Cancelada' : 'No asistió' }}
+    </span>
+    <div class="motivo-col">{{ c.motivo || 'Sin motivo' }}</div>
+    <div class="row-actions" (click)="$event.stopPropagation()">
+      <button class="btn-sm btn-outline" (click)="openDrawer(c)">Ver detalle</button>
+    </div>
+  </div>
+
+  <!-- Paginación historial -->
+  <div class="pagination-bar" *ngIf="totalPaginasHistorial > 1">
+    <button class="btn-sm btn-outline"
+            (click)="cambiarPaginaHistorial(historialPagina - 1)"
+            [disabled]="historialPagina === 1">‹ Anterior</button>
+    <span class="pagination-info">Página {{ historialPagina }} de {{ totalPaginasHistorial }}</span>
+    <button class="btn-sm btn-outline"
+            (click)="cambiarPaginaHistorial(historialPagina + 1)"
+            [disabled]="historialPagina === totalPaginasHistorial">Siguiente ›</button>
+  </div>
+
+  <!-- Vacío -->
+  <div class="placeholder" *ngIf="filteredPendingCitas.length === 0 && filteredHandledCitas.length === 0">
+    <div class="placeholder-ic">▦</div>
+    <b>Sin citas</b>
+    <span>Usa el botón "Nueva cita" para agendar una consulta.</span>
+  </div>
+</div>
+
+<!-- ===== DRAWER: Detalle de cita ===== -->
+<aside class="drawer" [class.open]="drawerCitaAbierto">
+  <ng-container *ngIf="drawerCita">
+
+    <div class="drawer-head">
+      <div>
+        <h2><span class="drawer-ic">▦</span>Detalle de cita</h2>
+        <div class="drawer-sub">{{ formatDateDisplay(drawerCita.fecha_cita) }}</div>
+      </div>
+      <button class="btn-x" (click)="closeDrawer()">×</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="d-patient">
+        <div class="av av-md">{{ getGridCitaInitials(drawerCita) }}</div>
+        <div class="d-patient-info">
+          <b>{{ getGridCitaName(drawerCita) }}</b>
+          <span class="d-patient-sub">No. <b>{{ drawerCita.alumno?.numero_control ?? '—' }}</b></span>
+        </div>
+      </div>
+
+      <div class="d-grid">
+        <div class="d-cell">
+          <div class="d-label">Fecha</div>
+          <b>{{ formatFechaCorta(drawerCita.fecha_cita) }}</b>
+        </div>
+        <div class="d-cell">
+          <div class="d-label">Hora</div>
+          <b>{{ formatTime(drawerCita.hora_cita) }}</b>
+        </div>
+        <div class="d-cell d-cell-full">
+          <div class="d-label">Estado</div>
+          <span class="estatus-chip"
+            [ngClass]="{
+              'chip-programada': drawerCita.estatus === 'programada',
+              'chip-atendida':   drawerCita.estatus === 'atendida',
+              'chip-cancelada':  drawerCita.estatus === 'cancelada',
+              'chip-no-asistio': drawerCita.estatus === 'no_asistio'
+            }">
+            {{ drawerCita.estatus === 'programada' ? 'Programada'
+               : drawerCita.estatus === 'atendida' ? 'Atendida'
+               : drawerCita.estatus === 'cancelada' ? 'Cancelada'
+               : 'No asistió' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="d-section" *ngIf="drawerCita.motivo">
+        <div class="d-section-head">Motivo</div>
+        <div class="d-text">{{ drawerCita.motivo }}</div>
+      </div>
+    </div>
+
+    <!-- Footer para citas programadas -->
+    <ng-container *ngIf="drawerCita.estatus === 'programada'">
+      <div class="drawer-foot-top" *ngIf="drawerCita.alumno">
+        <button class="btn-sm btn-outline flex1" (click)="openPerfilAlumno(drawerCita.alumno.id)">Ver expediente</button>
+        <button class="btn-sm btn-gray flex1" (click)="drawerReprogramar(drawerCita)">Reprogramar</button>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn-sm btn-danger flex1" (click)="drawerCancelar(drawerCita)">Cancelar</button>
+        <button class="btn-sm btn-warn flex1" (click)="drawerNoAsistio(drawerCita)">No asistió</button>
+        <button class="btn-sm btn-primary-full flex1" (click)="drawerAtender(drawerCita)">Consulta</button>
+      </div>
+    </ng-container>
+
+    <!-- Footer para citas ya gestionadas -->
+    <div class="drawer-foot" *ngIf="drawerCita.estatus !== 'programada'">
+      <button class="btn-sm btn-gray flex1" (click)="closeDrawer()">Cerrar</button>
+      <button class="btn-sm btn-outline flex1" *ngIf="drawerCita.alumno"
+        (click)="openPerfilAlumno(drawerCita.alumno.id)">Ver expediente</button>
+    </div>
+
+  </ng-container>
+</aside>
+
+<!-- ===== MODAL: 3 pasos — Nueva cita ===== -->
+<div class="modal-overlay" *ngIf="showCreateForm" (click)="toggleCreateForm()">
+  <div class="modal-3step" (click)="$event.stopPropagation()">
+
+    <div class="modal-3step-head">
+      <div>
+        <h3>Nueva cita</h3>
+        <div class="step-indicator">
+          <span class="step-dot" [class.active]="createStep >= 1" [class.done]="createStep > 1">1</span>
+          <span class="step-line"></span>
+          <span class="step-dot" [class.active]="createStep >= 2" [class.done]="createStep > 2">2</span>
+          <span class="step-line"></span>
+          <span class="step-dot" [class.active]="createStep >= 3">3</span>
+        </div>
+      </div>
+      <button class="modal-close" (click)="toggleCreateForm()">✕</button>
+    </div>
+
+    <div *ngIf="submitMessage" class="form-msg">{{ submitMessage }}</div>
+
+    <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
+
+      <!-- Paso 1: Alumno -->
+      <div *ngIf="createStep === 1" class="step-body">
+        <div class="step-title">¿Para quién es la cita?</div>
+        <div class="form-group">
+          <label>Número de control del alumno</label>
+          <input type="text" name="numero_control" [(ngModel)]="createFormData.numero_control"
+            placeholder="Ej. 22690495" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- Paso 2: Fecha y hora -->
+      <div *ngIf="createStep === 2" class="step-body">
+        <div class="step-title">¿Cuándo?</div>
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
+            <h4>{{ calendarLabel | titlecase }}</h4>
+            <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
+          </div>
+          <div class="calendar-legend">
+            <span><span class="dot available"></span> Disponible</span>
+            <span><span class="dot partial"></span> Parcial</span>
+            <span><span class="dot full"></span> Sin lugares</span>
+          </div>
+          <div class="calendar-weekdays">
+            <span *ngFor="let day of weekDays">{{ day }}</span>
+          </div>
+          <div class="calendar-grid">
+            <ng-container *ngFor="let week of calendarWeeks">
+              <button type="button" *ngFor="let day of week" class="calendar-day" [ngClass]="{
+                outside: !day.isCurrentMonth,
+                today: day.isToday,
+                selected: isSelectedDate(day.date),
+                unavailable: isDayUnavailable(day),
+                'status-available': day.availability === 'available',
+                'status-partial': day.availability === 'partial',
+                'status-full': day.availability === 'full',
+                'status-none': day.availability === 'none'
+              }" [ngStyle]="getDayStyle(day)" [attr.aria-pressed]="isSelectedDate(day.date)"
+                (click)="selectCalendarDay(day)">
+                <span class="day-number">{{ day.label }}</span>
+                <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
+              </button>
+            </ng-container>
+          </div>
+        </div>
+        <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
+          <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
+        </div>
+        <div class="slots-wrapper" *ngIf="createFormData.fecha_cita"
+             [class.disabled]="!hasAvailableSlotsForSelectedDate">
+          <div class="slots-legend">
+            <span class="leg-dot free"></span> Libre
+            <span class="leg-dot selected-dot"></span> Seleccionado
+            <span class="leg-dot booked-dot"></span> Ocupado
+          </div>
+          <div class="slots-group">
+            <span class="slots-period">Mañana</span>
+            <div class="time-slots">
+              <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(0, 16)"
+                [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                [class.booked]="isSlotUnavailable(slot)"
+                [disabled]="isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
+                {{ formatTime(slot) }}
+              </button>
+            </div>
+          </div>
+          <div class="slots-group">
+            <span class="slots-period">Tarde</span>
+            <div class="time-slots">
+              <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(16)"
+                [class.selected]="createFormData.hora_cita === normalizeTime(slot)"
+                [class.booked]="isSlotUnavailable(slot)"
+                [disabled]="isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
+                {{ formatTime(slot) }}
+              </button>
+            </div>
+          </div>
+          <small class="helper-text warning" *ngIf="!hasAvailableSlotsForSelectedDate">
+            Este día ya no tiene espacios disponibles.
+          </small>
+        </div>
+        <small class="helper-text" *ngIf="!createFormData.fecha_cita">
+          Selecciona un día disponible para ver las horas libres.
+        </small>
+      </div>
+
+      <!-- Paso 3: Confirmar + motivo -->
+      <div *ngIf="createStep === 3" class="step-body">
+        <div class="step-title">Confirmar cita</div>
+        <div class="confirm-summary">
+          <div class="confirm-row">
+            <span>Alumno</span>
+            <b>No. {{ createFormData.numero_control }}</b>
+          </div>
+          <div class="confirm-row">
+            <span>Fecha</span>
+            <b>{{ formatDateDisplay(createFormData.fecha_cita ?? '') }}</b>
+          </div>
+          <div class="confirm-row">
+            <span>Hora</span>
+            <b>{{ formatTime(createFormData.hora_cita ?? '') }}</b>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Motivo (opcional)</label>
+          <textarea name="motivo" [(ngModel)]="createFormData.motivo" rows="3"
+            placeholder="Describe el motivo de la consulta…"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-3step-foot">
+        <button type="button" class="btn-secondary"
+          (click)="createStep > 1 ? stepBack() : toggleCreateForm()">
+          {{ createStep > 1 ? 'Atrás' : 'Cancelar' }}
+        </button>
+        <button type="button" class="btn-primary" *ngIf="createStep < 3" (click)="stepNext()">
+          Siguiente
+        </button>
+        <button type="submit" class="btn-primary" *ngIf="createStep === 3" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Agendando…' : 'Agendar cita' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL: Registrar consulta ===== -->
 <div class="modal-overlay" *ngIf="showConsultaForm" (click)="closeConsultaForm()">
   <div class="modal modal-consulta" (click)="$event.stopPropagation()">
     <h3>Registrar consulta</h3>
@@ -275,13 +454,13 @@
     <div class="modal-actions">
       <button class="btn-secondary" (click)="closeConsultaForm()">Cancelar</button>
       <button class="btn-primary" (click)="submitConsulta()" [disabled]="isSubmittingConsulta">
-        {{ isSubmittingConsulta ? 'Guardando...' : 'Guardar y marcar atendida' }}
+        {{ isSubmittingConsulta ? 'Guardando…' : 'Guardar y marcar atendida' }}
       </button>
     </div>
   </div>
 </div>
 
-<!-- Modal: Perfil Médico Alumno -->
+<!-- ===== MODAL: Perfil médico del alumno ===== -->
 <div class="modal-overlay" *ngIf="showPerfilAlumnoModal" (click)="closePerfilAlumno()">
   <div class="modal-perfil-alumno" (click)="$event.stopPropagation()">
     <div class="modal-perfil-header">
@@ -295,8 +474,7 @@
       <div class="perfil-alumno-top">
         <div class="perfil-alumno-avatar">
           <img *ngIf="perfilAlumnoData.foto_perfil" [src]="perfilAlumnoData.foto_perfil" alt="foto" />
-          <span *ngIf="!perfilAlumnoData.foto_perfil">{{ perfilAlumnoData.nombre[0] }}{{ perfilAlumnoData.apellido[0]
-            }}</span>
+          <span *ngIf="!perfilAlumnoData.foto_perfil">{{ perfilAlumnoData.nombre[0] }}{{ perfilAlumnoData.apellido[0] }}</span>
         </div>
         <div class="perfil-alumno-info">
           <h4>{{ perfilAlumnoData.nombre }} {{ perfilAlumnoData.apellido }}</h4>
@@ -339,8 +517,7 @@
           <div *ngIf="historialAlumnoExpandido === item.id" class="historial-mini-detalle">
             <p *ngIf="item.consulta"><strong>Diagnóstico:</strong> {{ item.consulta.diagnostico }}</p>
             <p *ngIf="item.consulta"><strong>Tratamiento:</strong> {{ item.consulta.tratamiento }}</p>
-            <p *ngIf="item.receta"><strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}
-            </p>
+            <p *ngIf="item.receta"><strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}</p>
           </div>
         </div>
       </div>
@@ -348,7 +525,7 @@
   </div>
 </div>
 
-<!-- Modal: Reprogramar cita -->
+<!-- ===== MODAL: Reprogramar cita ===== -->
 <div class="modal-overlay" *ngIf="showReprogramarModal" (click)="closeReprogramar()">
   <div class="modal" (click)="$event.stopPropagation()">
     <h3>Reprogramar cita</h3>
@@ -372,7 +549,7 @@
     <div class="modal-actions">
       <button class="btn-secondary" (click)="closeReprogramar()">Cancelar</button>
       <button class="btn-primary" (click)="submitReprogramar()" [disabled]="isSubmittingReprogramar">
-        {{ isSubmittingReprogramar ? 'Reprogramando...' : 'Confirmar reprogramación' }}
+        {{ isSubmittingReprogramar ? 'Reprogramando…' : 'Confirmar reprogramación' }}
       </button>
     </div>
   </div>

@@ -1,35 +1,110 @@
-<section class="content-section">
-  <div class="welcome-card">
-    <h2>Bienvenido al Sistema del Consultorio</h2>
-
-    <div class="quick-stats">
-      <div class="stat-card">
-        <h3>Próxima Cita</h3>
-        <ng-container *ngIf="nextCitaInfo; else noProximaCita">
-          <p class="stat-value">{{ nextCitaInfo.fecha }}</p>
-          <p class="stat-detail">{{ nextCitaInfo.hora }} hrs</p>
-          <p class="stat-detail" *ngIf="nextCitaInfo.motivo">Motivo: {{ nextCitaInfo.motivo }}</p>
-        </ng-container>
-        <ng-template #noProximaCita>
-          <p class="stat-value">No tienes citas programadas</p>
-        </ng-template>
+<!-- KPIs skeleton -->
+@if (isLoading) {
+  <div class="inicio-kpis">
+    @for (i of [1,2,3]; track i) {
+      <div class="kpi skeleton">
+        <div class="sk-line sk-sm"></div>
+        <div class="sk-line sk-lg"></div>
+        <div class="sk-line sk-sm"></div>
       </div>
+    }
+  </div>
+}
 
-      <div class="stat-card">
-        <h3>Citas Programadas</h3>
-        <p class="stat-value">{{ totalCitasProgramadas }} {{ totalCitasProgramadas === 1 ? 'cita' : 'citas' }}</p>
-      </div>
+<!-- KPIs cargados -->
+@if (!isLoading) {
+  <div class="inicio-kpis">
+    <div class="kpi accent">
+      <div class="kpi-lbl"><span class="kpi-ic">⊞</span>Próximas citas</div>
+      <div class="kpi-v">{{ citasProximas.length }}<small>agendadas</small></div>
+      @if (citasProximas.length > 0) {
+        <div class="kpi-sub">
+          Próxima: <b>{{ citasProximas[0].dow }} {{ citasProximas[0].dia }} {{ citasProximas[0].mes }}, {{ citasProximas[0].hora }}</b>
+        </div>
+      } @else {
+        <div class="kpi-sub">Sin citas agendadas</div>
+      }
+    </div>
 
-      <div class="stat-card" [class.stat-card-alert]="citasPendientesSinEvaluacion > 0">
-        <h3>Pre-evaluación IA</h3>
-        <ng-container *ngIf="citasPendientesSinEvaluacion > 0; else evalAlDia">
-          <p class="stat-value">{{ citasPendientesSinEvaluacion }} pendiente{{ citasPendientesSinEvaluacion > 1 ? 's' : '' }}</p>
-          <button class="btn-ia-inicio" (click)="navegarACitas.emit()">Completar ahora →</button>
-        </ng-container>
-        <ng-template #evalAlDia>
-          <p class="stat-value">✓ Al día</p>
-        </ng-template>
+    <div class="kpi">
+      <div class="kpi-lbl"><span class="kpi-ic">⚲</span>Última visita</div>
+      @if (ultimaVisita) {
+        <div class="kpi-v">{{ ultimaVisita.fecha }}</div>
+        <div class="kpi-sub">{{ ultimaVisita.motivo }} · <b>Atendida</b></div>
+      } @else {
+        <div class="kpi-v">—</div>
+        <div class="kpi-sub">Sin visitas previas</div>
+      }
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-lbl"><span class="kpi-ic">℞</span>Recetas</div>
+      <div class="kpi-v">{{ recetasActivas }}<small>total</small></div>
+      <div class="kpi-sub">
+        <span (click)="navegarARecetas.emit()" class="inicio-link">Ver mis recetas →</span>
       </div>
     </div>
   </div>
-</section>
+}
+
+<!-- Próximas citas -->
+<div class="inicio-section">
+  <div class="inicio-section-head">
+    <h2>Próximas citas</h2>
+    @if (citasProximas.length > 0) {
+      <a class="inicio-link" (click)="navegarACitas.emit()">Ver todas →</a>
+    }
+  </div>
+
+  <div class="inicio-card">
+    @if (!isLoading && citasProximas.length === 0) {
+      <div class="empty">
+        <div class="empty-ic">⊞</div>
+        <h3>No tienes citas agendadas</h3>
+        <p>Cuando agendes una consulta en el servicio médico aparecerá aquí con su fecha, hora y motivo.</p>
+        <button class="btn-agendar" (click)="navegarAAgendar.emit()">
+          <span>＋</span> Agendar cita
+        </button>
+      </div>
+    }
+
+    @if (citasProximas.length > 0) {
+      <table class="inicio-table">
+        <thead>
+          <tr>
+            <th style="width:28%">Fecha</th>
+            <th style="width:12%">Hora</th>
+            <th>Motivo</th>
+            <th style="width:14%">Estatus</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of citasProximas; track c.id) {
+            <tr>
+              <td>
+                <div class="date-cell">
+                  <div class="date-block">
+                    <b>{{ c.dia }}</b>
+                    <span>{{ c.mes }}</span>
+                  </div>
+                  <div class="date-dow">
+                    <b>{{ c.dow }}</b>
+                    2026
+                  </div>
+                </div>
+              </td>
+              <td class="hora-cell">{{ c.hora }}</td>
+              <td>{{ c.motivo }}</td>
+              <td>
+                <span class="badge" [class.ok]="c.estatus === 'programada'" [class.warn]="c.estatus !== 'programada'">
+                  <span class="badge-dot"></span>
+                  {{ c.estatus === 'programada' ? 'Confirmada' : 'Pendiente' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

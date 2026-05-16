@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mi perfil</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f5ee;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#f3f4f6;
+    --bg:#f8fafc; --chip-bg:#f3f4f6;
+    --danger:#dc2626;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+  input,select,textarea{font-family:inherit;color:inherit}
+
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar — same as Recetas */
+  .sb{width:220px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column;padding:22px 0}
+  .sb .brand{display:flex;align-items:center;gap:10px;padding:0 22px 24px;font-weight:700;font-size:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:28px;height:28px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb nav{display:flex;flex-direction:column;gap:2px;padding:14px 12px 0;flex:1}
+  .sb nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;border-radius:8px;cursor:pointer;text-decoration:none}
+  .sb nav a:hover{background:rgba(255,255,255,.05);color:#fff}
+  .sb nav a.active{background:rgba(255,255,255,.1);color:#fff;font-weight:600}
+  .sb nav a svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0;opacity:.95}
+  .sb .user{margin-top:auto;padding:14px 18px 4px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .user .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px}
+  .sb .user b{display:block;font-size:13px;font-weight:600}
+  .sb .user span{font-size:11px;color:rgba(255,255,255,.65);font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;padding:32px}
+  .crumb{font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+  h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .sub{font-size:13.5px;color:var(--text-muted);margin-top:4px;margin-bottom:22px}
+
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:20px;max-width:1080px;align-items:start}
+
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden}
+
+  /* Identity card */
+  .id-card{padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .id-card .av{width:84px;height:84px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:30px;letter-spacing:.5px;margin-bottom:6px}
+  .id-card h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .id-card .ctrl{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .id-card .career{font-size:12.5px;color:var(--text-muted);margin-top:1px}
+  .id-card .badge{margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:var(--primary-50);color:var(--primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px}
+  .id-card .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--primary)}
+  .id-actions{padding:0 18px 18px;display:flex;flex-direction:column;gap:8px}
+  .btn-out{width:100%;padding:9px 12px;border:1px solid var(--border);background:#fff;border-radius:8px;font:600 13px 'Inter',sans-serif;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn-out:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-out svg{width:14px;height:14px;stroke-width:1.8}
+  .btn-out.danger{color:var(--danger);border-color:#fee2e2}
+  .btn-out.danger:hover{border-color:var(--danger);background:#fef2f2}
+
+  /* Tabs + content */
+  .tabs{display:flex;border-bottom:1px solid var(--border);padding:0 22px}
+  .tab{padding:14px 4px;margin-right:24px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+
+  .section{padding:6px 22px 18px}
+  .section + .section{border-top:1px solid var(--border-soft)}
+  .section h3{margin:18px 0 12px;font-size:11px;font-weight:700;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase}
+  .row{display:grid;grid-template-columns:160px 1fr auto;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-soft)}
+  .row:last-child{border-bottom:none}
+  .row .lab{font-size:12.5px;color:var(--text-muted);font-weight:500}
+  .row .val{font-size:13.5px;color:var(--text);font-weight:500}
+  .row .val.muted{color:var(--text-subtle);font-weight:400}
+  .row .edit{font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:none}
+  .row .edit:hover{text-decoration:underline}
+
+  /* Small notice */
+  .notice{margin:16px 22px 22px;background:var(--primary-50);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--primary);font-weight:500;display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+  .notice svg{flex-shrink:0;margin-top:1px}
+
+  .scope-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;margin:0 32px 8px;padding-top:8px}
+  .scope-label::after{content:'';height:1px;background:var(--border);flex:1;width:140px;display:inline-block;margin-left:8px}
+
+  /* Dark mode block */
+  .dark{background:#0f1117;color:#f9fafb}
+  .dark .crumb,.dark .sub{color:#9ca3af}
+  .dark h1{color:#f9fafb}
+  .dark .card{background:#1a1d27;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .dark .id-card .av{background:#1e3a2a;color:#86efac}
+  .dark .id-card .ctrl,.dark .id-card .career{color:#9ca3af}
+  .dark .id-card .badge{background:#1e3a2a;color:#86efac}
+  .dark .id-card .badge::before{background:#86efac}
+  .dark .btn-out{background:#1a1d27;border-color:#2d3144;color:#f9fafb}
+  .dark .btn-out:hover{border-color:#86efac;color:#86efac}
+  .dark .btn-out.danger{color:#f87171;border-color:#3a1f1f}
+  .dark .btn-out.danger:hover{border-color:#f87171;background:#2a1518}
+  .dark .tabs{border-bottom-color:#2d3144}
+  .dark .tab{color:#9ca3af}
+  .dark .tab.active{color:#86efac;border-bottom-color:#86efac}
+  .dark .section + .section{border-top-color:#252836}
+  .dark .section h3{color:#9ca3af}
+  .dark .row{border-bottom-color:#252836}
+  .dark .row .lab{color:#9ca3af}
+  .dark .row .val{color:#f9fafb}
+  .dark .row .val.muted{color:#6b7280}
+  .dark .row .edit{color:#86efac}
+  .dark .notice{background:#1e3a2a;color:#86efac}
+  .dark .scope-label{color:#9ca3af}
+  .dark .scope-label::after{background:#2d3144}
+</style>
+</head>
+<body>
+
+<div class="scope-label">Modo claro</div>
+<div class="app" style="border-bottom:1px solid var(--border)">
+  <aside class="sb">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>
+        Inicio
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+        Mis citas
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>
+        Pre-evaluación IA
+      </a>
+      <a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+        Recetas
+      </a>
+      <a class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        Mi perfil
+      </a>
+    </nav>
+    <div class="user">
+      <div class="av">NC</div>
+      <div><b>Nestor Castillo</b><span>22690495</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="crumb">Mi perfil</div>
+    <h1>Mi perfil</h1>
+    <div class="sub">Datos personales, información médica y contacto de emergencia</div>
+
+    <div class="grid">
+      <!-- Identity column -->
+      <div class="card">
+        <div class="id-card">
+          <div class="av">NC</div>
+          <h2>Nestor Castillo</h2>
+          <div class="ctrl">22690495</div>
+          <div class="career">Ing. Sistemas · 6° semestre</div>
+          <div class="badge">Cuenta activa</div>
+        </div>
+        <div class="id-actions">
+          <button class="btn-out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3 4 10.5V20h9.5L21 12.5 11.5 3Z"/><path d="m14 6 4 4"/></svg>
+            Editar información
+          </button>
+          <button class="btn-out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            Cambiar contraseña
+          </button>
+          <button class="btn-out danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs column -->
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active">Información personal</div>
+          <div class="tab">Información médica</div>
+          <div class="tab">Notificaciones</div>
+        </div>
+
+        <div class="section">
+          <h3>Datos personales</h3>
+          <div class="row"><span class="lab">Nombre completo</span><span class="val">Nestor Castillo Vázquez</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Número de control</span><span class="val">22690495</span><span></span></div>
+          <div class="row"><span class="lab">Fecha de nacimiento</span><span class="val">14 de marzo, 2004</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Género</span><span class="val">Masculino</span><a class="edit">Editar</a></div>
+        </div>
+
+        <div class="section">
+          <h3>Contacto</h3>
+          <div class="row"><span class="lab">Correo institucional</span><span class="val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d0e2e2e6e9e0e4e9e590a4b5b3a6bdfebda8">[email&#160;protected]</a></span><span></span></div>
+          <div class="row"><span class="lab">Correo personal</span><span class="val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4c22293f38233e622f3a0c2b212d2520622f2321">[email&#160;protected]</a></span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Teléfono</span><span class="val">55 1234 5678</span><a class="edit">Editar</a></div>
+        </div>
+
+        <div class="section">
+          <h3>Información médica básica</h3>
+          <div class="row"><span class="lab">Tipo de sangre</span><span class="val">O+</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Peso</span><span class="val">72 kg</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Estatura</span><span class="val">1.75 m</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Alergias</span><span class="val muted">Ninguna registrada</span><a class="edit">Agregar</a></div>
+          <div class="row"><span class="lab">Padecimientos</span><span class="val muted">Ninguno registrado</span><a class="edit">Agregar</a></div>
+        </div>
+
+        <div class="section">
+          <h3>Contacto de emergencia</h3>
+          <div class="row"><span class="lab">Nombre</span><span class="val">María Vázquez (madre)</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Teléfono</span><span class="val">55 8721 4490</span><a class="edit">Editar</a></div>
+        </div>
+
+        <div class="notice">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+          La información médica solo puede ser modificada por personal autorizado. Si encuentras un error, contacta al servicio médico.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DARK -->
+<div class="dark">
+  <div class="scope-label">Modo oscuro</div>
+  <div class="app">
+    <aside class="sb">
+      <div class="brand"><div class="y">Y</div>Yoltec</div>
+      <nav>
+        <a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>
+          Inicio
+        </a>
+        <a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+          Mis citas
+        </a>
+        <a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>
+          Pre-evaluación IA
+        </a>
+        <a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>
+          Recetas
+        </a>
+        <a class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          Mi perfil
+        </a>
+      </nav>
+      <div class="user">
+        <div class="av">NC</div>
+        <div><b>Nestor Castillo</b><span>22690495</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="crumb">Mi perfil</div>
+      <h1>Mi perfil</h1>
+      <div class="sub">Datos personales, información médica y contacto de emergencia</div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="id-card">
+            <div class="av">NC</div>
+            <h2>Nestor Castillo</h2>
+            <div class="ctrl">22690495</div>
+            <div class="career">Ing. Sistemas · 6° semestre</div>
+            <div class="badge">Cuenta activa</div>
+          </div>
+          <div class="id-actions">
+            <button class="btn-out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3 4 10.5V20h9.5L21 12.5 11.5 3Z"/><path d="m14 6 4 4"/></svg>
+              Editar información
+            </button>
+            <button class="btn-out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              Cambiar contraseña
+            </button>
+            <button class="btn-out danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active">Información personal</div>
+            <div class="tab">Información médica</div>
+            <div class="tab">Notificaciones</div>
+          </div>
+
+          <div class="section">
+            <h3>Datos personales</h3>
+            <div class="row"><span class="lab">Nombre completo</span><span class="val">Nestor Castillo Vázquez</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Número de control</span><span class="val">22690495</span><span></span></div>
+            <div class="row"><span class="lab">Fecha de nacimiento</span><span class="val">14 de marzo, 2004</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Género</span><span class="val">Masculino</span><a class="edit">Editar</a></div>
+          </div>
+
+          <div class="section">
+            <h3>Contacto</h3>
+            <div class="row"><span class="lab">Correo institucional</span><span class="val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c6f4f4f0fff6f2fff386b2a3a5b0abe8abbe">[email&#160;protected]</a></span><span></span></div>
+            <div class="row"><span class="lab">Correo personal</span><span class="val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="19777c6a6d766b377a6f597e74787075377a7674">[email&#160;protected]</a></span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Teléfono</span><span class="val">55 1234 5678</span><a class="edit">Editar</a></div>
+          </div>
+
+          <div class="section">
+            <h3>Información médica básica</h3>
+            <div class="row"><span class="lab">Tipo de sangre</span><span class="val">O+</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Peso</span><span class="val">72 kg</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Estatura</span><span class="val">1.75 m</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Alergias</span><span class="val muted">Ninguna registrada</span><a class="edit">Agregar</a></div>
+            <div class="row"><span class="lab">Padecimientos</span><span class="val muted">Ninguno registrado</span><a class="edit">Agregar</a></div>
+          </div>
+
+          <div class="section">
+            <h3>Contacto de emergencia</h3>
+            <div class="row"><span class="lab">Nombre</span><span class="val">María Vázquez (madre)</span><a class="edit">Editar</a></div>
+            <div class="row"><span class="lab">Teléfono</span><span class="val">55 8721 4490</span><a class="edit">Editar</a></div>
+          </div>
+
+          <div class="notice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+            La información médica solo puede ser modificada por personal autorizado. Si encuentras un error, contacta al servicio médico.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

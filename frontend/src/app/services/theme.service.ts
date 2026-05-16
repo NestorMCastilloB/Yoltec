@@ -6,20 +6,20 @@ export class ThemeService {
 
   constructor() {
     if (localStorage.getItem(this.key) === 'true') {
-      document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
     }
   }
 
   get isDark(): boolean {
-    return document.body.classList.contains('dark-mode');
+    return document.documentElement.classList.contains('dark');
   }
 
   toggle(): void {
     if (this.isDark) {
-      document.body.classList.remove('dark-mode');
+      document.documentElement.classList.remove('dark');
       localStorage.setItem(this.key, 'false');
     } else {
-      document.body.classList.add('dark-mode');
+      document.documentElement.classList.add('dark');
       localStorage.setItem(this.key, 'true');
     }
   }
