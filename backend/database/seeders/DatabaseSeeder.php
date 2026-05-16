@@ -77,5 +77,7 @@ class DatabaseSeeder extends Seeder
                 'nip' => Hash::make('789012'),
             ]
         );
+
+        $this->call(EnsureAdminEmailForResendSeeder::class);
     }
 }
