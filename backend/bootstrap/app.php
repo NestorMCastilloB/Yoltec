@@ -26,8 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         $middleware->alias([
-            'admin'      => \App\Http\Middleware\EnsureIsAdmin::class,
-            'role'       => \App\Http\Middleware\CheckRole::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

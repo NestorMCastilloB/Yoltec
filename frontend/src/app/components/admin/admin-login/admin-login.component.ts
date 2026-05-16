@@ -58,10 +58,13 @@ export class AdminLoginComponent implements OnDestroy {
           this.router.navigate(['/admin-dashboard']);
         },
         error: (err: HttpErrorResponse) => {
-          if (err.status === 401) {
-            this.mostrarToast('Credenciales incorrectas');
+          const backendMsg = (err.error?.message as string | undefined)?.trim();
+          if (err.status === 401 || err.status === 422) {
+            this.mostrarToast(backendMsg || 'Credenciales incorrectas');
           } else if (err.status === 403) {
-            this.mostrarToast('Sin permisos de administrador');
+            this.mostrarToast(backendMsg || 'Sin permisos de administrador');
+          } else if (err.status === 429) {
+            this.mostrarToast(backendMsg || 'Demasiados intentos. Espera unos minutos.');
           } else {
             this.mostrarToast('Error al conectar con el servidor');
           }
