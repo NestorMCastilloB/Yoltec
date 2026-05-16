@@ -210,4 +210,28 @@ class CitaController extends Controller
         $cita->update(['estatus' => 'no_asistio']);
         return response()->json(['message' => 'Cita marcada como no asistida', 'cita' => $cita]);
     }
+
+    // Solo doctor — busca alumnos por número de control, nombre o apellido (max 20 resultados)
+    public function buscarAlumno(Request $request)
+    {
+        $q = trim((string) $request->input('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json(['alumnos' => []]);
+        }
+        $alumnos = User::where('tipo', 'alumno')
+            ->where(function ($query) use ($q) {
+                $query->where('numero_control', 'ILIKE', "%{$q}%")
+                    ->orWhere('nombre', 'ILIKE', "%{$q}%")
+                    ->orWhere('apellido', 'ILIKE', "%{$q}%");
+            })
+            ->select('id', 'numero_control', 'nombre', 'apellido')
+            ->limit(20)
+            ->get()
+            ->map(fn($a) => [
+                'id' => $a->id,
+                'numero_control' => $a->numero_control,
+                'nombre' => "{$a->nombre} {$a->apellido}",
+            ]);
+        return response()->json(['alumnos' => $alumnos]);
+    }
 }
