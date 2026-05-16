@@ -268,12 +268,13 @@
                         <div
                           class="cal-day"
                           [class.other-month]="!day.isCurrentMonth"
+                          [class.past]="day.isPast && !day.diaEspecial"
                           [class.selected]="diaForm.fecha === day.date"
                           [class.fes]="day.diaEspecial?.tipo === 'holiday'"
                           [class.vac]="day.diaEspecial?.tipo === 'vacation'"
                           [class.red]="day.diaEspecial?.tipo === 'reduced'"
-                          (click)="day.isCurrentMonth && selectCalDay(day.date)"
-                          [title]="day.diaEspecial?.etiqueta ?? (day.isCurrentMonth ? 'Clic para marcar' : '')">
+                          (click)="day.isCurrentMonth && selectCalDay(day.date, day.isPast, !!day.diaEspecial)"
+                          [title]="day.diaEspecial?.etiqueta ?? (day.isPast && !day.diaEspecial ? 'Día pasado — no editable' : day.isCurrentMonth ? 'Clic para marcar' : '')">
                           <span class="day-num">{{ day.label }}</span>
                           @if (day.diaEspecial) {
                             <span class="day-dot" [class]="day.diaEspecial.tipo"></span>

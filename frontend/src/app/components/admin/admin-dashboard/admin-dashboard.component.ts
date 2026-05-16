@@ -88,7 +88,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   calCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   calLabel = '';  // cambio 6: propiedad, no getter
-  calWeeks: { date: string; label: number; isCurrentMonth: boolean; diaEspecial: DiaEspecial | null }[][] = [];
+  calWeeks: { date: string; label: number; isCurrentMonth: boolean; isPast: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
   diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
@@ -232,7 +232,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   formatFechaDia(iso: string): string {
-    const [y, m, d] = iso.split('-').map(Number);
+    if (!iso) return '';
+    const [y, m, d] = iso.split('T')[0].split('-').map(Number);
+    if (!y || !m || !d) return iso;
     return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' }).format(new Date(y, m - 1, d));
   }
 
@@ -480,6 +482,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const dow = new Date(year, month, 1).getDay();
     const daysBack = dow === 0 ? 6 : dow - 1;
     const cursor = new Date(year, month, 1 - daysBack);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const diasMap = new Map(this.diasEspeciales.map(d => [d.fecha, d]));
     const weeks: any[][] = [];
     for (let w = 0; w < 6; w++) {
@@ -487,7 +491,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       while (week.length < 6) {
         if (cursor.getDay() !== 0) {
           const ds = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-          week.push({ date: ds, label: cursor.getDate(), isCurrentMonth: cursor.getMonth() === month, diaEspecial: diasMap.get(ds) ?? null });
+          week.push({
+            date: ds,
+            label: cursor.getDate(),
+            isCurrentMonth: cursor.getMonth() === month,
+            isPast: ds < todayStr,
+            diaEspecial: diasMap.get(ds) ?? null
+          });
         }
         cursor.setDate(cursor.getDate() + 1);
       }
@@ -496,7 +506,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.calWeeks = weeks;
   }
 
-  selectCalDay(fecha: string): void {
+  selectCalDay(fecha: string, isPast = false, hasDia = false): void {
+    if (isPast && !hasDia) return;
     this.diaForm.fecha = fecha;
     const existing = this.diasEspeciales.find(d => d.fecha === fecha);
     if (existing) { this.diaForm.tipo = existing.tipo; this.diaForm.etiqueta = existing.etiqueta ?? ''; }
