@@ -78,13 +78,25 @@ export class AgendarCitaService {
   }
 
   // Slots calculados localmente desde el cache del mes (no requiere endpoint adicional)
+  // Si la fecha es hoy, excluye horas que ya pasaron
   getSlots(fecha: string): Observable<Slot[]> {
     const monthKey = fecha.substring(0, 7);
     const dayInfo = this.monthCache.get(monthKey)?.get(fecha)
       ?? { takenSlots: new Set<string>(), horaCierre: null, isFull: false };
     if (dayInfo.isFull) return of([]);
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const ahoraHHMM = fecha === todayStr
+      ? `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      : null;
+
     const slots: Slot[] = this.allSlots()
-      .filter(h => !dayInfo.takenSlots.has(h) && (!dayInfo.horaCierre || h < dayInfo.horaCierre))
+      .filter(h =>
+        !dayInfo.takenSlots.has(h)
+        && (!dayInfo.horaCierre || h < dayInfo.horaCierre)
+        && (!ahoraHHMM || h > ahoraHHMM)
+      )
       .map(h => {
         const id = ++this.slotCounter;
         this.slotIdToHora.set(id, h);
