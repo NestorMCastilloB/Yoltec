@@ -51,6 +51,7 @@
           <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
             <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
           </div>
+          <div class="warning-banner" *ngIf="selectedDayWarning">⚠ {{ selectedDayWarning }}</div>
           <input type="hidden" name="fecha_cita" [(ngModel)]="createFormData.fecha_cita" required />
         </div>
 
