@@ -19,6 +19,7 @@ interface DayAvailabilityRecord {
   status: AvailabilityStatus;
   color?: string;
   label?: string | null;
+  horaCierre?: string | null;
 }
 
 interface CalendarDay {
@@ -172,7 +173,8 @@ export class SdCitasComponent implements OnInit, OnDestroy {
     if (!fecha) return null;
     const rec = this.availabilityMap.get(fecha);
     if (!rec || rec.status !== 'partial') return null;
-    return rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+    const baseMsg = rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+    return rec.horaCierre ? `${baseMsg} (cierre a las ${rec.horaCierre})` : baseMsg;
   }
 
   get hasAvailableSlotsForSelectedDate(): boolean {
@@ -184,7 +186,10 @@ export class SdCitasComponent implements OnInit, OnDestroy {
   isSlotUnavailable(slot: string): boolean {
     if (!this.createFormData.fecha_cita) return true;
     const rec = this.availabilityMap.get(this.createFormData.fecha_cita);
-    return rec ? rec.takenSlots.has(this.normalizeTime(slot)) : false;
+    if (!rec) return false;
+    const normalized = this.normalizeTime(slot);
+    if (rec.horaCierre && normalized >= rec.horaCierre) return true;
+    return rec.takenSlots.has(normalized);
   }
 
   getDayStyle(day: CalendarDay): Record<string, string> {
@@ -249,7 +254,7 @@ export class SdCitasComponent implements OnInit, OnDestroy {
       else if (takenSlots.size === 0) status = 'available';
       else if (takenSlots.size >= this.totalSlotsPerDay) status = 'full';
       else status = 'partial';
-      map.set(day.date, { takenSlots, status, color: day.special?.color ?? undefined, label: day.special?.label ?? null });
+      map.set(day.date, { takenSlots, status, color: day.special?.color ?? undefined, label: day.special?.label ?? null, horaCierre: day.special?.hora_cierre ?? null });
     });
     this.availabilityMap = map;
   }

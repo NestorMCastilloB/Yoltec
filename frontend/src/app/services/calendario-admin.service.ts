@@ -9,6 +9,7 @@ export interface DiaEspecial {
   fecha: string;
   tipo: 'holiday' | 'vacation' | 'reduced';
   etiqueta: string | null;
+  hora_cierre: string | null;
 }
 
 export const TIPO_LABELS: Record<string, { label: string; color: string }> = {
@@ -28,8 +29,10 @@ export class CalendarioAdminService {
       .pipe(map(r => r.dias.map(d => ({ ...d, fecha: (d.fecha || '').split('T')[0] }))));
   }
 
-  saveDia(fecha: string, tipo: string, etiqueta: string): Observable<any> {
-    return this.http.post(this.base, { fecha, tipo, etiqueta });
+  saveDia(fecha: string, tipo: string, etiqueta: string, horaCierre?: string | null): Observable<any> {
+    const body: Record<string, any> = { fecha, tipo, etiqueta };
+    if (tipo === 'reduced' && horaCierre) body['hora_cierre'] = horaCierre;
+    return this.http.post(this.base, body);
   }
 
   deleteDia(id: number): Observable<any> {

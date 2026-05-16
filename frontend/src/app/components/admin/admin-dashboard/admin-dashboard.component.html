@@ -321,6 +321,13 @@
                   <label>Etiqueta</label>
                   <input type="text" [(ngModel)]="diaForm.etiqueta" placeholder="Ej: Semana Santa, Puente..." class="form-input">
                 </div>
+                @if (diaForm.tipo === 'reduced') {
+                  <div class="form-group" style="margin-top: 12px">
+                    <label>Hora de cierre *</label>
+                    <input type="time" [(ngModel)]="diaForm.hora_cierre" min="08:00" max="16:45" class="form-input">
+                    <small class="form-hint">A partir de esta hora no se podrán agendar citas.</small>
+                  </div>
+                }
                 <button class="btn-pri btn-full" style="margin-top: 16px" (click)="submitDia()" [disabled]="isSubmittingDia">
                   {{ isSubmittingDia ? 'Guardando...' : 'Guardar día' }}
                 </button>
@@ -333,7 +340,12 @@
                     <div class="dia-reg-item">
                       <div class="dia-reg-fecha">{{ formatFechaDia(dia.fecha) }}</div>
                       <span class="dia-preview-tipo" [class]="dia.tipo">{{ tipoLabels[dia.tipo].label }}</span>
-                      <span class="dia-reg-etiqueta">{{ dia.etiqueta || '—' }}</span>
+                      <span class="dia-reg-etiqueta">
+                        {{ dia.etiqueta || '—' }}
+                        @if (dia.tipo === 'reduced' && dia.hora_cierre) {
+                          <small class="dia-reg-hora">· cierre {{ dia.hora_cierre }}</small>
+                        }
+                      </span>
                       <div class="dia-reg-actions">
                         <button class="action-link" (click)="selectCalDay(dia.fecha)">Editar</button>
                         <button class="action-link warn" (click)="deleteDia(dia.id)">Eliminar</button>
