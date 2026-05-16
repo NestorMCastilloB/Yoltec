@@ -137,11 +137,25 @@ export class AgendarCitaService {
     const info = new Map<string, DayInfo>();
     const daysInMonth = new Date(year, month, 0).getDate();
 
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const ahoraHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Cuenta slots libres descontando: ocupados, posteriores al cierre y (si es hoy) horas ya pasadas
+    const contarLibres = (date: string, takenSlots: Set<string>, horaCierre: string | null) => {
+      return this.allSlots().filter(s =>
+        !takenSlots.has(s)
+        && (!horaCierre || s < horaCierre)
+        && (date !== todayStr || s > ahoraHHMM)
+      ).length;
+    };
+
     for (let d = 1; d <= daysInMonth; d++) {
       const date = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const dow = new Date(year, month - 1, d).getDay();
       if (dow === 0) continue; // domingo cerrado
-      result[date] = { libres: total, total };
+      const libres = contarLibres(date, new Set(), null);
+      result[date] = { libres, total };
       info.set(date, { takenSlots: new Set(), horaCierre: null, isFull: false });
     }
 
@@ -152,14 +166,9 @@ export class AgendarCitaService {
       const horaCierre = day.special?.hora_cierre ?? null;
       const takenSlots = new Set(day.taken_slots ?? []);
       info.set(dateKey, { takenSlots, horaCierre, isFull });
-      if (isFull) {
-        result[dateKey] = { libres: 0, total };
-      } else {
-        const libres = this.allSlots().filter(s =>
-          !takenSlots.has(s) && (!horaCierre || s < horaCierre)
-        ).length;
-        result[dateKey] = { libres, total };
-      }
+      result[dateKey] = isFull
+        ? { libres: 0, total }
+        : { libres: contarLibres(dateKey, takenSlots, horaCierre), total };
     });
 
     this.monthCache.set(`${year}-${String(month).padStart(2, '0')}`, info);

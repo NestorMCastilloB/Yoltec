@@ -301,6 +301,8 @@
 
 .btn-sm { padding: 6px 11px; font-size: var(--yol-fs-cap); }
 
+.btn-modal { min-width: 180px; justify-content: center; }
+
 /* --- Filtros historial --- */
 .filters {
   display: flex;

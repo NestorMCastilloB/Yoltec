@@ -210,11 +210,16 @@ export class DoctorPreEvaluacionesComponent implements OnInit, OnDestroy {
     return `${n} ${a}`.trim() || 'Sin nombre';
   }
 
-  formatFecha(iso: string): string {
+  tieneAlumno(pe: PreEvaluacion): boolean {
+    return !!(pe.cita?.alumno?.nombre || pe.cita?.alumno?.apellido);
+  }
+
+  formatFecha(iso: string | null | undefined): string {
     if (!iso) return '—';
-    const [y, m, d] = iso.split('-').map(Number);
+    const [y, m, d] = iso.split('T')[0].split('-').map(Number);
+    if (!y || !m || !d || isNaN(y) || isNaN(m) || isNaN(d)) return '—';
     return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
-      .format(new Date(y, (m ?? 1) - 1, d ?? 1));
+      .format(new Date(y, m - 1, d));
   }
 
   private mostrarToast(mensaje: string, tipo: 'ok' | 'error'): void {
