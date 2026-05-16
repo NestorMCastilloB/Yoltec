@@ -199,7 +199,8 @@
       <div class="modal-foot">
         <button class="btn btn-ghost" (click)="cerrarValidar()">Cancelar</button>
         <button class="btn btn-primary btn-modal" (click)="confirmarValidar()" [disabled]="enviando">
-          {{ enviando ? 'Validando...' : 'Confirmar validación' }}
+          <span *ngIf="!enviando">Confirmar validación</span>
+          <span *ngIf="enviando">Validando...</span>
         </button>
       </div>
     </div>
@@ -227,7 +228,8 @@
       <div class="modal-foot">
         <button class="btn btn-ghost" (click)="cerrarDescartar()">Cancelar</button>
         <button class="btn btn-danger-outline btn-modal" (click)="confirmarDescartar()" [disabled]="enviando">
-          {{ enviando ? 'Descartando...' : 'Descartar diagnóstico' }}
+          <span *ngIf="!enviando">Descartar diagnóstico</span>
+          <span *ngIf="enviando">Descartando...</span>
         </button>
       </div>
     </div>
