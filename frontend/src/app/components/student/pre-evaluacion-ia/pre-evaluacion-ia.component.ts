@@ -1,15 +1,16 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
   PreEvaluacionChatService,
   MensajeChat,
   DiagnosticoIA,
   RespuestaChat
 } from './pre-evaluacion-ia.service';
+import { CitaService } from '../../../services/cita.service';
 
 interface MensajeUI {
   tipo: 'ai' | 'user';
@@ -25,7 +26,7 @@ interface MensajeUI {
   templateUrl: './pre-evaluacion-ia.component.html',
   styleUrls: ['./pre-evaluacion-ia.component.css']
 })
-export class PreEvaluacionIaComponent implements AfterViewChecked {
+export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef<HTMLElement>;
   @ViewChild('inputRef') private inputRef!: ElementRef<HTMLTextAreaElement>;
 
@@ -35,6 +36,11 @@ export class PreEvaluacionIaComponent implements AfterViewChecked {
   enviando = false;
   error = '';
   shouldScroll = false;
+
+  // Cita requerida para asociar la pre-evaluación
+  citaId: number | null = null;
+  cargandoCita = true;
+  sinCita = false;
 
   // Resultado diagnóstico
   diagnosticos: DiagnosticoIA[] = [];
@@ -46,9 +52,31 @@ export class PreEvaluacionIaComponent implements AfterViewChecked {
 
   constructor(
     private chatService: PreEvaluacionChatService,
+    private citaService: CitaService,
     private router: Router
   ) {
     this.agregarMensajeIA('Hola, soy tu asistente médico. Cuéntame, ¿qué síntomas estás presentando hoy?');
+  }
+
+  ngOnInit(): void {
+    // Cargar próxima cita programada para asociar la pre-evaluación
+    this.citaService.getCitas()
+      .pipe(takeUntil(this.destroy$), catchError(() => of([])), finalize(() => this.cargandoCita = false))
+      .subscribe(citas => {
+        const proxima = (citas || [])
+          .filter(c => c.estatus === 'programada')
+          .sort((a, b) => `${a.fecha_cita} ${a.hora_cita}`.localeCompare(`${b.fecha_cita} ${b.hora_cita}`))[0];
+        if (proxima) {
+          this.citaId = proxima.id;
+        } else {
+          this.sinCita = true;
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewChecked(): void {
@@ -80,7 +108,14 @@ export class PreEvaluacionIaComponent implements AfterViewChecked {
     this.enviando = true;
     this.shouldScroll = true;
 
-    this.chatService.enviarMensaje(texto, this.historial)
+    if (!this.citaId) {
+      this.error = 'Necesitas tener una cita programada para usar la pre-evaluación. Agenda una primero.';
+      this.enviando = false;
+      this.historial.pop();
+      this.mensajes.pop();
+      return;
+    }
+    this.chatService.enviarMensaje(this.citaId, texto, this.historial.slice(0, -1))
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => { this.enviando = false; })
