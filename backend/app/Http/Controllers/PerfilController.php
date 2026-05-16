@@ -28,6 +28,7 @@ class PerfilController extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'telefono' => 'nullable|string|max:20',
             'fecha_nacimiento' => 'nullable|date',
+            'genero' => 'nullable|in:masculino,femenino,otro',
         ]);
 
         $user->update($validated);
