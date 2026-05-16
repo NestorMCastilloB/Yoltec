@@ -11,38 +11,30 @@ import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../../../../se
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './doctor-bitacoras.component.html',
-  styleUrls: ['./doctor-bitacoras.component.css']   // ← Asegúrate de que esté
+  styleUrls: ['./doctor-bitacoras.component.css']
 })
-
 export class DoctorBitacorasComponent implements OnInit, OnDestroy {
   citas: Cita[] = [];
   bitacoras: Bitacora[] = [];
   isLoadingBitacoras = false;
   bitacorasError: string | null = null;
-  filtrosBitacora = { fecha_desde: '', fecha_hasta: '', alumno: '' };
-  showBitacoraForm = false;
-  isSubmittingBitacora = false;
-  bitacoraMessage: string | null = null;
-  editingBitacoraId: number | null = null;
+  busquedaAlumno = '';
+
+  // Drawer
+  drawerAbierto = false;
+  drawerModo: 'vista' | 'form' = 'vista';
+  drawerBitacora: Bitacora | null = null;
+  editandoId: number | null = null;
   bitacoraFormData: Partial<CreateBitacoraPayload> = this.emptyForm();
+  isSubmitting = false;
+  mensajeForm: string | null = null;
 
-  readonly PAGE_SIZE = 6;
-  currentPageBitacoras = 1;
-
-  get pagedBitacoras(): Bitacora[] {
-    const start = (this.currentPageBitacoras - 1) * this.PAGE_SIZE;
-    return this.bitacoras.slice(start, start + this.PAGE_SIZE);
-  }
-  get totalPagesBitacoras(): number { return Math.ceil(this.bitacoras.length / this.PAGE_SIZE) || 1; }
-
-  get availableCitasForBitacora(): Cita[] {
-    const ids = new Set(this.bitacoras.map(b => b.cita_id));
-    return this.citas.filter(c => c.estatus === 'atendida' && !ids.has(c.id));
-  }
+  readonly PAGE_SIZE = 10;
+  currentPage = 1;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private citaService: CitaService, private bitacoraService: BitacoraService) { }
+  constructor(private citaService: CitaService, private bitacoraService: BitacoraService) {}
 
   ngOnInit(): void {
     this.loadCitas();
@@ -54,50 +46,105 @@ export class DoctorBitacorasComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  toggleBitacoraForm(): void {
-    this.showBitacoraForm = !this.showBitacoraForm;
-    this.bitacoraMessage = null;
-    if (!this.showBitacoraForm) {
-      this.editingBitacoraId = null;
-      this.bitacoraFormData = this.emptyForm();
+  // --- KPIs (computados del array cargado) ---
+
+  get bitacorasDelMes(): number {
+    const ahora = new Date();
+    return this.bitacoras.filter(b => {
+      const f = new Date(b.created_at);
+      return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear();
+    }).length;
+  }
+
+  get pacientesUnicos(): number {
+    return new Set(this.bitacoras.map(b => b.alumno_id)).size;
+  }
+
+  get dxFrecuente(): string {
+    const conteo: Record<string, number> = {};
+    for (const b of this.bitacoras) {
+      if (b.diagnostico) conteo[b.diagnostico] = (conteo[b.diagnostico] ?? 0) + 1;
     }
+    const top = Object.entries(conteo).sort((a, b) => b[1] - a[1])[0];
+    return top ? top[0] : '—';
   }
 
-  aplicarFiltrosBitacora(): void {
-    this.currentPageBitacoras = 1;
-    this.loadBitacoras();
+  // --- Búsqueda local ---
+
+  get bitacorasFiltradas(): Bitacora[] {
+    const busq = this.busquedaAlumno.toLowerCase().trim();
+    if (!busq) return this.bitacoras;
+    return this.bitacoras.filter(b => {
+      const nombre = `${b.alumno?.nombre ?? ''} ${b.alumno?.apellido ?? ''}`.toLowerCase();
+      const ctrl = b.alumno?.numero_control?.toLowerCase() ?? '';
+      const dx = b.diagnostico?.toLowerCase() ?? '';
+      return nombre.includes(busq) || ctrl.includes(busq) || dx.includes(busq);
+    });
   }
 
-  limpiarFiltrosBitacora(): void {
-    this.filtrosBitacora = { fecha_desde: '', fecha_hasta: '', alumno: '' };
-    this.currentPageBitacoras = 1;
-    this.loadBitacoras();
+  get pagedBitacoras(): Bitacora[] {
+    const start = (this.currentPage - 1) * this.PAGE_SIZE;
+    return this.bitacorasFiltradas.slice(start, start + this.PAGE_SIZE);
   }
 
-  prevPageBitacoras(): void { if (this.currentPageBitacoras > 1) this.currentPageBitacoras--; }
-  nextPageBitacoras(): void { if (this.currentPageBitacoras < this.totalPagesBitacoras) this.currentPageBitacoras++; }
+  get totalPages(): number { return Math.ceil(this.bitacorasFiltradas.length / this.PAGE_SIZE) || 1; }
 
-  startEditBitacora(bitacora: Bitacora): void {
-    this.showBitacoraForm = true;
-    this.editingBitacoraId = bitacora.id;
-    this.bitacoraMessage = null;
+  onBusqueda(): void { this.currentPage = 1; }
+
+  prevPage(): void { if (this.currentPage > 1) this.currentPage--; }
+  nextPage(): void { if (this.currentPage < this.totalPages) this.currentPage++; }
+
+  get availableCitas(): Cita[] {
+    const ids = new Set(this.bitacoras.map(b => b.cita_id));
+    return this.citas.filter(c => c.estatus === 'atendida' && !ids.has(c.id));
+  }
+
+  // --- Drawer ---
+
+  abrirVista(b: Bitacora): void {
+    this.drawerBitacora = b;
+    this.drawerModo = 'vista';
+    this.drawerAbierto = true;
+  }
+
+  abrirNueva(): void {
+    this.editandoId = null;
+    this.bitacoraFormData = this.emptyForm();
+    this.mensajeForm = null;
+    this.drawerModo = 'form';
+    this.drawerBitacora = null;
+    this.drawerAbierto = true;
+  }
+
+  abrirEdicion(b: Bitacora): void {
+    this.editandoId = b.id;
     this.bitacoraFormData = {
-      cita_id: bitacora.cita_id,
-      diagnostico: bitacora.diagnostico || '',
-      tratamiento: bitacora.tratamiento || '',
-      observaciones: bitacora.observaciones || '',
-      peso: bitacora.peso || '',
-      altura: bitacora.altura || '',
-      temperatura: bitacora.temperatura || '',
-      presion_arterial: bitacora.presion_arterial || ''
+      cita_id: b.cita_id,
+      diagnostico: b.diagnostico || '',
+      tratamiento: b.tratamiento || '',
+      observaciones: b.observaciones || '',
+      peso: b.peso || '',
+      altura: b.altura || '',
+      temperatura: b.temperatura || '',
+      presion_arterial: b.presion_arterial || ''
     };
+    this.mensajeForm = null;
+    this.drawerModo = 'form';
+    this.drawerAbierto = true;
   }
 
-  onCreateBitacora(form: NgForm): void {
+  cerrarDrawer(): void {
+    this.drawerAbierto = false;
+    this.drawerBitacora = null;
+    this.editandoId = null;
+    this.mensajeForm = null;
+  }
+
+  guardarBitacora(form: NgForm): void {
     if (form.invalid) {
-      this.bitacoraMessage = !this.bitacoraFormData.cita_id
-        ? 'Selecciona la cita atendida correspondiente.'
-        : 'Por favor completa todos los campos obligatorios.';
+      this.mensajeForm = !this.bitacoraFormData.cita_id
+        ? 'Selecciona la cita atendida.'
+        : 'Completa todos los campos obligatorios.';
       return;
     }
 
@@ -112,72 +159,80 @@ export class DoctorBitacorasComponent implements OnInit, OnDestroy {
       presion_arterial: this.bitacoraFormData.presion_arterial || undefined
     };
 
-    this.isSubmittingBitacora = true;
-    this.bitacoraMessage = null;
+    this.isSubmitting = true;
+    this.mensajeForm = null;
 
-    const request$ = this.editingBitacoraId
-      ? this.bitacoraService.updateBitacora(this.editingBitacoraId, payload)
+    const req$ = this.editandoId
+      ? this.bitacoraService.updateBitacora(this.editandoId, payload)
       : this.bitacoraService.createBitacora(payload);
 
-    request$.pipe(
+    req$.pipe(
       takeUntil(this.destroy$),
       catchError(error => {
         const errores = error?.error?.errors;
         if (errores) {
           const first = Object.keys(errores)[0];
-          const msgs = (errores as any)[first];
-          if (Array.isArray(msgs) && msgs.length > 0) { this.bitacoraMessage = msgs[0]; return of(null); }
+          const msgs = (errores as Record<string, string[]>)[first];
+          if (Array.isArray(msgs) && msgs.length) { this.mensajeForm = msgs[0]; return of(null); }
         }
-        this.bitacoraMessage = error?.error?.message || 'No se pudo registrar la bitácora.';
+        this.mensajeForm = error?.error?.message || 'No se pudo guardar la bitácora.';
         return of(null);
       }),
-      finalize(() => { this.isSubmittingBitacora = false; })
-    ).subscribe(response => {
-      if (response?.bitacora) {
-        this.bitacoraMessage = this.editingBitacoraId ? 'Bitácora actualizada.' : 'Bitácora registrada.';
+      finalize(() => { this.isSubmitting = false; })
+    ).subscribe(res => {
+      if (res?.bitacora) {
+        this.cerrarDrawer();
         this.loadBitacoras();
-        this.editingBitacoraId = null;
-        this.bitacoraFormData = this.emptyForm();
-        this.showBitacoraForm = false;
       }
     });
   }
 
-  exportBitacorasCSV(): void {
-    const headers = ['Fecha Cita', 'Alumno', 'Diagnóstico', 'Tratamiento', 'Observaciones', 'Peso', 'Altura', 'Temperatura', 'Presión Arterial', 'Registrada'];
-    const rows = this.bitacoras.map(b => [
-      b.cita?.fecha_cita ?? '',
-      `${b.alumno?.nombre ?? ''} ${b.alumno?.apellido ?? ''}`.trim(),
-      b.diagnostico ?? '', b.tratamiento ?? '', b.observaciones ?? '',
-      b.peso ?? '', b.altura ?? '', b.temperatura ?? '', b.presion_arterial ?? '',
-      b.created_at ? new Date(b.created_at).toLocaleDateString('es-MX') : ''
-    ].map(v => `"${String(v).replace(/"/g, '""')}"`));
+  // --- Helpers ---
 
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  iniciales(b: Bitacora): string {
+    const n = b.alumno?.nombre?.[0] ?? '';
+    const a = b.alumno?.apellido?.[0] ?? '';
+    return (n + a).toUpperCase() || '?';
+  }
+
+  formatFecha(fecha: string): string {
+    if (!fecha) return '—';
+    const [y, m, d] = fecha.split('-').map(Number);
+    return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+      .format(new Date(y, (m ?? 1) - 1, d ?? 1)).toUpperCase();
+  }
+
+  formatDatetime(iso: string): string {
+    if (!iso) return '—';
+    return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
+  }
+
+  // Descarga las bitácoras visibles (respeta el filtro activo) como CSV con BOM UTF-8
+  exportarCsv(): void {
+    if (!this.bitacorasFiltradas.length) return;
+    const headers = ['Fecha', 'Alumno', 'No. Control', 'Diagnóstico', 'Tratamiento', 'Observaciones', 'Peso', 'Altura', 'Temperatura', 'Presión arterial'];
+    const rows = this.bitacorasFiltradas.map(b => [
+      b.cita?.fecha_cita ?? b.created_at.split('T')[0],
+      `${b.alumno?.nombre ?? ''} ${b.alumno?.apellido ?? ''}`.trim(),
+      b.alumno?.numero_control ?? '',
+      b.diagnostico ?? '',
+      b.tratamiento ?? '',
+      b.observaciones ?? '',
+      b.peso ?? '',
+      b.altura ?? '',
+      b.temperatura ?? '',
+      b.presion_arterial ?? '',
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bitacoras_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `bitacoras_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  formatDateDisplay(fecha: string): string {
-    const [year, month, day] = fecha.split('-').map(Number);
-    return new Intl.DateTimeFormat('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-      .format(new Date(year, (month ?? 1) - 1, day ?? 1));
-  }
-
-  formatTime(hora: string): string {
-    const [h, m] = hora.split(':').map(Number);
-    const d = new Date();
-    d.setHours(h, m || 0, 0, 0);
-    return new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
-  }
-
-  formatBitacoraDate(fecha: string): string {
-    return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fecha));
   }
 
   private loadCitas(): void {
@@ -190,15 +245,10 @@ export class DoctorBitacorasComponent implements OnInit, OnDestroy {
     if (this.isLoadingBitacoras) return;
     this.isLoadingBitacoras = true;
     this.bitacorasError = null;
-    const filtros = {
-      fecha_desde: this.filtrosBitacora.fecha_desde || undefined,
-      fecha_hasta: this.filtrosBitacora.fecha_hasta || undefined,
-      alumno: this.filtrosBitacora.alumno || undefined
-    };
-    this.bitacoraService.getBitacoras(filtros)
+    this.bitacoraService.getBitacoras()
       .pipe(
         takeUntil(this.destroy$),
-        catchError(error => { this.bitacorasError = error?.error?.message || 'No se pudieron obtener las bitácoras.'; return of([] as Bitacora[]); }),
+        catchError(err => { this.bitacorasError = err?.error?.message || 'No se pudieron obtener las bitácoras.'; return of([] as Bitacora[]); }),
         finalize(() => { this.isLoadingBitacoras = false; })
       )
       .subscribe(bitacoras => {

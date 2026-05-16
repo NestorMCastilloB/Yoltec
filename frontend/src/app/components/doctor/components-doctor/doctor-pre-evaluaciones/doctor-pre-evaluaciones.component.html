@@ -12,7 +12,7 @@
     <div class="tabs">
       <button [class.active]="tab === 'pendientes'" (click)="tab = 'pendientes'">
         Pendientes de validar
-        <span class="ct red">{{ totalPendientes }}</span>
+        <span class="ct" [class.red]="totalPendientes > 0" [class.gray]="totalPendientes === 0">{{ totalPendientes }}</span>
       </button>
       <button [class.active]="tab === 'historial'" (click)="tab = 'historial'">
         Historial

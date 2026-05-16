@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Bitácoras (Doctor)</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec; --primary-100:#d1e3d8;
+    --warn:#b45309; --warn-50:#fef3c7;
+    --danger:#dc2626; --danger-50:#fef2f2; --danger-100:#fecaca;
+    --info:#1d4ed8; --info-50:#dbeafe;
+    --bg:#f7f9f8; --surface:#fff;
+    --border:#e2e8e5; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+    --soft:#f9fafb;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body,#app{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit}
+
+  .app{display:flex;min-height:100vh;position:relative}
+
+  /* Sidebar */
+  .sb{width:240px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column}
+  .sb .brand{padding:22px 22px 20px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:32px;height:32px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb .brand b{font-size:17px;font-weight:700;letter-spacing:-.3px}
+  .sb .brand span{font-size:11px;opacity:.7;display:block;margin-top:1px}
+  .sb nav{padding:14px 0;display:flex;flex-direction:column;gap:1px;flex:1}
+  .sb nav a{padding:11px 22px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:12px;border-left:3px solid transparent;cursor:pointer}
+  .sb nav a:hover{background:rgba(255,255,255,.05)}
+  .sb nav a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#86efac;font-weight:600}
+  .sb nav a .ic{font-size:14px;width:16px;text-align:center}
+  .sb nav a .ct{margin-left:auto;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;min-width:18px;text-align:center}
+  .sb .user{padding:16px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+  .sb .user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+  .sb .user span{font-size:11.5px;opacity:.7;display:block;margin-top:2px}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;padding-right:440px}
+  .header{padding:28px 36px 22px;background:#fff;border-bottom:1px solid var(--border)}
+  .crumb{font-size:12px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:500;margin-bottom:6px}
+  h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .sub{font-size:13.5px;color:var(--text-muted);margin-bottom:18px}
+
+  .head-tools{display:flex;gap:12px;align-items:center}
+  .search{flex:1;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;max-width:520px}
+  .search .ic{color:var(--text-subtle);font-size:14px}
+  .search input{flex:1;border:none;outline:none;background:transparent;font-size:13.5px;color:var(--text)}
+  .search input::placeholder{color:var(--text-subtle)}
+  .filters-btn{padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text-muted);font-weight:500;display:inline-flex;align-items:center;gap:7px}
+  .filters-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .filters-btn .ct{background:var(--primary-50);color:var(--primary);font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px}
+
+  .btn{padding:10px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.outline{background:#fff;color:var(--primary);border-color:var(--primary)}
+  .btn.outline:hover{background:var(--primary-50)}
+  .btn.gray{background:#fff;color:var(--text-muted);border-color:var(--border-strong)}
+  .btn.gray:hover{border-color:var(--text-muted);color:var(--text)}
+  .btn.sm{padding:7px 13px;font-size:12.5px}
+
+  .content{padding:24px 36px 40px;flex:1}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+  .kpi .icb{width:34px;height:34px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .kpi .lbl{font-size:10.5px;color:var(--text-muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+  .kpi .v{font-size:20px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums;margin-top:1px}
+  .kpi .v small{font-size:12px;font-weight:500;color:var(--text-subtle);margin-left:6px;letter-spacing:0}
+  .kpi.warn .icb{background:var(--warn-50);color:var(--warn)}
+  .kpi.info .icb{background:var(--info-50);color:var(--info)}
+
+  /* Table */
+  .table-wrap{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(26,92,58,.04)}
+  .table-head{padding:14px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-subtle)}
+  .table-head b{color:var(--text-muted);font-weight:600}
+  .table-head .sort{display:flex;align-items:center;gap:8px}
+  .table-head select{background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:12.5px;color:var(--text-muted)}
+
+  .row{display:grid;grid-template-columns:auto 1.4fr 1.3fr 1.4fr auto;gap:18px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);cursor:pointer}
+  .row:last-child{border-bottom:none}
+  .row:hover{background:var(--soft)}
+  .row.sel{background:var(--primary-50);box-shadow:inset 3px 0 0 var(--primary)}
+  .row.sel:hover{background:#dceadf}
+
+  .avp{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14.5px;flex-shrink:0}
+
+  .who{min-width:0}
+  .who b{display:block;font-size:14px;font-weight:600;letter-spacing:-.1px}
+  .who span{font-size:12.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums;margin-top:1px;display:block}
+
+  .meta-c{min-width:0;display:flex;flex-direction:column;gap:5px}
+  .meta-c .folio{font-size:10.5px;font-weight:700;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;font-variant-numeric:tabular-nums}
+  .meta-c .fdate{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+  .meta-c .fdate .dot{width:6px;height:6px;border-radius:50%;background:var(--primary)}
+
+  .dx{min-width:0}
+  .dx .name{font-size:13.5px;font-weight:600;color:var(--text);letter-spacing:-.1px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .dx .code{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--primary);background:var(--primary-50);padding:2px 7px;border-radius:4px;margin-top:5px;letter-spacing:.3px;font-variant-numeric:tabular-nums;text-transform:uppercase}
+
+  .vitals{display:flex;gap:6px;flex-wrap:wrap;min-width:0}
+  .vit{display:inline-flex;align-items:baseline;gap:3px;padding:4px 8px;background:var(--soft);border:1px solid var(--border);border-radius:6px;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--text);font-weight:600}
+  .vit .l{font-size:9.5px;font-weight:700;color:var(--text-subtle);letter-spacing:.4px;text-transform:uppercase}
+  .vit.alert{background:#fff5ed;border-color:#fbd7b6;color:#a35200}
+  .vit.alert .l{color:#a35200;opacity:.75}
+
+  .actions{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+  .actions .lnk{font-size:11px;font-weight:600;color:var(--text-muted);background:var(--soft);border:1px solid var(--border);padding:4px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;letter-spacing:.2px}
+  .actions .lnk.rx{color:var(--primary);background:var(--primary-50);border-color:var(--primary-100)}
+  .actions .iconbtn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text-muted);display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .actions .iconbtn:hover{border-color:var(--primary);color:var(--primary)}
+
+  .pagination{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--border);font-size:12.5px;color:var(--text-subtle)}
+  .pagination .pages{display:flex;gap:4px;align-items:center}
+  .pagination .pages button{width:30px;height:30px;border-radius:6px;font-size:12.5px;color:var(--text-muted);font-weight:500;border:1px solid var(--border);background:#fff}
+  .pagination .pages button:hover{border-color:var(--primary);color:var(--primary)}
+  .pagination .pages button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .pagination .pages .nav{padding:0 10px;width:auto}
+
+  /* Drawer */
+  .drawer{position:fixed;top:0;right:0;width:440px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-12px 0 32px rgba(26,46,37,.08);display:flex;flex-direction:column;z-index:50}
+  .drawer-head{padding:20px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .drawer-head h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+  .drawer-head h2 .ic{width:26px;height:26px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+  .drawer-head .x{width:30px;height:30px;border-radius:6px;color:var(--text-subtle);font-size:18px;display:inline-flex;align-items:center;justify-content:center}
+  .drawer-head .x:hover{background:var(--bg);color:var(--text)}
+  .drawer-head .folio{font-size:11.5px;color:var(--text-subtle);margin-top:3px;font-variant-numeric:tabular-nums}
+  .drawer-head .folio b{color:var(--text-muted);font-weight:600}
+
+  .drawer-body{flex:1;overflow-y:auto;padding:18px 22px 22px}
+
+  .d-patient{background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;margin-bottom:18px}
+  .d-patient .avp{width:44px;height:44px;font-size:15px}
+  .d-patient .info b{display:block;font-size:14px;font-weight:600}
+  .d-patient .info .l{font-size:11.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums}
+  .d-patient .info .l b{display:inline;font-weight:600;color:var(--text-muted)}
+  .d-patient .ago{font-size:11px;font-weight:600;color:var(--text-muted);background:#fff;border:1px solid var(--border);padding:3px 9px;border-radius:999px;letter-spacing:.2px;flex-shrink:0;align-self:flex-start}
+
+  .d-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;font-size:12px}
+  .d-grid .cell{background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+  .d-grid .cell .l{font-size:10.5px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:3px}
+  .d-grid .cell b{font-size:12.5px;color:var(--text);font-weight:600}
+
+  /* Vitals card */
+  .vbox{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px}
+  .vbox .head{font-size:10.5px;color:var(--text-subtle);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+  .vbox .head span{font-weight:500;color:var(--text-muted);text-transform:none;letter-spacing:0;font-size:11.5px}
+  .vgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .vcell{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center}
+  .vcell .l{font-size:9.5px;color:var(--text-subtle);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:3px}
+  .vcell .v{font-size:13.5px;color:var(--text);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+  .vcell .u{font-size:9.5px;color:var(--text-subtle);font-weight:500;margin-top:1px;letter-spacing:.2px}
+  .vcell.alert{background:#fff5ed;border-color:#fbd7b6}
+  .vcell.alert .v{color:#a35200}
+  .vcell.alert .l{color:#a35200;opacity:.75}
+
+  /* SOAP */
+  .soap{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+  .nt{border:1px solid var(--border);border-radius:10px;background:#fff;overflow:hidden}
+  .nt .nt-head{display:flex;align-items:center;gap:9px;padding:10px 14px;background:var(--soft);border-bottom:1px solid var(--border)}
+  .nt .nt-head .tag{width:22px;height:22px;border-radius:5px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+  .nt .nt-head .ttl{font-size:11px;font-weight:700;color:var(--text);letter-spacing:.5px;text-transform:uppercase}
+  .nt .nt-head .ttl span{color:var(--text-subtle);font-weight:500;text-transform:none;letter-spacing:0;margin-left:6px}
+  .nt .body{padding:11px 14px 13px;font-size:12.5px;line-height:1.55;color:var(--text-muted)}
+  .nt .body b{color:var(--text);font-weight:600}
+  .nt .body ul{margin:6px 0 0;padding-left:18px}
+  .nt .body li{margin-bottom:3px}
+
+  .links-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+  .lnkcard{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:#fff;display:flex;align-items:center;gap:10px}
+  .lnkcard .ic{width:30px;height:30px;border-radius:7px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .lnkcard .l{font-size:10px;color:var(--text-subtle);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+  .lnkcard b{display:block;font-size:12.5px;color:var(--text);font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+  .lnkcard:hover{border-color:var(--primary);background:var(--primary-50)}
+
+  .drawer-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;background:#fff}
+  .drawer-foot .btn{flex:1;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+function Sidebar(){
+  const items=[
+    ['panel','Panel','▦'],
+    ['citas','Citas','⊞'],
+    ['bit','Bitácoras','≡',true],
+    ['rec','Recetas','℞'],
+    ['pe','Pre-evaluaciones','◔',false,3],
+    ['pri','Prioridad IA','◉'],
+    ['est','Estadísticas','◊'],
+  ];
+  return (
+    <aside className="sb">
+      <div className="brand"><div className="y">Y</div><div><b>Yoltec</b><span>Panel médico</span></div></div>
+      <nav>{items.map(([k,l,i,a,n])=>(<a key={k} className={a?'active':''}><span className="ic">{i}</span>{l}{n?<span className="ct">{n}</span>:null}</a>))}</nav>
+      <div className="user"><div className="av">OG</div><div><b>Dr. Omar González</b><span>Médico general</span></div></div>
+    </aside>
+  );
+}
+
+const BITACORAS=[
+  {
+    id:0, av:'AP', n:'Ana Pérez García', ctrl:'22690495', carrera:'Ing. Industrial · 5°',
+    folio:'BIT-2026-0431', fecha:'7 abr 2026 · 10:42',
+    dx:'Faringitis aguda', cie:'J02.9',
+    vitals:{TA:'118/76',FC:'82',Tmp:'38.4',Sat:'97'},
+    alerts:['Tmp'],
+    rx:'RX-2026-0319',
+    cita:'CIT-1042',
+    selected:true,
+  },
+  {
+    id:1, av:'RM', n:'Raúl Mendoza Vidal', ctrl:'22134781', carrera:'Lic. Administración · 7°',
+    folio:'BIT-2026-0430', fecha:'5 abr 2026 · 12:15',
+    dx:'Migraña sin aura', cie:'G43.0',
+    vitals:{TA:'124/80',FC:'76',Tmp:'36.6',Sat:'98'},
+    alerts:[],
+    rx:'RX-2026-0317',
+    cita:'CIT-1039',
+  },
+  {
+    id:2, av:'JS', n:'Jorge Salinas Méndez', ctrl:'22789012', carrera:'Arq. · 4°',
+    folio:'BIT-2026-0429', fecha:'2 abr 2026 · 09:08',
+    dx:'Bronquitis aguda', cie:'J20.9',
+    vitals:{TA:'121/78',FC:'88',Tmp:'37.2',Sat:'96'},
+    alerts:[],
+    rx:'RX-2026-0314',
+    cita:'CIT-1031',
+  },
+  {
+    id:3, av:'KB', n:'Karla Bárcenas Ríos', ctrl:'21897603', carrera:'Lic. Comunicación · 6°',
+    folio:'BIT-2026-0428', fecha:'29 mar 2026 · 16:20',
+    dx:'Lumbalgia mecánica', cie:'M54.5',
+    vitals:{TA:'115/72',FC:'74',Tmp:'36.5',Sat:'99'},
+    alerts:[],
+    rx:'RX-2026-0312',
+    cita:'CIT-1024',
+  },
+  {
+    id:4, av:'DK', n:'Diego Kuri Salazar', ctrl:'22034512', carrera:'Ing. Mecatrónica · 3°',
+    folio:'BIT-2026-0427', fecha:'24 mar 2026 · 11:30',
+    dx:'Asma — exacerbación leve', cie:'J45.9',
+    vitals:{TA:'128/82',FC:'94',Tmp:'36.8',Sat:'93'},
+    alerts:['FC','Sat'],
+    rx:'RX-2026-0309',
+    cita:'CIT-1017',
+  },
+  {
+    id:5, av:'LF', n:'Lucía Fuentes Ortiz', ctrl:'21450923', carrera:'Ing. Sistemas · 8°',
+    folio:'BIT-2026-0426', fecha:'21 mar 2026 · 14:55',
+    dx:'Gastroenteritis aguda', cie:'A09',
+    vitals:{TA:'108/68',FC:'90',Tmp:'37.6',Sat:'98'},
+    alerts:['Tmp'],
+    rx:null,
+    cita:'CIT-1012',
+  },
+];
+
+const VITAL_DEFS=[
+  ['TA','T/A','mmHg'],
+  ['FC','FC','lpm'],
+  ['FR','FR','rpm'],
+  ['Tmp','T°','°C'],
+  ['Sat','SpO₂','%'],
+];
+
+function Row({r,onSel}){
+  return (
+    <div className={'row'+(r.selected?' sel':'')} onClick={()=>onSel(r.id)}>
+      <div className="avp">{r.av}</div>
+      <div className="who"><b>{r.n}</b><span>No. {r.ctrl} · {r.carrera}</span></div>
+      <div className="meta-c">
+        <span className="folio">{r.folio}</span>
+        <span className="fdate"><span className="dot"></span>{r.fecha}</span>
+      </div>
+      <div className="dx">
+        <div className="name">{r.dx}</div>
+        <span className="code">{r.cie}</span>
+      </div>
+      <div className="vitals" style={{justifySelf:'end'}}>
+        <span className={'vit'+(r.alerts.includes('TA')?' alert':'')}><span className="l">T/A</span>{r.vitals.TA}</span>
+        <span className={'vit'+(r.alerts.includes('FC')?' alert':'')}><span className="l">FC</span>{r.vitals.FC}</span>
+        <span className={'vit'+(r.alerts.includes('Tmp')?' alert':'')}><span className="l">T°</span>{r.vitals.Tmp}</span>
+        <span className={'vit'+(r.alerts.includes('Sat')?' alert':'')}><span className="l">SpO₂</span>{r.vitals.Sat}</span>
+        {r.rx
+          ? <span className="lnk rx" title={r.rx}>℞ Receta</span>
+          : <span className="lnk" title="Sin receta">— Sin receta</span>}
+      </div>
+    </div>
+  );
+}
+
+function Drawer(){
+  return (
+    <aside className="drawer">
+      <div className="drawer-head">
+        <div>
+          <h2><span className="ic">≡</span>Bitácora clínica</h2>
+          <div className="folio"><b>Folio BIT-2026-0431</b> · Consulta 7 abr 2026 · 10:42</div>
+        </div>
+        <button className="x" title="Cerrar">×</button>
+      </div>
+
+      <div className="drawer-body">
+        <div className="d-patient">
+          <div className="avp">AP</div>
+          <div className="info" style={{flex:1}}>
+            <b>Ana Pérez García</b>
+            <span className="l">Matrícula <b>22690495</b> · Ing. Industrial · 5°</span>
+          </div>
+          <span className="ago">Hace 5 sem</span>
+        </div>
+
+        <div className="d-grid">
+          <div className="cell"><div className="l">Motivo de consulta</div><b>Odinofagia · fiebre</b></div>
+          <div className="cell"><div className="l">Tipo</div><b>Consulta general</b></div>
+          <div className="cell"><div className="l">Duración</div><b>22 min</b></div>
+          <div className="cell"><div className="l">Alergias</div><b style={{color:'var(--danger)'}}>Penicilina</b></div>
+        </div>
+
+        <div className="vbox">
+          <div className="head"><span>Signos vitales</span><span>Toma 10:44</span></div>
+          <div className="vgrid">
+            <div className="vcell"><div className="l">T/A</div><div className="v">118/76</div><div className="u">mmHg</div></div>
+            <div className="vcell"><div className="l">FC</div><div className="v">82</div><div className="u">lpm</div></div>
+            <div className="vcell"><div className="l">FR</div><div className="v">18</div><div className="u">rpm</div></div>
+            <div className="vcell alert"><div className="l">T°</div><div className="v">38.4</div><div className="u">°C</div></div>
+            <div className="vcell"><div className="l">SpO₂</div><div className="v">97</div><div className="u">%</div></div>
+          </div>
+        </div>
+
+        <div className="soap">
+          <div className="nt">
+            <div className="nt-head"><span className="tag">S</span><span className="ttl">Subjetivo <span>· lo que refiere la paciente</span></span></div>
+            <div className="body">
+              Paciente refiere <b>dolor de garganta</b> intenso de 3 días de evolución, con dificultad para deglutir y sensación de cuerpo extraño. Reporta <b>fiebre de 38.4 °C</b> la tarde previa, malestar general y cefalea leve. Niega tos productiva, dificultad respiratoria u otros síntomas asociados. <b>Alergia conocida a penicilina</b>.
+            </div>
+          </div>
+
+          <div className="nt">
+            <div className="nt-head"><span className="tag">O</span><span className="ttl">Objetivo <span>· exploración física</span></span></div>
+            <div className="body">
+              Paciente alerta, hidratada, orientada en las tres esferas. Faringe <b>hiperémica</b> con exudado blanquecino en amígdalas, sin abscesos. Adenopatías cervicales anteriores dolorosas a la palpación. Campos pulmonares ventilados sin agregados. Abdomen blando, depresible, no doloroso. Resto sin alteraciones.
+            </div>
+          </div>
+
+          <div className="nt">
+            <div className="nt-head"><span className="tag">A</span><span className="ttl">Análisis <span>· diagnóstico</span></span></div>
+            <div className="body">
+              <b>Faringitis aguda probablemente bacteriana (J02.9).</b><br/>
+              Criterios de Centor: 3/4 (fiebre, exudado, adenopatías; sin tos).
+            </div>
+          </div>
+
+          <div className="nt">
+            <div className="nt-head"><span className="tag">P</span><span className="ttl">Plan <span>· tratamiento e indicaciones</span></span></div>
+            <div className="body">
+              <ul>
+                <li>Antibiótico macrólido (paciente alérgica a penicilina) por 7 días — ver receta RX-2026-0319.</li>
+                <li>Paracetamol e ibuprofeno para control sintomático.</li>
+                <li>Reposo relativo 48 h, hidratación ≥ 2 L/día, gárgaras con agua tibia y sal cada 6 h.</li>
+                <li>Acudir a urgencias si aparece fiebre &gt; 39 °C, dificultad respiratoria o imposibilidad para tragar saliva.</li>
+                <li>Cita de seguimiento en 7 días para verificar resolución.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="links-row">
+          <div className="lnkcard">
+            <div className="ic">℞</div>
+            <div><div className="l">Receta vinculada</div><b>RX-2026-0319</b></div>
+          </div>
+          <div className="lnkcard">
+            <div className="ic">⊞</div>
+            <div><div className="l">Cita asociada</div><b>CIT-1042</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="drawer-foot">
+        <button className="btn gray">Imprimir</button>
+        <button className="btn outline">Exportar PDF</button>
+        <button className="btn primary">Editar bitácora</button>
+      </div>
+    </aside>
+  );
+}
+
+function App(){
+  const [sel,setSel]=React.useState(0);
+  return (
+    <div className="app">
+      <Sidebar/>
+      <div className="main">
+        <div className="header">
+          <div className="crumb">Servicio médico · Bitácoras</div>
+          <h1>Bitácoras clínicas</h1>
+          <div className="sub">Notas de consulta por paciente, formato SOAP. Cada bitácora vincula a la cita y la receta emitida.</div>
+          <div className="head-tools">
+            <div className="search">
+              <span className="ic">⌕</span>
+              <input placeholder="Buscar por alumno, número de control, folio o diagnóstico…"/>
+            </div>
+            <button className="filters-btn">⊟ Filtros <span className="ct">2</span></button>
+            <button className="btn outline">⤓ Exportar</button>
+            <button className="btn primary">+ Nueva bitácora</button>
+          </div>
+        </div>
+
+        <div className="content">
+          <div className="kpis">
+            <div className="kpi"><div className="icb">≡</div><div><div className="lbl">Bitácoras del mes</div><div className="v">86 <small>+12 vs mes ant.</small></div></div></div>
+            <div className="kpi"><div className="icb">⚲</div><div><div className="lbl">Pacientes únicos</div><div className="v">72</div></div></div>
+            <div className="kpi warn"><div className="icb">!</div><div><div className="lbl">Con signos de alerta</div><div className="v">9</div></div></div>
+            <div className="kpi info"><div className="icb">⊕</div><div><div className="lbl">Dx más frecuente</div><div className="v" style={{fontSize:14,letterSpacing:0}}>Faringitis · J02.9</div></div></div>
+          </div>
+
+          <div className="table-wrap">
+            <div className="table-head">
+              <span><b>6</b> de <b>86</b> bitácoras · mes en curso</span>
+              <div className="sort">
+                <span>Ordenar por</span>
+                <select defaultValue="reciente"><option value="reciente">Más recientes</option><option>Alumno</option><option>Diagnóstico</option></select>
+              </div>
+            </div>
+            {BITACORAS.map(r=><Row key={r.id} r={{...r,selected:r.id===sel}} onSel={setSel}/>)}
+            <div className="pagination">
+              <span>Mostrando 1–6 de 86</span>
+              <div className="pages">
+                <button className="nav">‹ Anterior</button>
+                <button className="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <span style={{padding:'0 4px',color:'var(--text-subtle)'}}>… 15</span>
+                <button className="nav">Siguiente ›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Drawer/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+</body>
+</html>

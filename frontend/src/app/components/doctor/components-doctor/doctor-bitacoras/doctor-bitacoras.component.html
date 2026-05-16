@@ -1,78 +1,250 @@
-<div class="bitacoras-container">
-  <ng-container *ngIf="!isLoadingBitacoras; else loadingBitacoras">
-    <div *ngIf="bitacorasError" class="alert error">{{ bitacorasError }}</div>
+<!-- Overlay -->
+<div class="overlay" *ngIf="drawerAbierto" (click)="cerrarDrawer()"></div>
 
-    <div *ngIf="!bitacorasError && bitacoras.length === 0" class="placeholder-card">
-      <h3>No hay bitácoras registradas aún</h3>
-      <p>Registra la información de la consulta para que el alumno pueda consultarla.</p>
+<!-- Header -->
+<div class="bita-header">
+  <div>
+    <div class="crumb">Servicio médico · Bitácoras</div>
+    <h1>Bitácoras de consulta</h1>
+  </div>
+  <button class="btn-primary" (click)="abrirNueva()">+ Nueva bitácora</button>
+</div>
+
+<!-- KPI bar -->
+<div class="kpis" *ngIf="!isLoadingBitacoras && bitacoras.length > 0">
+  <div class="kpi">
+    <div class="kpi-ic">≡</div>
+    <div>
+      <div class="kpi-lbl">Bitácoras del mes</div>
+      <div class="kpi-v">{{ bitacorasDelMes }}</div>
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-ic">◎</div>
+    <div>
+      <div class="kpi-lbl">Pacientes únicos</div>
+      <div class="kpi-v">{{ pacientesUnicos }}</div>
+    </div>
+  </div>
+  <div class="kpi kpi-total">
+    <div class="kpi-ic">≡</div>
+    <div>
+      <div class="kpi-lbl">Total registradas</div>
+      <div class="kpi-v">{{ bitacoras.length }}</div>
+    </div>
+  </div>
+  <div class="kpi kpi-dx">
+    <div class="kpi-ic">Dx</div>
+    <div>
+      <div class="kpi-lbl">Dx más frecuente</div>
+      <div class="kpi-v kpi-dx-val">{{ dxFrecuente }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Buscador -->
+<div class="bita-search-bar" *ngIf="!isLoadingBitacoras">
+  <span class="search-ic">⌕</span>
+  <input placeholder="Buscar por alumno, No. control o diagnóstico…"
+         [(ngModel)]="busquedaAlumno" (ngModelChange)="onBusqueda()" />
+</div>
+
+<!-- Loading -->
+<div *ngIf="isLoadingBitacoras" class="placeholder">Cargando bitácoras…</div>
+
+<!-- Error -->
+<div *ngIf="bitacorasError" class="msg-error">{{ bitacorasError }}</div>
+
+<!-- Tabla -->
+<div class="table-wrap" *ngIf="!isLoadingBitacoras && !bitacorasError && bitacorasFiltradas.length > 0">
+
+  <div class="table-head">
+    <span><b>{{ bitacorasFiltradas.length }}</b> bitácora{{ bitacorasFiltradas.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <div class="bita-row"
+       *ngFor="let b of pagedBitacoras"
+       (click)="abrirVista(b)"
+       [class.sel]="drawerBitacora?.id === b.id">
+    <div class="av">{{ iniciales(b) }}</div>
+    <div class="who">
+      <b>{{ b.alumno?.nombre }} {{ b.alumno?.apellido }}</b>
+      <span>No. {{ b.alumno?.numero_control ?? '—' }}</span>
+    </div>
+    <span class="badge-fecha">
+      <span class="dot"></span>{{ formatFecha(b.cita?.fecha_cita ?? '') }}
+    </span>
+    <div class="dx-col">
+      <span class="dx-lbl">Diagnóstico</span>
+      <span class="dx-val">{{ b.diagnostico || '—' }}</span>
+    </div>
+    <div class="row-actions" (click)="$event.stopPropagation()">
+      <button class="btn-sm btn-outline" (click)="abrirVista(b)">Ver detalle</button>
+      <button class="btn-sm btn-gray"    (click)="abrirEdicion(b)">Editar</button>
+    </div>
+  </div>
+
+  <div class="bita-pagination" *ngIf="totalPages > 1">
+    <span>Página {{ currentPage }} de {{ totalPages }}</span>
+    <div class="pages">
+      <button class="page-nav" (click)="prevPage()" [disabled]="currentPage === 1">‹ Anterior</button>
+      <button class="page-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vacío -->
+<div class="placeholder" *ngIf="!isLoadingBitacoras && !bitacorasError && bitacorasFiltradas.length === 0">
+  <div class="placeholder-ic">≡</div>
+  <b>Sin bitácoras registradas</b>
+  <span>Registra la información de consulta para que el alumno pueda consultarla.</span>
+</div>
+
+<!-- ===== DRAWER ===== -->
+<aside class="drawer" [class.open]="drawerAbierto">
+
+  <!-- MODO VISTA -->
+  <ng-container *ngIf="drawerModo === 'vista' && drawerBitacora">
+    <div class="drawer-head">
+      <div>
+        <h2><span class="drawer-ic">≡</span>Bitácora de consulta</h2>
+        <div class="drawer-sub">{{ formatDatetime(drawerBitacora.created_at) }}</div>
+      </div>
+      <button class="btn-x" (click)="cerrarDrawer()">×</button>
     </div>
 
-    <!-- Contenedor condicional cuando hay datos -->
-    <div *ngIf="bitacoras.length > 0">
-
-      <!-- GRID DE TARJETAS -->
-      <div class="bitacoras-layout">
-        <article *ngFor="let bitacora of pagedBitacoras" class="data-card bitacora-card">
-          <header class="card-header">
-            <div class="card-title">
-              <h4>{{ bitacora.alumno?.nombre }} {{ bitacora.alumno?.apellido }}</h4>
-              <p class="card-caption" *ngIf="bitacora.cita">
-                {{ formatDateDisplay(bitacora.cita.fecha_cita) }} · {{ formatTime(bitacora.cita.hora_cita) }} hrs
-              </p>
-            </div>
-            <span class="badge-pill badge-success">Consulta atendida</span>
-          </header>
-
-          <div class="card-meta">
-            <span class="meta-item">Registrada el {{ formatBitacoraDate(bitacora.created_at) }}</span>
-          </div>
-
-          <div class="card-body">
-            <dl class="details-list">
-              <div class="detail-item" *ngIf="bitacora.diagnostico">
-                <dt>Diagnóstico</dt>
-                <dd>{{ bitacora.diagnostico }}</dd>
-              </div>
-              <div class="detail-item" *ngIf="bitacora.tratamiento">
-                <dt>Tratamiento</dt>
-                <dd>{{ bitacora.tratamiento }}</dd>
-              </div>
-              <div class="detail-item" *ngIf="bitacora.observaciones">
-                <dt>Observaciones</dt>
-                <dd>{{ bitacora.observaciones }}</dd>
-              </div>
-            </dl>
-
-            <div class="metrics-row"
-              *ngIf="bitacora.peso || bitacora.altura || bitacora.temperatura || bitacora.presion_arterial">
-              <span class="metric-chip" *ngIf="bitacora.peso">⚖️ {{ bitacora.peso }}</span>
-              <span class="metric-chip" *ngIf="bitacora.altura">📏 {{ bitacora.altura }}</span>
-              <span class="metric-chip" *ngIf="bitacora.temperatura">🌡️ {{ bitacora.temperatura }}</span>
-              <span class="metric-chip" *ngIf="bitacora.presion_arterial">🩺 {{ bitacora.presion_arterial }}</span>
-            </div>
-
-            <div class="card-actions">
-              <button class="btn-edit-bitacora" type="button" (click)="startEditBitacora(bitacora)">Editar
-                bitácora</button>
-            </div>
-          </div>
-        </article>
-      </div> <!-- FIN DEL GRID -->
-
-      <!-- PAGINACIÓN (Ahora fuera del grid, ocupando el 100% del ancho) -->
-      <div class="pagination-container">
-        <div class="pagination">
-          <button class="page-btn" (click)="prevPageBitacoras()" [disabled]="currentPageBitacoras === 1">‹</button>
-          <span class="page-info">{{ currentPageBitacoras }} / {{ totalPagesBitacoras }}</span>
-          <button class="page-btn" (click)="nextPageBitacoras()"
-            [disabled]="currentPageBitacoras === totalPagesBitacoras">›</button>
+    <div class="drawer-body">
+      <div class="d-patient">
+        <div class="av">{{ iniciales(drawerBitacora) }}</div>
+        <div class="d-patient-info">
+          <b>{{ drawerBitacora.alumno?.nombre }} {{ drawerBitacora.alumno?.apellido }}</b>
+          <span class="d-patient-sub">Matrícula <b>{{ drawerBitacora.alumno?.numero_control ?? '—' }}</b></span>
         </div>
       </div>
 
+      <div class="d-grid">
+        <div class="d-cell">
+          <div class="d-label">Fecha de cita</div>
+          <b>{{ formatFecha(drawerBitacora.cita?.fecha_cita ?? '') }}</b>
+        </div>
+        <div class="d-cell">
+          <div class="d-label">Hora</div>
+          <b>{{ drawerBitacora.cita?.hora_cita ?? '—' }}</b>
+        </div>
+      </div>
+
+      <div class="d-section" *ngIf="drawerBitacora.diagnostico">
+        <div class="d-section-head">Diagnóstico</div>
+        <div class="d-text">{{ drawerBitacora.diagnostico }}</div>
+      </div>
+
+      <div class="d-section" *ngIf="drawerBitacora.tratamiento">
+        <div class="d-section-head">Tratamiento</div>
+        <div class="d-text">{{ drawerBitacora.tratamiento }}</div>
+      </div>
+
+      <div class="d-section" *ngIf="drawerBitacora.observaciones">
+        <div class="d-section-head">Observaciones</div>
+        <div class="d-text obs">{{ drawerBitacora.observaciones }}</div>
+      </div>
+
+      <div class="d-vitals" *ngIf="drawerBitacora.peso || drawerBitacora.altura || drawerBitacora.temperatura || drawerBitacora.presion_arterial">
+        <div class="d-section-head">Signos vitales</div>
+        <div class="vitals-grid">
+          <div class="vital-chip" *ngIf="drawerBitacora.peso">
+            <span class="vital-lbl">Peso</span>
+            <b>{{ drawerBitacora.peso }}</b>
+          </div>
+          <div class="vital-chip" *ngIf="drawerBitacora.altura">
+            <span class="vital-lbl">Altura</span>
+            <b>{{ drawerBitacora.altura }}</b>
+          </div>
+          <div class="vital-chip" *ngIf="drawerBitacora.temperatura">
+            <span class="vital-lbl">Temperatura</span>
+            <b>{{ drawerBitacora.temperatura }}</b>
+          </div>
+          <div class="vital-chip" *ngIf="drawerBitacora.presion_arterial">
+            <span class="vital-lbl">Presión</span>
+            <b>{{ drawerBitacora.presion_arterial }}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-foot">
+      <button class="btn-sm btn-gray flex1" (click)="cerrarDrawer()">Cerrar</button>
+      <button class="btn-sm btn-primary-full flex1" (click)="abrirEdicion(drawerBitacora)">Editar bitácora</button>
     </div>
   </ng-container>
 
-  <ng-template #loadingBitacoras>
-    <div class="placeholder-card">Cargando bitácoras...</div>
-  </ng-template>
-</div>
+  <!-- MODO FORMULARIO -->
+  <ng-container *ngIf="drawerModo === 'form'">
+    <div class="drawer-head">
+      <div>
+        <h2><span class="drawer-ic">≡</span>{{ editandoId ? 'Editar bitácora' : 'Nueva bitácora' }}</h2>
+      </div>
+      <button class="btn-x" (click)="cerrarDrawer()">×</button>
+    </div>
+
+    <div class="drawer-body">
+      <form #bitacoraForm="ngForm" (ngSubmit)="guardarBitacora(bitacoraForm)">
+        <div class="form-group">
+          <label>Cita atendida</label>
+          <select [(ngModel)]="bitacoraFormData.cita_id" name="cita_id" [disabled]="editandoId !== null">
+            <option [ngValue]="undefined" disabled>Selecciona una cita</option>
+            <option *ngFor="let c of availableCitas" [ngValue]="c.id">
+              {{ c.fecha_cita }} · {{ c.hora_cita }} — {{ c.alumno?.nombre }} {{ c.alumno?.apellido }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Diagnóstico</label>
+          <textarea rows="3" [(ngModel)]="bitacoraFormData.diagnostico" name="diagnostico"
+            placeholder="Diagnóstico de la consulta…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Tratamiento</label>
+          <textarea rows="3" [(ngModel)]="bitacoraFormData.tratamiento" name="tratamiento"
+            placeholder="Tratamiento indicado…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones</label>
+          <textarea rows="3" [(ngModel)]="bitacoraFormData.observaciones" name="observaciones"
+            placeholder="Observaciones adicionales…"></textarea>
+        </div>
+
+        <div class="vitals-form-grid">
+          <div class="form-group">
+            <label>Peso</label>
+            <input type="text" [(ngModel)]="bitacoraFormData.peso" name="peso" placeholder="ej. 70 kg" />
+          </div>
+          <div class="form-group">
+            <label>Altura</label>
+            <input type="text" [(ngModel)]="bitacoraFormData.altura" name="altura" placeholder="ej. 1.70 m" />
+          </div>
+          <div class="form-group">
+            <label>Temperatura</label>
+            <input type="text" [(ngModel)]="bitacoraFormData.temperatura" name="temperatura" placeholder="ej. 36.5°C" />
+          </div>
+          <div class="form-group">
+            <label>Presión arterial</label>
+            <input type="text" [(ngModel)]="bitacoraFormData.presion_arterial" name="presion_arterial" placeholder="ej. 120/80 mmHg" />
+          </div>
+        </div>
+
+        <div *ngIf="mensajeForm" class="msg-form">{{ mensajeForm }}</div>
+      </form>
+    </div>
+
+    <div class="drawer-foot">
+      <button class="btn-sm btn-gray flex1" (click)="cerrarDrawer()">Cancelar</button>
+      <button class="btn-sm btn-primary-full flex1" (click)="guardarBitacora(bitacoraForm)" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Guardando…' : (editandoId ? 'Guardar cambios' : 'Registrar bitácora') }}
+      </button>
+    </div>
+  </ng-container>
+
+</aside>

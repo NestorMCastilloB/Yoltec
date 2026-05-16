@@ -174,8 +174,8 @@ def main():
 
     print("Entrenando HistGradientBoostingClassifier...")
     model = HistGradientBoostingClassifier(
-        max_iter=200, learning_rate=0.05,
-        max_depth=6, l2_regularization=0.1,
+        max_iter=500, learning_rate=0.02,
+        max_depth=10, l2_regularization=0.01,
         random_state=42,
     )
     model.fit(X_train, y_train)

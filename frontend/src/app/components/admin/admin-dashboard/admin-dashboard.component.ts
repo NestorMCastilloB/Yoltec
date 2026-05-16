@@ -1,34 +1,54 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostListener, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, of } from 'rxjs';
+import { Subject, of, forkJoin } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { ThemeService } from '../../../services/theme.service';
 import { AdminService, Alumno, Doctor } from '../../../services/admin.service';
 import { CalendarioAdminService, DiaEspecial, TIPO_LABELS } from '../../../services/calendario-admin.service';
 import { AdminDashboardService, AdminStats } from '../dashboard/admin-dashboard.service';
 import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
+
+interface UsuarioRow {
+  key: string;
+  id: number;
+  initials: string;
+  nombre: string;
+  sub: string;
+  email: string;
+  rol: 'alumno' | 'doctor';
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, AdminSidebarComponent],
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css']
+  styleUrls: ['./admin-dashboard.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush  // cambio 4: evita CD innecesario
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   activeSection = 'panel';
   adminName = 'Administrador';
+  userMenuOpen = false;
 
-  // Métricas del panel de inicio
+  // Panel
   stats: AdminStats | null = null;
   isLoadingStats = false;
+  panelUsuarios: UsuarioRow[] = [];
+  diasProximos: DiaEspecial[] = [];
+  isLoadingPanel = false;
+
+  // cambio 5: calculado una sola vez, no en cada ciclo de CD
+  readonly fechaHoy = new Intl.DateTimeFormat('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  }).format(new Date());
 
   // Alumnos
   alumnos: Alumno[] = [];
-  alumnosBusqueda = '';
   isLoadingAlumnos = false;
   alumnosError: string | null = null;
   showAlumnoForm = false;
@@ -36,17 +56,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   alumnoMsg: string | null = null;
   isSubmittingAlumno = false;
   alumnoForm = { numero_control: '', nombre: '', apellido: '', email: '', nip: '', telefono: '', fecha_nacimiento: '' };
-
-  get alumnosFiltrados(): Alumno[] {
-    const q = this.alumnosBusqueda.trim().toLowerCase();
-    if (!q) return this.alumnos;
-    return this.alumnos.filter(a =>
-      a.numero_control.toLowerCase().includes(q) ||
-      a.nombre.toLowerCase().includes(q) ||
-      a.apellido.toLowerCase().includes(q) ||
-      (a.email ?? '').toLowerCase().includes(q)
-    );
-  }
 
   // Doctores
   doctores: Doctor[] = [];
@@ -57,7 +66,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   doctorMsg: string | null = null;
   isSubmittingDoctor = false;
   doctorForm = { username: '', nombre: '', apellido: '', email: '', password: '', telefono: '' };
-  usersTab: 'alumnos' | 'doctores' = 'alumnos';
+
+  // cambio 3: propiedades cacheadas en lugar de getters recalculados en cada CD
+  alumnosRows: UsuarioRow[] = [];
+  doctoresRows: UsuarioRow[] = [];
+  todosRows: UsuarioRow[] = [];
+  filteredRows: UsuarioRow[] = [];
+
+  // cambio 3: setter activa el filtro automáticamente al escribir sin CD extra
+  usersTab: 'todos' | 'alumnos' | 'doctores' = 'todos';
+  private _usuariosBusqueda = '';
+  get usuariosBusqueda(): string { return this._usuariosBusqueda; }
+  set usuariosBusqueda(v: string) { this._usuariosBusqueda = v; this.applyFilter(); }
 
   // Confirmación de borrado
   confirmDeleteId: number | null = null;
@@ -65,12 +85,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Calendario
   readonly tipoLabels = TIPO_LABELS;
-  readonly weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   calCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  calWeeks: { date: string; label: number; isCurrentMonth: boolean; diaEspecial: DiaEspecial | null }[][] = [];
+  calLabel = '';  // cambio 6: propiedad, no getter
+  calWeeks: { date: string; label: number; isCurrentMonth: boolean; isPast: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
-  showDiaForm = false;
   diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
   diaMsg: string | null = null;
   isSubmittingDia = false;
@@ -78,15 +98,42 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
+    public themeService: ThemeService,
     private adminService: AdminService,
     private calendarioService: CalendarioAdminService,
-    private dashboardService: AdminDashboardService
-  ) {}
+    private dashboardService: AdminDashboardService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.updateCalLabel();
+  }
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.adminName = user ? `${user.nombre} ${user.apellido}` : 'Administrador';
     this.loadStats();
+    this.loadPanelPreview();
+  }
+
+  get adminInitial(): string { return this.adminName.charAt(0).toUpperCase(); }
+
+  get sectionTitle(): string {
+    const titles: Record<string, string> = {
+      panel: 'Panel de administración',
+      usuarios: 'Gestión de usuarios',
+      calendario: 'Días especiales'
+    };
+    return titles[this.activeSection] ?? '';
+  }
+
+  get sectionCrumb(): string { return 'ADMIN · ' + this.activeSection.toUpperCase(); }
+
+  toggleUserMenu(): void { this.userMenuOpen = !this.userMenuOpen; }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (!(e.target as Element).closest('.admin-user-wrap')) {
+      this.userMenuOpen = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -96,15 +143,30 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   setSection(section: string): void {
     this.activeSection = section;
-    if (section === 'panel') this.loadStats();
-    if (section === 'usuarios') { this.usersTab = 'alumnos'; this.loadAlumnos(); }
-    if (section === 'calendario') this.router.navigate(['/admin-dias-especiales']);
+    // cambio 1 y 2: no re-fetch si ya hay datos en memoria
+    if (section === 'panel') {
+      if (!this.stats) this.loadStats();
+      if (this.alumnos.length || this.doctores.length || this.diasEspeciales.length) {
+        this.panelUsuarios = this.buildPanelUsuarios();
+        this.diasProximos = this.buildDiasProximos();
+      } else {
+        this.loadPanelPreview();
+      }
+    }
+    if (section === 'usuarios') {
+      this.usersTab = 'todos';
+      this._usuariosBusqueda = '';
+      if (!this.alumnos.length) this.loadAlumnos();
+      if (!this.doctores.length) this.loadDoctores();
+      if (this.alumnos.length && this.doctores.length) this.updateRows();
+    }
+    if (section === 'calendario') { this.loadCalendario(); }
   }
 
-  setUsersTab(tab: 'alumnos' | 'doctores'): void {
+  setUsersTab(tab: 'todos' | 'alumnos' | 'doctores'): void {
     this.usersTab = tab;
-    if (tab === 'alumnos') this.loadAlumnos();
-    else this.loadDoctores();
+    this._usuariosBusqueda = '';
+    this.applyFilter();
   }
 
   logout(): void {
@@ -120,13 +182,111 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(() => of(null)),
-        finalize(() => { this.isLoadingStats = false; })
+        finalize(() => { this.isLoadingStats = false; this.cdr.markForCheck(); })
       )
-      .subscribe(data => { this.stats = data; });
+      .subscribe(data => { this.stats = data; this.cdr.markForCheck(); });
   }
 
-  get fechaHoy(): string {
-    return new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  // cambio 2: solo pide al backend lo que no tiene en memoria
+  loadPanelPreview(): void {
+    this.isLoadingPanel = true;
+    const m = new Date().getMonth() + 1;
+    const y = new Date().getFullYear();
+
+    const alumnos$ = this.alumnos.length
+      ? of(this.alumnos)
+      : this.adminService.getAlumnos().pipe(catchError(() => of([])));
+    const doctores$ = this.doctores.length
+      ? of(this.doctores)
+      : this.adminService.getDoctores().pipe(catchError(() => of([])));
+    const dias$ = this.diasEspeciales.length
+      ? of(this.diasEspeciales)
+      : this.calendarioService.getDias(m, y).pipe(catchError(() => of([])));
+
+    forkJoin({ alumnos: alumnos$, doctores: doctores$, dias: dias$ })
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => { this.isLoadingPanel = false; this.cdr.markForCheck(); })
+      )
+      .subscribe(({ alumnos, doctores, dias }) => {
+        if (!this.alumnos.length) this.alumnos = alumnos as Alumno[];
+        if (!this.doctores.length) this.doctores = doctores as Doctor[];
+        if (!this.diasEspeciales.length) this.diasEspeciales = dias as DiaEspecial[];
+        this.panelUsuarios = this.buildPanelUsuarios();
+        this.diasProximos = this.buildDiasProximos();
+        this.cdr.markForCheck();
+      });
+  }
+
+  private buildPanelUsuarios(): UsuarioRow[] {
+    return [
+      ...this.alumnos.slice(0, 4).map(a => this.toAlumnoRow(a)),
+      ...this.doctores.slice(0, 2).map(d => this.toDoctorRow(d))
+    ];
+  }
+
+  private buildDiasProximos(): DiaEspecial[] {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    return this.diasEspeciales.filter(d => d.fecha >= todayStr).slice(0, 3);
+  }
+
+  formatFechaDia(iso: string): string {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('T')[0].split('-').map(Number);
+    if (!y || !m || !d) return iso;
+    return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' }).format(new Date(y, m - 1, d));
+  }
+
+  // ===== USUARIOS =====
+
+  private toAlumnoRow(a: Alumno): UsuarioRow {
+    return {
+      key: `a-${a.id}`, id: a.id,
+      initials: `${a.nombre[0] ?? ''}${a.apellido[0] ?? ''}`.toUpperCase(),
+      nombre: `${a.nombre} ${a.apellido}`, sub: a.numero_control,
+      email: a.email, rol: 'alumno'
+    };
+  }
+
+  private toDoctorRow(d: Doctor): UsuarioRow {
+    return {
+      key: `d-${d.id}`, id: d.id,
+      initials: `${d.nombre[0] ?? ''}${d.apellido[0] ?? ''}`.toUpperCase(),
+      nombre: `${d.nombre} ${d.apellido}`, sub: d.username,
+      email: d.email, rol: 'doctor'
+    };
+  }
+
+  // cambio 3: recalcula y cachea al cambiar datos, no en cada CD
+  private updateRows(): void {
+    this.alumnosRows = this.alumnos.map(a => this.toAlumnoRow(a));
+    this.doctoresRows = this.doctores.map(d => this.toDoctorRow(d));
+    this.todosRows = [...this.alumnosRows, ...this.doctoresRows];
+    this.applyFilter();
+  }
+
+  private applyFilter(): void {
+    const base = this.usersTab === 'todos' ? this.todosRows
+               : this.usersTab === 'alumnos' ? this.alumnosRows
+               : this.doctoresRows;
+    const q = this._usuariosBusqueda.trim().toLowerCase();
+    this.filteredRows = !q ? base : base.filter(r =>
+      r.nombre.toLowerCase().includes(q) ||
+      r.sub.toLowerCase().includes(q) ||
+      r.email.toLowerCase().includes(q)
+    );
+    this.cdr.markForCheck();
+  }
+
+  editUsuario(row: UsuarioRow): void {
+    if (row.rol === 'alumno') {
+      const a = this.alumnos.find(x => x.id === row.id);
+      if (a) this.openAlumnoForm(a);
+    } else {
+      const d = this.doctores.find(x => x.id === row.id);
+      if (d) this.openDoctorForm(d);
+    }
   }
 
   // ===== ALUMNOS =====
@@ -138,9 +298,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(err => { this.alumnosError = err?.error?.message || 'Error al cargar alumnos.'; return of([]); }),
-        finalize(() => { this.isLoadingAlumnos = false; })
+        finalize(() => { this.isLoadingAlumnos = false; this.cdr.markForCheck(); })
       )
-      .subscribe(data => { this.alumnos = data; });
+      .subscribe(data => { this.alumnos = data; this.updateRows(); this.cdr.markForCheck(); });
   }
 
   openAlumnoForm(alumno?: Alumno): void {
@@ -186,9 +346,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       catchError(err => {
         const errors = err?.error?.errors;
         this.alumnoMsg = errors ? (Object.values(errors)[0] as string[])[0] : (err?.error?.message || 'Error al guardar alumno.');
+        this.cdr.markForCheck();
         return of(null);
       }),
-      finalize(() => { this.isSubmittingAlumno = false; })
+      finalize(() => { this.isSubmittingAlumno = false; this.cdr.markForCheck(); })
     ).subscribe(res => {
       if (res) {
         this.alumnoMsg = this.editingAlumnoId ? 'Alumno actualizado.' : 'Alumno creado.';
@@ -213,16 +374,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const id = this.confirmDeleteId;
     const tipo = this.confirmDeleteType;
     this.cancelDelete();
-
     const req$ = tipo === 'alumno'
       ? this.adminService.deleteAlumno(id)
       : this.adminService.deleteDoctor(id);
-
     req$.pipe(takeUntil(this.destroy$), catchError(() => of(null)))
-      .subscribe(() => {
-        if (tipo === 'alumno') this.loadAlumnos();
-        else this.loadDoctores();
-      });
+      .subscribe(() => { if (tipo === 'alumno') this.loadAlumnos(); else this.loadDoctores(); });
   }
 
   // ===== DOCTORES =====
@@ -234,9 +390,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(err => { this.doctoresError = err?.error?.message || 'Error al cargar doctores.'; return of([]); }),
-        finalize(() => { this.isLoadingDoctores = false; })
+        finalize(() => { this.isLoadingDoctores = false; this.cdr.markForCheck(); })
       )
-      .subscribe(data => { this.doctores = data; });
+      .subscribe(data => { this.doctores = data; this.updateRows(); this.cdr.markForCheck(); });
   }
 
   openDoctorForm(doctor?: Doctor): void {
@@ -280,9 +436,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       catchError(err => {
         const errors = err?.error?.errors;
         this.doctorMsg = errors ? (Object.values(errors)[0] as string[])[0] : (err?.error?.message || 'Error al guardar doctor.');
+        this.cdr.markForCheck();
         return of(null);
       }),
-      finalize(() => { this.isSubmittingDoctor = false; })
+      finalize(() => { this.isSubmittingDoctor = false; this.cdr.markForCheck(); })
     ).subscribe(res => {
       if (res) {
         this.doctorMsg = this.editingDoctorId ? 'Doctor actualizado.' : 'Doctor creado.';
@@ -294,12 +451,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // ===== CALENDARIO =====
 
-  get calLabel(): string {
-    return new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(this.calCurrentMonth);
+  // cambio 6: actualiza la propiedad solo cuando cambia el mes
+  private updateCalLabel(): void {
+    this.calLabel = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(this.calCurrentMonth);
   }
 
   changeCalMonth(dir: number): void {
     this.calCurrentMonth = new Date(this.calCurrentMonth.getFullYear(), this.calCurrentMonth.getMonth() + dir, 1);
+    this.updateCalLabel();
     this.loadCalendario();
   }
 
@@ -308,31 +467,38 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const m = this.calCurrentMonth.getMonth() + 1;
     const y = this.calCurrentMonth.getFullYear();
     this.calendarioService.getDias(m, y)
-      .pipe(takeUntil(this.destroy$), catchError(() => of([])), finalize(() => this.isLoadingCal = false))
-      .subscribe(dias => {
-        this.diasEspeciales = dias;
-        this.buildCalGrid();
-      });
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([])),
+        finalize(() => { this.isLoadingCal = false; this.cdr.markForCheck(); })
+      )
+      .subscribe(dias => { this.diasEspeciales = dias; this.buildCalGrid(); this.cdr.markForCheck(); });
   }
 
   private buildCalGrid(): void {
     const ref = this.calCurrentMonth;
-    const firstDay = ref.getDay();
-    const start = new Date(ref);
-    start.setDate(start.getDate() - firstDay);
+    const year = ref.getFullYear();
+    const month = ref.getMonth();
+    const dow = new Date(year, month, 1).getDay();
+    const daysBack = dow === 0 ? 6 : dow - 1;
+    const cursor = new Date(year, month, 1 - daysBack);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const diasMap = new Map(this.diasEspeciales.map(d => [d.fecha, d]));
     const weeks: any[][] = [];
-    const cursor = new Date(start);
     for (let w = 0; w < 6; w++) {
       const week: any[] = [];
-      for (let d = 0; d < 7; d++) {
-        const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-        week.push({
-          date: dateStr,
-          label: cursor.getDate(),
-          isCurrentMonth: cursor.getMonth() === ref.getMonth(),
-          diaEspecial: diasMap.get(dateStr) ?? null
-        });
+      while (week.length < 6) {
+        if (cursor.getDay() !== 0) {
+          const ds = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+          week.push({
+            date: ds,
+            label: cursor.getDate(),
+            isCurrentMonth: cursor.getMonth() === month,
+            isPast: ds < todayStr,
+            diaEspecial: diasMap.get(ds) ?? null
+          });
+        }
         cursor.setDate(cursor.getDate() + 1);
       }
       weeks.push(week);
@@ -340,28 +506,32 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.calWeeks = weeks;
   }
 
-  openDiaForm(fecha?: string): void {
-    this.diaMsg = null;
-    this.diaForm = { fecha: fecha ?? '', tipo: 'holiday', etiqueta: '' };
-    if (fecha) {
-      const existing = this.diasEspeciales.find(d => d.fecha === fecha);
-      if (existing) { this.diaForm.tipo = existing.tipo; this.diaForm.etiqueta = existing.etiqueta ?? ''; }
-    }
-    this.showDiaForm = true;
+  selectCalDay(fecha: string, isPast = false, hasDia = false): void {
+    if (isPast && !hasDia) return;
+    this.diaForm.fecha = fecha;
+    const existing = this.diasEspeciales.find(d => d.fecha === fecha);
+    if (existing) { this.diaForm.tipo = existing.tipo; this.diaForm.etiqueta = existing.etiqueta ?? ''; }
+    else { this.diaForm.tipo = 'holiday'; this.diaForm.etiqueta = ''; }
   }
 
-  closeDiaForm(): void { this.showDiaForm = false; this.diaMsg = null; }
+  resetDiaForm(): void { this.diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' }; this.diaMsg = null; }
 
   submitDia(): void {
     if (!this.diaForm.fecha) { this.diaMsg = 'Selecciona una fecha.'; return; }
     this.isSubmittingDia = true;
+    this.diaMsg = null;
     this.calendarioService.saveDia(this.diaForm.fecha, this.diaForm.tipo, this.diaForm.etiqueta)
-      .pipe(takeUntil(this.destroy$), catchError(err => {
-        this.diaMsg = err?.error?.message || 'Error al guardar.';
-        return of(null);
-      }), finalize(() => this.isSubmittingDia = false))
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(err => {
+          this.diaMsg = err?.error?.message || 'Error al guardar.';
+          this.cdr.markForCheck();
+          return of(null);
+        }),
+        finalize(() => { this.isSubmittingDia = false; this.cdr.markForCheck(); })
+      )
       .subscribe(res => {
-        if (res) { this.diaMsg = 'Guardado.'; this.loadCalendario(); setTimeout(() => this.closeDiaForm(), 800); }
+        if (res) { this.diaMsg = 'Guardado correctamente.'; this.loadCalendario(); setTimeout(() => this.resetDiaForm(), 1200); }
       });
   }
 

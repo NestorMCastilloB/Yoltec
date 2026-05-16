@@ -25,7 +25,7 @@ export class CalendarioAdminService {
 
   getDias(month: number, year: number): Observable<DiaEspecial[]> {
     return this.http.get<{ dias: DiaEspecial[] }>(this.base, { params: { month, year } })
-      .pipe(map(r => r.dias));
+      .pipe(map(r => r.dias.map(d => ({ ...d, fecha: (d.fecha || '').split('T')[0] }))));
   }
 
   saveDia(fecha: string, tipo: string, etiqueta: string): Observable<any> {
