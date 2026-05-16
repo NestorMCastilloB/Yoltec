@@ -207,6 +207,15 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     return this.currentMonth.getFullYear() === now.getFullYear() && this.currentMonth.getMonth() === now.getMonth();
   }
 
+  // Aviso para días con atención reducida — null si el día es normal o no seleccionado
+  get selectedDayWarning(): string | null {
+    const fecha = this.createFormData.fecha_cita;
+    if (!fecha) return null;
+    const rec = this.getDayRecord(fecha);
+    if (!rec || rec.status !== 'partial') return null;
+    return rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+  }
+
   get hasAvailableSlotsForSelectedDate(): boolean {
     if (!this.createFormData.fecha_cita) return false;
     const record = this.getDayRecord(this.createFormData.fecha_cita);

@@ -166,6 +166,15 @@ export class SdCitasComponent implements OnInit, OnDestroy {
     return !day.isCurrentMonth || day.isPast || day.availability === 'full' || day.availability === 'none';
   }
 
+  // Aviso para días con atención reducida — null si el día es normal o no seleccionado
+  get selectedDayWarning(): string | null {
+    const fecha = this.createFormData.fecha_cita;
+    if (!fecha) return null;
+    const rec = this.availabilityMap.get(fecha);
+    if (!rec || rec.status !== 'partial') return null;
+    return rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+  }
+
   get hasAvailableSlotsForSelectedDate(): boolean {
     if (!this.createFormData.fecha_cita) return false;
     const rec = this.availabilityMap.get(this.createFormData.fecha_cita);

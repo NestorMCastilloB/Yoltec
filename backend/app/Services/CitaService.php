@@ -61,6 +61,14 @@ class CitaService
         if ($hora < '08:00' || $hora > '16:45') {
             return 'El horario de atención es de 08:00 a 16:45.';
         }
+        $dia = DiaEspecial::where('fecha', $fecha)->first();
+        if ($dia) {
+            $status = config("clinic.types.{$dia->tipo}.status", 'full');
+            if ($status === 'full') {
+                $motivo = $dia->etiqueta ?: ($dia->tipo === 'vacation' ? 'vacaciones' : 'festivo');
+                return "Este día no hay atención ({$motivo}).";
+            }
+        }
         return null;
     }
 
