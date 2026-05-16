@@ -4,6 +4,7 @@ Microservicio FastAPI para la IA de Yoltec.
 Corre en el contenedor 'ia' y es llamado por el backend Laravel via HTTP.
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
@@ -25,7 +26,15 @@ load_dotenv()
 logger = logging.getLogger("yoltec-ia")
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="Yoltec IA", version="2.0.0")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    load_model()
+    yield
+
+
+app = FastAPI(title="Yoltec IA", version="2.0.0", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -109,11 +118,6 @@ def load_model():
             feature_names = json.load(f)
 
     print(f"Modelo sklearn cargado. Enfermedades: {list(le.classes_)}")
-
-
-@app.on_event("startup")
-def startup():
-    load_model()
 
 
 # ─── Constantes (sklearn) ────────────────────────────────────────────────────

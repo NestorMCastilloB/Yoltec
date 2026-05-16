@@ -41,6 +41,8 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   historial: MensajeChat[] = [];
   textoInput = '';
   enviando = false;
+  enviandoLento = false;
+  private lentoTimer: ReturnType<typeof setTimeout> | null = null;
   error = '';
   shouldScroll = false;
 
@@ -102,6 +104,7 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.lentoTimer) clearTimeout(this.lentoTimer);
   }
 
   ngAfterViewChecked(): void {
@@ -158,12 +161,20 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
     this.mensajes.push({ tipo: 'user', contenido: texto, hora: this.horaActual() });
     this.historial.push({ rol: 'user', contenido: texto });
     this.enviando = true;
+    this.enviandoLento = false;
     this.shouldScroll = true;
+
+    if (this.lentoTimer) clearTimeout(this.lentoTimer);
+    this.lentoTimer = setTimeout(() => { this.enviandoLento = true; this.shouldScroll = true; }, 8000);
 
     this.chatService.enviarMensaje(this.citaIdSeleccionada, texto, this.historial.slice(0, -1))
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => { this.enviando = false; })
+        finalize(() => {
+          this.enviando = false;
+          this.enviandoLento = false;
+          if (this.lentoTimer) { clearTimeout(this.lentoTimer); this.lentoTimer = null; }
+        })
       )
       .subscribe({
         next: (res: RespuestaChat) => {
