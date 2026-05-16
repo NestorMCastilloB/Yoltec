@@ -26,7 +26,7 @@ Objetivo: web (admin + doctor + alumno + IA) funcional en producción sin bugs b
 - [x] **Fix endpoint + cita_id** — PR #29
 - [x] **UX sin cita** — bloqueo con CTA "Agendar cita" + selector cuando hay varias citas + lectura modo pre-eval existente
 - [x] **Eliminar `enfermedades_config.json`** — era código muerto, no lo usaba `app.py` ni `train_model_light.py`
-- [ ] **Loading state UX cold start** — mostrar "Conectando con el asistente (puede tardar 30s la primera vez)" — PENDIENTE menor (timeout 60s ya cubre, pero UX confusa)
+- [x] **Loading state UX cold start** — typing indicator + hint "Conectando con el asistente… puede tardar hasta 30s la primera vez" después de 8s
 
 ---
 
