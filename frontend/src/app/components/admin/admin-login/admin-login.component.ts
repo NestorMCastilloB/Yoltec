@@ -54,6 +54,7 @@ export class AdminLoginComponent implements OnDestroy {
       .subscribe({
         next: (res) => {
           localStorage.setItem('auth_token', res.token);
+          localStorage.setItem('user_data', JSON.stringify(res.user));
           this.router.navigate(['/admin-dashboard']);
         },
         error: (err: HttpErrorResponse) => {

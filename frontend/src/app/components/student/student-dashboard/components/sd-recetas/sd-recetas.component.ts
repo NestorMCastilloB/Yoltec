@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -8,13 +9,38 @@ import { Receta, RecetaService } from '../../../../../services/receta.service';
 @Component({
   selector: 'app-sd-recetas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './sd-recetas.component.html',
+  styleUrls: ['./sd-recetas.component.css'],
 })
 export class SdRecetasComponent implements OnInit, OnDestroy {
   recetas: Receta[] = [];
   isLoading = false;
   error: string | null = null;
+  busqueda = '';
+  recetaDetalle: Receta | null = null;
+
+  get recetasFiltradas(): Receta[] {
+    const q = this.busqueda.toLowerCase().trim();
+    if (!q) return this.recetas;
+    return this.recetas.filter(r =>
+      r.medicamentos.toLowerCase().includes(q) ||
+      `${r.doctor?.nombre} ${r.doctor?.apellido}`.toLowerCase().includes(q)
+    );
+  }
+
+  // Divide el string de medicamentos en líneas; separa nombre y dosis por " - "
+  parseMedicamentos(texto: string): { nombre: string; dosis: string }[] {
+    return texto.split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0)
+      .map(l => {
+        const idx = l.indexOf(' - ');
+        return idx !== -1
+          ? { nombre: l.substring(0, idx), dosis: l.substring(idx + 3) }
+          : { nombre: l, dosis: '' };
+      });
+  }
 
   private destroy$ = new Subject<void>();
 
@@ -30,7 +56,12 @@ export class SdRecetasComponent implements OnInit, OnDestroy {
       .subscribe((data: Receta[]) => this.recetas = data);
   }
 
+  abrirDetalle(r: Receta): void { this.recetaDetalle = r; }
+  cerrarDetalle(): void { this.recetaDetalle = null; }
+
   formatFecha(fecha: string): string {
-    return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(fecha));
+    const d = new Date(fecha);
+    const mes = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][d.getMonth()];
+    return `${d.getDate()} ${mes} ${d.getFullYear()}`;
   }
 }

@@ -26,8 +26,8 @@ Route::get('/health', function () {
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
 Route::middleware('throttle:5,10')->post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
 Route::middleware('throttle:5,10')->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
-Route::post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
-Route::post('/resend-2fa', [AuthController::class, 'resendTwoFactor']);
+Route::middleware('throttle:5,1')->post('/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
+Route::middleware('throttle:5,1')->post('/resend-2fa', [AuthController::class, 'resendTwoFactor']);
 
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function () {
@@ -49,17 +49,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sesiones', [PerfilController::class, 'sesiones']);
     Route::delete('/sesiones/{id}', [PerfilController::class, 'revocarSesion']);
 
-    // Citas
+    // Citas — rutas compartidas alumno/doctor
     Route::get('/citas', [CitaController::class, 'index']);
     Route::get('/citas/disponibilidad', [CitaController::class, 'availability']);
     Route::post('/citas', [CitaController::class, 'store']);
     Route::get('/citas/{id}', [CitaController::class, 'show']);
     Route::post('/citas/{id}/cancelar', [CitaController::class, 'cancelar']);
-    Route::put('/citas/{id}/reprogramar', [CitaController::class, 'reprogramar']);  // Solo doctor
-    Route::post('/citas/{id}/atender', [CitaController::class, 'atender']);       // Solo doctor
-    Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']); // Solo doctor
-    Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);   // Solo doctor
-    Route::get('/citas/{id}/consulta', [ConsultaController::class, 'show']);
+
+    // Citas — solo doctor
+    Route::middleware('role:doctor')->group(function () {
+        Route::put('/citas/{id}/reprogramar', [CitaController::class, 'reprogramar']);
+        Route::post('/citas/{id}/atender', [CitaController::class, 'atender']);
+        Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']);
+        Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);
+        Route::get('/citas/{id}/consulta', [ConsultaController::class, 'show']);
+    });
 
     // Perfil médico e historial
     Route::get('/perfil-medico', [PerfilMedicoController::class, 'show']);
@@ -70,30 +74,37 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Bitácoras
     Route::get('/bitacoras', [BitacoraController::class, 'index']);
-    Route::post('/bitacoras', [BitacoraController::class, 'store']); // Solo doctor
     Route::get('/bitacoras/{id}', [BitacoraController::class, 'show']);
-    Route::put('/bitacoras/{id}', [BitacoraController::class, 'update']); // Solo doctor
+    Route::middleware('role:doctor')->group(function () {
+        Route::post('/bitacoras', [BitacoraController::class, 'store']);
+        Route::put('/bitacoras/{id}', [BitacoraController::class, 'update']);
+    });
 
     // Recetas
     Route::get('/recetas', [RecetaController::class, 'index']);
-    Route::post('/recetas', [RecetaController::class, 'store']); // Solo doctor
     Route::get('/recetas/{id}', [RecetaController::class, 'show']);
-    Route::put('/recetas/{id}', [RecetaController::class, 'update']); // Solo doctor
+    Route::middleware('role:doctor')->group(function () {
+        Route::post('/recetas', [RecetaController::class, 'store']);
+        Route::put('/recetas/{id}', [RecetaController::class, 'update']);
+    });
 
-    // Pre-evaluaciones IA
+    // Pre-evaluaciones IA — rutas estáticas ANTES del wildcard {id}
     Route::post('/pre-evaluacion/chat', [PreEvaluacionIAController::class, 'chat']);
     Route::get('/pre-evaluacion/preguntas', [PreEvaluacionIAController::class, 'getPreguntas']);
-    Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
     Route::get('/pre-evaluacion', [PreEvaluacionIAController::class, 'index']);
     Route::post('/pre-evaluacion', [PreEvaluacionIAController::class, 'store']);
+    Route::middleware('role:doctor')->group(function () {
+        Route::get('/pre-evaluacion/pendientes', [PreEvaluacionIAController::class, 'pendientes']);
+        Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
+    });
     Route::get('/pre-evaluacion/{id}', [PreEvaluacionIAController::class, 'show']);
-    Route::post('/pre-evaluacion/{id}/validar', [PreEvaluacionIAController::class, 'validar']);
 
-    // Estadísticas (solo doctores)
-    Route::get('/estadisticas', [EstadisticasController::class, 'index']);
+    // Estadísticas — solo doctor
+    Route::middleware('role:doctor')->get('/estadisticas', [EstadisticasController::class, 'index']);
 
     // Admin - CRUD alumnos y doctores
     Route::prefix('admin')->middleware('admin')->group(function () {
+        Route::get('/stats',             [AdminController::class, 'getStats']);
         Route::get('/calendario',        [CalendarioAdminController::class, 'index']);
         Route::post('/calendario',       [CalendarioAdminController::class, 'store']);
         Route::delete('/calendario/{id}', [CalendarioAdminController::class, 'destroy']);
@@ -107,21 +118,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/doctores/{id}',  [AdminController::class, 'destroyDoctor']);
     });
 
-    // ===== IA 1: Clasificador de Prioridad (solo doctores) =====
-    Route::prefix('ia/priority')->group(function () {
+    // ===== IA 1: Clasificador de Prioridad — solo doctor =====
+    Route::middleware('role:doctor')->prefix('ia/priority')->group(function () {
         Route::get('/info', [IAPriorityController::class, 'infoModelos']);
         Route::get('/pendientes', [IAPriorityController::class, 'listarPendientesPorPrioridad']);
         Route::post('/clasificar/{citaId}', [IAPriorityController::class, 'clasificar']);
     });
 
-    // ===== IA 2: Pre-evaluación de Síntomas (alumnos y doctores) =====
+    // ===== IA 2: Pre-evaluación de Síntomas — alumno y doctor =====
     Route::prefix('ia/symptoms')->group(function () {
-        Route::get('/listado', [IASymptomController::class, 'listado']); // Solo doctores
         Route::post('/iniciar/{citaId}', [IASymptomController::class, 'iniciar']);
         Route::post('/evaluar/{citaId}', [IASymptomController::class, 'evaluar']);
         Route::get('/resultado/{citaId}', [IASymptomController::class, 'obtenerResultado']);
-        Route::post('/validar/{preEvaluacionId}', [IASymptomController::class, 'validar']); // Solo doctores
         Route::delete('/{citaId}', [IASymptomController::class, 'cancelar']);
+        // Solo doctor
+        Route::middleware('role:doctor')->group(function () {
+            Route::get('/listado', [IASymptomController::class, 'listado']);
+            Route::post('/validar/{preEvaluacionId}', [IASymptomController::class, 'validar']);
+        });
     });
 });
 

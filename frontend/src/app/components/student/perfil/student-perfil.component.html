@@ -2,7 +2,6 @@
 
   <!-- Encabezado de perfil -->
   <div class="sp-head">
-    <div class="sp-crumb">Mi perfil</div>
     <div class="sp-pcard">
 
       <!-- Avatar -->
@@ -25,23 +24,12 @@
           {{ perfil?.nombre }} {{ perfil?.apellido }}
           <span class="sp-badge-ok"><span class="sp-pulse"></span>Activo</span>
         </h1>
-        <div class="sp-ctrl">No. de control · <b>{{ perfil?.numero_control }}</b></div>
-        <div class="sp-meta">
-          <div *ngIf="perfil?.carrera">
-            <span>Carrera</span><b>{{ perfil?.carrera }}</b>
-          </div>
-          <div *ngIf="perfil?.semestre">
-            <span>Semestre</span><b>{{ perfil?.semestre }}°</b>
-          </div>
-          <div>
-            <span>Correo</span><b>{{ perfil?.email }}</b>
-          </div>
-          <div *ngIf="perfil?.updated_at">
-            <span>Última actualización</span>
-            <b>{{ perfil?.updated_at | date:'dd MMM yyyy' }}</b>
-          </div>
+        <div class="sp-ctrl">
+          {{ perfil?.numero_control }}
+          <ng-container *ngIf="perfil?.carrera"> · {{ perfil?.carrera }}</ng-container>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -55,138 +43,124 @@
         <div class="sk-line"></div>
         <div class="sk-line"></div>
         <div class="sk-line"></div>
-        <div class="sk-line"></div>
         <div class="sk-line sk-full"></div>
         <div class="sk-line sk-full"></div>
       </div>
     </div>
 
-    <!-- Card info médica -->
-    <div *ngIf="!cargando && perfil" class="sp-card">
+    <ng-container *ngIf="!cargando && perfil">
 
-      <!-- Encabezado card -->
-      <div class="sp-card-head">
-        <div class="sp-card-head-left">
-          <h2>{{ editando ? 'Editar información médica' : 'Información médica' }}</h2>
-          <p class="sp-hint">
-            {{ editando
-              ? 'Los cambios serán visibles para el personal médico autorizado.'
-              : 'Tus datos los puede consultar el doctor durante la consulta. Mantenlos actualizados.' }}
-          </p>
-        </div>
-        <button *ngIf="!editando" class="sp-btn sp-btn-sm sp-btn-secondary" (click)="iniciarEdicion()">
-          ✎ Editar
-        </button>
-        <span *ngIf="editando" class="sp-badge-ok"><span class="sp-pulse"></span>Modo edición</span>
-      </div>
-
-      <!-- Modo lectura -->
-      <div *ngIf="!editando" class="sp-grid2">
-        <div class="sp-field">
-          <label>Tipo de sangre</label>
-          <div class="sp-ro" [class.sp-ro-empty]="!perfil.tipo_sangre">
-            {{ perfil.tipo_sangre || 'No especificado' }}
+      <!-- Card: Datos físicos -->
+      <div class="sp-card">
+        <div class="sp-card-head">
+          <div>
+            <h2>Datos físicos</h2>
+            <div *ngIf="editando" class="sp-hint">Los cambios serán visibles para el personal médico autorizado.</div>
           </div>
+          <button *ngIf="!editando" class="sp-btn sp-btn-secondary sp-btn-sm" (click)="iniciarEdicion()">✎ Editar</button>
+          <span *ngIf="editando" class="sp-badge-ok"><span class="sp-pulse"></span>Modo edición</span>
         </div>
-        <div class="sp-field">
-          <label>Peso</label>
-          <div class="sp-ro" [class.sp-ro-empty]="!perfil.peso">
-            {{ perfil.peso ? perfil.peso + ' kg' : 'No registrado' }}
+        <div class="sp-grid3">
+          <div class="sp-field">
+            <label>Tipo de sangre</label>
+            <div *ngIf="!editando" class="sp-ro" [class.sp-ro-empty]="!perfil.tipo_sangre">
+              {{ perfil.tipo_sangre || 'No especificado' }}
+            </div>
+            <select *ngIf="editando" [(ngModel)]="form.tipo_sangre">
+              <option value="">No especificado</option>
+              <option *ngFor="let t of TIPOS_SANGRE" [value]="t">{{ t }}</option>
+            </select>
           </div>
-        </div>
-        <div class="sp-field">
-          <label>Estatura</label>
-          <div class="sp-ro" [class.sp-ro-empty]="!perfil.estatura">
-            {{ perfil.estatura ? perfil.estatura + ' cm' : 'No registrada' }}
+          <div class="sp-field">
+            <label>Peso</label>
+            <div *ngIf="!editando" class="sp-ro" [class.sp-ro-empty]="!perfil.peso">
+              {{ perfil.peso ? perfil.peso + ' kg' : 'No registrado' }}
+            </div>
+            <div *ngIf="editando" class="sp-input-unit">
+              <input type="number" inputmode="decimal" min="0" max="300" step="0.1"
+                [(ngModel)]="form.peso" placeholder="Ej: 68" />
+              <span class="sp-unit">kg</span>
+            </div>
           </div>
-        </div>
-        <div class="sp-field">
-          <label>Contacto de emergencia</label>
-          <div class="sp-ro"
-            [class.sp-ro-empty]="!perfil.contacto_emergencia_nombre && !perfil.contacto_emergencia_telefono">
-            <ng-container *ngIf="perfil.contacto_emergencia_nombre || perfil.contacto_emergencia_telefono">
-              {{ perfil.contacto_emergencia_nombre }}
-              <ng-container *ngIf="perfil.contacto_emergencia_nombre && perfil.contacto_emergencia_telefono"> — </ng-container>
-              {{ perfil.contacto_emergencia_telefono }}
-            </ng-container>
-            <ng-container *ngIf="!perfil.contacto_emergencia_nombre && !perfil.contacto_emergencia_telefono">
-              No registrado
-            </ng-container>
-          </div>
-        </div>
-        <div class="sp-field sp-full">
-          <label>Alergias conocidas</label>
-          <div class="sp-ro sp-ro-medical" [class.sp-ro-empty]="!perfil.alergias">
-            {{ perfil.alergias || 'Ninguna registrada' }}
-          </div>
-        </div>
-        <div class="sp-field sp-full">
-          <label>Enfermedades crónicas / antecedentes</label>
-          <div class="sp-ro sp-ro-medical" [class.sp-ro-empty]="!perfil.enfermedades_cronicas">
-            {{ perfil.enfermedades_cronicas || 'Ninguna registrada' }}
+          <div class="sp-field">
+            <label>Estatura</label>
+            <div *ngIf="!editando" class="sp-ro" [class.sp-ro-empty]="!perfil.estatura">
+              {{ perfil.estatura ? perfil.estatura + ' cm' : 'No registrada' }}
+            </div>
+            <div *ngIf="editando" class="sp-input-unit">
+              <input type="number" inputmode="numeric" min="0" max="250"
+                [(ngModel)]="form.estatura" placeholder="Ej: 175" />
+              <span class="sp-unit">cm</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Modo edición -->
-      <div *ngIf="editando" class="sp-grid2">
-        <div class="sp-field">
-          <label>Tipo de sangre <span class="sp-req">*</span></label>
-          <select [(ngModel)]="form.tipo_sangre">
-            <option value="">No especificado</option>
-            <option *ngFor="let t of TIPOS_SANGRE" [value]="t">{{ t }}</option>
-          </select>
+      <!-- Card: Información médica -->
+      <div class="sp-card">
+        <div class="sp-card-head">
+          <h2>Información médica</h2>
         </div>
-        <div class="sp-field">
-          <label>Peso (kg)</label>
-          <input type="number" inputmode="decimal" min="0" max="300" step="0.1"
-            [(ngModel)]="form.peso" placeholder="Ej: 68" />
-        </div>
-        <div class="sp-field">
-          <label>Estatura (cm)</label>
-          <input type="number" inputmode="numeric" min="0" max="250"
-            [(ngModel)]="form.estatura" placeholder="Ej: 175" />
-        </div>
-        <div class="sp-field">
-          <label>Nombre del contacto de emergencia</label>
-          <input type="text" [(ngModel)]="form.contacto_emergencia_nombre"
-            placeholder="Nombre completo" />
-        </div>
-        <div class="sp-field">
-          <label>Teléfono de emergencia</label>
-          <input type="tel" [(ngModel)]="form.contacto_emergencia_telefono"
-            placeholder="10 dígitos" />
-        </div>
-        <div class="sp-field sp-full">
-          <label>Alergias conocidas</label>
-          <textarea [(ngModel)]="form.alergias" rows="3"
-            placeholder="Ej: Penicilina, Polen&#10;Separa cada alergia con un salto de línea."></textarea>
-          <span class="sp-below">Separa cada alergia con un salto de línea. Indica gravedad si aplica.</span>
-        </div>
-        <div class="sp-field sp-full">
-          <label>Enfermedades crónicas / antecedentes</label>
-          <textarea [(ngModel)]="form.enfermedades_cronicas" rows="3"
-            placeholder="Ej: Asma leve, Diabetes tipo 2 (familiar)"></textarea>
+        <div class="sp-grid2">
+          <div class="sp-field sp-full">
+            <label>Alergias conocidas</label>
+            <div *ngIf="!editando" class="sp-ro sp-ro-medical" [class.sp-ro-empty]="!perfil.alergias">
+              {{ perfil.alergias || 'Ninguna registrada' }}
+            </div>
+            <textarea *ngIf="editando" [(ngModel)]="form.alergias" rows="3"
+              placeholder="Ej: Penicilina, Polen&#10;Separa cada alergia con un salto de línea."></textarea>
+            <span *ngIf="editando" class="sp-below">Separa cada alergia con un salto de línea. Indica gravedad si aplica.</span>
+          </div>
+          <div class="sp-field sp-full">
+            <label>Enfermedades crónicas / antecedentes</label>
+            <div *ngIf="!editando" class="sp-ro sp-ro-medical" [class.sp-ro-empty]="!perfil.enfermedades_cronicas">
+              {{ perfil.enfermedades_cronicas || 'Ninguna registrada' }}
+            </div>
+            <textarea *ngIf="editando" [(ngModel)]="form.enfermedades_cronicas" rows="3"
+              placeholder="Ej: Asma leve, Diabetes tipo 2 (familiar)"></textarea>
+          </div>
         </div>
       </div>
 
-      <!-- Barra de acciones en modo edición -->
-      <div *ngIf="editando" class="sp-editbar">
-        <div class="sp-saved" *ngIf="perfil.updated_at">
-          Última actualización:
-          <b>{{ perfil.updated_at | date:'dd MMM yyyy, HH:mm' }}</b>
+      <!-- Card: Contacto de emergencia -->
+      <div class="sp-card">
+        <div class="sp-card-head">
+          <h2>Contacto de emergencia</h2>
         </div>
-        <div class="sp-saved" *ngIf="!perfil.updated_at"></div>
-        <div class="sp-editbar-btns">
-          <button class="sp-btn sp-btn-gray" (click)="cancelarEdicion()" [disabled]="guardando">
-            Cancelar
-          </button>
-          <button class="sp-btn sp-btn-primary" (click)="guardar()" [disabled]="guardando">
-            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
-          </button>
+        <div class="sp-grid2">
+          <div class="sp-field">
+            <label>Nombre</label>
+            <div *ngIf="!editando" class="sp-ro" [class.sp-ro-empty]="!perfil.contacto_emergencia_nombre">
+              {{ perfil.contacto_emergencia_nombre || 'No registrado' }}
+            </div>
+            <input *ngIf="editando" type="text" [(ngModel)]="form.contacto_emergencia_nombre"
+              placeholder="Nombre completo" />
+          </div>
+          <div class="sp-field">
+            <label>Teléfono</label>
+            <div *ngIf="!editando" class="sp-ro" [class.sp-ro-empty]="!perfil.contacto_emergencia_telefono">
+              {{ perfil.contacto_emergencia_telefono || 'No registrado' }}
+            </div>
+            <input *ngIf="editando" type="tel" [(ngModel)]="form.contacto_emergencia_telefono"
+              placeholder="10 dígitos" />
+          </div>
         </div>
+
+        <div *ngIf="editando" class="sp-editbar">
+          <div class="sp-saved" *ngIf="perfil.updated_at">
+            Última actualización: <b>{{ perfil.updated_at | date:'dd MMM yyyy' }}</b>
+          </div>
+          <div class="sp-editbar-btns">
+            <button class="sp-btn sp-btn-gray" (click)="cancelarEdicion()" [disabled]="guardando">Cancelar</button>
+            <button class="sp-btn sp-btn-primary" (click)="guardar()" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </div>
+
       </div>
-    </div>
+
+    </ng-container>
 
     <!-- Estado vacío si falla la carga -->
     <div *ngIf="!cargando && !perfil" class="sp-error-state">

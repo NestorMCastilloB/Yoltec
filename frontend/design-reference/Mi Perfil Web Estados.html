@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Mi perfil — Estados</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f5ee;
+    --text:#111827; --text-muted:#6b7280; --text-subtle:#9ca3af;
+    --border:#e5e7eb; --border-soft:#f3f4f6;
+    --bg:#f8fafc; --chip-bg:#f3f4f6;
+    --danger:#dc2626; --danger-50:#fef2f2;
+    --warn:#b45309; --warn-50:#fef3c7;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh;background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+  input,select,textarea{font-family:inherit;color:inherit;font-size:inherit}
+
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sb{width:220px;flex-shrink:0;background:var(--primary);color:#fff;display:flex;flex-direction:column;padding:22px 0}
+  .sb .brand{display:flex;align-items:center;gap:10px;padding:0 22px 24px;font-weight:700;font-size:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sb .y{width:28px;height:28px;border-radius:7px;background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+  .sb nav{display:flex;flex-direction:column;gap:2px;padding:14px 12px 0;flex:1}
+  .sb nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:500;border-radius:8px;cursor:pointer;text-decoration:none}
+  .sb nav a:hover{background:rgba(255,255,255,.05);color:#fff}
+  .sb nav a.active{background:rgba(255,255,255,.1);color:#fff;font-weight:600}
+  .sb nav a svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0;opacity:.95}
+  .sb .user{margin-top:auto;padding:14px 18px 4px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px}
+  .sb .user .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px}
+  .sb .user b{display:block;font-size:13px;font-weight:600}
+  .sb .user span{font-size:11px;color:rgba(255,255,255,.65);font-variant-numeric:tabular-nums}
+
+  .main{flex:1;min-width:0;padding:32px}
+  .crumb{font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+  h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.4px}
+  .sub{font-size:13.5px;color:var(--text-muted);margin-top:4px;margin-bottom:22px}
+
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:20px;max-width:1080px;align-items:start}
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden}
+
+  /* Identity card (shared) */
+  .id-card{padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .id-card .av{width:84px;height:84px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:30px;margin-bottom:6px}
+  .id-card h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .id-card .ctrl{font-size:12.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .id-card .career{font-size:12.5px;color:var(--text-muted);margin-top:1px}
+  .id-card .badge{margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:var(--primary-50);color:var(--primary);font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px}
+  .id-card .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--primary)}
+  .id-actions{padding:0 18px 18px;display:flex;flex-direction:column;gap:8px}
+  .btn-out{width:100%;padding:9px 12px;border:1px solid var(--border);background:#fff;border-radius:8px;font:600 13px 'Inter',sans-serif;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn-out:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-out svg{width:14px;height:14px;stroke-width:1.8}
+  .btn-out.danger{color:var(--danger);border-color:#fee2e2}
+  .btn-out.danger:hover{border-color:var(--danger);background:#fef2f2}
+
+  /* Tabs */
+  .tabs{display:flex;border-bottom:1px solid var(--border);padding:0 22px}
+  .tab{padding:14px 4px;margin-right:24px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+
+  .section{padding:6px 22px 18px}
+  .section + .section{border-top:1px solid var(--border-soft)}
+  .section h3{margin:18px 0 12px;font-size:11px;font-weight:700;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+  .section h3 .hint{font-weight:500;color:var(--text-subtle);text-transform:none;letter-spacing:0;font-size:11.5px}
+  .row{display:grid;grid-template-columns:170px 1fr auto;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-soft)}
+  .row:last-child{border-bottom:none}
+  .row .lab{font-size:12.5px;color:var(--text-muted);font-weight:500}
+  .row .val{font-size:13.5px;color:var(--text);font-weight:500}
+  .row .val.muted{color:var(--text-subtle);font-weight:400}
+  .row .edit{font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:none}
+  .row .edit.locked{color:var(--text-subtle);cursor:not-allowed;display:inline-flex;align-items:center;gap:4px}
+  .row .edit.locked svg{width:11px;height:11px;stroke-width:2}
+  .row .edit:hover:not(.locked){text-decoration:underline}
+
+  /* Notice */
+  .notice{margin:16px 22px 22px;background:var(--primary-50);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--primary);font-weight:500;display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+  .notice svg{flex-shrink:0;margin-top:1px}
+  .notice.warn{background:var(--warn-50);color:var(--warn)}
+
+  /* Pills (medicine info) */
+  .pill-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .pill{background:var(--chip-bg);color:var(--text);font-size:12px;font-weight:500;padding:3px 10px;border-radius:99px}
+  .pill.warn{background:var(--warn-50);color:var(--warn)}
+
+  /* Notifications toggle row */
+  .notif-row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border-soft)}
+  .notif-row:last-child{border-bottom:none}
+  .notif-row .l{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .notif-row .d{font-size:12.5px;color:var(--text-muted);line-height:1.4}
+  .toggle{position:relative;width:38px;height:22px;background:#cbd5e1;border-radius:99px;cursor:pointer;flex-shrink:0;transition:background .15s}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .toggle.on{background:var(--primary)}
+  .toggle.on::after{transform:translateX(16px)}
+
+  .channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .channel{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--chip-bg);border-radius:8px}
+  .channel svg{width:16px;height:16px;color:var(--text-muted);stroke-width:1.8;flex-shrink:0}
+  .channel b{display:block;font-size:12.5px;font-weight:600}
+  .channel span{display:block;font-size:11.5px;color:var(--text-muted)}
+
+  /* Edit drawer (modal) */
+  .drawer-wrap{position:relative;margin:24px 0;padding:24px;background:rgba(15,30,22,.4);border-radius:16px}
+  .drawer-wrap .drawer{max-width:520px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden}
+  .dh{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .dh h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.2px}
+  .dh .close{width:30px;height:30px;border-radius:6px;color:var(--text-subtle);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .dh .close:hover{background:var(--chip-bg);color:var(--text)}
+  .db{padding:20px 22px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11.5px;font-weight:600;color:var(--text-muted);letter-spacing:.3px;margin-bottom:6px;text-transform:uppercase}
+  .field label .req{color:var(--danger);margin-left:2px}
+  .field input,.field select{width:100%;height:40px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:0 12px;font:500 13.5px 'Inter',sans-serif;outline:none}
+  .field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+  .field .hint{font-size:11.5px;color:var(--text-subtle);margin-top:5px}
+  .field.locked input{background:var(--chip-bg);color:var(--text-subtle);cursor:not-allowed}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .df{padding:14px 22px;background:var(--chip-bg);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+  .btn{padding:9px 16px;border-radius:7px;font:600 13px 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.ghost{color:var(--text-muted);background:transparent}
+  .btn.ghost:hover{background:#fff}
+
+  .lock-line{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--warn);background:var(--warn-50);padding:9px 12px;border-radius:8px;margin-bottom:14px;line-height:1.4}
+  .lock-line svg{flex-shrink:0;width:14px;height:14px;stroke-width:1.8}
+
+  /* Password meter */
+  .meter{display:flex;gap:4px;margin-top:8px}
+  .meter span{flex:1;height:4px;border-radius:99px;background:var(--border)}
+  .meter.s2 span:nth-child(-n+2){background:#f59e0b}
+  .meter.s3 span:nth-child(-n+3){background:var(--primary)}
+  .meter.s4 span{background:var(--primary)}
+  .meter-label{font-size:11.5px;color:var(--text-muted);margin-top:5px}
+  .meter-label b{color:var(--primary)}
+  .check-list{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+  .check-list div{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted)}
+  .check-list div svg{width:13px;height:13px;flex-shrink:0;stroke-width:2}
+  .check-list .ok{color:var(--primary)}
+  .check-list .ok svg{color:var(--primary)}
+
+  .scope{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;margin:0 0 6px;padding-top:8px}
+  .scope::after{content:'';height:1px;background:var(--border);flex:1;width:140px;display:inline-block;margin-left:8px}
+  .frame{border-bottom:1px solid var(--border);padding-bottom:8px}
+</style>
+</head>
+<body>
+
+<div style="padding:24px 32px 0">
+  <div class="scope">Vista A · Tab Información médica</div>
+</div>
+<div class="app frame">
+  <aside class="sb">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>Inicio</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Mis citas</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>Pre-evaluación IA</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+      <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Mi perfil</a>
+    </nav>
+    <div class="user">
+      <div class="av">NC</div>
+      <div><b>Nestor Castillo</b><span>22690495</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="crumb">Mi perfil</div>
+    <h1>Mi perfil</h1>
+    <div class="sub">Datos personales, información médica y contacto de emergencia</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="id-card">
+          <div class="av">NC</div>
+          <h2>Nestor Castillo</h2>
+          <div class="ctrl">22690495</div>
+          <div class="career">Ing. Sistemas · 6° semestre</div>
+          <div class="badge">Cuenta activa</div>
+        </div>
+        <div class="id-actions">
+          <button class="btn-out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3 4 10.5V20h9.5L21 12.5 11.5 3Z"/><path d="m14 6 4 4"/></svg>Editar información</button>
+          <button class="btn-out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Cambiar contraseña</button>
+          <button class="btn-out danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <div class="tab">Información personal</div>
+          <div class="tab active">Información médica</div>
+          <div class="tab">Notificaciones</div>
+        </div>
+
+        <div class="section">
+          <h3>Datos físicos<span class="hint">Editables por ti</span></h3>
+          <div class="row"><span class="lab">Tipo de sangre</span><span class="val">O+</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Peso</span><span class="val">72 kg</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Estatura</span><span class="val">1.75 m</span><a class="edit">Editar</a></div>
+          <div class="row"><span class="lab">Última actualización</span><span class="val muted">12 ene 2026 · por ti</span><span></span></div>
+        </div>
+
+        <div class="section">
+          <h3>Alergias conocidas<span class="hint">Solo el doctor puede modificar</span></h3>
+          <div class="row"><span class="lab">Medicamentos</span><span class="val"><div class="pill-list"><span class="pill warn">Penicilina</span><span class="pill warn">Aspirina</span></div></span><a class="edit locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Bloqueado</a></div>
+          <div class="row"><span class="lab">Alimentos</span><span class="val"><div class="pill-list"><span class="pill">Mariscos</span></div></span><a class="edit locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Bloqueado</a></div>
+          <div class="row"><span class="lab">Ambientales</span><span class="val muted">Ninguna registrada</span><span></span></div>
+        </div>
+
+        <div class="section">
+          <h3>Padecimientos crónicos<span class="hint">Solo el doctor puede modificar</span></h3>
+          <div class="row"><span class="lab">Diagnósticos</span><span class="val"><div class="pill-list"><span class="pill">Asma leve</span></div></span><a class="edit locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Bloqueado</a></div>
+          <div class="row"><span class="lab">Medicamentos crónicos</span><span class="val muted">Ninguno registrado</span><span></span></div>
+        </div>
+
+        <div class="section">
+          <h3>Vacunación</h3>
+          <div class="row"><span class="lab">Esquema básico</span><span class="val">Completo</span><span></span></div>
+          <div class="row"><span class="lab">Influenza</span><span class="val">22 oct 2025</span><span></span></div>
+          <div class="row"><span class="lab">COVID-19</span><span class="val">14 abr 2024 · 4ª dosis</span><span></span></div>
+        </div>
+
+        <div class="notice warn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Los campos marcados como <b>Bloqueado</b> solo pueden ser modificados por el doctor durante una consulta. Para reportar un error, agenda una cita.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- VISTA B — Notificaciones -->
+<div style="padding:24px 32px 0">
+  <div class="scope">Vista B · Tab Notificaciones</div>
+</div>
+<div class="app frame">
+  <aside class="sb">
+    <div class="brand"><div class="y">Y</div>Yoltec</div>
+    <nav>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9Z"/></svg>Inicio</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Mis citas</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1.5v3M15 1.5v3M9 19.5v3M15 19.5v3M1.5 9h3M1.5 15h3M19.5 9h3M19.5 15h3"/></svg>Pre-evaluación IA</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.8 6.5l7.6 7.6" transform="rotate(-35 12 12)"/></svg>Recetas</a>
+      <a class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Mi perfil</a>
+    </nav>
+    <div class="user">
+      <div class="av">NC</div>
+      <div><b>Nestor Castillo</b><span>22690495</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="crumb">Mi perfil</div>
+    <h1>Mi perfil</h1>
+    <div class="sub">Datos personales, información médica y contacto de emergencia</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="id-card">
+          <div class="av">NC</div>
+          <h2>Nestor Castillo</h2>
+          <div class="ctrl">22690495</div>
+          <div class="career">Ing. Sistemas · 6° semestre</div>
+          <div class="badge">Cuenta activa</div>
+        </div>
+        <div class="id-actions">
+          <button class="btn-out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3 4 10.5V20h9.5L21 12.5 11.5 3Z"/><path d="m14 6 4 4"/></svg>Editar información</button>
+          <button class="btn-out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Cambiar contraseña</button>
+          <button class="btn-out danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <div class="tab">Información personal</div>
+          <div class="tab">Información médica</div>
+          <div class="tab active">Notificaciones</div>
+        </div>
+
+        <div class="section">
+          <h3>Canales preferidos</h3>
+          <div class="channel-grid">
+            <div class="channel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              <div><b>Correo institucional</b><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d0e2e2e6e9e0e4e9e590a4b5b3a6bdfebda8">[email&#160;protected]</a></span></div>
+            </div>
+            <div class="channel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></svg>
+              <div><b>Push móvil</b><span>App instalada · iPhone 14</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Citas médicas</h3>
+          <div class="notif-row">
+            <div>
+              <div class="l">Recordatorio de cita</div>
+              <div class="d">Te avisamos 24 hrs antes de tu cita y 1 hora antes.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="notif-row">
+            <div>
+              <div class="l">Cambios o cancelaciones</div>
+              <div class="d">Cuando el doctor reagende o cancele una cita.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="notif-row">
+            <div>
+              <div class="l">Confirmación de asistencia</div>
+              <div class="d">Pedir confirmación 2 hrs antes de cada cita.</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Recetas y resultados</h3>
+          <div class="notif-row">
+            <div>
+              <div class="l">Nueva receta emitida</div>
+              <div class="d">Aviso cuando el doctor emite una receta para ti.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="notif-row">
+            <div>
+              <div class="l">Recordatorio de medicamento</div>
+              <div class="d">Avisos según la dosificación de tus recetas activas.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="notif-row">
+            <div>
+              <div class="l">Resultados de pre-evaluación IA</div>
+              <div class="d">Cuando el doctor revise tu pre-evaluación.</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Comunicación general</h3>
+          <div class="notif-row">
+            <div>
+              <div class="l">Avisos del servicio médico</div>
+              <div class="d">Días sin atención, campañas de vacunación y horarios especiales.</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="notif-row">
+            <div>
+              <div class="l">Encuestas y mejora del servicio</div>
+              <div class="d">Recibir encuestas ocasionales después de cada consulta.</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- VISTA C — Modal editar información -->
+<div style="padding:24px 32px 0">
+  <div class="scope">Vista C · Modal Editar información</div>
+</div>
+<div class="drawer-wrap">
+  <div class="drawer">
+    <div class="dh">
+      <h2>Editar información</h2>
+      <button class="close">×</button>
+    </div>
+    <div class="db">
+      <div class="lock-line">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        Algunos campos solo pueden ser modificados por servicios escolares o por el doctor.
+      </div>
+
+      <div class="field locked">
+        <label>Nombre completo</label>
+        <input value="Nestor Castillo Vázquez" disabled>
+        <div class="hint">Vinculado a Servicios Escolares.</div>
+      </div>
+
+      <div class="field locked">
+        <label>Número de control</label>
+        <input value="22690495" disabled>
+      </div>
+
+      <div class="field">
+        <label>Correo personal</label>
+        <input value="nestor.cv@gmail.com">
+        <div class="hint">Usado para recuperación de contraseña y avisos.</div>
+      </div>
+
+      <div class="field">
+        <label>Teléfono <span class="req">*</span></label>
+        <input value="55 1234 5678">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Peso (kg)</label>
+          <input value="72" type="number">
+        </div>
+        <div class="field">
+          <label>Estatura (m)</label>
+          <input value="1.75" type="number" step="0.01">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tipo de sangre</label>
+        <select>
+          <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Contacto de emergencia — Nombre</label>
+        <input value="María Vázquez (madre)">
+      </div>
+
+      <div class="field">
+        <label>Contacto de emergencia — Teléfono</label>
+        <input value="55 8721 4490">
+      </div>
+    </div>
+    <div class="df">
+      <button class="btn ghost">Cancelar</button>
+      <button class="btn primary">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA D — Cambiar contraseña -->
+<div style="padding:24px 32px 0">
+  <div class="scope">Vista D · Modal Cambiar contraseña</div>
+</div>
+<div class="drawer-wrap" style="padding-bottom:48px">
+  <div class="drawer">
+    <div class="dh">
+      <h2>Cambiar contraseña</h2>
+      <button class="close">×</button>
+    </div>
+    <div class="db">
+      <div class="lock-line" style="background:var(--primary-50);color:var(--primary)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        Tu sesión se cerrará en todos los dispositivos después de cambiar la contraseña.
+      </div>
+
+      <div class="field">
+        <label>Contraseña actual <span class="req">*</span></label>
+        <input type="password" value="••••••••••">
+      </div>
+
+      <div class="field">
+        <label>Nueva contraseña <span class="req">*</span></label>
+        <input type="password" value="••••••••••••">
+        <div class="meter s3"><span></span><span></span><span></span><span></span></div>
+        <div class="meter-label">Fortaleza: <b>Buena</b></div>
+        <div class="check-list">
+          <div class="ok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            Mínimo 8 caracteres
+          </div>
+          <div class="ok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            Mayúsculas y minúsculas
+          </div>
+          <div class="ok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            Al menos un número
+          </div>
+          <div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+            Al menos un símbolo (recomendado)
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Confirmar nueva contraseña <span class="req">*</span></label>
+        <input type="password" value="••••••••••••">
+      </div>
+    </div>
+    <div class="df">
+      <button class="btn ghost">Cancelar</button>
+      <button class="btn primary">Actualizar contraseña</button>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

@@ -19,7 +19,7 @@ class Receta extends Model
     ];
 
     protected $casts = [
-        'fecha_emision' => 'date',
+        'fecha_emision' => 'date:Y-m-d',
     ];
 
     // Relaciones

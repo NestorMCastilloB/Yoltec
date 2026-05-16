@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Yoltec · Nueva cita (Doctor)</title>
+<link rel="icon" href="assets/favicon.ico">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url('fonts/Inter-Regular.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:500;src:url('fonts/Inter-Medium.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:600;src:url('fonts/Inter-SemiBold.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-weight:700;src:url('fonts/Inter-Bold.woff2') format('woff2')}
+  :root{
+    --primary:#1a5c3a; --primary-600:#144a2e; --primary-50:#e8f1ec; --primary-100:#d1e3d8;
+    --warn:#f59e0b; --warn-50:#fef3e0;
+    --danger:#dc2626; --danger-50:#fde8e8;
+    --bg:#f7f9f8; --surface:#fff;
+    --border:#2d3144; --border-strong:#cdd9d3;
+    --text:#1a2e25; --text-muted:#4a6859; --text-subtle:#7b8f86;
+    --soft:#f9fafb;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;min-height:100vh}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);display:flex;align-items:center;justify-content:center;gap:32px;padding:40px;flex-wrap:wrap}
+
+  .frame-label{position:absolute;top:-26px;left:0;right:0;text-align:center;color:var(--text-subtle);font:600 11px 'Inter',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+
+  /* Modal */
+  .modal-wrap{position:relative;width:560px;background:#1a1d27;border-radius:14px;box-shadow:0 28px 80px rgba(20,40,30,.18),0 2px 8px rgba(20,40,30,.04);overflow:hidden;display:flex;flex-direction:column;max-height:780px}
+
+  .mh{padding:22px 24px 0;border-bottom:1px solid var(--border)}
+  .mh-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .mh h2{margin:0 0 4px;font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .mh .sub{font-size:12.5px;color:var(--text-muted);margin-bottom:18px}
+  .close{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text-subtle);background:none;border:0;cursor:pointer;font-size:18px}
+  .close:hover{background:var(--soft);color:var(--text)}
+
+  /* Stepper */
+  .steps{display:flex;gap:6px;padding-bottom:14px;margin-top:4px}
+  .step{flex:1;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-subtle);font-weight:500}
+  .step .n{width:22px;height:22px;border-radius:50%;background:var(--soft);color:var(--text-subtle);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+  .step.active{color:var(--primary);font-weight:600}
+  .step.active .n{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .step.done{color:var(--text)}
+  .step.done .n{background:var(--primary-50);color:var(--primary);border-color:var(--primary-100)}
+  .step .arrow{margin:0 4px;color:var(--text-subtle);font-size:13px}
+
+  .mb{padding:20px 24px;flex:1;overflow-y:auto;min-height:0}
+
+  /* Step 1: alumno */
+  .search-field{position:relative;margin-bottom:14px}
+  .search-field svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-subtle)}
+  .search-field input{width:100%;height:42px;background:var(--soft);border:1px solid var(--border);border-radius:9px;padding:0 14px 0 40px;font:500 13.5px 'Inter',sans-serif;color:var(--text);outline:none}
+  .search-field input:focus{border-color:var(--primary);background:#1a1d27;box-shadow:0 0 0 3px var(--primary-50)}
+  .search-field input::placeholder{color:var(--text-subtle);font-weight:400}
+
+  .list-label{font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;margin:14px 2px 6px;display:flex;justify-content:space-between;align-items:center}
+  .list-label span:last-child{color:var(--text-subtle);font-weight:500;text-transform:none;letter-spacing:0;font-size:11.5px}
+
+  .student-list{display:flex;flex-direction:column;gap:4px}
+  .student{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+  .student:hover{background:var(--soft);border-color:var(--border)}
+  .student.sel{background:var(--primary-50);border-color:var(--primary-100)}
+  .av{width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;letter-spacing:.3px}
+  .student .who{flex:1;min-width:0}
+  .student .who b{display:block;font-size:13.5px;font-weight:600;color:var(--text);letter-spacing:-.1px}
+  .student .who span{display:block;font-size:11.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums;margin-top:1px}
+  .student .who span em{font-style:normal;color:var(--text-muted)}
+  .student .meta{font-size:11.5px;color:var(--text-subtle)}
+  .student .ck{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
+  .student.sel .ck{background:var(--primary);border-color:var(--primary)}
+
+  /* Step 2: calendar */
+  .selected-student{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--primary-50);border-radius:9px;margin-bottom:16px}
+  .selected-student .who{flex:1;min-width:0}
+  .selected-student .who b{display:block;font-size:13.5px;font-weight:600;color:var(--text)}
+  .selected-student .who span{font-size:11.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .selected-student .av{width:32px;height:32px;font-size:11.5px}
+  .selected-student .change{font-size:12px;color:var(--primary);font-weight:600;background:none;border:0;cursor:pointer}
+
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
+  .cal-nav b{font-size:14px;font-weight:600;text-transform:capitalize}
+  .cal-nav button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#1a1d27;color:var(--text-muted);font-size:14px}
+  .cal-nav button:hover{border-color:var(--primary);color:var(--primary)}
+
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-dow{font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-align:center;text-transform:uppercase;padding:6px 0}
+  .day{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;border:1px solid transparent}
+  .day .num{font-size:13.5px;font-weight:600}
+  .day .sub{font-size:9px;font-weight:600;color:var(--primary);margin-top:1px}
+  .day.past{color:var(--text-subtle);cursor:default}
+  .day.past .sub{display:none}
+  .day:hover:not(.past):not(.sel){background:var(--soft)}
+  .day.full{background:var(--danger-50);color:var(--danger);cursor:not-allowed}
+  .day.full .sub{color:var(--danger)}
+  .day.low .sub{color:var(--warn)}
+  .day.sel{background:var(--primary);color:#fff}
+  .day.sel .sub{color:#fff}
+
+  .slot-section{margin-top:18px}
+  .slot-section .lbl{font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .slot{padding:9px 6px;border:1px solid var(--border);border-radius:7px;background:#1a1d27;font-size:12.5px;font-weight:600;text-align:center;cursor:pointer;color:var(--text);font-variant-numeric:tabular-nums}
+  .slot:hover{border-color:var(--primary);color:var(--primary)}
+  .slot.sel{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .slot.taken{background:var(--soft);color:var(--text-subtle);cursor:not-allowed;text-decoration:line-through}
+  .slot.taken:hover{border-color:var(--border);color:var(--text-subtle)}
+
+  /* Step 3 */
+  .summary{display:flex;flex-direction:column;gap:0;background:var(--soft);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .summary .r{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px}
+  .summary .r:last-child{border-bottom:0}
+  .summary .r .k{color:var(--text-subtle);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  .summary .r .v{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  .summary .r.student-r{padding:14px 16px}
+  .summary .student-r .who{display:flex;align-items:center;gap:10px}
+  .summary .student-r .who b{font-size:13.5px;font-weight:600;display:block}
+  .summary .student-r .who span{font-size:11.5px;color:var(--text-subtle);font-variant-numeric:tabular-nums}
+
+  .form-row{margin-top:16px}
+  .form-row label{display:block;font-size:10.5px;font-weight:600;color:var(--text-subtle);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+  .form-row textarea{width:100%;min-height:78px;background:#1a1d27;border:1px solid var(--border);border-radius:9px;padding:11px 13px;font:400 13px 'Inter',sans-serif;color:var(--text);outline:none;resize:vertical}
+  .form-row textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+  .form-row .hint{font-size:11.5px;color:var(--text-subtle);margin-top:5px}
+
+  /* Footer */
+  .mf{padding:14px 24px;border-top:1px solid var(--border);background:var(--soft);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .mf .left{font-size:11.5px;color:var(--text-subtle)}
+  .mf .actions{display:flex;gap:8px}
+  .btn{padding:9px 16px;border-radius:7px;font:600 13px 'Inter',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;white-space:nowrap}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.primary:disabled{background:var(--border-strong);cursor:not-allowed}
+  .btn.ghost{color:var(--text-muted);background:transparent}
+  .btn.ghost:hover{background:#1a1d27;color:var(--text)}
+  .btn.outline{background:#1a1d27;color:var(--primary);border-color:var(--primary)}
+  .btn.outline:hover{background:var(--primary-50)}
+</style>
+</head>
+<body>
+
+<!-- STEP 1 -->
+<div class="modal-wrap">
+  <div class="frame-label">Paso 1 · Seleccionar alumno</div>
+  <div class="mh">
+    <div class="mh-top">
+      <div>
+        <h2>Nueva cita</h2>
+        <div class="sub">¿Para qué alumno?</div>
+      </div>
+      <button class="close">×</button>
+    </div>
+    <div class="steps">
+      <div class="step active">
+        <div class="n">1</div>Alumno
+      </div>
+      <div class="arrow" style="color:#7b8f86;display:flex;align-items:center">›</div>
+      <div class="step">
+        <div class="n">2</div>Fecha y hora
+      </div>
+      <div class="arrow" style="color:#7b8f86;display:flex;align-items:center">›</div>
+      <div class="step">
+        <div class="n">3</div>Confirmar
+      </div>
+    </div>
+  </div>
+
+  <div class="mb">
+    <div class="search-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input placeholder="Nombre o número de control" value="cas">
+    </div>
+
+    <div class="list-label">
+      <span>Resultados</span>
+      <span>3 coincidencias</span>
+    </div>
+    <div class="student-list">
+      <div class="student sel">
+        <div class="av">NC</div>
+        <div class="who">
+          <b>Nestor <em>Cas</em>tillo</b>
+          <span>22690495 · Ing. Sistemas</span>
+        </div>
+        <div class="meta">Última cita: 14 abr</div>
+        <div class="ck">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+        </div>
+      </div>
+      <div class="student">
+        <div class="av">DC</div>
+        <div class="who">
+          <b>Daniela <em>Cas</em>tro Ríos</b>
+          <span>23104822 · Ing. Industrial</span>
+        </div>
+        <div class="meta">Última cita: 28 mar</div>
+        <div class="ck"></div>
+      </div>
+      <div class="student">
+        <div class="av">JC</div>
+        <div class="who">
+          <b>Javier <em>Cas</em>anova López</b>
+          <span>21778302 · Lic. Administración</span>
+        </div>
+        <div class="meta">Sin citas previas</div>
+        <div class="ck"></div>
+      </div>
+    </div>
+
+    <div class="list-label" style="margin-top:18px">
+      <span>Recientes</span>
+    </div>
+    <div class="student-list">
+      <div class="student">
+        <div class="av">AP</div>
+        <div class="who">
+          <b>Ana Pérez García</b>
+          <span>22501133 · Ing. Mecatrónica</span>
+        </div>
+        <div class="meta">Hace 2 días</div>
+        <div class="ck"></div>
+      </div>
+      <div class="student">
+        <div class="av">LM</div>
+        <div class="who">
+          <b>Luis Mora Hernández</b>
+          <span>22301844 · Ing. Civil</span>
+        </div>
+        <div class="meta">Hace 5 días</div>
+        <div class="ck"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mf">
+    <div class="left">Selecciona un alumno para continuar</div>
+    <div class="actions">
+      <button class="btn ghost">Cancelar</button>
+      <button class="btn primary">Continuar ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="modal-wrap">
+  <div class="frame-label">Paso 2 · Fecha y hora</div>
+  <div class="mh">
+    <div class="mh-top">
+      <div>
+        <h2>Nueva cita</h2>
+        <div class="sub">Selecciona fecha y horario disponible</div>
+      </div>
+      <button class="close">×</button>
+    </div>
+    <div class="steps">
+      <div class="step done"><div class="n">1</div>Alumno</div>
+      <div class="arrow" style="display:flex;align-items:center">›</div>
+      <div class="step active"><div class="n">2</div>Fecha y hora</div>
+      <div class="arrow" style="display:flex;align-items:center">›</div>
+      <div class="step"><div class="n">3</div>Confirmar</div>
+    </div>
+  </div>
+
+  <div class="mb">
+    <div class="selected-student">
+      <div class="av">NC</div>
+      <div class="who">
+        <b>Nestor Castillo</b>
+        <span>22690495 · Ing. Sistemas</span>
+      </div>
+      <button class="change">Cambiar</button>
+    </div>
+
+    <div class="cal-nav">
+      <button>‹</button>
+      <b>Mayo 2026</b>
+      <button>›</button>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-dow">L</div><div class="cal-dow">M</div><div class="cal-dow">X</div><div class="cal-dow">J</div><div class="cal-dow">V</div><div class="cal-dow">S</div><div class="cal-dow">D</div>
+
+      <div class="day past"><span class="num">28</span></div>
+      <div class="day past"><span class="num">29</span></div>
+      <div class="day past"><span class="num">30</span></div>
+      <div class="day"><span class="num">1</span><span class="sub">8 disp</span></div>
+      <div class="day"><span class="num">2</span></div>
+      <div class="day"><span class="num">3</span></div>
+      <div class="day low"><span class="num">4</span><span class="sub">3 disp</span></div>
+
+      <div class="day"><span class="num">5</span><span class="sub">7 disp</span></div>
+      <div class="day low"><span class="num">6</span><span class="sub">2 disp</span></div>
+      <div class="day"><span class="num">7</span><span class="sub">5 disp</span></div>
+      <div class="day full"><span class="num">8</span><span class="sub">Lleno</span></div>
+      <div class="day"><span class="num">9</span></div>
+      <div class="day"><span class="num">10</span></div>
+      <div class="day"><span class="num">11</span><span class="sub">6 disp</span></div>
+
+      <div class="day"><span class="num">12</span><span class="sub">8 disp</span></div>
+      <div class="day sel"><span class="num">13</span><span class="sub">5 disp</span></div>
+      <div class="day"><span class="num">14</span><span class="sub">4 disp</span></div>
+      <div class="day low"><span class="num">15</span><span class="sub">1 disp</span></div>
+      <div class="day"><span class="num">16</span></div>
+      <div class="day"><span class="num">17</span></div>
+      <div class="day"><span class="num">18</span><span class="sub">7 disp</span></div>
+    </div>
+
+    <div class="slot-section">
+      <div class="lbl">Horarios — Mié 13 mayo</div>
+      <div class="slots">
+        <div class="slot">08:00</div>
+        <div class="slot taken">08:15</div>
+        <div class="slot">08:30</div>
+        <div class="slot">08:45</div>
+        <div class="slot sel">09:00</div>
+        <div class="slot taken">09:15</div>
+        <div class="slot">09:30</div>
+        <div class="slot taken">09:45</div>
+        <div class="slot">10:00</div>
+        <div class="slot">10:15</div>
+        <div class="slot">10:30</div>
+        <div class="slot">10:45</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mf">
+    <div class="left">Mié 13 mayo · 09:00 – 09:15</div>
+    <div class="actions">
+      <button class="btn ghost">‹ Atrás</button>
+      <button class="btn primary">Continuar ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="modal-wrap">
+  <div class="frame-label">Paso 3 · Confirmar</div>
+  <div class="mh">
+    <div class="mh-top">
+      <div>
+        <h2>Nueva cita</h2>
+        <div class="sub">Revisa los datos antes de confirmar</div>
+      </div>
+      <button class="close">×</button>
+    </div>
+    <div class="steps">
+      <div class="step done"><div class="n">1</div>Alumno</div>
+      <div class="arrow" style="display:flex;align-items:center">›</div>
+      <div class="step done"><div class="n">2</div>Fecha y hora</div>
+      <div class="arrow" style="display:flex;align-items:center">›</div>
+      <div class="step active"><div class="n">3</div>Confirmar</div>
+    </div>
+  </div>
+
+  <div class="mb">
+    <div class="summary">
+      <div class="r student-r">
+        <span class="k">Alumno</span>
+        <div class="who" style="display:flex;align-items:center;gap:10px">
+          <div class="av" style="width:32px;height:32px;font-size:11.5px">NC</div>
+          <div>
+            <b>Nestor Castillo</b>
+            <span>22690495 · Ing. Sistemas</span>
+          </div>
+        </div>
+      </div>
+      <div class="r">
+        <span class="k">Fecha</span>
+        <span class="v">Miércoles, 13 de mayo 2026</span>
+      </div>
+      <div class="r">
+        <span class="k">Hora</span>
+        <span class="v">09:00 – 09:15 hrs</span>
+      </div>
+      <div class="r">
+        <span class="k">Consultorio</span>
+        <span class="v">Consultorio 2</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Motivo de la cita</label>
+      <textarea placeholder="Ej. Control de presión, seguimiento de tratamiento, revisión general..."></textarea>
+      <div class="hint">El alumno verá este motivo en su agenda.</div>
+    </div>
+
+    <div class="form-row">
+      <label>Notas internas (opcional)</label>
+      <textarea placeholder="Notas visibles solo para personal médico"></textarea>
+    </div>
+  </div>
+
+  <div class="mf">
+    <div class="left">Se enviará notificación al alumno</div>
+    <div class="actions">
+      <button class="btn ghost">‹ Atrás</button>
+      <button class="btn primary">Confirmar cita</button>
+    </div>
+  </div>
+</div>
+
+
+<style id="__dark-mode-overrides">
+:root{--bg:#0f1117 !important;--surface:#1a1d27 !important;--soft:#252836 !important;--text:#f9fafb !important;--text-muted:#9ca3af !important;--text-subtle:#6b7280 !important;--border:#2d3144 !important;--border-soft:#252836 !important;--border-strong:#3a4055 !important;--primary-50:#1e3a2a !important;--primary-100:#1e3a2a !important;--primary-300:#214d33 !important;--gray-bg:#252836 !important;--gray-text:#9ca3af !important;--danger-bg:#2a1518 !important;--danger-50:#2a1518 !important;--warn-50:#2d2410 !important;--info-50:#122738 !important;}
+html,body{background:#0f1117 !important;color:#f9fafb !important}
+.phone{background:#0f1117 !important;border-color:#000 !important;box-shadow:0 30px 80px rgba(0,0,0,.55) !important}
+.notch{background:#000 !important}
+.statusbar{color:#f9fafb !important}
+.card,.modal-wrap,.table-wrap,.tabs,.nav,.search-wrap,.header,.pag,.pagination,.summary,.summary .r,.empty,.field,.filters,.tab,.cal-nav button{background-color:#1a1d27 !important;color:#f9fafb !important}
+.sb,.side,.sidebar,aside{background:#0d2018 !important;color:#f9fafb !important}
+input,select,textarea{background:#252836 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+input::placeholder,textarea::placeholder{color:#6b7280 !important}
+table{background:#1a1d27 !important;color:#f9fafb !important}
+th{background:#0f1117 !important;color:#9ca3af !important;border-color:#2d3144 !important}
+td{border-color:#2d3144 !important;color:#f9fafb !important}
+tr:hover td{background:#252836 !important}
+hr,.sep{border-color:#2d3144 !important;background:#2d3144 !important}
+.btn.primary{background:#1a5c3a !important;color:#fff !important}
+.btn.secondary,.btn.outline,.btn.gray,.btn.ghost{background:#1a1d27 !important;color:#f9fafb !important;border-color:#2d3144 !important}
+.av,.avatar{background:#1a5c3a !important;color:#fff !important}
+.card,.modal-wrap,.table-wrap{box-shadow:0 1px 3px rgba(0,0,0,.3) !important}
+</style>
+</body>
+</html>

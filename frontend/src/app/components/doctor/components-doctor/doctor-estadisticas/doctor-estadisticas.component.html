@@ -52,7 +52,7 @@
   </div>
 
   <div *ngIf="!estadisticas && !isLoadingEstadisticas && !estadisticasError" class="empty-state">
-    <p>📊 Presiona "Actualizar" para cargar las estadísticas.</p>
-    <button class="btn-primary" (click)="loadEstadisticas()">Cargar estadísticas</button>
+    <p>No se encontraron estadísticas disponibles.</p>
+    <button class="btn-primary" (click)="loadEstadisticas()">Reintentar</button>
   </div>
 </div>

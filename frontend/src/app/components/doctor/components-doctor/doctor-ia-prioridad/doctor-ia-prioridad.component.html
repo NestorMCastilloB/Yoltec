@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <div *ngIf="!prioridadResumen && !isLoadingPrioridad && !prioridadError" class="empty-state">
+  <div *ngIf="!prioridadResumen && !isLoadingPrioridad && !hasError" class="empty-state">
     <p>Presiona "Actualizar" para clasificar las citas pendientes.</p>
     <button class="btn-primary" (click)="loadPrioridad()">Clasificar ahora</button>
   </div>
