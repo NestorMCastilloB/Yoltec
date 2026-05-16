@@ -349,6 +349,7 @@
         <div class="selected-date-info" *ngIf="createFormData.fecha_cita">
           <strong>Seleccionaste:</strong> {{ formatDateDisplay(createFormData.fecha_cita) }}
         </div>
+        <div class="warning-banner" *ngIf="selectedDayWarning">⚠ {{ selectedDayWarning }}</div>
         <div class="slots-wrapper" *ngIf="createFormData.fecha_cita"
              [class.disabled]="!hasAvailableSlotsForSelectedDate">
           <div class="slots-legend">

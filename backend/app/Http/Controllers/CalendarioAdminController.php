@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\DiaEspecial;
 use Carbon\Carbon;
 
@@ -41,13 +42,24 @@ class CalendarioAdminController extends Controller
             ['tipo' => $data['tipo'], 'etiqueta' => $data['etiqueta'] ?? null]
         );
 
+        $this->invalidarCacheDisponibilidad($data['fecha']);
+
         return response()->json(['message' => 'Día especial guardado.', 'dia' => $dia], 201);
     }
 
     public function destroy(Request $request, $id)
     {
         $dia = DiaEspecial::findOrFail($id);
+        $fecha = $dia->fecha->toDateString();
         $dia->delete();
+        $this->invalidarCacheDisponibilidad($fecha);
         return response()->json(['message' => 'Día eliminado del calendario.']);
+    }
+
+    // Invalida el cache de disponibilidad del mes/año al que pertenece la fecha
+    private function invalidarCacheDisponibilidad(string $fecha): void
+    {
+        $c = Carbon::parse($fecha);
+        Cache::forget("disp_{$c->year}_{$c->month}");
     }
 }

@@ -119,3 +119,14 @@ html, body {
   font-family: var(--yol-font);
   color: var(--yol-text);
 }
+
+/* Aviso de día con atención reducida (reutilizable) */
+.warning-banner {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--yol-warn-surface);
+  color: var(--yol-warn-text);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
