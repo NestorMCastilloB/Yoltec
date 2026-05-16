@@ -46,16 +46,28 @@ export class AdminLoginComponent implements OnDestroy {
       tipo_usuario: 'admin'
     };
 
-    this.http.post<{ token: string; user: { tipo: string } }>(`${API_BASE_URL}/login`, body)
+    this.http.post<{ token?: string; user?: { tipo: string }; requires_2fa?: boolean; user_id?: number; email_masked?: string }>(`${API_BASE_URL}/login`, body)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => { this.isLoading = false; })
       )
       .subscribe({
         next: (res) => {
-          localStorage.setItem('auth_token', res.token);
-          localStorage.setItem('user_data', JSON.stringify(res.user));
-          this.router.navigate(['/admin-dashboard']);
+          if (res.requires_2fa && res.user_id) {
+            sessionStorage.setItem('pending_2fa', JSON.stringify({
+              user_id: res.user_id,
+              email_masked: res.email_masked ?? '',
+            }));
+            this.router.navigate(['/verify-2fa']);
+            return;
+          }
+          if (res.token && res.user) {
+            localStorage.setItem('auth_token', res.token);
+            localStorage.setItem('user_data', JSON.stringify(res.user));
+            this.router.navigate(['/admin-dashboard']);
+          } else {
+            this.mostrarToast('Respuesta inesperada del servidor');
+          }
         },
         error: (err: HttpErrorResponse) => {
           const backendMsg = (err.error?.message as string | undefined)?.trim();
