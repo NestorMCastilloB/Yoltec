@@ -5,26 +5,28 @@
   </div>
   <nav>
     <a [class.active]="activeSection === 'inicio'" (click)="sectionChange.emit('inicio')">
-      <span class="ico">▦</span>Panel
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Panel
     </a>
     <a [class.active]="activeSection === 'citas'" (click)="sectionChange.emit('citas')">
-      <span class="ico">⊞</span>Citas
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Citas
     </a>
     <a [class.active]="activeSection === 'bitacoras'" (click)="sectionChange.emit('bitacoras')">
-      <span class="ico">⚲</span>Bitácoras
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Bitácoras
     </a>
     <a [class.active]="activeSection === 'recetas'" (click)="sectionChange.emit('recetas')">
-      <span class="ico">℞</span>Recetas
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="18" rx="2"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/><path d="M17 14l4 4M21 14l-4 4"/></svg>Recetas
     </a>
     <a [class.active]="activeSection === 'pre-evaluaciones'" (click)="sectionChange.emit('pre-evaluaciones')">
-      <span class="ico">◔</span>Pre-evaluaciones
-      <span *ngIf="totalPendientes > 0" class="badge">{{ totalPendientes }}</span>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Pre-evaluaciones
+      @if (totalPendientes > 0) {
+        <span class="badge">{{ totalPendientes }}</span>
+      }
     </a>
     <a [class.active]="activeSection === 'ia-prioridad'" (click)="sectionChange.emit('ia-prioridad')">
-      <span class="ico">⚡</span>Prioridad IA
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.5 6.5L21 11l-5.5 4 1.5 7-5-3.5L7 22l1.5-7L3 11l6.5-2.5z"/></svg>Prioridad IA
     </a>
     <a [class.active]="activeSection === 'estadisticas'" (click)="sectionChange.emit('estadisticas')">
-      <span class="ico">◔</span>Estadísticas
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="10" width="3" height="10"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="13" width="3" height="7"/></svg>Estadísticas
     </a>
   </nav>
   <div class="sidebar-user">
@@ -42,12 +44,35 @@
     <h1>{{ sectionTitle }}</h1>
   </div>
   <div class="topbar-actions">
-    <div class="topbar-search">
-      <span class="search-ico">⌕</span>
-      <input type="text" placeholder="Buscar paciente, cita o receta..." (input)="onSearch($event)"/>
+    @if (showExport) {
+      <button class="btn-action secondary" (click)="exportEvent.emit()">Exportar</button>
+    }
+    @if (primaryAction) {
+      <button class="btn-action primary" (click)="sectionChange.emit('citas')">{{ primaryAction }}</button>
+    }
+    <div class="user-menu-wrap">
+      <button class="user-trigger" (click)="toggleUserMenu()">
+        <div class="user-avatar-sm">{{ initials }}</div>
+        <span class="user-trigger-name">{{ doctorName }}</span>
+        <span class="chevron" [class.open]="userMenuOpen">▾</span>
+      </button>
+      @if (userMenuOpen) {
+        <div class="user-dropdown">
+          <div class="user-dropdown-header">
+            <b>{{ doctorName }}</b>
+            <span>Médico general</span>
+          </div>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" (click)="themeService.toggle()">
+            <span>{{ themeService.isDark ? 'Modo claro' : 'Modo oscuro' }}</span>
+            <span class="theme-dot" [class.dark]="themeService.isDark"></span>
+          </button>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item danger" (click)="logoutEvent.emit(); userMenuOpen = false">
+            Cerrar sesión
+          </button>
+        </div>
+      }
     </div>
-    <button *ngIf="showExport" class="btn-action secondary" (click)="exportEvent.emit()">Exportar</button>
-    <button *ngIf="primaryAction" class="btn-action primary" (click)="sectionChange.emit('citas')">{{ primaryAction }}</button>
-    <button class="btn-logout" (click)="logoutEvent.emit()">Cerrar sesión</button>
   </div>
 </div>
