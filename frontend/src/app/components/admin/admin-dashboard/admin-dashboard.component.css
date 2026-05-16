@@ -871,8 +871,10 @@
   gap: 3px;
 }
 
-.cal-day:hover:not(.other-month) { background: #e8f5ee; border-color: #1a5c3a; }
+.cal-day:hover:not(.other-month):not(.past) { background: #e8f5ee; border-color: #1a5c3a; }
 .cal-day.other-month { opacity: 0.3; cursor: default; }
+.cal-day.past { background: #f3f4f6; cursor: not-allowed; pointer-events: none; }
+.cal-day.past .day-num { color: #9ca3af; text-decoration: line-through; }
 .cal-day.selected { border-color: #1a5c3a !important; background: #e8f5ee !important; }
 
 .cal-day.fes { background: #fee2e2; border-color: #fca5a5; }
