@@ -202,6 +202,13 @@
 .cal-cell.muted { background: #fafbfb; }
 .cal-cell.muted .day-num { color: #9ca3af; }
 
+.cal-cell.past {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.cal-cell.past .day-num { color: #9ca3af; text-decoration: line-through; }
+
 .cal-cell.special {
   background: #fee2e2;
   border-color: #fecaca;
@@ -256,6 +263,11 @@
   background: #fee2e2;
   border: 1px solid #fecaca;
   flex-shrink: 0;
+}
+
+.swatch.swatch-past {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
 }
 
 /* Tabla */
@@ -375,7 +387,8 @@ tr:last-child td { border-bottom: 0; }
   color: #374151;
 }
 
-.field input {
+.field input,
+.field select {
   height: 40px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -388,9 +401,17 @@ tr:last-child td { border-bottom: 0; }
   box-sizing: border-box;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: #1a5c3a;
   box-shadow: 0 0 0 3px rgba(26, 92, 58, 0.12);
+}
+
+.field-hint {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 11px;
+  margin-left: 4px;
 }
 
 .form-error {
