@@ -91,7 +91,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   calWeeks: { date: string; label: number; isCurrentMonth: boolean; isPast: boolean; diaEspecial: DiaEspecial | null }[][] = [];
   diasEspeciales: DiaEspecial[] = [];
   isLoadingCal = false;
-  diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' };
+  diaForm = { fecha: '', tipo: 'holiday', etiqueta: '', hora_cierre: '' };
   diaMsg: string | null = null;
   isSubmittingDia = false;
 
@@ -510,17 +510,28 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     if (isPast && !hasDia) return;
     this.diaForm.fecha = fecha;
     const existing = this.diasEspeciales.find(d => d.fecha === fecha);
-    if (existing) { this.diaForm.tipo = existing.tipo; this.diaForm.etiqueta = existing.etiqueta ?? ''; }
-    else { this.diaForm.tipo = 'holiday'; this.diaForm.etiqueta = ''; }
+    if (existing) {
+      this.diaForm.tipo = existing.tipo;
+      this.diaForm.etiqueta = existing.etiqueta ?? '';
+      this.diaForm.hora_cierre = existing.hora_cierre ?? '';
+    } else {
+      this.diaForm.tipo = 'holiday';
+      this.diaForm.etiqueta = '';
+      this.diaForm.hora_cierre = '';
+    }
   }
 
-  resetDiaForm(): void { this.diaForm = { fecha: '', tipo: 'holiday', etiqueta: '' }; this.diaMsg = null; }
+  resetDiaForm(): void { this.diaForm = { fecha: '', tipo: 'holiday', etiqueta: '', hora_cierre: '' }; this.diaMsg = null; }
 
   submitDia(): void {
     if (!this.diaForm.fecha) { this.diaMsg = 'Selecciona una fecha.'; return; }
+    if (this.diaForm.tipo === 'reduced' && !this.diaForm.hora_cierre) {
+      this.diaMsg = 'Especifica la hora de cierre para un día de horario reducido.';
+      return;
+    }
     this.isSubmittingDia = true;
     this.diaMsg = null;
-    this.calendarioService.saveDia(this.diaForm.fecha, this.diaForm.tipo, this.diaForm.etiqueta)
+    this.calendarioService.saveDia(this.diaForm.fecha, this.diaForm.tipo, this.diaForm.etiqueta, this.diaForm.hora_cierre || null)
       .pipe(
         takeUntil(this.destroy$),
         catchError(err => {
