@@ -35,12 +35,18 @@
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filtros-row">
-      <button class="filtro-chip" [class.activo]="filtroActivo === 'todas'" (click)="setFiltro('todas')">Todas</button>
-      <button class="filtro-chip filtro-alta" [class.activo]="filtroActivo === 'alta'" (click)="setFiltro('alta')">Alta</button>
-      <button class="filtro-chip filtro-media" [class.activo]="filtroActivo === 'media'" (click)="setFiltro('media')">Media</button>
-      <button class="filtro-chip filtro-baja" [class.activo]="filtroActivo === 'baja'" (click)="setFiltro('baja')">Baja</button>
+    <!-- Buscador + Filtros -->
+    <div class="busqueda-row">
+      <div class="ia-search">
+        <span class="search-ic">⌕</span>
+        <input placeholder="Buscar alumno o No. control…" [(ngModel)]="busqueda" />
+      </div>
+      <div class="filtros-row">
+        <button class="filtro-chip" [class.activo]="filtroActivo === 'todas'" (click)="setFiltro('todas')">Todas</button>
+        <button class="filtro-chip filtro-alta" [class.activo]="filtroActivo === 'alta'" (click)="setFiltro('alta')">Alta</button>
+        <button class="filtro-chip filtro-media" [class.activo]="filtroActivo === 'media'" (click)="setFiltro('media')">Media</button>
+        <button class="filtro-chip filtro-baja" [class.activo]="filtroActivo === 'baja'" (click)="setFiltro('baja')">Baja</button>
+      </div>
     </div>
 
     <div *ngIf="citasFiltradas.length === 0" class="empty-state">

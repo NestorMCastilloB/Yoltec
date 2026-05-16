@@ -38,12 +38,12 @@
 
 /* ── Disclaimer IA ──────────────────────────────── */
 .ia-disclaimer {
-  background: #eff6ff;
+  background: var(--yol-ia-soft);
   border-left: 4px solid #2563eb;
   padding: var(--yol-s-3) var(--yol-s-4);
   border-radius: var(--yol-r-md);
   font-size: var(--yol-fs-sm);
-  color: #1e40af;
+  color: var(--yol-ia-text);
   font-weight: 500;
 }
 
@@ -69,7 +69,7 @@
 .prioridad-badge.alta  { background: var(--yol-cancel-surface); border-color: #fecaca; }
 .prioridad-badge.media { background: var(--yol-warn-surface);   border-color: #fde68a; }
 .prioridad-badge.baja  { background: var(--yol-ok-surface);     border-color: #bbf7d0; }
-.prioridad-badge.total { background: #eff6ff;                   border-color: #bfdbfe; }
+.prioridad-badge.total { background: var(--yol-ia-soft);                   border-color: #bfdbfe; }
 
 .badge-num {
   display: block;
@@ -97,7 +97,36 @@
 .prioridad-badge.baja  .badge-label { color: var(--yol-primary); }
 .prioridad-badge.total .badge-label { color: #2563eb; }
 
-/* ── Filtros ────────────────────────────────────── */
+/* ── Buscador + Filtros ─────────────────────────── */
+.busqueda-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yol-s-3);
+}
+
+.ia-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--yol-surface);
+  border: 1px solid var(--yol-border);
+  border-radius: var(--yol-r-md);
+  padding: 9px 14px;
+}
+
+.ia-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--yol-text);
+  font-family: var(--yol-font);
+}
+
+.ia-search input::placeholder { color: var(--yol-text-subtle); }
+.search-ic { color: var(--yol-text-subtle); font-size: 15px; }
+
 .filtros-row {
   display: flex;
   gap: var(--yol-s-2);
@@ -215,7 +244,7 @@
 
 .prioridad-score {
   font-size: var(--yol-fs-label);
-  background: #eff6ff;
+  background: var(--yol-ia-soft);
   color: #2563eb;
   padding: 3px 10px;
   border-radius: var(--yol-r-pill);
@@ -243,13 +272,13 @@
 .cita-prioridad-body strong { color: var(--yol-text); font-weight: 600; }
 
 .justificacion {
-  background: #eff6ff;
+  background: var(--yol-ia-soft);
   padding: var(--yol-s-3) var(--yol-s-3);
   border-radius: var(--yol-r-md);
   font-style: italic;
   margin-top: var(--yol-s-3) !important;
   border-left: 3px solid #2563eb;
-  color: #1e40af;
+  color: var(--yol-ia-text);
   font-size: var(--yol-fs-sm);
 }
 
@@ -267,11 +296,11 @@
 }
 
 .detalle-justificacion {
-  background: #eff6ff;
+  background: var(--yol-ia-soft);
   padding: var(--yol-s-3);
   border-radius: var(--yol-r-md);
   font-size: var(--yol-fs-sm);
-  color: #1e40af;
+  color: var(--yol-ia-text);
   border-left: 3px solid #2563eb;
   margin-bottom: var(--yol-s-2);
 }
@@ -285,20 +314,6 @@
 
 .detalle-factores ul { margin: var(--yol-s-1) 0 0; padding-left: 18px; }
 .detalle-factores li { margin-bottom: var(--yol-s-1); line-height: 1.5; }
-
-/* ── Dark mode ──────────────────────────────────── */
-:host-context(.dark) .cita-prioridad-card { background: #1a2e25; border-color: #2a4030; }
-:host-context(.dark) .prioridad-badge.alta  { background: #2d1a1a; border-color: #7f1d1d; }
-:host-context(.dark) .prioridad-badge.media { background: #2d2310; border-color: #92400e; }
-:host-context(.dark) .prioridad-badge.baja  { background: #0f2d1a; border-color: #166534; }
-:host-context(.dark) .prioridad-badge.total { background: #1a1d2e; border-color: #1e3a8a; }
-:host-context(.dark) .ia-disclaimer         { background: #1a1d2e; color: #93c5fd; border-color: #2563eb; }
-:host-context(.dark) .justificacion,
-:host-context(.dark) .detalle-justificacion { background: #1a1d2e; color: #93c5fd; }
-:host-context(.dark) .prioridad-score       { background: #1a1d2e; color: #93c5fd; border-color: #1e3a8a; }
-:host-context(.dark) .loading,
-:host-context(.dark) .empty-state           { background: #1a2e25; border-color: #2a4030; }
-:host-context(.dark) .cita-detalles         { border-top-color: #2a4030; }
 
 /* ── Responsive ─────────────────────────────────── */
 @media (max-width: 768px) {

@@ -136,21 +136,3 @@ nav {
   font-family: var(--yol-font);
 }
 
-.btn-logout {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 7px;
-  padding: 7px 0;
-  font-size: 12.5px;
-  font-weight: 500;
-  font-family: var(--yol-font);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn-logout:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}

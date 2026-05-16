@@ -13,6 +13,7 @@ export interface ClasificacionPrioridad {
     alumno: {
       id: number;
       nombre: string;
+      apellido?: string;
       numero_control: string;
     };
   };

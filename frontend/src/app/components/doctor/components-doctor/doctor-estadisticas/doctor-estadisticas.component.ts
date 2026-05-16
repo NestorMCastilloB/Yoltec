@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { Chart, registerables } from 'chart.js';
-import { EstadisticasService, Estadisticas } from '../../../../services/estadisticas.service';
+import { EstadisticasService, Estadisticas, MesStats } from '../../../../services/estadisticas.service';
 
 Chart.register(...registerables);
 
@@ -22,6 +22,11 @@ export class DoctorEstadisticasComponent implements OnInit, OnDestroy {
   estadisticas: Estadisticas | null = null;
   isLoadingEstadisticas = false;
   estadisticasError: string | null = null;
+
+  deltaAtendidas: string | null = null;
+  deltaAtenidasPositivo = true;
+  deltaCancelaciones: string | null = null;
+  deltaCancelacionesPositivo = true;
 
   private barChart: Chart | null = null;
   private doughnutChart: Chart | null = null;
@@ -57,6 +62,7 @@ export class DoctorEstadisticasComponent implements OnInit, OnDestroy {
       )
       .subscribe(data => {
         this.estadisticas = data;
+        if (data) this.computeDeltas(data.citas_por_mes);
         if (data && !this.chartsRendered) {
           setTimeout(() => {
             if (this.barCanvas && this.doughnutCanvas) {
@@ -66,6 +72,22 @@ export class DoctorEstadisticasComponent implements OnInit, OnDestroy {
           }, 0);
         }
       });
+  }
+
+  private computeDeltas(meses: MesStats[]): void {
+    if (!meses || meses.length < 2) return;
+    const curr = meses[meses.length - 1];
+    const prev = meses[meses.length - 2];
+    if (prev.atendidas > 0) {
+      const pct = Math.round((curr.atendidas - prev.atendidas) / prev.atendidas * 100);
+      this.deltaAtendidas = pct >= 0 ? `▲ +${pct}% vs mes pasado` : `▼ ${pct}% vs mes pasado`;
+      this.deltaAtenidasPositivo = pct >= 0;
+    }
+    const diffCancel = curr.canceladas - prev.canceladas;
+    if (diffCancel !== 0) {
+      this.deltaCancelaciones = diffCancel > 0 ? `▲ +${diffCancel} vs mes pasado` : `▼ ${Math.abs(diffCancel)} vs mes pasado`;
+      this.deltaCancelacionesPositivo = diffCancel <= 0;
+    }
   }
 
   private renderCharts(): void {
