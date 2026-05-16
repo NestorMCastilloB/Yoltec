@@ -8,9 +8,8 @@
 
 ## Tarea actual
 
-**Qué:** Bloque 3 — Backend hardening (auditoría CheckRole, rate limit 2FA, eliminar CorsMiddleware custom)
-**Archivo:** `backend/routes/api.php`, `backend/app/Http/Middleware/`
-**Esperado:** Todas las rutas sensibles protegidas + sin middleware obsoletos
+**Qué:** Bloque 4 — Smoke test end-to-end en producción (Vercel + Render)
+**Esperado:** Validar flujos completos admin/alumno/doctor + IA sin errores
 
 ---
 
@@ -40,11 +39,12 @@ Objetivo: web (admin + doctor + alumno + IA) funcional en producción sin bugs b
 
 ---
 
-## Bloque 3 — Backend hardening pendiente
+## Bloque 3 — Backend hardening ✅ COMPLETADO
 
-- [ ] **Middleware `CheckRole`** auditar `routes/api.php` — verificar que TODAS las rutas sensibles tienen `role:doctor` o `role:admin`
-- [ ] **Eliminar `CorsMiddleware.php`** custom si existe (ngrok hardcodeado) — CORS ya está en `config/cors.php`
-- [ ] **Rate limiting** en `/verify-2fa` y `/resend-2fa` — confirmar que `throttle:5,1` está aplicado
+- [x] **Auditoría CheckRole en `routes/api.php`** — todas las rutas sensibles tienen `role:doctor` o `role:admin`. Las rutas mixtas `/perfil-medico/alumno/{id}` mantienen validación interna en controller (alumno usa su id, doctor pasa id explícito) — protección existente.
+- [x] **`CorsMiddleware` custom** ya no existe (eliminado en sesiones anteriores). CORS solo en `config/cors.php` con orígenes explícitos (sin wildcards, sin ngrok).
+- [x] **Rate limiting** `throttle:5,1` confirmado en `/verify-2fa`, `/resend-2fa`, `/login`.
+- [x] **Eliminado `EnsureIsAdmin.php`** — duplicaba a `CheckRole` con param admin. Ahora `/admin/*` usa `role:admin` (un solo middleware para todos los roles).
 
 ---
 

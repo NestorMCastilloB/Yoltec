@@ -104,7 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:doctor')->get('/estadisticas', [EstadisticasController::class, 'index']);
 
     // Admin - CRUD alumnos y doctores
-    Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/stats',             [AdminController::class, 'getStats']);
         Route::get('/calendario',        [CalendarioAdminController::class, 'index']);
         Route::post('/calendario',       [CalendarioAdminController::class, 'store']);
