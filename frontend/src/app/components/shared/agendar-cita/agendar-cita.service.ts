@@ -17,8 +17,11 @@ export interface Slot {
 
 export interface Cita {
   id: number;
+  fecha: string;          // alias de fecha_cita para compatibilidad
   fecha_cita: string;
   hora_cita: string;
+  hora_inicio: string;    // alias de hora_cita para compatibilidad
+  hora_fin: string;       // hora_cita + 15min
   motivo: string;
   alumno_id: number;
 }
@@ -100,13 +103,20 @@ export class AgendarCitaService {
       motivo: body.motivo,
     };
     if (body.alumno_id) payload['alumno_id'] = body.alumno_id;
-    return this.http.post<{ cita: any }>(`${API}/citas`, payload).pipe(map(r => ({
-      id: r.cita.id,
-      fecha_cita: r.cita.fecha_cita,
-      hora_cita: r.cita.hora_cita,
-      motivo: r.cita.motivo,
-      alumno_id: r.cita.alumno_id,
-    })));
+    return this.http.post<{ cita: any }>(`${API}/citas`, payload).pipe(map(r => {
+      const fechaCita = (r.cita.fecha_cita || '').split('T')[0];
+      const horaCita = (r.cita.hora_cita || '').substring(0, 5);
+      return {
+        id: r.cita.id,
+        fecha: fechaCita,
+        fecha_cita: fechaCita,
+        hora_cita: horaCita,
+        hora_inicio: horaCita,
+        hora_fin: this.addMinutes(horaCita, STEP_MINUTOS),
+        motivo: r.cita.motivo,
+        alumno_id: r.cita.alumno_id,
+      };
+    }));
   }
 
   private buildDispRecord(year: number, month: number, days: BackendDay[]): Record<string, Disponibilidad> {
