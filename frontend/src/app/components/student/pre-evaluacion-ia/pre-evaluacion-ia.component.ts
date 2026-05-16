@@ -178,9 +178,4 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   private horaActual(): string {
     return new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
   }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }
