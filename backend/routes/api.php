@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']);
         Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);
         Route::get('/citas/{id}/consulta', [ConsultaController::class, 'show']);
+        Route::get('/alumnos/buscar', [CitaController::class, 'buscarAlumno']);
     });
 
     // Perfil médico e historial

@@ -44,6 +44,7 @@ export interface AvailabilitySpecial {
   label?: string | null;
   status?: AvailabilityStatus;
   color?: string;
+  hora_cierre?: string | null;
 }
 
 export interface CitaAvailabilityDay {

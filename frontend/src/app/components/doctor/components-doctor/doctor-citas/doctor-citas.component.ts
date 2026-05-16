@@ -14,6 +14,7 @@ interface DayAvailabilityRecord {
   status: AvailabilityStatus;
   color?: string;
   label?: string | null;
+  horaCierre?: string | null;
 }
 
 interface CalendarDay {
@@ -213,7 +214,8 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     if (!fecha) return null;
     const rec = this.getDayRecord(fecha);
     if (!rec || rec.status !== 'partial') return null;
-    return rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+    const baseMsg = rec.label ? `Atención reducida hoy: ${rec.label}` : 'Este día tiene atención reducida.';
+    return rec.horaCierre ? `${baseMsg} (cierre a las ${rec.horaCierre})` : baseMsg;
   }
 
   get hasAvailableSlotsForSelectedDate(): boolean {
@@ -635,7 +637,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
       } else {
         status = 'partial';
       }
-      map.set(day.date, { takenSlots, status, color: day.special?.color ?? undefined, label: day.special?.label ?? null });
+      map.set(day.date, { takenSlots, status, color: day.special?.color ?? undefined, label: day.special?.label ?? null, horaCierre: day.special?.hora_cierre ?? null });
     });
     this.availabilityMap = map;
   }
@@ -715,6 +717,7 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     }
     const record = this.getDayRecord(this.createFormData.fecha_cita);
     if (record?.status === 'full') return true;
+    if (record?.horaCierre && normalizedSlot >= record.horaCierre) return true;
     if (record?.takenSlots.has(normalizedSlot)) return true;
     return this.citas.some(c =>
       c.fecha_cita === this.createFormData.fecha_cita &&
