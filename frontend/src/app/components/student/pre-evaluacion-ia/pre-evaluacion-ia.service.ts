@@ -24,6 +24,17 @@ export interface RespuestaChat {
   finalizado?: boolean;
 }
 
+export interface PreEvaluacionExistente {
+  id: number;
+  cita_id: number;
+  diagnostico_sugerido: string;
+  confianza: number;
+  sintomas_detectados: string[];
+  estatus_validacion: 'pendiente' | 'validado' | 'descartado';
+  comentario_doctor?: string | null;
+  created_at?: string;
+}
+
 // Shape crudo del backend (POST /api/pre-evaluacion/chat)
 interface BackendChatResponse {
   message: string;
@@ -43,6 +54,13 @@ export class PreEvaluacionChatService {
   private apiUrl = `${API_BASE_URL}/pre-evaluacion`;
 
   constructor(private http: HttpClient) {}
+
+  // GET /api/pre-evaluacion — historial del alumno autenticado
+  listarPreEvaluaciones(): Observable<PreEvaluacionExistente[]> {
+    return this.http
+      .get<{ pre_evaluaciones: PreEvaluacionExistente[] }>(this.apiUrl)
+      .pipe(map(r => r.pre_evaluaciones || []));
+  }
 
   // POST /api/pre-evaluacion/chat — requiere cita_id y messages[{role,content}]
   enviarMensaje(citaId: number, mensaje: string, historial: MensajeChat[]): Observable<RespuestaChat> {
