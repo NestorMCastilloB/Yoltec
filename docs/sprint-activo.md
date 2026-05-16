@@ -8,10 +8,9 @@
 
 ## Tarea actual
 
-**Qué:** Diagnosticar por qué la IA no funciona en el alumno web
-**Archivo:** `frontend/src/app/components/student/pre-evaluacion-ia/`, `backend/app/Http/Controllers/PreEvaluacionIAController.php`, `IA/main.py`
-**Problema:** El alumno no puede usar el chat de pre-evaluación IA — desconocemos si es timeout, CORS, env var, o token Groq
-**Esperado:** Identificar la causa raíz con DevTools + logs Render → fix mínimo
+**Qué:** Bloque 3 — Backend hardening (auditoría CheckRole, rate limit 2FA, eliminar CorsMiddleware custom)
+**Archivo:** `backend/routes/api.php`, `backend/app/Http/Middleware/`
+**Esperado:** Todas las rutas sensibles protegidas + sin middleware obsoletos
 
 ---
 
@@ -21,25 +20,23 @@ Objetivo: web (admin + doctor + alumno + IA) funcional en producción sin bugs b
 
 ---
 
-## Bloque 1 — IA Web operativa (PRIORIDAD MÁXIMA)
+## Bloque 1 — IA Web operativa ✅ COMPLETADO
 
-- [ ] **Diagnosticar IA alumno**: abrir DevTools en alumno → click "Pre-evaluación IA" → ver Network. Posibles causas:
-  - Backend timeout (IA en cold start Render ~50s, backend timeout 20s)
-  - `IA_SERVICE_URL` mal configurado en Render panel (sigue apuntando a localhost)
-  - Groq API key vencido/inválido
-  - CORS en IA bloqueando origin de Vercel
-- [ ] **Fix encontrado**: aplicar el cambio mínimo según el diagnóstico
-- [ ] **Loading state UX**: mientras IA está cold-starting, mostrar "Conectando con el asistente (puede tardar 30s la primera vez)"
-- [ ] **Sincronizar** `IA/enfermedades_config.json` con `IA/feature_names.json` (si están desfasados)
+- [x] **Diagnosticar IA alumno** — causa: endpoint mal (`/api/ia/chat` vs `/api/pre-evaluacion/chat`) + faltaba `cita_id`
+- [x] **Fix endpoint + cita_id** — PR #29
+- [x] **UX sin cita** — bloqueo con CTA "Agendar cita" + selector cuando hay varias citas + lectura modo pre-eval existente
+- [x] **Eliminar `enfermedades_config.json`** — era código muerto, no lo usaba `app.py` ni `train_model_light.py`
+- [ ] **Loading state UX cold start** — mostrar "Conectando con el asistente (puede tardar 30s la primera vez)" — PENDIENTE menor (timeout 60s ya cubre, pero UX confusa)
 
 ---
 
-## Bloque 2 — IA hardening (después del bloque 1)
+## Bloque 2 — IA hardening ✅ COMPLETADO
 
-- [ ] **Rate limiting** con `slowapi`: 5 req/min por IP en `/chat`
-- [ ] **Validación input** `max_length=5000` en `ChatMessage.content`
-- [ ] **CORS middleware** FastAPI con orígenes explícitos (Vercel + localhost)
-- [ ] **Health endpoint** `/health` que retorne `{status:'ok', model:'loaded'}` — usado por keep-alive de Render
+- [x] **Rate limiting** con `slowapi`: 10/min por IP en `/chat` y `/predict` (>5/min del plan original, aceptable)
+- [x] **Validación input** `max_length=5000` en `ChatMessage.content`, `max_length=50` en `messages[]` y `respuestas{}`
+- [x] **CORS middleware** FastAPI con orígenes explícitos (Vercel + localhost)
+- [x] **Health endpoint** `/health` retorna `{status, model_sklearn_loaded, llm_provider, llm_model, llm_available}` — 503 si modelo no cargado
+- [x] **Migrar `@app.on_event` a `lifespan`** (FastAPI moderno)
 
 ---
 
