@@ -1,7 +1,6 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Subject, of, forkJoin } from 'rxjs';
 import { takeUntil, finalize, catchError } from 'rxjs/operators';
 import {
@@ -55,6 +54,8 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   preEvalPorCita = new Map<number, PreEvaluacionExistente>();
   preEvaluacionActual: PreEvaluacionExistente | null = null;
 
+  @Output() solicitaAgendar = new EventEmitter<void>();
+
   // Resultado IA del chat actual
   diagnosticos: DiagnosticoIA[] = [];
   sintomasDetectados: string[] = [];
@@ -66,7 +67,6 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   constructor(
     private chatService: PreEvaluacionChatService,
     private citaService: CitaService,
-    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -198,7 +198,7 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   }
 
   agendarCita(): void {
-    this.router.navigate(['/student-dashboard']);
+    this.solicitaAgendar.emit();
   }
 
   autoResize(): void {
