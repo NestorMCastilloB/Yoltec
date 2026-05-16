@@ -198,8 +198,8 @@
       </div>
       <div class="modal-foot">
         <button class="btn btn-ghost" (click)="cerrarValidar()">Cancelar</button>
-        <button class="btn btn-primary" (click)="confirmarValidar()" [disabled]="enviando">
-          {{ enviando ? 'Validando...' : '✓ Confirmar validación' }}
+        <button class="btn btn-primary btn-modal" (click)="confirmarValidar()" [disabled]="enviando">
+          {{ enviando ? 'Validando...' : 'Confirmar validación' }}
         </button>
       </div>
     </div>
@@ -226,8 +226,8 @@
       </div>
       <div class="modal-foot">
         <button class="btn btn-ghost" (click)="cerrarDescartar()">Cancelar</button>
-        <button class="btn btn-danger-outline" (click)="confirmarDescartar()" [disabled]="enviando">
-          {{ enviando ? 'Descartando...' : '✕ Descartar diagnóstico' }}
+        <button class="btn btn-danger-outline btn-modal" (click)="confirmarDescartar()" [disabled]="enviando">
+          {{ enviando ? 'Descartando...' : 'Descartar diagnóstico' }}
         </button>
       </div>
     </div>
