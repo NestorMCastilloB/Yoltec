@@ -60,8 +60,8 @@
           <div class="pc-section">
             <h3>Síntomas detectados</h3>
             <div class="chips">
-              <span *ngFor="let s of pe.sintomas_detectados" class="chip">{{ s }}</span>
-              <span *ngIf="pe.sintomas_detectados.length === 0" class="chip-empty">Sin síntomas registrados</span>
+              <span *ngFor="let s of (pe.sintomas_detectados || [])" class="chip">{{ s }}</span>
+              <span *ngIf="!(pe.sintomas_detectados || []).length" class="chip-empty">Sin síntomas registrados</span>
             </div>
           </div>
           <div class="pc-section">
@@ -69,11 +69,11 @@
             <div class="dx-list">
               <div class="dx">
                 <div class="dx-row">
-                  <span class="dx-nombre">{{ pe.diagnostico_sugerido }}</span>
-                  <span class="dx-pct">{{ (pe.confianza * 100).toFixed(0) }}%</span>
+                  <span class="dx-nombre">{{ pe.diagnostico_sugerido || 'Sin diagnóstico registrado' }}</span>
+                  <span class="dx-pct">{{ ((pe.confianza || 0) * 100).toFixed(0) }}%</span>
                 </div>
                 <div class="bar">
-                  <div class="fill" [style.width.%]="pe.confianza * 100"></div>
+                  <div class="fill" [style.width.%]="(pe.confianza || 0) * 100"></div>
                 </div>
               </div>
             </div>
@@ -149,8 +149,8 @@
           <div class="pc-section">
             <h3>Síntomas detectados</h3>
             <div class="chips">
-              <span *ngFor="let s of pe.sintomas_detectados" class="chip">{{ s }}</span>
-              <span *ngIf="pe.sintomas_detectados.length === 0" class="chip-empty">Sin síntomas registrados</span>
+              <span *ngFor="let s of (pe.sintomas_detectados || [])" class="chip">{{ s }}</span>
+              <span *ngIf="!(pe.sintomas_detectados || []).length" class="chip-empty">Sin síntomas registrados</span>
             </div>
           </div>
           <div class="pc-section">
@@ -158,11 +158,11 @@
             <div class="dx-list">
               <div class="dx">
                 <div class="dx-row">
-                  <span class="dx-nombre">{{ pe.diagnostico_sugerido }}</span>
-                  <span class="dx-pct">{{ (pe.confianza * 100).toFixed(0) }}%</span>
+                  <span class="dx-nombre">{{ pe.diagnostico_sugerido || 'Sin diagnóstico registrado' }}</span>
+                  <span class="dx-pct">{{ ((pe.confianza || 0) * 100).toFixed(0) }}%</span>
                 </div>
                 <div class="bar">
-                  <div class="fill" [style.width.%]="pe.confianza * 100"></div>
+                  <div class="fill" [style.width.%]="(pe.confianza || 0) * 100"></div>
                 </div>
               </div>
             </div>
@@ -187,8 +187,8 @@
       </div>
       <div class="modal-body">
         <p class="modal-sub">
-          ¿El diagnóstico <b>{{ modalValidar.diagnostico_sugerido }}</b> coincidió con el resultado real de la consulta
-          de <b>{{ nombreCompleto(modalValidar) }}</b>?
+          ¿El diagnóstico <b>{{ modalValidar.diagnostico_sugerido || 'sugerido' }}</b> coincidió con el resultado real de la consulta
+          <ng-container *ngIf="tieneAlumno(modalValidar)">de <b>{{ nombreCompleto(modalValidar) }}</b></ng-container>?
         </p>
         <div class="form-group">
           <label>Comentario (opcional)</label>
@@ -214,8 +214,7 @@
       </div>
       <div class="modal-body">
         <p class="modal-sub">
-          Indica por qué el diagnóstico sugerido <b>no coincidió</b> con la consulta de
-          <b>{{ nombreCompleto(modalDescartar) }}</b>.
+          Indica por qué el diagnóstico sugerido <b>no coincidió</b> con la consulta<ng-container *ngIf="tieneAlumno(modalDescartar)"> de <b>{{ nombreCompleto(modalDescartar) }}</b></ng-container>.
         </p>
         <div class="form-group" [class.has-error]="motivoError">
           <label>Motivo <span class="req">*</span></label>

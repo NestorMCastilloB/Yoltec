@@ -210,6 +210,10 @@ export class DoctorPreEvaluacionesComponent implements OnInit, OnDestroy {
     return `${n} ${a}`.trim() || 'Sin nombre';
   }
 
+  tieneAlumno(pe: PreEvaluacion): boolean {
+    return !!(pe.cita?.alumno?.nombre || pe.cita?.alumno?.apellido);
+  }
+
   formatFecha(iso: string): string {
     if (!iso) return '—';
     const [y, m, d] = iso.split('-').map(Number);
