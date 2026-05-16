@@ -637,3 +637,12 @@
   font: 500 12.5px var(--yol-font);
   color: var(--yol-text-2, #5a6772);
 }
+
+.pe-slow-hint {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--yol-border);
+  font: 400 12.5px var(--yol-font);
+  color: var(--yol-text-2, #5a6772);
+  font-style: italic;
+}
