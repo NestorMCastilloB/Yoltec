@@ -6,12 +6,13 @@ import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
-import { DiasEspecialesService, DiaEspecialItem } from './dias-especiales.service';
+import { DiasEspecialesService, DiaEspecialItem, TipoDiaEspecial } from './dias-especiales.service';
 
 interface CalDay {
   date: string;
   label: number;
   isCurrentMonth: boolean;
+  isPast: boolean;
   dia: DiaEspecialItem | null;
 }
 
@@ -37,13 +38,20 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   // Modal agregar
   showModalAgregar = false;
-  form = { fecha: '', motivo: '' };
+  form: { fecha: string; tipo: TipoDiaEspecial; etiqueta: string } = { fecha: '', tipo: 'holiday', etiqueta: '' };
   formError: string | null = null;
   isSubmitting = false;
 
+  // Catálogo de tipos para el select
+  readonly tiposDia: { value: TipoDiaEspecial; label: string }[] = [
+    { value: 'holiday',  label: 'Festivo (sin atención)' },
+    { value: 'vacation', label: 'Vacaciones (sin atención)' },
+    { value: 'reduced',  label: 'Horario reducido' },
+  ];
+
   // Modal eliminar
   confirmDeleteId: number | null = null;
-  confirmDeleteMotivo = '';
+  confirmDeleteEtiqueta = '';
 
   constructor(
     private router: Router,
@@ -64,12 +72,15 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   loadDias(): void {
     this.isLoading = true;
-    this.service.getDias().pipe(
+    const month = this.calCurrentMonth.getMonth() + 1;
+    const year = this.calCurrentMonth.getFullYear();
+    this.service.getDias(month, year).pipe(
       takeUntil(this.destroy$),
       catchError(() => of([])),
       finalize(() => { this.isLoading = false; })
     ).subscribe(data => {
-      this.dias = data;
+      // Backend cast 'date' serializa como ISO — normalizar a YYYY-MM-DD
+      this.dias = data.map(d => ({ ...d, fecha: (d.fecha || '').split('T')[0] }));
       this.buildCalGrid();
     });
   }
@@ -85,7 +96,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
       this.calCurrentMonth.getFullYear(),
       this.calCurrentMonth.getMonth() + dir, 1
     );
-    this.buildCalGrid();
+    this.loadDias();
   }
 
   private buildCalGrid(): void {
@@ -95,6 +106,9 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
     const daysBack = dow === 0 ? 6 : dow - 1;
     const cursor = new Date(year, month, 1 - daysBack);
 
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
     const diasMap = new Map(this.dias.map(d => [d.fecha, d]));
     const rows: CalDay[][] = [];
 
@@ -103,7 +117,13 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
       for (let d = 0; d < 7; d++) {
         if (cursor.getDay() !== 0) {
           const ds = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-          row.push({ date: ds, label: cursor.getDate(), isCurrentMonth: cursor.getMonth() === month, dia: diasMap.get(ds) ?? null });
+          row.push({
+            date: ds,
+            label: cursor.getDate(),
+            isCurrentMonth: cursor.getMonth() === month,
+            isPast: ds < todayStr,
+            dia: diasMap.get(ds) ?? null
+          });
         }
         cursor.setDate(cursor.getDate() + 1);
       }
@@ -113,6 +133,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
   }
 
   selectDay(day: CalDay): void {
+    if (day.isPast && !day.dia) return;
     this.selectedDate = day.date;
     this.openModalAgregar(day.date);
   }
@@ -121,7 +142,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   openModalAgregar(fecha = ''): void {
     this.formError = null;
-    this.form = { fecha, motivo: '' };
+    this.form = { fecha, tipo: 'holiday', etiqueta: '' };
     this.showModalAgregar = true;
   }
 
@@ -133,10 +154,14 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   submitAgregar(): void {
     if (!this.form.fecha) { this.formError = 'Selecciona una fecha.'; return; }
-    if (this.form.motivo.trim().length < 3) { this.formError = 'El motivo debe tener al menos 3 caracteres.'; return; }
+    if (!this.form.tipo) { this.formError = 'Selecciona el tipo de día.'; return; }
     this.isSubmitting = true;
     this.formError = null;
-    this.service.agregar(this.form.fecha, this.form.motivo.trim()).pipe(
+    this.service.agregar({
+      fecha: this.form.fecha,
+      tipo: this.form.tipo,
+      etiqueta: this.form.etiqueta.trim() || null,
+    }).pipe(
       takeUntil(this.destroy$),
       catchError(err => { this.formError = err?.error?.message ?? 'Error al guardar.'; return of(null); }),
       finalize(() => { this.isSubmitting = false; })
@@ -149,12 +174,16 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   askEliminar(dia: DiaEspecialItem): void {
     this.confirmDeleteId = dia.id;
-    this.confirmDeleteMotivo = dia.motivo;
+    this.confirmDeleteEtiqueta = dia.etiqueta || this.tipoLabel(dia.tipo);
   }
 
   cancelEliminar(): void {
     this.confirmDeleteId = null;
-    this.confirmDeleteMotivo = '';
+    this.confirmDeleteEtiqueta = '';
+  }
+
+  tipoLabel(tipo: TipoDiaEspecial): string {
+    return this.tiposDia.find(t => t.value === tipo)?.label ?? tipo;
   }
 
   confirmarEliminar(): void {
@@ -169,9 +198,11 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   // ===== HELPERS =====
 
-  // Convierte YYYY-MM-DD a formato legible en español
+  // Convierte YYYY-MM-DD (o ISO) a formato legible en español
   formatFecha(fecha: string): string {
-    const [y, m, d] = fecha.split('-').map(Number);
+    if (!fecha) return '';
+    const [y, m, d] = fecha.split('T')[0].split('-').map(Number);
+    if (!y || !m || !d) return fecha;
     return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d));
   }
 
