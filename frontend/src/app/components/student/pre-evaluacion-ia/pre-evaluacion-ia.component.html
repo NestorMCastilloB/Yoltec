@@ -9,6 +9,29 @@
     <p class="pe-sub">Describe tus sintomas con tus propias palabras. Esto <b>NO reemplaza una consulta medica</b> — solo orienta y prepara tu cita con el doctor.</p>
   </div>
 
+  <!-- Estado: cargando próxima cita -->
+  @if (cargandoCita) {
+    <div class="pe-empty-state">
+      <div class="pe-empty-spinner"></div>
+      <p>Cargando...</p>
+    </div>
+  }
+
+  <!-- Estado: sin cita programada -->
+  @if (!cargandoCita && sinCita) {
+    <div class="pe-empty-state">
+      <div class="pe-empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <h3>Primero agenda una cita</h3>
+      <p>La pre-evaluación con IA se asocia a una cita específica. Agenda tu consulta y vuelve aquí para describir tus síntomas antes del día.</p>
+      <button class="pe-btn-primary" (click)="agendarCita()">Agendar cita</button>
+    </div>
+  }
+
+  @if (!cargandoCita && !sinCita) {
   <div class="pe-chat-wrap">
     <div class="pe-msgs" #scrollContainer>
       @for (msg of mensajes; track $index) {
@@ -111,4 +134,5 @@
       </div>
     </div>
   </div>
+  }
 </div>

@@ -459,3 +459,60 @@
   .pe-msg { max-width: 90%; }
   .pe-result-body { max-width: 100%; }
 }
+
+/* Empty state — sin cita programada */
+.pe-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  flex: 1;
+}
+.pe-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--yol-primary-50, #e8f5ee);
+  color: var(--yol-primary, #1a5c3a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.pe-empty-icon svg { width: 26px; height: 26px; }
+.pe-empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--yol-text);
+}
+.pe-empty-state p {
+  margin: 0 0 22px;
+  font-size: 14px;
+  color: var(--yol-text-muted);
+  max-width: 380px;
+  line-height: 1.5;
+}
+.pe-btn-primary {
+  background: var(--yol-primary, #1a5c3a);
+  color: #fff;
+  border: 0;
+  border-radius: 7px;
+  padding: 10px 22px;
+  font: 600 13.5px var(--yol-font);
+  cursor: pointer;
+  transition: background var(--yol-duration-fast) var(--yol-ease);
+}
+.pe-btn-primary:hover { background: #144a2e; }
+.pe-empty-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--yol-border);
+  border-top-color: var(--yol-primary);
+  border-radius: 50%;
+  animation: pe-spin 0.8s linear infinite;
+  margin-bottom: 14px;
+}
+@keyframes pe-spin { to { transform: rotate(360deg); } }

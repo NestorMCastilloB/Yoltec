@@ -153,7 +153,7 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
   }
 
   agendarCita(): void {
-    this.router.navigate(['/student/agendar-cita']);
+    this.router.navigate(['/student-dashboard']);
   }
 
   // Auto-resize del textarea
