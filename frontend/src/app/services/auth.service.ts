@@ -13,6 +13,7 @@ interface User {
   tipo: string;
   numero_control?: string;
   username?: string;
+  genero?: 'masculino' | 'femenino' | 'otro' | null;
 }
 
 interface LoginResponse {
@@ -223,6 +224,15 @@ export class AuthService implements OnDestroy {
   // Guardar la información del usuario en el almacenamiento local
   private setUser(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
+  }
+
+  // Actualizar campos del user en localStorage y emitir cambio (sin re-login)
+  updateCurrentUser(partial: Partial<User>): void {
+    const current = this.getCurrentUser();
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    this.setUser(updated);
+    this.userSubject.next(updated);
   }
   
   // Obtener el usuario almacenado en el almacenamiento local

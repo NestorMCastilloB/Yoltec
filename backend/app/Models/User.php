@@ -23,6 +23,7 @@ class User extends Authenticatable
         'es_admin',        // Nuevo campo para rol administrador
         'telefono',
         'fecha_nacimiento',
+        'genero',
         'fcm_token',
         'tipo_sangre',
         'alergias',

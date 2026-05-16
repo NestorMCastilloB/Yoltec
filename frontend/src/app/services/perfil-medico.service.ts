@@ -11,6 +11,7 @@ export interface PerfilMedico {
   email: string;
   telefono: string | null;
   fecha_nacimiento: string | null;
+  genero: 'masculino' | 'femenino' | 'otro' | null;
   tipo_sangre: string | null;
   alergias: string | null;
   enfermedades_cronicas: string | null;
@@ -62,7 +63,7 @@ export class PerfilMedicoService {
     return this.http.get<{ perfil: any }>(`${API_BASE_URL}/perfil`);
   }
 
-  updateDatosPersonales(data: { nombre?: string; apellido?: string; email?: string; telefono?: string; fecha_nacimiento?: string }): Observable<any> {
+  updateDatosPersonales(data: { nombre?: string; apellido?: string; email?: string; telefono?: string; fecha_nacimiento?: string; genero?: string }): Observable<any> {
     return this.http.put(`${API_BASE_URL}/perfil`, data);
   }
 
