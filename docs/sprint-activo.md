@@ -60,6 +60,14 @@ Todas en producción (Vercel + Render).
 - [ ] **Doctor**: estadísticas → ver gráficos cargados
 - [ ] **Doctor**: prioridad IA → ver score → reintento si falla
 
+### Fixes encontrados durante smoke test (PRs #37-#40)
+- [x] **2FA en producción**: `MAIL_MAILER` no estaba en Render (default `log`, emails no llegaban) — agregado `MAIL_MAILER=resend`, `MAIL_FROM_ADDRESS=onboarding@resend.dev`, `MAIL_FROM_NAME=Yoltec`
+- [x] **Resend workaround**: drop `UNIQUE(email)`, seeder unifica email admin+doctores a `nespiolin05@gmail.com` (Resend free tier sin dominio)
+- [x] **localStorage corrupto**: `getStoredUser()` crasheaba con `JSON.parse("undefined")` — agregado try/catch
+- [x] **Perfil género/foto**: `PerfilMedicoController::show()` no incluía `genero` ni `foto_perfil` en la respuesta
+- [x] **Dark mode**: tokens CSS en admin días-especiales + select options en doctor pre-evaluaciones
+- [x] **Datos de prueba**: seeder limpia alergias/enfermedades del alumno test
+
 ---
 
 ## Bloque 5 — Performance y polish (si hay tiempo)
