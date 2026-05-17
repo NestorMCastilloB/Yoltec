@@ -79,5 +79,10 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(EnsureAdminEmailForResendSeeder::class);
+
+        // Limpiar datos de prueba en campos médicos
+        User::where('numero_control', '22690495')
+            ->whereNotNull('alergias')
+            ->update(['alergias' => null, 'enfermedades_cronicas' => null]);
     }
 }
