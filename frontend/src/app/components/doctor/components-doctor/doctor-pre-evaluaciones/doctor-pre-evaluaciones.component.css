@@ -347,6 +347,8 @@
 
 .fic { color: var(--yol-text-subtle); font-size: var(--yol-fs-h3); }
 
+.ffld select option { background: var(--yol-surface); color: var(--yol-text); }
+
 .spacer { flex: 1; }
 
 /* --- Modal --- */
