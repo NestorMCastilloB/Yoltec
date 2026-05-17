@@ -238,7 +238,13 @@ export class AuthService implements OnDestroy {
   // Obtener el usuario almacenado en el almacenamiento local
   private getStoredUser(): User | null {
     const userJson = localStorage.getItem(this.userKey);
-    return userJson ? JSON.parse(userJson) : null;
+    if (!userJson) return null;
+    try {
+      return JSON.parse(userJson);
+    } catch {
+      localStorage.removeItem(this.userKey);
+      return null;
+    }
   }
   
   // Redirigir al usuario según su tipo
