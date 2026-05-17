@@ -23,16 +23,8 @@ class EnsureAdminEmailForResendSeeder extends Seeder
             return;
         }
 
-        // Resend (free tier) rechaza aliases +tag@gmail.com, solo acepta el email exacto.
-        // Solo admin recibe el email verificado; doctores quedan con alias (no podrán hacer 2FA
-        // en prod hasta verificar dominio en Resend, pero no es bloqueante para la demo).
-        [$local, $domain] = explode('@', $target, 2);
-
-        // 1) Liberar el target si lo tiene otro user (alias previo del propio admin o ex-admin).
-        User::where('email', $target)
-            ->update(['email' => "{$local}+freed-" . now()->timestamp . "@{$domain}"]);
-
-        // 2) Asignar el target al admin.
+        // Resend free tier sin dominio verificado solo entrega al email del owner.
+        // UNIQUE(email) eliminado para permitir que admin y doctores compartan email.
         $admin = User::where('tipo', 'admin')->first();
         if ($admin && $admin->email !== $target) {
             $admin->update(['email' => $target]);
@@ -41,13 +33,12 @@ class EnsureAdminEmailForResendSeeder extends Seeder
             Log::info("EnsureAdminEmailForResendSeeder: admin ya tiene {$target}");
         }
 
-        // 3) Doctores: asignar aliases únicos solo si todavía no los tienen.
+        // Doctores también reciben el email verificado para que 2FA funcione
         $doctores = User::where('tipo', 'doctor')->get();
         foreach ($doctores as $doc) {
-            $slug = $doc->username ?: ('doctor' . $doc->id);
-            $aliasEmail = "{$local}+{$slug}@{$domain}";
-            if ($doc->email !== $aliasEmail) {
-                $doc->update(['email' => $aliasEmail]);
+            if ($doc->email !== $target) {
+                $doc->update(['email' => $target]);
+                Log::info("EnsureAdminEmailForResendSeeder: doctor {$doc->id} actualizado a {$target}");
             }
         }
     }
