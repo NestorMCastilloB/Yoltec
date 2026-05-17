@@ -30,6 +30,8 @@ class PerfilMedicoController extends Controller
                 'email'                => $alumno->email,
                 'telefono'             => $alumno->telefono,
                 'fecha_nacimiento'     => $alumno->fecha_nacimiento,
+                'genero'               => $alumno->genero,
+                'foto_perfil'          => $alumno->foto_perfil,
                 'tipo_sangre'          => $alumno->tipo_sangre,
                 'alergias'             => $alumno->alergias,
                 'enfermedades_cronicas' => $alumno->enfermedades_cronicas,
