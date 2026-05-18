@@ -443,8 +443,8 @@
 }
 
 /* Dark mode */
-:host-context(.dark) .pe-msg.ai .pe-bubble { background: #1e2a23; border-color: #2d4a38; }
-:host-context(.dark) .pe-msg.me .pe-bubble { background: #1a3a28; }
+:host-context(.dark) .pe-msg.ai .pe-bubble { background: #243d31; border-color: #3d6650; color: #e8f5ee; }
+:host-context(.dark) .pe-msg.me .pe-bubble { background: #1f5538; color: #e8f5ee; }
 :host-context(.dark) .pe-result-card { background: #1e2a23; border-color: #2d4a38; border-left-color: #4ade80; }
 :host-context(.dark) .pe-callout { background: #332b1a; border-color: #5a4a20; }
 :host-context(.dark) .pe-callout-txt { color: #d4a94e; }
