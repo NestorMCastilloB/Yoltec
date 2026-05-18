@@ -993,3 +993,25 @@
   .users-toolbar { flex-direction: column; align-items: stretch; }
   .toolbar-actions { flex-wrap: wrap; }
 }
+
+/* Dark mode: calendario de días especiales */
+:host-context(html.dark) .cal-day {
+  background: #1f3a2a;
+  border-color: #2a4030;
+}
+:host-context(html.dark) .cal-day:hover:not(.other-month):not(.past) {
+  background: #2b4f3a;
+  border-color: var(--yol-primary-mid);
+}
+:host-context(html.dark) .cal-day.past {
+  background: #060c08;
+  opacity: 0.55;
+}
+:host-context(html.dark) .cal-day.past .day-num { color: #5a7a6a; }
+:host-context(html.dark) .cal-day.selected {
+  background: #2b4f3a !important;
+  border-color: var(--yol-primary-mid) !important;
+}
+:host-context(html.dark) .cal-day.fes { background: #3a1414; border-color: #6a2020; }
+:host-context(html.dark) .cal-day.vac { background: #0d1b3e; border-color: #1e3a6e; }
+:host-context(html.dark) .cal-day.red { background: #2d1800; border-color: #5a3a10; }
