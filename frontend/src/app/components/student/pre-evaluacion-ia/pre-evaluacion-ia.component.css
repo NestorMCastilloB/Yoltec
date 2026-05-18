@@ -524,7 +524,7 @@
   gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--yol-border);
-  background: var(--yol-surface-2, #fafbfc);
+  background: var(--yol-bg);
   flex-wrap: wrap;
 }
 .pe-cita-picker label {
@@ -579,7 +579,7 @@
 .pe-badge-descartado { background: #fee2e2; color: #991b1b; }
 
 .pe-existing-card {
-  background: var(--yol-surface-2, #fafbfc);
+  background: var(--yol-bg);
   border: 1px solid var(--yol-border);
   border-radius: 10px;
   padding: 16px 18px;
