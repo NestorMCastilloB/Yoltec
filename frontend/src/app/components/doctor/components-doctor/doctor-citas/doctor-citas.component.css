@@ -834,7 +834,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.kpi-info .kpi-ic  { background: #dbeafe; color: #1d4ed8; }
+.kpi-info .kpi-ic  { background: var(--yol-ia-soft); color: var(--yol-ia-text); }
 .kpi-warn .kpi-ic  { background: var(--yol-warn-surface); color: var(--yol-warn); }
 .kpi-danger .kpi-ic { background: var(--yol-cancel-surface); color: var(--yol-danger); }
 

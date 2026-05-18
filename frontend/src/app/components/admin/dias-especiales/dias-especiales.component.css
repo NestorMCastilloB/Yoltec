@@ -40,7 +40,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #1a5c3a;
+  background: var(--yol-primary);
   color: #fff;
   font: 600 13px var(--yol-font, 'Inter', sans-serif);
   padding: 9px 16px;
@@ -51,7 +51,7 @@
   flex-shrink: 0;
 }
 
-.btn-primary:hover { background: #144a2e; }
+.btn-primary:hover { background: var(--yol-primary-600); }
 .btn-primary:disabled { opacity: 0.6; cursor: default; }
 
 .btn-ghost {
@@ -74,7 +74,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #dc2626;
+  background: var(--yol-danger);
   color: #fff;
   font: 600 13px var(--yol-font, 'Inter', sans-serif);
   padding: 9px 16px;
@@ -84,12 +84,12 @@
   flex: 1;
 }
 
-.btn-danger:hover { background: #b91c1c; }
+.btn-danger:hover { filter: brightness(.88); }
 
 .btn-delete {
   font-size: 12.5px;
   font-weight: 500;
-  color: #dc2626;
+  color: var(--yol-danger);
   background: none;
   border: none;
   cursor: pointer;
@@ -419,7 +419,7 @@ tr:last-child td { border-bottom: 0; }
 .form-error {
   margin: 0 0 12px;
   font-size: 12.5px;
-  color: #dc2626;
+  color: var(--yol-danger);
   font-weight: 500;
 }
 
@@ -427,4 +427,16 @@ tr:last-child td { border-bottom: 0; }
   display: flex;
   gap: 10px;
   margin-top: 6px;
+}
+
+/* Dark mode: contraste de cells contra el card padre (ambos eran var(--yol-surface)) */
+:host-context(html.dark) .cal-cell {
+  background: #1a2b20;
+  border-color: #335043;
+}
+:host-context(html.dark) .cal-cell:hover { border-color: var(--yol-primary-mid); }
+:host-context(html.dark) .cal-cell.muted,
+:host-context(html.dark) .cal-cell.past {
+  background: #0d1812;
+  border-color: #1f2f25;
 }
