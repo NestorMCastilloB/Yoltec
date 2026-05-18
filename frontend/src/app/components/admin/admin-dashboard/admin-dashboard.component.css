@@ -1015,3 +1015,27 @@
 :host-context(html.dark) .cal-day.fes { background: #3a1414; border-color: #6a2020; }
 :host-context(html.dark) .cal-day.vac { background: #0d1b3e; border-color: #1e3a6e; }
 :host-context(html.dark) .cal-day.red { background: #2d1800; border-color: #5a3a10; }
+
+/* Dark mode: modales, forms, search e inputs */
+:host-context(html.dark) .modal h3 { color: var(--yol-primary-mid); }
+:host-context(html.dark) .form-group label { color: #b8c9be; }
+:host-context(html.dark) .form-group input,
+:host-context(html.dark) .form-select,
+:host-context(html.dark) .form-input,
+:host-context(html.dark) .search-input {
+  color: var(--yol-text);
+  background: var(--yol-bg);
+  border-color: #2a4030;
+}
+:host-context(html.dark) .form-group input::placeholder,
+:host-context(html.dark) .form-select::placeholder,
+:host-context(html.dark) .form-input::placeholder,
+:host-context(html.dark) .search-input::placeholder {
+  color: #5a7a6a;
+}
+:host-context(html.dark) .form-group input:focus,
+:host-context(html.dark) .form-select:focus,
+:host-context(html.dark) .form-input:focus,
+:host-context(html.dark) .search-input:focus {
+  border-color: var(--yol-primary-mid);
+}
