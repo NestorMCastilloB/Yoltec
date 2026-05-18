@@ -429,14 +429,18 @@ tr:last-child td { border-bottom: 0; }
   margin-top: 6px;
 }
 
-/* Dark mode: contraste de cells contra el card padre (ambos eran var(--yol-surface)) */
+/* Dark mode: contraste explícito de cells contra el card padre */
 :host-context(html.dark) .cal-cell {
-  background: #1a2b20;
-  border-color: #335043;
+  background: #1f3a2a;
+  border-color: #4a6b56;
 }
 :host-context(html.dark) .cal-cell:hover { border-color: var(--yol-primary-mid); }
 :host-context(html.dark) .cal-cell.muted,
 :host-context(html.dark) .cal-cell.past {
-  background: #0d1812;
-  border-color: #1f2f25;
+  background: #060c08;
+  border-color: #1a2820;
+  opacity: 0.55;
 }
+:host-context(html.dark) .cal-cell .day-num { color: #e8f5ee; }
+:host-context(html.dark) .cal-cell.past .day-num,
+:host-context(html.dark) .cal-cell.muted .day-num { color: #5a7a6a; }
