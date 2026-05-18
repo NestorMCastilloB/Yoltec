@@ -23,7 +23,7 @@
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: var(--yol-ia);
   color: #fff;
   border: none;
   padding: 8px 18px;
@@ -33,7 +33,7 @@
   transition: background var(--yol-duration-normal);
 }
 
-.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:hover { background: var(--yol-ia-600); }
 .btn-primary:disabled { opacity: .55; cursor: default; }
 
 /* ── Disclaimer IA ──────────────────────────────── */
@@ -245,7 +245,7 @@
 .prioridad-score {
   font-size: var(--yol-fs-label);
   background: var(--yol-ia-soft);
-  color: #2563eb;
+  color: var(--yol-ia-text);
   padding: 3px 10px;
   border-radius: var(--yol-r-pill);
   font-weight: 700;

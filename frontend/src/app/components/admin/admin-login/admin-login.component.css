@@ -31,7 +31,7 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #fff;
+  background: var(--adm-surface);
   border: 1px solid var(--adm-danger-border);
   border-left: 4px solid var(--adm-danger);
   color: var(--adm-danger);
@@ -147,7 +147,7 @@
   font-size: 13.5px;
   font-family: inherit;
   color: var(--adm-text);
-  background: #fff;
+  background: var(--adm-surface);
   outline: none;
   transition: border-color .15s, box-shadow .15s;
   width: 100%;
@@ -222,4 +222,17 @@
   .card {
     padding: 24px 20px;
   }
+}
+
+/* Override de tokens propios cuando el tema global está en oscuro */
+:host-context(html.dark) {
+  --adm-bg: #0a1a10;
+  --adm-surface: #111d14;
+  --adm-border: #2a4030;
+  --adm-text: #e8f5ee;
+  --adm-text-muted: #93b3a1;
+  --adm-text-subtle: #5a7a6a;
+  --adm-danger-bg: #2d0a0a;
+  --adm-danger-border: #5a1818;
+  --adm-shadow: 0 4px 20px rgba(0, 0, 0, .35);
 }
