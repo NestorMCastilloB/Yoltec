@@ -48,15 +48,34 @@ graphify-out/
 
 # ─── General ───────────────────────────────────────
 .DS_Store
+Thumbs.db
 *.log
 *.zip
 *.rar
+*.tmp
+*.swp
 .vscode/
+.idea/
 .aider*
-.env.companero
-contexto_proyecto.md
 
-# ─── Archivos obsoletos ────────────────────────────
+# ─── Secretos (paranoia) ───────────────────────────
+*.env
+*.env.local
+*.env.companero
+*.env.companero.*
+.env
+.env.*
+!.env.example
+!.env.docker.example
+contexto_proyecto.md
+**/credenciales*
+**/secrets*
+**/*.pem
+**/*.key
+!**/*.pub.key
+backend/storage/app/firebase-credentials.json
+
+# ─── Archivos obsoletos / locales ──────────────────
 Iniciar/
 tester/
 scripts/
@@ -64,7 +83,8 @@ logs/
 start-yoltec.bat
 stop-yoltec.bat
 Untitled-*.png
-releases/*.apk
+releases/
+*.apk
 IA/railway.toml
 
 # ─── Documentos binarios (usar .md en su lugar) ─────
