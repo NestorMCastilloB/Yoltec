@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yoltec_mobile/screens/student/bitacora_tab.dart';
 import 'package:yoltec_mobile/screens/student/citas_tab.dart';
 import 'package:yoltec_mobile/screens/student/inicio_tab.dart';
 import 'package:yoltec_mobile/screens/student/perfil_tab.dart';
 import 'package:yoltec_mobile/screens/student/recetas_tab.dart';
 import 'package:yoltec_mobile/screens/student/widgets/student_widgets.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
-import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
 import 'package:yoltec_mobile/services/theme_service.dart';
@@ -32,7 +30,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     final token = Provider.of<AuthService>(context, listen: false).token ?? '';
     await Future.wait([
       Provider.of<CitaService>(context, listen: false).cargarCitas(token),
-      Provider.of<BitacoraService>(context, listen: false).cargarBitacoras(token),
       Provider.of<RecetaService>(context, listen: false).cargarRecetas(token),
     ]);
   }
@@ -42,7 +39,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     final tabs = [
       InicioTab(onNuevaCita: () => setState(() => _tabIndex = 1)),
       const CitasTab(),
-      const BitacoraTab(),
       const RecetasTab(),
       const PerfilTab(),
     ];
@@ -71,9 +67,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: Column(
         children: [
           // Banner offline
-          Consumer3<CitaService, BitacoraService, RecetaService>(
-            builder: (_, citas, bitacora, recetas, __) {
-              final offline = citas.isOffline || bitacora.isOffline || recetas.isOffline;
+          Consumer2<CitaService, RecetaService>(
+            builder: (_, citas, recetas, __) {
+              final offline = citas.isOffline || recetas.isOffline;
               return offline ? const OfflineBanner() : const SizedBox.shrink();
             },
           ),
@@ -86,7 +82,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), activeIcon: Icon(Icons.calendar_today), label: 'Citas'),
-          BottomNavigationBarItem(icon: Icon(Icons.medical_services_outlined), activeIcon: Icon(Icons.medical_services), label: 'Bitacora'),
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), activeIcon: Icon(Icons.receipt_long), label: 'Recetas'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
         ],
