@@ -135,4 +135,29 @@ class CitaService
             })
             ->update(['estatus' => 'no_asistio']);
     }
+
+    // Invalida el cache de disponibilidad del mes correspondiente a la fecha dada.
+    public function invalidateAvailabilityCache(string|Carbon $fecha): void
+    {
+        $mes = $fecha instanceof Carbon ? $fecha : Carbon::parse($fecha);
+        Cache::forget("disp_{$mes->year}_{$mes->month}");
+    }
+
+    // Envía notificación FCM al alumno de la cita (diferida, solo si tiene token).
+    public function notifyAlumno(Cita $cita, string $titulo, string $mensaje, string $tipo): void
+    {
+        if (!$cita->alumno?->fcm_token) {
+            return;
+        }
+        $token  = $cita->alumno->fcm_token;
+        $fecha  = (string) $cita->fecha_cita;
+        $hora   = (string) $cita->hora_cita;
+        $citaId = (string) $cita->id;
+        defer(fn() => (new FcmService())->send(
+            $token,
+            $titulo,
+            str_replace([':fecha', ':hora'], [$fecha, $hora], $mensaje),
+            ['cita_id' => $citaId, 'tipo' => $tipo]
+        ));
+    }
 }
