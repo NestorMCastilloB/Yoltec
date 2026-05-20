@@ -257,8 +257,8 @@
 
     <!-- Footer para citas programadas -->
     <ng-container *ngIf="drawerCita.estatus === 'programada'">
-      <div class="drawer-foot-top" *ngIf="drawerCita.alumno">
-        <button class="btn-sm btn-outline flex1" (click)="openPerfilAlumno(drawerCita.alumno.id)">Ver expediente</button>
+      <div class="drawer-foot-top">
+        <button *ngIf="drawerCita.alumno" class="btn-sm btn-outline flex1" (click)="openPerfilAlumno(drawerCita.alumno.id)">Ver expediente</button>
         <button class="btn-sm btn-gray flex1" (click)="drawerReprogramar(drawerCita)">Reprogramar</button>
       </div>
       <div class="drawer-foot">
