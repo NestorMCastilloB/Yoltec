@@ -543,7 +543,7 @@
       <label>Nueva hora</label>
       <select [(ngModel)]="reprogramarHora" class="filtro-select">
         <option value="">Selecciona hora</option>
-        <option *ngFor="let slot of timeSlots" [value]="normalizeTime(slot)">{{ formatTime(slot) }}</option>
+        <option *ngFor="let slot of slotsParaFecha(reprogramarFecha)" [value]="normalizeTime(slot)">{{ formatTime(slot) }}</option>
       </select>
     </div>
 

@@ -796,4 +796,12 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     }
     return slots;
   }
+
+  // Filtra slots a futuras si fecha == hoy; devuelve todos si es fecha posterior.
+  slotsParaFecha(fecha: string): string[] {
+    if (fecha !== this.today) return this.timeSlots;
+    const now = new Date();
+    const horaActual = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return this.timeSlots.filter(s => s > horaActual);
+  }
 }

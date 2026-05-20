@@ -62,6 +62,9 @@ class CitaService
         if ($hora < '08:00' || $hora > '16:45') {
             return 'El horario de atención es de 08:00 a 16:45.';
         }
+        if (Carbon::parse($fecha)->isToday() && $hora <= Carbon::now()->format('H:i')) {
+            return 'La hora seleccionada ya pasó. Elige una hora futura.';
+        }
         $dia = DiaEspecial::where('fecha', $fecha)->first();
         if ($dia) {
             $status = config("clinic.types.{$dia->tipo}.status", 'full');
