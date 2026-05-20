@@ -8,8 +8,7 @@
 
 ## Tarea actual
 
-**Qué:** Bloque 4 — Smoke test end-to-end en producción (Vercel + Render)
-**Esperado:** Validar flujos completos admin/alumno/doctor + IA sin errores
+**Fase 4 cerrada al 100%** — todos los bloques completos. Listo para entrega académica.
 
 ---
 
@@ -48,17 +47,17 @@ Objetivo: web (admin + doctor + alumno + IA) funcional en producción sin bugs b
 
 ---
 
-## Bloque 4 — Pruebas end-to-end (smoke test antes de entregar)
+## Bloque 4 — Pruebas end-to-end (smoke test antes de entregar) ✅ COMPLETADO
 
 Todas en producción (Vercel + Render).
 
-- [ ] **Admin**: login → crear alumno → crear doctor → marcar día festivo → marcar día reducido con cierre 12:00
-- [ ] **Alumno**: login → agendar cita en día reducido con hora antes de 12:00 (debe permitir) → intentar a 12:30 (debe rechazar) → cancelar
-- [ ] **Alumno**: pre-evaluación IA → chat completo → ver diagnóstico → ver pre-evaluación en perfil
-- [ ] **Doctor**: login → ver cita programada → atender → llenar consulta → emitir receta
-- [ ] **Doctor**: bitácora con filtros → exportar CSV
-- [ ] **Doctor**: estadísticas → ver gráficos cargados
-- [ ] **Doctor**: prioridad IA → ver score → reintento si falla
+- [x] **Admin**: login → crear alumno → crear doctor → marcar día festivo → marcar día reducido con cierre 12:00
+- [x] **Alumno**: login → agendar cita en día reducido con hora antes de 12:00 (debe permitir) → intentar a 12:30 (debe rechazar) → cancelar
+- [x] **Alumno**: pre-evaluación IA → chat completo → ver diagnóstico → ver pre-evaluación en perfil
+- [x] **Doctor**: login → ver cita programada → atender → llenar consulta → emitir receta
+- [x] **Doctor**: bitácora con filtros → exportar CSV
+- [x] **Doctor**: estadísticas → ver gráficos cargados
+- [x] **Doctor**: prioridad IA → ver score → reintento si falla
 
 ### Fixes encontrados durante smoke test (PRs #37-#40)
 - [x] **2FA en producción**: `MAIL_MAILER` no estaba en Render (default `log`, emails no llegaban) — agregado `MAIL_MAILER=resend`, `MAIL_FROM_ADDRESS=onboarding@resend.dev`, `MAIL_FROM_NAME=Yoltec`
