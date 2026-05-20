@@ -82,7 +82,8 @@ class PreEvaluacionService extends ChangeNotifier {
         if (map['cita_id'] == citaId) return map;
       }
       return null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error buscando pre-evaluación de cita $citaId: $e');
       return null;
     }
   }
