@@ -88,13 +88,9 @@ class CitasTab extends StatelessWidget {
   }
 
   void _mostrarFormNuevaCita(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const NuevaCitaForm(),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const NuevaCitaForm()),
     );
   }
 }
