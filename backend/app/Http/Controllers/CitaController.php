@@ -6,10 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\User;
 use App\Services\CitaService;
-use App\Services\FcmService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 class CitaController extends Controller
 {
@@ -88,21 +85,8 @@ class CitaController extends Controller
         }
 
         $cita->load(['alumno:id,nombre,apellido,numero_control,fcm_token', 'doctor:id,nombre,apellido']);
-        Cache::forget("disp_{$cita->fecha_cita->year}_{$cita->fecha_cita->month}");
-
-        // FCM diferido: envía la notificación DESPUÉS del response (evita bloquear ~2-5s)
-        if ($cita->alumno?->fcm_token) {
-            $token = $cita->alumno->fcm_token;
-            $fecha = (string) $cita->fecha_cita;
-            $hora  = (string) $cita->hora_cita;
-            $citaId = (string) $cita->id;
-            defer(fn() => (new FcmService())->send(
-                $token,
-                'Cita confirmada',
-                "Tu cita está programada para el {$fecha} a las {$hora}.",
-                ['cita_id' => $citaId, 'tipo' => 'cita_confirmada']
-            ));
-        }
+        $this->citaService->invalidateAvailabilityCache($cita->fecha_cita);
+        $this->citaService->notifyAlumno($cita, 'Cita confirmada', 'Tu cita está programada para el :fecha a las :hora.', 'cita_confirmada');
 
         return response()->json(['message' => 'Cita agendada exitosamente', 'cita' => $cita], 201);
     }
@@ -132,23 +116,10 @@ class CitaController extends Controller
             return response()->json(['message' => 'No se puede cancelar una cita que ya fue procesada.'], 400);
         }
 
-        $mes = Carbon::parse($cita->fecha_cita);
         $cita->update(['estatus' => 'cancelada']);
-        Cache::forget("disp_{$mes->year}_{$mes->month}");
+        $this->citaService->invalidateAvailabilityCache($cita->fecha_cita);
         $cita->load('alumno');
-
-        if ($cita->alumno?->fcm_token) {
-            $token = $cita->alumno->fcm_token;
-            $fecha = (string) $cita->fecha_cita;
-            $hora  = (string) $cita->hora_cita;
-            $citaId = (string) $cita->id;
-            defer(fn() => (new FcmService())->send(
-                $token,
-                'Cita cancelada',
-                "Tu cita del {$fecha} a las {$hora} fue cancelada.",
-                ['cita_id' => $citaId, 'tipo' => 'cita_cancelada']
-            ));
-        }
+        $this->citaService->notifyAlumno($cita, 'Cita cancelada', 'Tu cita del :fecha a las :hora fue cancelada.', 'cita_cancelada');
 
         return response()->json(['message' => 'Cita cancelada exitosamente', 'cita' => $cita]);
     }
@@ -188,25 +159,12 @@ class CitaController extends Controller
             return response()->json(['message' => 'El horario seleccionado ya no está disponible.'], 422);
         }
 
-        $mesAnterior = Carbon::parse($cita->fecha_cita);
+        $fechaAnterior = $cita->fecha_cita;
         $cita->update(['fecha_cita' => $validated['fecha_cita'], 'hora_cita' => $validated['hora_cita']]);
-        $mesNuevo = Carbon::parse($validated['fecha_cita']);
-        Cache::forget("disp_{$mesAnterior->year}_{$mesAnterior->month}");
-        Cache::forget("disp_{$mesNuevo->year}_{$mesNuevo->month}");
+        $this->citaService->invalidateAvailabilityCache($fechaAnterior);
+        $this->citaService->invalidateAvailabilityCache($validated['fecha_cita']);
         $cita->load(['alumno:id,nombre,apellido,numero_control,fcm_token', 'doctor:id,nombre,apellido']);
-
-        if ($cita->alumno?->fcm_token) {
-            $token = $cita->alumno->fcm_token;
-            $fecha = (string) $cita->fecha_cita;
-            $hora  = (string) $cita->hora_cita;
-            $citaId = (string) $cita->id;
-            defer(fn() => (new FcmService())->send(
-                $token,
-                'Cita reprogramada',
-                "Tu cita fue reprogramada para el {$fecha} a las {$hora}.",
-                ['cita_id' => $citaId, 'tipo' => 'cita_reprogramada']
-            ));
-        }
+        $this->citaService->notifyAlumno($cita, 'Cita reprogramada', 'Tu cita fue reprogramada para el :fecha a las :hora.', 'cita_reprogramada');
 
         return response()->json(['message' => 'Cita reprogramada exitosamente', 'cita' => $cita]);
     }
@@ -222,29 +180,5 @@ class CitaController extends Controller
 
         $cita->update(['estatus' => 'no_asistio']);
         return response()->json(['message' => 'Cita marcada como no asistida', 'cita' => $cita]);
-    }
-
-    // Solo doctor — busca alumnos por número de control, nombre o apellido (max 20 resultados)
-    public function buscarAlumno(Request $request)
-    {
-        $q = trim((string) $request->input('q', ''));
-        if (strlen($q) < 2) {
-            return response()->json(['alumnos' => []]);
-        }
-        $alumnos = User::where('tipo', 'alumno')
-            ->where(function ($query) use ($q) {
-                $query->where('numero_control', 'ILIKE', "%{$q}%")
-                    ->orWhere('nombre', 'ILIKE', "%{$q}%")
-                    ->orWhere('apellido', 'ILIKE', "%{$q}%");
-            })
-            ->select('id', 'numero_control', 'nombre', 'apellido')
-            ->limit(20)
-            ->get()
-            ->map(fn($a) => [
-                'id' => $a->id,
-                'numero_control' => $a->numero_control,
-                'nombre' => "{$a->nombre} {$a->apellido}",
-            ]);
-        return response()->json(['alumnos' => $alumnos]);
     }
 }
