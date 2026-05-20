@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/screens/splash_screen.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
-import 'package:yoltec_mobile/services/bitacora_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/services/notification_service.dart';
 import 'package:yoltec_mobile/services/pre_evaluacion_service.dart';
@@ -32,7 +31,6 @@ class YoltecApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => CitaService()),
-        ChangeNotifierProvider(create: (_) => BitacoraService()),
         ChangeNotifierProvider(create: (_) => RecetaService()),
         ChangeNotifierProvider(create: (_) => PreEvaluacionService()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
