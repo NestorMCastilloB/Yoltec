@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\BitacoraController;
@@ -63,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/citas/{id}/no-asistio', [CitaController::class, 'noAsistio']);
         Route::post('/citas/{id}/consulta', [ConsultaController::class, 'store']);
         Route::get('/citas/{id}/consulta', [ConsultaController::class, 'show']);
-        Route::get('/alumnos/buscar', [CitaController::class, 'buscarAlumno']);
+        Route::get('/alumnos/buscar', [AlumnoController::class, 'buscar']);
     });
 
     // Perfil médico e historial
