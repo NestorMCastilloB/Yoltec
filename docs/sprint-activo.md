@@ -72,10 +72,10 @@ Todas en producción (Vercel + Render).
 
 ## Bloque 5 — Performance y polish (si hay tiempo)
 
-- [ ] **Keep-alive Render**: cron-job.org cada 10 min ping a backend + IA para evitar cold starts
-- [ ] **Refactor** `PreEvaluacionIAController` (>300L) → extraer a service
-- [ ] **Refactor** `CitaController` → mover lógica restante a `CitaService`
-- [ ] **Documentar** endpoints reales del backend (descartar zombies como `/api/slots` viejos)
+- [x] **Keep-alive Render**: cron-job.org cada 10 min ping a backend + IA para evitar cold starts
+- [x] **Refactor** `PreEvaluacionIAController` (ya estaba refactorizado, 166L)
+- [x] **Refactor** `CitaController` → 250L → 184L (PR #46) + fix Reprogramar visible (PR #47) + bloquear horas pasadas (PR #48)
+- [x] **Documentar** endpoints reales del backend → [docs/endpoints.md](endpoints.md)
 
 ---
 
