@@ -37,7 +37,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final tabs = [
-      InicioTab(onNuevaCita: () => setState(() => _tabIndex = 1)),
+      InicioTab(
+        onNuevaCita: () => setState(() => _tabIndex = 1),
+        onIrRecetas: () => setState(() => _tabIndex = 2),
+        onIrPerfil: () => setState(() => _tabIndex = 3),
+      ),
       const CitasTab(),
       const RecetasTab(),
       const PerfilTab(),
