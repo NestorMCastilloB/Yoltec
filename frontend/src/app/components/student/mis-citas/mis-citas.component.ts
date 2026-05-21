@@ -4,6 +4,7 @@ import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { MisCitasService, CitaMisCitas } from './mis-citas.service';
 import { AgendarCitaComponent } from '../../shared/agendar-cita/agendar-cita.component';
+import { PollingService } from '../../../services/polling.service';
 
 type TabId = 'proximas' | 'pasadas' | 'canceladas';
 
@@ -37,9 +38,16 @@ export class MisCitasComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private readonly MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 
-  constructor(private misCitasService: MisCitasService) {}
+  constructor(
+    private misCitasService: MisCitasService,
+    private polling: PollingService,
+  ) {}
 
-  ngOnInit(): void { this.loadCitas(); }
+  ngOnInit(): void {
+    this.loadCitas();
+    // Refresca cada 45s mientras la pestana este visible — sincroniza cambios hechos por el doctor sin recargar
+    this.polling.poll(45).pipe(takeUntil(this.destroy$)).subscribe(() => this.loadCitas());
+  }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
   onCitaAgendada(): void {

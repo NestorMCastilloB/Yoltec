@@ -17,11 +17,15 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\CalendarioAdminController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\PerfilMedicoController;
+use App\Http\Controllers\SeedDemoController;
 
 // Health check (Y20I-93)
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()->toISOString()]);
 });
+
+// Endpoint de un solo uso para sembrar demo en prod sin shell — gated por env + token
+Route::middleware('throttle:1,5')->post('/admin/seed-demo', [SeedDemoController::class, 'run']);
 
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min

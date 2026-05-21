@@ -4,6 +4,7 @@ import { Subject, of, forkJoin } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { Cita, CitaService } from '../../../../services/cita.service';
 import { RecetaService } from '../../../../services/receta.service';
+import { PollingService } from '../../../../services/polling.service';
 
 interface ActividadItem {
   tipo: string;
@@ -38,12 +39,18 @@ export class DoctorInicioComponent implements OnInit, OnDestroy {
 
   constructor(
     private citaService: CitaService,
-    private recetaService: RecetaService
+    private recetaService: RecetaService,
+    private polling: PollingService,
   ) {}
 
   ngOnInit(): void {
     this.todayFormatted = this.formatDisplayDate(new Date());
+    this.recargarDatos();
+    // Refresca cada 20s mientras la pestana este visible — doctor necesita ver citas nuevas sin recargar
+    this.polling.poll(20).pipe(takeUntil(this.destroy$)).subscribe(() => this.recargarDatos());
+  }
 
+  private recargarDatos(): void {
     forkJoin({
       citas: this.citaService.getCitas().pipe(catchError(() => of([] as Cita[]))),
       recetas: this.recetaService.getRecetas().pipe(catchError(() => of([] as any[])))

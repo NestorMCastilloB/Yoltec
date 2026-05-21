@@ -49,7 +49,8 @@ class _PerfilTabState extends State<PerfilTab> {
       final token =
           Provider.of<AuthService>(context, listen: false).token ?? '';
       final data = await ApiService.get('/perfil-medico', token: token);
-      final perfil = data['data'] ?? data;
+      // Backend devuelve { "perfil": {...} } — sin esta lectura la foto y demas campos vuelven nulos al recargar
+      final perfil = data['perfil'] ?? data['data'] ?? data;
       if (mounted) {
         setState(() {
           _nombre = (perfil['nombre'] ?? '').toString();

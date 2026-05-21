@@ -10,6 +10,7 @@ import { AdminService, Alumno, Doctor } from '../../../services/admin.service';
 import { CalendarioAdminService, DiaEspecial, TIPO_LABELS } from '../../../services/calendario-admin.service';
 import { AdminDashboardService, AdminStats } from '../dashboard/admin-dashboard.service';
 import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
+import { PollingService } from '../../../services/polling.service';
 
 interface UsuarioRow {
   key: string;
@@ -102,7 +103,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private adminService: AdminService,
     private calendarioService: CalendarioAdminService,
     private dashboardService: AdminDashboardService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private polling: PollingService,
   ) {
     this.updateCalLabel();
   }
@@ -112,6 +114,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminName = user ? `${user.nombre} ${user.apellido}` : 'Administrador';
     this.loadStats();
     this.loadPanelPreview();
+    // Refresca stats cada 60s mientras la pestana este visible — admin ve totales actualizados al agendarse citas
+    this.polling.poll(60).pipe(takeUntil(this.destroy$)).subscribe(() => this.loadStats());
   }
 
   get adminInitial(): string { return this.adminName.charAt(0).toUpperCase(); }
