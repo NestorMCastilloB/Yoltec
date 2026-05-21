@@ -1,12 +1,20 @@
 # ─── Python / IA ───────────────────────────────────
 IA/venv/
-IA/__pycache__/
-IA/*.pyc
 IA/.env
 IA/data/
 IA/*.pkl
 archive/
 *.csv
+
+# Python global (cualquier subcarpeta)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # ─── Laravel / Backend ─────────────────────────────
 backend/vendor/
@@ -26,6 +34,19 @@ backend/railway.toml
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+frontend/.vscode/
+
+# Node / JS global
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/cache
+.pnp.*
+coverage/
+.nyc_output/
 
 # ─── Flutter / Mobile ──────────────────────────────
 mobile/.dart_tool/
@@ -38,6 +59,16 @@ mobile/android/app/debug/
 mobile/android/app/profile/
 mobile/android/app/release/
 mobile/android/app/google-services.json
+mobile/android/key.properties
+mobile/ios/Runner/GoogleService-Info.plist
+
+# Keystores y firmas (Android/iOS)
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.mobileprovision
+*.cer
 
 # ─── Claude Code (IA asistente) ────────────────────
 CLAUDE.md
@@ -46,16 +77,24 @@ CLAUDE.md
 .graphifyignore
 graphify-out/
 
-# ─── General ───────────────────────────────────────
+# ─── General / OS / Editor ─────────────────────────
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 *.log
 *.zip
 *.rar
 *.tmp
 *.swp
+*.swo
+*~
+*.bak
+*.orig
+*.rej
 .vscode/
 .idea/
+*.iml
 .aider*
 
 # ─── Secretos (paranoia) ───────────────────────────
@@ -93,3 +132,8 @@ docs/*.odt
 docs/*.docx
 docs/*.html
 docs/presentacion-pentesting.md
+
+# ─── Docs internos (no para repo público) ──────────
+docs/sprint-activo.md
+docs/*-interno.md
+docs/notas-*.md
