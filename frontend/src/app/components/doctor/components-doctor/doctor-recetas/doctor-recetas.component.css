@@ -536,3 +536,10 @@
 
   .drawer { width: 100vw; }
 }
+
+@media (max-width: 480px) {
+  .rx-search { width: 100%; }
+  .filtros-bar { flex-wrap: wrap; gap: 8px; }
+  .header-actions { flex-wrap: wrap; }
+  .rx-row { padding: 10px 12px; }
+}

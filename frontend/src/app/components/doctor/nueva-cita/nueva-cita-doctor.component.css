@@ -415,3 +415,26 @@
 .nc-btn.outline:hover {
   background: var(--yol-primary-50);
 }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .nc-wrap { padding: 16px; }
+  .nc-header h2 { font-size: 20px; }
+  .nc-steps { gap: 8px; }
+  .nc-step { font-size: 12px; }
+  .nc-step-sep { display: none; }
+  .nc-body { padding: 16px; }
+  .nc-search-row { flex-direction: column; gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  .nc-wrap { padding: 12px; }
+  .nc-header h2 { font-size: 17px; }
+  .nc-sub { font-size: 12px; }
+  .nc-step-n { width: 24px; height: 24px; font-size: 12px; }
+  .nc-body { padding: 12px; }
+  .nc-search-field input { font-size: 16px; }
+  .nc-student { padding: 10px 12px; gap: 10px; }
+  .nc-av { width: 36px; height: 36px; font-size: 13px; }
+  .nc-btn { width: 100%; }
+}

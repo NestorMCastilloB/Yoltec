@@ -480,3 +480,11 @@
   .filters { flex-direction: column; align-items: stretch; }
   .ffld input, .ffld select { min-width: 0; width: 100%; }
 }
+
+@media (max-width: 480px) {
+  .pe-header, .pe-content { padding-left: 14px; padding-right: 14px; }
+  .pe-header h2 { font-size: 18px; }
+  .pc-card { padding: 14px; }
+  .pc-actions { flex-wrap: wrap; }
+  .pc-actions button { width: 100%; }
+}

@@ -1456,3 +1456,13 @@
   .citas-search-bar { flex-direction: column; align-items: stretch; }
   .filtros-inline { flex-wrap: wrap; }
 }
+
+@media (max-width: 480px) {
+  .kpis { grid-template-columns: 1fr; gap: 10px; }
+  .kpi-card { padding: 14px; }
+  .citas-actions-bar { flex-wrap: wrap; gap: 8px; }
+  .week-grid-table { font-size: 12px; }
+  .cita-row { padding: 10px 12px; gap: 8px; }
+  .badge-prioridad { font-size: 10px; padding: 2px 6px; }
+  .proxima-hero { padding: 14px; }
+}

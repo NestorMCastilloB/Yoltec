@@ -337,3 +337,9 @@
     grid-column: span 1;
   }
 }
+
+@media (max-width: 480px) {
+  .ficha-header { flex-wrap: wrap; gap: 12px; }
+  .ficha-header h2 { font-size: 18px; }
+  .info-card { padding: var(--yol-s-4); }
+}

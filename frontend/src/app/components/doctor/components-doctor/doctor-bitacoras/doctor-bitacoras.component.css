@@ -494,3 +494,11 @@
   .kpis { grid-template-columns: 1fr 1fr; }
   .drawer { width: 100vw; }
 }
+
+@media (max-width: 480px) {
+  .kpis { grid-template-columns: 1fr; gap: 10px; }
+  .bita-search { min-width: unset; width: 100%; }
+  .filtros-bar { flex-wrap: wrap; }
+  .bita-row { padding: 10px 12px; }
+  .header-actions { flex-wrap: wrap; gap: 8px; }
+}

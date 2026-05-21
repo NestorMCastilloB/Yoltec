@@ -276,3 +276,10 @@ tr:hover td {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .kpis { gap: 10px; }
+  .kpi, .card { padding: 14px; }
+  .kpi-v { font-size: 24px; }
+  .card-head h2 { font-size: 15px; }
+}
