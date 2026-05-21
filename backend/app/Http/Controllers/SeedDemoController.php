@@ -17,8 +17,10 @@ class SeedDemoController extends Controller
 {
     public function run(Request $request): JsonResponse
     {
-        $expected = env('SEED_DEMO_TOKEN');
-        $enabled  = filter_var(env('SEED_DEMO_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+        // getenv() en lugar de env() porque con config:cache (default en deploys) env() retorna null en runtime
+        $expected = getenv('SEED_DEMO_TOKEN') ?: ($_ENV['SEED_DEMO_TOKEN'] ?? null);
+        $rawEnabled = getenv('SEED_DEMO_ENABLED') ?: ($_ENV['SEED_DEMO_ENABLED'] ?? false);
+        $enabled = filter_var($rawEnabled, FILTER_VALIDATE_BOOLEAN);
 
         // 404 cuando esta deshabilitado para no revelar la existencia del endpoint
         if (! $enabled || ! $expected) {
