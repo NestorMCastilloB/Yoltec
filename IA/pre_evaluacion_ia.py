@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Servicio de IA para pre-evaluación médica de Yoltec.
-Usa modelo Gradient Boosting entrenado con dataset real + datos sintéticos.
-Lee JSON de stdin, escribe JSON a stdout.
+Pre-evaluación médica de Yoltec (modo CLI stdin/stdout).
+Usa modelo HistGradientBoosting entrenado con dataset sintético expandido.
 """
 
 import sys
@@ -14,36 +13,63 @@ import numpy as np
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 FEATURE_NAMES = [
-    'fiebre', 'tos', 'tos_seca', 'dolor_garganta', 'congestion_nasal',
-    'estornudos', 'dolor_cabeza', 'dolor_cuerpo', 'cansancio', 'nauseas',
-    'vomito', 'diarrea', 'dolor_abdominal', 'perdida_apetito', 'perdida_olfato',
-    'erupcion_piel', 'picazon', 'ojos_rojos', 'lagrimeo', 'dolor_orinar',
-    'frecuencia_orinar', 'mareos', 'palpitaciones', 'sensibilidad_luz',
-    'dolor_articulaciones', 'sudoracion', 'escalofrios', 'dolor_espalda',
-    'dificultad_respirar', 'fiebre_alta', 'sangre_orina', 'orina_turbia',
-    'confusion', 'rigidez_cuello',
+    'fiebre', 'fiebre_alta', 'tos', 'tos_seca', 'dolor_garganta',
+    'congestion_nasal', 'estornudos', 'dificultad_respirar',
+    'dolor_cabeza', 'mareos', 'confusion', 'sensibilidad_luz',
+    'rigidez_cuello', 'perdida_balance', 'hormigueo', 'desmayo',
+    'dolor_cuerpo', 'dolor_articulaciones', 'dolor_espalda',
+    'dolor_pecho', 'debilidad_muscular',
+    'nauseas', 'vomito', 'diarrea', 'dolor_abdominal',
+    'perdida_apetito', 'ardor_estomago', 'estrenimiento',
+    'dolor_orinar', 'frecuencia_orinar', 'sangre_orina', 'orina_turbia',
+    'dolor_menstrual', 'sangrado_anormal',
+    'erupcion_piel', 'picazon', 'hinchazon', 'enrojecimiento',
+    'ojos_rojos', 'lagrimeo', 'vision_borrosa', 'dolor_oido', 'secrecion_oido',
+    'cansancio', 'sudoracion', 'escalofrios', 'perdida_olfato',
+    'palpitaciones', 'sequedad_boca', 'deshidratacion',
+    'ansiedad', 'insomnio', 'irritabilidad', 'tristeza_persistente',
+    'sangrado_severo', 'golpe_reciente', 'quemadura',
 ]
 
 FEATURE_LABELS = {
-    'fiebre': 'Fiebre', 'tos': 'Tos', 'tos_seca': 'Tos seca',
+    'fiebre': 'Fiebre', 'fiebre_alta': 'Fiebre alta',
+    'tos': 'Tos', 'tos_seca': 'Tos seca',
     'dolor_garganta': 'Dolor de garganta', 'congestion_nasal': 'Congestión nasal',
-    'estornudos': 'Estornudos frecuentes', 'dolor_cabeza': 'Dolor de cabeza',
-    'dolor_cuerpo': 'Dolor en el cuerpo', 'cansancio': 'Cansancio / fatiga',
+    'estornudos': 'Estornudos frecuentes', 'dificultad_respirar': 'Dificultad para respirar',
+    'dolor_cabeza': 'Dolor de cabeza', 'mareos': 'Mareos',
+    'confusion': 'Confusión o desorientación', 'sensibilidad_luz': 'Sensibilidad a la luz',
+    'rigidez_cuello': 'Rigidez de cuello', 'perdida_balance': 'Pérdida de equilibrio',
+    'hormigueo': 'Hormigueo en extremidades', 'desmayo': 'Desmayo o pérdida de conciencia',
+    'dolor_cuerpo': 'Dolor en el cuerpo', 'dolor_articulaciones': 'Dolor en articulaciones',
+    'dolor_espalda': 'Dolor de espalda', 'dolor_pecho': 'Dolor en el pecho',
+    'debilidad_muscular': 'Debilidad muscular',
     'nauseas': 'Náuseas', 'vomito': 'Vómito', 'diarrea': 'Diarrea',
     'dolor_abdominal': 'Dolor abdominal', 'perdida_apetito': 'Pérdida de apetito',
-    'perdida_olfato': 'Pérdida del olfato o gusto', 'erupcion_piel': 'Erupción en la piel',
-    'picazon': 'Picazón', 'ojos_rojos': 'Ojos rojos', 'lagrimeo': 'Lagrimeo excesivo',
+    'ardor_estomago': 'Ardor estomacal / acidez', 'estrenimiento': 'Estreñimiento',
     'dolor_orinar': 'Dolor al orinar', 'frecuencia_orinar': 'Frecuencia urinaria aumentada',
-    'mareos': 'Mareos', 'palpitaciones': 'Palpitaciones', 'sensibilidad_luz': 'Sensibilidad a la luz',
-    'dolor_articulaciones': 'Dolor en articulaciones', 'sudoracion': 'Sudoración excesiva',
-    'escalofrios': 'Escalofríos', 'dolor_espalda': 'Dolor de espalda',
-    'dificultad_respirar': 'Dificultad para respirar', 'fiebre_alta': 'Fiebre alta',
     'sangre_orina': 'Sangre en la orina', 'orina_turbia': 'Orina turbia',
-    'confusion': 'Confusión o desorientación', 'rigidez_cuello': 'Rigidez de cuello',
+    'dolor_menstrual': 'Dolor menstrual', 'sangrado_anormal': 'Sangrado anormal',
+    'erupcion_piel': 'Erupción en la piel', 'picazon': 'Picazón',
+    'hinchazon': 'Hinchazón', 'enrojecimiento': 'Enrojecimiento de piel',
+    'ojos_rojos': 'Ojos rojos', 'lagrimeo': 'Lagrimeo excesivo',
+    'vision_borrosa': 'Visión borrosa', 'dolor_oido': 'Dolor de oído',
+    'secrecion_oido': 'Secreción de oído',
+    'cansancio': 'Cansancio / fatiga', 'sudoracion': 'Sudoración excesiva',
+    'escalofrios': 'Escalofríos', 'perdida_olfato': 'Pérdida del olfato o gusto',
+    'palpitaciones': 'Palpitaciones', 'sequedad_boca': 'Sequedad de boca',
+    'deshidratacion': 'Deshidratación',
+    'ansiedad': 'Ansiedad', 'insomnio': 'Insomnio',
+    'irritabilidad': 'Irritabilidad', 'tristeza_persistente': 'Tristeza persistente',
+    'sangrado_severo': 'Sangrado severo', 'golpe_reciente': 'Golpe o trauma reciente',
+    'quemadura': 'Quemadura',
 }
 
 PALABRAS_POSITIVAS = ['sí', 'si', 'leve', 'moderado', 'severo', 'alta', 'intenso', 'frecuente', 'yes']
 PALABRAS_NEGATIVAS = ['no', 'ninguno', 'ninguna', 'ausente', 'nada']
+
+# Confianza mínima por clase: con ~50 clases, la prob top suele ser <0.4 incluso en casos claros
+CONFIANZA_MIN_DIAGNOSTICO = 0.18
+PROB_MIN_INCLUIR_POSIBLE = 0.04
 
 
 def _load_model():
@@ -104,20 +130,31 @@ def obtener_sintomas_detectados(respuestas):
 
 
 def generar_recomendacion(diagnostico, confianza):
-    if confianza >= 0.75:
-        return f"Los síntomas sugieren con alta probabilidad {diagnostico}. Se recomienda atención médica prioritaria. Este análisis es solo orientativo."
-    elif confianza >= 0.50:
-        return f"Los síntomas son compatibles con {diagnostico}. Se recomienda consulta médica para confirmar el diagnóstico."
-    elif confianza >= 0.30:
-        return f"Los síntomas podrían estar relacionados con {diagnostico}. Monitorea la evolución y consulta al médico si persisten."
-    else:
-        return "Los síntomas no son concluyentes. Se recomienda consulta médica para evaluación más detallada."
+    # Clases especiales que NO son enfermedad sino redirección
+    if diagnostico == 'Trauma o Lesión Física':
+        return ("Los síntomas sugieren una lesión física (golpe, caída, quemadura). "
+                "Esto no es una enfermedad infecciosa: acude a atención médica presencial "
+                "o, si es severo, a urgencias. La IA no evalúa traumatismos.")
+    if diagnostico == 'Sin Patrón Claro':
+        return ("Los síntomas reportados no corresponden a un cuadro clínico claro. "
+                "Se recomienda consulta médica para una valoración personalizada.")
+    if confianza < CONFIANZA_MIN_DIAGNOSTICO:
+        return ("Los síntomas no son lo suficientemente específicos para una orientación clara. "
+                "Se recomienda consulta médica para evaluación detallada.")
+    if confianza >= 0.55:
+        return (f"Los síntomas sugieren con alta probabilidad {diagnostico}. "
+                "Se recomienda atención médica prioritaria. Este análisis es solo orientativo.")
+    if confianza >= 0.35:
+        return (f"Los síntomas son compatibles con {diagnostico}. "
+                "Se recomienda consulta médica para confirmar el diagnóstico.")
+    return (f"Los síntomas podrían estar relacionados con {diagnostico}. "
+            "Monitorea la evolución y consulta al médico si persisten.")
 
 
 def predecir(respuestas):
     model, le, feature_names = _load_model()
     if model is None:
-        return {'success': False, 'error': 'Modelo no encontrado. Ejecuta train_model.py primero.'}
+        return {'success': False, 'error': 'Modelo no encontrado. Ejecuta train_model_light.py primero.'}
 
     X = construir_vector(respuestas, feature_names)
     probs = model.predict_proba(X)[0]
@@ -125,25 +162,39 @@ def predecir(respuestas):
 
     posibles = [
         {'enfermedad': le.classes_[i], 'confianza': min(round(float(probs[i]), 3), 0.95)}
-        for i in top_indices if probs[i] > 0.05
+        for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
     ]
+
+    sintomas_detectados = obtener_sintomas_detectados(respuestas)
 
     if not posibles:
         return {
             'success': True,
             'diagnostico_principal': 'Sin diagnóstico claro',
             'confianza': 0.0,
-            'sintomas_detectados': obtener_sintomas_detectados(respuestas),
+            'sintomas_detectados': sintomas_detectados,
             'posibles_enfermedades': [],
             'recomendacion': 'Los síntomas no son concluyentes. Se recomienda consulta médica.',
         }
 
     principal = posibles[0]
+
+    # Si la confianza es muy baja, no exponemos un nombre de enfermedad: degradamos
+    if principal['confianza'] < CONFIANZA_MIN_DIAGNOSTICO and principal['enfermedad'] not in ('Trauma o Lesión Física', 'Sin Patrón Claro'):
+        return {
+            'success': True,
+            'diagnostico_principal': 'Sin diagnóstico claro',
+            'confianza': principal['confianza'],
+            'sintomas_detectados': sintomas_detectados,
+            'posibles_enfermedades': posibles,
+            'recomendacion': generar_recomendacion('Sin diagnóstico', principal['confianza']),
+        }
+
     return {
         'success': True,
         'diagnostico_principal': principal['enfermedad'],
         'confianza': principal['confianza'],
-        'sintomas_detectados': obtener_sintomas_detectados(respuestas),
+        'sintomas_detectados': sintomas_detectados,
         'posibles_enfermedades': posibles,
         'recomendacion': generar_recomendacion(principal['enfermedad'], principal['confianza']),
     }

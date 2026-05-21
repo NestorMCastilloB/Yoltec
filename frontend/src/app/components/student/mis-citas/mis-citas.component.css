@@ -119,6 +119,19 @@
   gap: var(--yol-s-3);
 }
 
+/* Header de mes (canceladas agrupadas) */
+.mc-month-header {
+  font-size: var(--yol-fs-cap);
+  font-weight: 600;
+  color: var(--yol-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: var(--yol-s-3) 0 var(--yol-s-2);
+}
+.mc-month-header:not(:first-child) {
+  margin-top: var(--yol-s-2);
+}
+
 .mc-cita-card {
   background: var(--yol-surface);
   border: 1px solid var(--yol-border);

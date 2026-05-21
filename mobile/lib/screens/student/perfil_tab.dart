@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
+import 'package:yoltec_mobile/services/theme_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
 
 class PerfilTab extends StatefulWidget {
@@ -125,8 +127,8 @@ class _PerfilTabState extends State<PerfilTab> {
         'foto',
         token: token,
       );
-      final nuevaFoto =
-          (result['data'] ?? result)['foto_perfil']?.toString();
+      final payload = (result['data'] ?? result) as Map<String, dynamic>;
+      final nuevaFoto = (payload['foto_url'] ?? payload['foto_perfil'])?.toString();
       if (mounted) {
         setState(() => _fotoPerfil = nuevaFoto);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -242,6 +244,9 @@ class _PerfilTabState extends State<PerfilTab> {
               if (_telefono.isNotEmpty)
                 _Fila(label: 'Teléfono', valor: _telefono),
             ]),
+            const SizedBox(height: 12),
+            const _SeccionTitulo('Preferencias'),
+            const _ToggleTema(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
               child: OutlinedButton.icon(
@@ -345,13 +350,7 @@ class _Cabecera extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: (fotoUrl != null && fotoUrl!.isNotEmpty)
-                    ? Image.network(
-                        fotoUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _avatarTexto(),
-                      )
-                    : _avatarTexto(),
+                child: _construirFoto(),
               ),
               Positioned(
                 bottom: 0,
@@ -439,6 +438,29 @@ class _Cabecera extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Backend devuelve base64 (no URL) en foto_perfil — decide por prefijo
+  Widget _construirFoto() {
+    final raw = fotoUrl ?? '';
+    if (raw.isEmpty) return _avatarTexto();
+    if (raw.startsWith('http')) {
+      return Image.network(
+        raw,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _avatarTexto(),
+      );
+    }
+    try {
+      final b64 = raw.contains(',') ? raw.split(',').last : raw;
+      return Image.memory(
+        base64Decode(b64),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _avatarTexto(),
+      );
+    } catch (_) {
+      return _avatarTexto();
+    }
   }
 }
 
@@ -708,6 +730,58 @@ class _EditarInfoMedicaDialogState extends State<_EditarInfoMedicaDialog> {
               : const Text('Guardar'),
         ),
       ],
+    );
+  }
+}
+
+class _ToggleTema extends StatelessWidget {
+  const _ToggleTema();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppTheme.surfaceDark : AppTheme.surface;
+    final textMain = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary;
+    final subtle = isDark ? AppTheme.textSubtleDark : AppTheme.textSubtle;
+
+    return Consumer<ThemeService>(
+      builder: (_, theme, __) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: SwitchListTile(
+          value: theme.isDark,
+          onChanged: (_) => theme.toggle(),
+          activeThumbColor: AppTheme.primaryColor,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          secondary: Icon(
+            theme.isDark ? Icons.dark_mode : Icons.light_mode,
+            color: AppTheme.primaryColor,
+          ),
+          title: Text(
+            'Modo oscuro',
+            style: TextStyle(
+              fontSize: 15,
+              color: textMain,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          subtitle: Text(
+            theme.isDark ? 'Activado' : 'Desactivado',
+            style: TextStyle(fontSize: 12, color: subtle),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -8,7 +8,6 @@ import 'package:yoltec_mobile/screens/student/widgets/student_widgets.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/services/receta_service.dart';
-import 'package:yoltec_mobile/services/theme_service.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -54,13 +53,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               Text('Hola, ${auth.currentUser?.nombre ?? ''}'),
         ),
         actions: [
-          Consumer<ThemeService>(
-            builder: (_, theme, __) => IconButton(
-              icon: Icon(theme.isDark ? Icons.light_mode : Icons.dark_mode),
-              tooltip: theme.isDark ? 'Modo claro' : 'Modo oscuro',
-              onPressed: () => theme.toggle(),
-            ),
-          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
