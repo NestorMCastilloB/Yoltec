@@ -73,12 +73,16 @@ INSTRUCCIONES:
 - Después de 3 a 5 respuestas del paciente, concluye la entrevista
 
 LISTA DE SÍNTOMAS RECONOCIDOS (usa exactamente estos identificadores en el JSON):
-fiebre, tos, tos_seca, dolor_garganta, congestion_nasal, estornudos, dolor_cabeza,
-dolor_cuerpo, cansancio, nauseas, vomito, diarrea, dolor_abdominal, perdida_apetito,
-perdida_olfato, erupcion_piel, picazon, ojos_rojos, lagrimeo, dolor_orinar,
-frecuencia_orinar, mareos, palpitaciones, sensibilidad_luz, dolor_articulaciones,
-sudoracion, escalofrios, dolor_espalda, dificultad_respirar, fiebre_alta,
-sangre_orina, orina_turbia, confusion, rigidez_cuello
+fiebre, fiebre_alta, tos, tos_seca, dolor_garganta, congestion_nasal, estornudos,
+dificultad_respirar, dolor_cabeza, mareos, confusion, sensibilidad_luz, rigidez_cuello,
+perdida_balance, hormigueo, desmayo, dolor_cuerpo, dolor_articulaciones, dolor_espalda,
+dolor_pecho, debilidad_muscular, nauseas, vomito, diarrea, dolor_abdominal,
+perdida_apetito, ardor_estomago, estrenimiento, dolor_orinar, frecuencia_orinar,
+sangre_orina, orina_turbia, dolor_menstrual, sangrado_anormal, erupcion_piel, picazon,
+hinchazon, enrojecimiento, ojos_rojos, lagrimeo, vision_borrosa, dolor_oido,
+secrecion_oido, cansancio, sudoracion, escalofrios, perdida_olfato, palpitaciones,
+sequedad_boca, deshidratacion, ansiedad, insomnio, irritabilidad, tristeza_persistente,
+sangrado_severo, golpe_reciente, quemadura
 
 CUÁNDO TERMINAR:
 Cuando tengas suficiente información (mínimo 3 respuestas del paciente), escribe un mensaje de cierre empático y luego agrega exactamente:
@@ -92,6 +96,44 @@ REGLAS DEL JSON:
 - recomendacion: una oración indicando si debe ir urgente o puede esperar consulta normal
 - NO incluyas el marcador hasta tener al menos 3 respuestas del paciente
 - NO intentes adivinar la enfermedad, el sistema médico la determinará automáticamente"""
+
+# ─── Sanity check de emergencias / trauma ────────────────────────────────────
+# Frases que indican lesión física, accidente o emergencia: NO pasamos por el clasificador.
+EMERGENCIA_KEYWORDS = [
+    'atropell', 'atropellaron', 'me chocaron', 'choque', 'accidente', 'auto',
+    'camion', 'camión', 'moto', 'motocicleta', 'bicicleta',
+    'me cai', 'me caí', 'me caigo', 'fractura', 'fracturé', 'fracture',
+    'hueso roto', 'roto', 'dislocad', 'esguince',
+    'apuñal', 'apunal', 'me cortaron', 'cuchillo', 'navaja', 'arma',
+    'balazo', 'disparo', 'tiro',
+    'quemadura grave', 'quemadura severa', 'me queme', 'me quemé',
+    'incendio', 'fuego', 'electrocut', 'descarga eléctrica',
+    'mucha sangre', 'sangro mucho', 'no para de sangrar', 'hemorragia',
+    'intoxicacion', 'intoxicación', 'envenen', 'tome veneno',
+    'suicid', 'me quiero matar', 'no quiero vivir',
+    'sobredosis', 'overdose',
+    'ahog', 'me ahogo', 'no respiro', 'asfixi',
+    'mordedura', 'me mordio', 'me mordió', 'serpiente', 'perro me mordió',
+    'convulsi', 'ataque',
+    'inconsciente', 'no responde', 'desmay',
+]
+
+EMERGENCIA_MESSAGE = (
+    "Lo que describes parece una emergencia o lesión física que requiere atención presencial "
+    "inmediata. Yoltec es un sistema de pre-evaluación para malestares comunes, no un servicio "
+    "de urgencias.\n\n"
+    "• Si estás en peligro, llama al 911.\n"
+    "• Si es una lesión que no puede esperar, acude al servicio médico universitario o a "
+    "urgencias del hospital más cercano.\n"
+    "• Si ya estás siendo atendido, comenta los detalles directamente al médico."
+)
+
+
+def detectar_emergencia(text: str) -> bool:
+    if not text:
+        return False
+    t = text.lower()
+    return any(kw in t for kw in EMERGENCIA_KEYWORDS)
 
 # ─── Cargar modelo sklearn (fallback) ───────────────────────────────────────
 model = None
@@ -122,22 +164,41 @@ def load_model():
 
 # ─── Constantes (sklearn) ────────────────────────────────────────────────────
 FEATURE_LABELS = {
-    'fiebre': 'Fiebre', 'tos': 'Tos', 'tos_seca': 'Tos seca',
+    'fiebre': 'Fiebre', 'fiebre_alta': 'Fiebre alta',
+    'tos': 'Tos', 'tos_seca': 'Tos seca',
     'dolor_garganta': 'Dolor de garganta', 'congestion_nasal': 'Congestión nasal',
-    'estornudos': 'Estornudos frecuentes', 'dolor_cabeza': 'Dolor de cabeza',
-    'dolor_cuerpo': 'Dolor en el cuerpo', 'cansancio': 'Cansancio / fatiga',
+    'estornudos': 'Estornudos frecuentes', 'dificultad_respirar': 'Dificultad para respirar',
+    'dolor_cabeza': 'Dolor de cabeza', 'mareos': 'Mareos',
+    'confusion': 'Confusión o desorientación', 'sensibilidad_luz': 'Sensibilidad a la luz',
+    'rigidez_cuello': 'Rigidez de cuello', 'perdida_balance': 'Pérdida de equilibrio',
+    'hormigueo': 'Hormigueo en extremidades', 'desmayo': 'Desmayo o pérdida de conciencia',
+    'dolor_cuerpo': 'Dolor en el cuerpo', 'dolor_articulaciones': 'Dolor en articulaciones',
+    'dolor_espalda': 'Dolor de espalda', 'dolor_pecho': 'Dolor en el pecho',
+    'debilidad_muscular': 'Debilidad muscular',
     'nauseas': 'Náuseas', 'vomito': 'Vómito', 'diarrea': 'Diarrea',
     'dolor_abdominal': 'Dolor abdominal', 'perdida_apetito': 'Pérdida de apetito',
-    'perdida_olfato': 'Pérdida del olfato o gusto', 'erupcion_piel': 'Erupción en la piel',
-    'picazon': 'Picazón', 'ojos_rojos': 'Ojos rojos', 'lagrimeo': 'Lagrimeo excesivo',
+    'ardor_estomago': 'Ardor estomacal / acidez', 'estrenimiento': 'Estreñimiento',
     'dolor_orinar': 'Dolor al orinar', 'frecuencia_orinar': 'Frecuencia urinaria aumentada',
-    'mareos': 'Mareos', 'palpitaciones': 'Palpitaciones', 'sensibilidad_luz': 'Sensibilidad a la luz',
-    'dolor_articulaciones': 'Dolor en articulaciones', 'sudoracion': 'Sudoración excesiva',
-    'escalofrios': 'Escalofríos', 'dolor_espalda': 'Dolor de espalda',
-    'dificultad_respirar': 'Dificultad para respirar', 'fiebre_alta': 'Fiebre alta',
     'sangre_orina': 'Sangre en la orina', 'orina_turbia': 'Orina turbia',
-    'confusion': 'Confusión o desorientación', 'rigidez_cuello': 'Rigidez de cuello',
+    'dolor_menstrual': 'Dolor menstrual', 'sangrado_anormal': 'Sangrado anormal',
+    'erupcion_piel': 'Erupción en la piel', 'picazon': 'Picazón',
+    'hinchazon': 'Hinchazón', 'enrojecimiento': 'Enrojecimiento de piel',
+    'ojos_rojos': 'Ojos rojos', 'lagrimeo': 'Lagrimeo excesivo',
+    'vision_borrosa': 'Visión borrosa', 'dolor_oido': 'Dolor de oído',
+    'secrecion_oido': 'Secreción de oído',
+    'cansancio': 'Cansancio / fatiga', 'sudoracion': 'Sudoración excesiva',
+    'escalofrios': 'Escalofríos', 'perdida_olfato': 'Pérdida del olfato o gusto',
+    'palpitaciones': 'Palpitaciones', 'sequedad_boca': 'Sequedad de boca',
+    'deshidratacion': 'Deshidratación',
+    'ansiedad': 'Ansiedad', 'insomnio': 'Insomnio',
+    'irritabilidad': 'Irritabilidad', 'tristeza_persistente': 'Tristeza persistente',
+    'sangrado_severo': 'Sangrado severo', 'golpe_reciente': 'Golpe o trauma reciente',
+    'quemadura': 'Quemadura',
 }
+
+# Confianza mínima por clase con ~50 clases (la prob top suele ser <0.4 incluso en casos claros)
+CONFIANZA_MIN_DIAGNOSTICO = 0.18
+PROB_MIN_INCLUIR_POSIBLE = 0.04
 
 PALABRAS_POSITIVAS = ['sí', 'si', 'leve', 'moderado', 'severo', 'alta', 'intenso', 'frecuente', 'yes']
 PALABRAS_NEGATIVAS = ['no', 'ninguno', 'ninguna', 'ausente', 'nada']
@@ -168,13 +229,20 @@ def respuesta_a_severidad(respuesta: str) -> str:
 
 
 def generar_recomendacion(diagnostico: str, confianza: float) -> str:
-    if confianza >= 0.75:
+    if diagnostico == 'Trauma o Lesión Física':
+        return ("Los síntomas sugieren una lesión física (golpe, caída, quemadura). "
+                "Esto no es una enfermedad infecciosa: acude a atención médica presencial "
+                "o, si es severo, a urgencias. La IA no evalúa traumatismos.")
+    if diagnostico == 'Sin Patrón Claro':
+        return ("Los síntomas reportados no corresponden a un cuadro clínico claro. "
+                "Se recomienda consulta médica para valoración personalizada.")
+    if confianza < CONFIANZA_MIN_DIAGNOSTICO:
+        return "Los síntomas no son lo suficientemente específicos. Se recomienda consulta médica para evaluación."
+    if confianza >= 0.55:
         return f"Los síntomas sugieren con alta probabilidad {diagnostico}. Se recomienda atención médica prioritaria."
-    elif confianza >= 0.50:
+    if confianza >= 0.35:
         return f"Los síntomas son compatibles con {diagnostico}. Se recomienda consulta médica para confirmar."
-    elif confianza >= 0.30:
-        return f"Los síntomas podrían estar relacionados con {diagnostico}. Consulta al médico si persisten."
-    return "Los síntomas no son concluyentes. Se recomienda consulta médica para evaluación."
+    return f"Los síntomas podrían estar relacionados con {diagnostico}. Consulta al médico si persisten."
 
 
 # ─── Schemas ─────────────────────────────────────────────────────────────────
@@ -233,6 +301,22 @@ def chat(request: Request, req: ChatRequest):
     un diagnóstico preliminar estructurado.
     """
     try:
+        # Sanity check: si el último mensaje del usuario sugiere emergencia/trauma,
+        # cortamos antes de invocar al LLM y respondemos con redirección a urgencias.
+        ultimo_user = next((m.content for m in reversed(req.messages) if m.role == 'user'), '')
+        if detectar_emergencia(ultimo_user):
+            return {
+                "message": EMERGENCIA_MESSAGE,
+                "finished": True,
+                "diagnostico": {
+                    "diagnostico_principal": "Emergencia / Trauma",
+                    "confianza": 1.0,
+                    "sintomas_detectados": [],
+                    "posibles_enfermedades": [],
+                    "recomendacion": "Atención médica presencial urgente. Llama al 911 si hay peligro inmediato.",
+                }
+            }
+
         messages_payload = [
             {"role": m.role, "content": m.content}
             for m in req.messages
@@ -293,18 +377,30 @@ def chat(request: Request, req: ChatRequest):
                         "enfermedad": le.classes_[i],
                         "confianza": round(float(probs[i]), 3)
                     }
-                    for i in top_indices if probs[i] > 0.05
+                    for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
                 ]
 
                 if posibles:
                     principal = posibles[0]
-                    diagnostico = {
-                        "diagnostico_principal": principal["enfermedad"],
-                        "confianza": principal["confianza"],
-                        "sintomas_detectados": sintomas_identificados,
-                        "posibles_enfermedades": posibles,
-                        "recomendacion": generar_recomendacion(principal["enfermedad"], principal["confianza"])
-                    }
+                    nombre = principal["enfermedad"]
+                    conf = principal["confianza"]
+                    # Degradar a "Sin diagnóstico claro" si confianza < umbral y no es clase especial
+                    if conf < CONFIANZA_MIN_DIAGNOSTICO and nombre not in ('Trauma o Lesión Física', 'Sin Patrón Claro'):
+                        diagnostico = {
+                            "diagnostico_principal": "Sin diagnóstico claro",
+                            "confianza": conf,
+                            "sintomas_detectados": sintomas_identificados,
+                            "posibles_enfermedades": posibles,
+                            "recomendacion": generar_recomendacion("Sin diagnóstico", conf)
+                        }
+                    else:
+                        diagnostico = {
+                            "diagnostico_principal": nombre,
+                            "confianza": conf,
+                            "sintomas_detectados": sintomas_identificados,
+                            "posibles_enfermedades": posibles,
+                            "recomendacion": generar_recomendacion(nombre, conf)
+                        }
                 else:
                     diagnostico = {
                         "diagnostico_principal": "Sin diagnóstico claro",
@@ -355,7 +451,7 @@ def predict(request: Request, req: PredictRequest):
 
     posibles = [
         {'enfermedad': le.classes_[i], 'confianza': min(round(float(probs[i]), 3), 0.95)}
-        for i in top_indices if probs[i] > 0.05
+        for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
     ]
 
     sintomas_detectados = []
@@ -375,13 +471,26 @@ def predict(request: Request, req: PredictRequest):
         }
 
     principal = posibles[0]
+    nombre = principal['enfermedad']
+    conf = principal['confianza']
+    # Degradar si confianza < umbral y no es clase especial
+    if conf < CONFIANZA_MIN_DIAGNOSTICO and nombre not in ('Trauma o Lesión Física', 'Sin Patrón Claro'):
+        return {
+            'success': True,
+            'diagnostico_principal': 'Sin diagnóstico claro',
+            'confianza': conf,
+            'sintomas_detectados': sintomas_detectados,
+            'posibles_enfermedades': posibles,
+            'recomendacion': generar_recomendacion('Sin diagnóstico', conf),
+        }
+
     return {
         'success': True,
-        'diagnostico_principal': principal['enfermedad'],
-        'confianza': principal['confianza'],
+        'diagnostico_principal': nombre,
+        'confianza': conf,
         'sintomas_detectados': sintomas_detectados,
         'posibles_enfermedades': posibles,
-        'recomendacion': generar_recomendacion(principal['enfermedad'], principal['confianza']),
+        'recomendacion': generar_recomendacion(nombre, conf),
     }
 
 
