@@ -38,6 +38,9 @@ MAIL_FROM_NAME=${MAIL_FROM_NAME:-Yoltec}
 RESEND_API_KEY=${RESEND_API_KEY}
 
 IA_SERVICE_URL=${IA_SERVICE_URL:-https://yoltec-production.up.railway.app}
+
+SEED_DEMO_ENABLED=${SEED_DEMO_ENABLED:-false}
+SEED_DEMO_TOKEN=${SEED_DEMO_TOKEN}
 EOF
 else
   echo "==> Modo local Docker: usando variables de entorno del contenedor" >&2
