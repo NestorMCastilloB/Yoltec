@@ -450,3 +450,31 @@ input[type=checkbox]:checked::after {
 
 .btn-pri-sm:hover:not(:disabled) { filter: brightness(0.9); }
 .btn-pri-sm:disabled { opacity: 0.6; cursor: default; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .admin-main { padding: 24px 20px 40px; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .search-box { max-width: 100%; }
+  .table-section { overflow-x: auto; }
+  table { min-width: 640px; }
+}
+
+@media (max-width: 600px) {
+  .admin-main { padding: 20px 16px 40px 16px; }
+  .page-head h1 { font-size: 20px; padding-left: 56px; min-height: 36px; display: flex; align-items: center; }
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; flex-shrink: 0; }
+  .btn-pri { width: 100%; justify-content: center; padding: 10px 14px; }
+}
+
+@media (max-width: 480px) {
+  .admin-main { padding: 16px 12px 32px; }
+  .page-head h1 { font-size: 18px; }
+  .btn-pri, .btn-pri-sm, .btn-ghost, .btn-danger { width: 100%; }
+}

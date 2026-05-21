@@ -429,3 +429,27 @@ tr:last-child td { border-bottom: 0; }
   margin-top: 6px;
 }
 
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .main { padding: 24px 20px 40px; }
+  .cols { grid-template-columns: 1fr; }
+  .page-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .btn-primary { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 600px) {
+  .main { padding: 20px 16px 40px 16px; }
+  .page-head h1 { padding-left: 56px; min-height: 36px; display: flex; align-items: center; font-size: 20px; }
+  .subtitle { padding-left: 0; }
+  .card-body { padding: 14px; }
+  .cal-grid { gap: 4px; }
+  .month-label { font-size: 14px; }
+  .modal-actions { flex-direction: column-reverse; }
+  .modal-actions button { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .main { padding: 16px 12px 32px; }
+  .page-head h1 { font-size: 18px; }
+}
+
