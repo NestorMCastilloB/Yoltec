@@ -25,8 +25,7 @@ Route::get('/health', function () {
 });
 
 // Endpoint de un solo uso para sembrar demo en prod sin shell — gated por env + token
-// throttle:10,1 temporal durante debug; restaurar a 1,5 cuando termine la demo
-Route::middleware('throttle:10,1')->match(['get', 'post'], '/admin/seed-demo', [SeedDemoController::class, 'run']);
+Route::middleware('throttle:1,5')->post('/admin/seed-demo', [SeedDemoController::class, 'run']);
 
 // Rutas públicas
 Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']); // Fix hallazgo #2: máx 5 intentos/min
