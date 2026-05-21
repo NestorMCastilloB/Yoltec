@@ -45,6 +45,7 @@ app.add_middleware(
         "http://127.0.0.1:4200",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "https://yoltec.vercel.app",
         "https://frontend-nu-weld-77.vercel.app",
         "https://yoltec-backend.onrender.com",
     ],

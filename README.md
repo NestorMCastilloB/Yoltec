@@ -232,7 +232,7 @@ Cada subcarpeta tiene su propio `CLAUDE.md` (gitignored) con convenciones intern
 
 | Servicio | Plataforma | URL |
 |----------|------------|-----|
-| Frontend | Vercel | https://frontend-nu-weld-77.vercel.app |
+| Frontend | Vercel | https://yoltec.vercel.app |
 | Backend | Render | https://yoltec-backend.onrender.com |
 | IA | Render | https://yoltec-ia.onrender.com |
 | BD | Neon | privada |

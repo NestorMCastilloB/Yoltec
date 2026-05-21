@@ -6,6 +6,7 @@ return [
     'allowed_origins' => [
         'http://localhost:4200',
         'http://127.0.0.1:4200',
+        'https://yoltec.vercel.app',
         'https://frontend-nu-weld-77.vercel.app',
     ],
     'allowed_origins_patterns' => [],
