@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Documentacion del proyecto
-    url: https://github.com/elnemito001/Yoltec/blob/main/docs/entregable_sistema.md
-    about: Consulta la documentacion general del sistema Yoltec
+  - name: Documentación del proyecto
+    url: https://github.com/NestorMCastilloB/Yoltec#readme
+    about: Consulta el README principal para arquitectura, instalación y uso.
+  - name: Reportar una vulnerabilidad
+    url: https://github.com/NestorMCastilloB/Yoltec/blob/main/SECURITY.md
+    about: Si encontraste un problema de seguridad, NO abras un issue público — sigue la política de SECURITY.md.
