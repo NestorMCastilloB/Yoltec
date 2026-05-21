@@ -74,6 +74,29 @@ export class MisCitasComponent implements OnInit, OnDestroy {
     return map[this.activeTab];
   }
 
+  // Agrupa canceladas por mes para reducir saturación visual en historiales largos
+  get canceladasAgrupadas(): { mes: string; citas: CitaMisCitas[] }[] {
+    const grupos: { mes: string; citas: CitaMisCitas[] }[] = [];
+    for (const cita of this.canceladas) {
+      const etiqueta = this.formatearMes(cita.fecha_cita);
+      const ultimo = grupos[grupos.length - 1];
+      if (ultimo && ultimo.mes === etiqueta) {
+        ultimo.citas.push(cita);
+      } else {
+        grupos.push({ mes: etiqueta, citas: [cita] });
+      }
+    }
+    return grupos;
+  }
+
+  private formatearMes(fechaIso: string): string {
+    const [y, m] = fechaIso.split('-').map(Number);
+    if (!y || !m) return fechaIso;
+    const txt = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
+      .format(new Date(y, m - 1, 1));
+    return txt.charAt(0).toUpperCase() + txt.slice(1);
+  }
+
   getCount(tab: TabId): number {
     const map: Record<TabId, CitaMisCitas[]> = {
       proximas: this.proximas, pasadas: this.pasadas, canceladas: this.canceladas,

@@ -71,49 +71,64 @@
         : 'No se encontraron citas en esta categoría.' }}</p>
     </div>
 
-    <!-- Cards -->
-    <div class="mc-citas-list" *ngIf="!isLoading && !error && citasActivas.length > 0">
+    <!-- Cards (próximas / pasadas) -->
+    <div class="mc-citas-list" *ngIf="!isLoading && !error && activeTab !== 'canceladas' && citasActivas.length > 0">
       <div class="mc-cita-card" *ngFor="let cita of citasActivas">
-        <div class="mc-cita-top">
-          <div class="mc-date-cell" [class.past]="activeTab !== 'proximas'">
-            <div class="mc-date-block">
-              <b>{{ getDia(cita.fecha_cita) }}</b>
-              <span>{{ getMes(cita.fecha_cita) }}</span>
-            </div>
-            <div class="mc-date-info">
-              <b>{{ getDiaSemana(cita.fecha_cita) }}</b>
-              <span>{{ getAnio(cita.fecha_cita) }}</span>
-            </div>
-          </div>
-          <span class="mc-badge" [ngClass]="estatusClass(cita.estatus)">
-            <span class="mc-badge-dot"></span>
-            {{ estatusLabel(cita.estatus) }}
-          </span>
-        </div>
-        <div class="mc-cita-hora" [class.past]="activeTab !== 'proximas'">
-          {{ formatTime(cita.hora_cita) }}
-        </div>
-        <div class="mc-cita-meta">
-          {{ cita.motivo || 'Sin motivo' }}
-          <span class="mc-meta-sep"> · </span>
-          <span class="mc-cita-doctor">{{ doctorNombre(cita) }}</span>
-        </div>
-        <div class="mc-diagnostico" *ngIf="activeTab === 'pasadas' && cita.diagnostico">
-          Diagnóstico: {{ cita.diagnostico }}
-        </div>
-        <div class="mc-motivo-cancel" *ngIf="activeTab === 'canceladas' && cita.motivo_cancelacion">
-          {{ cita.motivo_cancelacion }}
-        </div>
-        <hr class="mc-cita-sep">
-        <div class="mc-cita-footer">
-          <button *ngIf="activeTab === 'proximas'"
-            class="mc-btn-cancel"
-            (click)="abrirModalCancelar(cita)">
-            Cancelar cita
-          </button>
-        </div>
+        <ng-container *ngTemplateOutlet="citaCard; context: { $implicit: cita }"></ng-container>
       </div>
     </div>
+
+    <!-- Cards (canceladas) — agrupadas por mes -->
+    <div class="mc-citas-list" *ngIf="!isLoading && !error && activeTab === 'canceladas' && canceladas.length > 0">
+      <ng-container *ngFor="let grupo of canceladasAgrupadas">
+        <div class="mc-month-header">{{ grupo.mes }}</div>
+        <div class="mc-cita-card" *ngFor="let cita of grupo.citas">
+          <ng-container *ngTemplateOutlet="citaCard; context: { $implicit: cita }"></ng-container>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Card template reutilizable -->
+    <ng-template #citaCard let-cita>
+      <div class="mc-cita-top">
+        <div class="mc-date-cell" [class.past]="activeTab !== 'proximas'">
+          <div class="mc-date-block">
+            <b>{{ getDia(cita.fecha_cita) }}</b>
+            <span>{{ getMes(cita.fecha_cita) }}</span>
+          </div>
+          <div class="mc-date-info">
+            <b>{{ getDiaSemana(cita.fecha_cita) }}</b>
+            <span>{{ getAnio(cita.fecha_cita) }}</span>
+          </div>
+        </div>
+        <span class="mc-badge" [ngClass]="estatusClass(cita.estatus)">
+          <span class="mc-badge-dot"></span>
+          {{ estatusLabel(cita.estatus) }}
+        </span>
+      </div>
+      <div class="mc-cita-hora" [class.past]="activeTab !== 'proximas'">
+        {{ formatTime(cita.hora_cita) }}
+      </div>
+      <div class="mc-cita-meta">
+        {{ cita.motivo || 'Sin motivo' }}
+        <span class="mc-meta-sep"> · </span>
+        <span class="mc-cita-doctor">{{ doctorNombre(cita) }}</span>
+      </div>
+      <div class="mc-diagnostico" *ngIf="activeTab === 'pasadas' && cita.diagnostico">
+        Diagnóstico: {{ cita.diagnostico }}
+      </div>
+      <div class="mc-motivo-cancel" *ngIf="activeTab === 'canceladas' && cita.motivo_cancelacion">
+        {{ cita.motivo_cancelacion }}
+      </div>
+      <hr class="mc-cita-sep">
+      <div class="mc-cita-footer">
+        <button *ngIf="activeTab === 'proximas'"
+          class="mc-btn-cancel"
+          (click)="abrirModalCancelar(cita)">
+          Cancelar cita
+        </button>
+      </div>
+    </ng-template>
   </div>
 
   <!-- Modal cancelar -->
