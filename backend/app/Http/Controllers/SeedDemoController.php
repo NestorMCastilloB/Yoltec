@@ -18,19 +18,23 @@ class SeedDemoController extends Controller
         [$expected, $enabledRaw] = $this->leerEnv();
         $enabled = filter_var($enabledRaw, FILTER_VALIDATE_BOOLEAN);
 
-        // Debug temporal: ?debug=DEBUG_TOKEN_TEMPORAL retorna visibilidad de env sin filtrar secretos
+        // Debug temporal
         if ($request->query('debug') === 'verify-env-2026') {
+            $probes = ['APP_NAME', 'DB_HOST', 'NEON_URL', 'RESEND_API_KEY', 'SEED_DEMO_ENABLED', 'SEED_DEMO_TOKEN'];
+            $visibility = [];
+            foreach ($probes as $k) {
+                $visibility[$k] = [
+                    'getenv' => getenv($k) !== false,
+                    'env_arr' => isset($_ENV[$k]),
+                    'srv_arr' => isset($_SERVER[$k]),
+                    'env_fn' => env($k) !== null,
+                ];
+            }
             return response()->json([
                 'enabled' => $enabled,
-                'enabled_raw' => $enabledRaw,
-                'token_present' => $expected !== null && $expected !== '',
-                'token_length' => $expected ? strlen($expected) : 0,
-                'sources' => [
-                    'getenv_token'  => getenv('SEED_DEMO_TOKEN') !== false,
-                    'env_token'     => isset($_ENV['SEED_DEMO_TOKEN']),
-                    'server_token'  => isset($_SERVER['SEED_DEMO_TOKEN']),
-                    'env_helper'    => env('SEED_DEMO_TOKEN') !== null,
-                ],
+                'env_count_getenv' => count(array_filter(array_keys($_SERVER), fn($k) => getenv($k) !== false)),
+                'env_count_arr'    => count($_ENV),
+                'probes' => $visibility,
             ], 200);
         }
 
