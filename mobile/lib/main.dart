@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/screens/splash_screen.dart';
@@ -13,6 +14,11 @@ import 'package:yoltec_mobile/utils/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Oculta la nav bar de Android en toda la app; deja status bar visible
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.top],
+  );
   try {
     await Firebase.initializeApp();
     await NotificationService.initialize();

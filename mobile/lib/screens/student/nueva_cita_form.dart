@@ -168,19 +168,19 @@ class _NuevaCitaFormState extends State<NuevaCitaForm> {
     );
   }
 
-  Future<bool> _confirmarCita(String motivo) async {
+  Future<String?> _confirmarCita(String motivo) async {
     final token = Provider.of<AuthService>(context, listen: false).token ?? '';
     final servicio = Provider.of<CitaService>(context, listen: false);
     final cita = await servicio.crearCita(
       token,
       fechaCita: _fechaSel!,
-      horaCita: '$_horaSel:00',
+      horaCita: _horaSel!,
       motivo: motivo,
     );
-    if (cita == null) return false;
+    if (cita == null) return servicio.error ?? 'No se pudo agendar. Intenta de nuevo.';
     await servicio.cargarCitas(token);
     if (mounted) Navigator.of(context).pop(true);
-    return true;
+    return null;
   }
 
   @override
@@ -731,7 +731,7 @@ class _SlotChip extends StatelessWidget {
 class _ConfirmacionSheet extends StatefulWidget {
   final String fecha;
   final String hora;
-  final Future<bool> Function(String motivo) onConfirmar;
+  final Future<String?> Function(String motivo) onConfirmar;
 
   const _ConfirmacionSheet({
     required this.fecha,
@@ -764,11 +764,11 @@ class _ConfirmacionSheetState extends State<_ConfirmacionSheet> {
       _enviando = true;
       _errorMotivo = null;
     });
-    final ok = await widget.onConfirmar(motivo);
+    final error = await widget.onConfirmar(motivo);
     if (!mounted) return;
     setState(() => _enviando = false);
-    if (!ok) {
-      setState(() => _errorMotivo = 'No se pudo agendar. Intenta de nuevo.');
+    if (error != null) {
+      setState(() => _errorMotivo = error);
     } else {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
