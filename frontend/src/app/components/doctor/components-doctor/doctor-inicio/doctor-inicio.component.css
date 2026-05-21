@@ -84,6 +84,7 @@
 }
 .card-body {
   padding: 6px 0;
+  overflow-x: auto;
 }
 
 /* ---- Row layout ---- */
@@ -277,9 +278,22 @@ tr:hover td {
   }
 }
 
+/* En ≤600px ocultar la columna Motivo (la mas ancha) para evitar scroll horizontal de la pagina. El detalle queda accesible via boton "Abrir". */
+@media (max-width: 600px) {
+  table th:nth-child(3),
+  table td:nth-child(3) { display: none; }
+  th, td { padding: 10px 12px; font-size: 12px; }
+  .av-sm { width: 24px; height: 24px; font-size: 10px; margin-right: 6px; }
+  .badge { padding: 2px 7px; font-size: 10px; }
+  .btn-ghost-sm { padding: 4px 8px; font-size: 11px; }
+}
+
 @media (max-width: 480px) {
   .kpis { gap: 10px; }
   .kpi, .card { padding: 14px; }
   .kpi-v { font-size: 24px; }
   .card-head h2 { font-size: 15px; }
+  /* En pantallas muy chicas ocultar tambien Estatus para garantizar 0 scroll horizontal */
+  table th:nth-child(4),
+  table td:nth-child(4) { display: none; }
 }

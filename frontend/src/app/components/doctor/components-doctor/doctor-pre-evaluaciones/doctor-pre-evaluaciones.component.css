@@ -481,6 +481,32 @@
   .ffld input, .ffld select { min-width: 0; width: 100%; }
 }
 
+/* En ≤600px el header de la card pasa a 2 filas: identidad (avatar+nombre+badge) y meta abajo. Evita que ID y "Enviada" se encimen con nombres largos. */
+@media (max-width: 600px) {
+  .pc-head {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  .who { flex: 1 1 auto; min-width: 0; }
+  .who b { font-size: 14px; line-height: 1.3; }
+  .badge { flex-shrink: 0; align-self: flex-start; }
+  .meta {
+    flex-basis: 100%;
+    text-align: left;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--yol-border);
+    font-size: 11px;
+    line-height: 1.55;
+  }
+  .meta b {
+    display: inline;
+    font-size: 12px;
+    margin-right: 8px;
+  }
+}
+
 @media (max-width: 480px) {
   .pe-header, .pe-content { padding-left: 14px; padding-right: 14px; }
   .pe-header h2 { font-size: 18px; }
