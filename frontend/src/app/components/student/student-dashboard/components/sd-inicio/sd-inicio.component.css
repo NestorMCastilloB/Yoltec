@@ -299,8 +299,25 @@
 .sk-sm { width: 60%; }
 .sk-lg { width: 40%; height: 28px; }
 
+@media (max-width: 900px) {
+  .inicio-kpis { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
-  .inicio-kpis {
-    grid-template-columns: 1fr;
-  }
+  .inicio-kpis { grid-template-columns: 1fr; gap: 12px; margin-bottom: 22px; }
+  .kpi { padding: 16px 18px; }
+  .kpi-v { font-size: 28px; }
+  .inicio-section { margin-bottom: 22px; }
+
+  /* Tabla con scroll horizontal */
+  .inicio-card { overflow-x: auto; }
+  .inicio-table { min-width: 480px; }
+  .inicio-table th,
+  .inicio-table td { padding: 11px 14px; }
+}
+
+@media (max-width: 480px) {
+  .inicio-section-head h2 { font-size: 15px; }
+  .empty { padding: 32px 18px; }
+  .empty-ic { width: 48px; height: 48px; font-size: 20px; }
 }

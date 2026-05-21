@@ -197,6 +197,40 @@
   flex-shrink: 0;
 }
 
+/* Hamburguesa (solo móvil) */
+.sd-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #1a2e25;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  transition: background .15s;
+}
+.sd-hamburger:hover { background: #f7f9f8; }
+.sd-hamburger svg { width: 22px; height: 22px; }
+
+.sd-header-title { min-width: 0; flex: 1; }
+
+/* Backdrop sidebar móvil */
+.sd-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  z-index: 199;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.sd-sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
+}
+
 .sd-btn-ghost {
   padding: 10px 16px;
   border-radius: 7px;
@@ -276,16 +310,66 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .sd-hamburger {
+    display: inline-flex;
+  }
+
   .sd-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 264px;
+    max-width: 80vw;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 200;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, .25);
+  }
+
+  .sd-sidebar.open {
+    transform: translateX(0);
   }
 
   .sd-header {
-    padding: 16px 20px 14px;
+    padding: 14px 16px 12px;
+  }
+
+  .sd-header-row {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sd-title {
+    font-size: 18px;
+  }
+
+  .sd-btn-primary {
+    padding: 9px 12px;
+    font-size: 12.5px;
   }
 
   .sd-content {
-    padding: 16px 20px 80px;
+    padding: 16px 16px 80px;
+  }
+
+  .sd-user-dropdown {
+    right: 0;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sd-header {
+    padding: 12px 12px 10px;
+  }
+
+  .sd-title {
+    font-size: 16px;
+  }
+
+  .sd-content {
+    padding: 12px 12px 80px;
   }
 }
 
@@ -411,3 +495,5 @@
 :host-context(.dark) .sd-user-dropdown-item:hover { background: #1a2e1a; }
 :host-context(.dark) .sd-user-dropdown-item.danger { color: #f87171; }
 :host-context(.dark) .sd-user-dropdown-item.danger:hover { background: #2a1010; }
+:host-context(.dark) .sd-hamburger { color: #e8f5ee; }
+:host-context(.dark) .sd-hamburger:hover { background: #1a2e1a; }

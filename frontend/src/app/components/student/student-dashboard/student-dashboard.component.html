@@ -1,7 +1,10 @@
 <div class="sd-app">
 
+  <!-- Backdrop móvil cuando sidebar abierto -->
+  <div class="sd-sidebar-backdrop" [class.show]="sidebarOpen" (click)="closeSidebar()"></div>
+
   <!-- Sidebar -->
-  <aside class="sd-sidebar">
+  <aside class="sd-sidebar" [class.open]="sidebarOpen">
     <div class="sd-brand">
       <div class="sd-brand-logo">Y</div>
       <div>
@@ -42,7 +45,10 @@
     <!-- Header -->
     <div class="sd-header">
       <div class="sd-header-row">
-        <div>
+        <button class="sd-hamburger" (click)="toggleSidebar()" aria-label="Abrir menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="sd-header-title">
           <div class="sd-crumb">{{ activeSection | uppercase }}</div>
           @if (activeSection === 'inicio') {
             <h1 class="sd-title">{{ saludoBienvenida }}, <span>{{ studentName }}</span></h1>

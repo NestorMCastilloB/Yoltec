@@ -361,3 +361,26 @@
 :host-context(.dark) .modal-diagnostico { background: #0f1a15; border-color: #2a4030; }
 :host-context(.dark) .modal-nota { background: #0f1a15; border-color: #2a4030; }
 :host-context(.dark) .modal-footer { border-color: #2a4030; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-box { max-width: 100%; }
+  .receta-card { padding: var(--yol-s-4); }
+  .card-top { flex-wrap: wrap; }
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal-card {
+    max-width: 100%;
+    max-height: 95vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .recetas-titulo { font-size: var(--yol-fs-h2); }
+  .receta-card { padding: var(--yol-s-3); gap: var(--yol-s-2); }
+  .med-item { font-size: var(--yol-fs-sm); }
+  .modal-header,
+  .modal-body,
+  .modal-footer { padding-left: var(--yol-s-4); padding-right: var(--yol-s-4); }
+}

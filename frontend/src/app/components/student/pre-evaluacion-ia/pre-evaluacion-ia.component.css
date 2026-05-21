@@ -646,3 +646,26 @@
   color: var(--yol-text-2, #5a6772);
   font-style: italic;
 }
+
+/* ── Responsive: móvil pequeño ──────────────────── */
+@media (max-width: 480px) {
+  .pe-layout { height: calc(100vh - 100px); }
+  .pe-header { padding: 12px 14px 10px; }
+  .pe-title { font-size: 16px; }
+  .pe-sub { font-size: 12px; }
+  .pe-header-row { flex-wrap: wrap; gap: 8px; }
+  .pe-msgs { padding: 12px; gap: 10px; }
+  .pe-msg { max-width: 95%; }
+  .pe-bubble { padding: 9px 12px; font-size: 13.5px; }
+  .pe-composer { padding: 10px 12px; }
+  .pe-input-row textarea { font-size: 14px; }
+  .pe-input-hint { display: none; }
+  .pe-send {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .pe-result-card { padding: 14px; }
+  .pe-empty-state { padding: 40px 18px; }
+}

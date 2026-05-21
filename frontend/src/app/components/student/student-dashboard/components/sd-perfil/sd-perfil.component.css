@@ -489,3 +489,40 @@
 :host-context(.dark) .sp-strength-bar { background: #2a4030; }
 :host-context(.dark) .sp-toggle       { background: #2a4030; }
 :host-context(.dark) .sp-toggle-row   { border-color: #2a4030; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .sp-section { padding: var(--yol-s-1) var(--yol-s-4) var(--yol-s-4); }
+  .sp-id-body { padding: var(--yol-s-5) var(--yol-s-4); }
+
+  .sp-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sp-tabs::-webkit-scrollbar { display: none; }
+  .sp-tab { white-space: nowrap; flex-shrink: 0; }
+
+  .sp-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "lab edit"
+      "val val";
+    gap: var(--yol-s-1) var(--yol-s-3);
+    padding: 12px 0;
+  }
+  .sp-lab { grid-area: lab; }
+  .sp-val { grid-area: val; }
+  .sp-edit { grid-area: edit; }
+
+  .sp-id-actions { flex-direction: column; width: 100%; }
+  .sp-btn-out { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .sp-avatar { width: 72px; height: 72px; font-size: 24px; }
+  .sp-form-actions { flex-direction: column-reverse; }
+  .sp-form-actions .sp-btn-primary,
+  .sp-form-actions .sp-btn-ghost { width: 100%; }
+  .sp-sesion-item { flex-wrap: wrap; gap: var(--yol-s-2); }
+}

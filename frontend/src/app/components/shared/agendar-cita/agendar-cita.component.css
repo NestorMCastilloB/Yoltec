@@ -479,11 +479,47 @@
 }
 
 @media (max-width: 520px) {
-  .ac-slot-grid { grid-template-columns: repeat(2, 1fr); }
+  .ac-buscar { padding: 16px 0; }
+  .ac-buscar-form { flex-direction: column; }
+  .ac-buscar-form .ac-btn-primary { width: 100%; }
+
+  .ac-toast {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    text-align: center;
+  }
+
+  .ac-slot-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .ac-slot { padding: 10px; }
+  .ac-slot b { font-size: 16px; }
+
   .ac-grid { gap: 4px; }
   .ac-day { height: 48px; }
   .ac-day-n { font-size: 13px; }
   .ac-day-d { display: none; }
+
+  .ac-month-nav { padding: 8px 12px; }
+  .ac-month-nav b { font-size: 14px; }
+
+  .ac-legend {
+    padding: 10px;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .ac-help { max-width: 100%; }
+
+  .ac-overlay { padding: 12px; }
+  .ac-modal { padding: 18px; border-radius: 12px; }
+  .ac-modal-foot {
+    flex-direction: column-reverse;
+  }
+  .ac-modal-foot .ac-btn-primary,
+  .ac-modal-foot .ac-btn-cancel { width: 100%; }
+
+  .ac-alumno-chip { flex-wrap: wrap; font-size: 12.5px; }
+  .ac-chip-change { margin-left: 0; }
 }
 
 /* ── Dark mode ──────────────────────────────────── */
