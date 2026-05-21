@@ -321,3 +321,9 @@
   .prioridad-badge   { min-width: 100px; padding: var(--yol-s-4) var(--yol-s-3); }
   .cita-prioridad-header { flex-direction: column; align-items: flex-start; }
 }
+
+@media (max-width: 480px) {
+  .prioridad-resumen { flex-wrap: wrap; }
+  .prioridad-badge   { flex: 1; min-width: 0; }
+  .detalle-factores ul { padding-left: 16px; }
+}

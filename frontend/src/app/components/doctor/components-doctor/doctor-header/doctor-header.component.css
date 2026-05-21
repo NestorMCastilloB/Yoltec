@@ -125,10 +125,43 @@ nav a.active {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-left: 220px;
   position: sticky;
   top: 0;
   z-index: 50;
+}
+.topbar-title { min-width: 0; flex: 1; }
+
+/* Hamburguesa (solo móvil pequeño) */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--yol-text);
+  border-radius: var(--yol-r);
+  align-items: center;
+  justify-content: center;
+  transition: background var(--yol-duration-fast) var(--yol-ease);
+}
+.hamburger:hover { background: var(--yol-bg); }
+.hamburger svg { width: 22px; height: 22px; }
+
+/* Backdrop sidebar móvil */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  z-index: 199;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
 }
 .crumb {
   font-size: 12px;
@@ -338,8 +371,12 @@ nav a.active {
   background: var(--yol-text-subtle);
 }
 
+/* Dark mode adicional */
+:host-context(.dark) .hamburger { color: var(--yol-text); }
+:host-context(.dark) .hamburger:hover { background: #1a2e1a; }
+
 /* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .sidebar {
     width: 60px;
   }
@@ -369,10 +406,72 @@ nav a.active {
   }
   .topbar {
     margin-left: 60px;
+    padding: 12px 20px;
   }
   .topbar-search {
     display: none;
   }
+  .user-trigger-name {
+    display: none;
+  }
+}
+
+/* En móvil pequeño: drawer con hamburguesa */
+@media (max-width: 600px) {
+  .hamburger {
+    display: inline-flex;
+  }
+  .sidebar {
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 250;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, .25);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  /* En modo drawer, mostrar textos completos */
+  .sidebar .brand span,
+  .sidebar nav a,
+  .sidebar .sidebar-user b,
+  .sidebar .sidebar-user span,
+  .sidebar .sidebar-user div:last-child {
+    display: revert;
+  }
+  .sidebar .brand {
+    justify-content: flex-start;
+    padding: 18px 20px;
+  }
+  .sidebar nav a {
+    justify-content: flex-start;
+    padding: 10px 20px;
+    border-left: 3px solid transparent;
+    border-bottom: none;
+  }
+  .sidebar nav a.active {
+    border-left-color: var(--yol-accent);
+    border-bottom: none;
+  }
+  .sidebar .sidebar-user {
+    justify-content: flex-start;
+  }
+  .topbar {
+    margin-left: 0;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .topbar h1 {
+    font-size: 17px;
+  }
+  .crumb { font-size: 11px; }
+  .btn-action {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 380px) {
   .btn-action {
     display: none;
   }

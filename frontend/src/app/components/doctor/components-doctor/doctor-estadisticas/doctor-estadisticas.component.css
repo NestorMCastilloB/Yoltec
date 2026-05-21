@@ -239,3 +239,12 @@
   .skeleton-charts { grid-template-columns: 1fr; }
   .rank-bar-wrap { width: 90px; }
 }
+
+@media (max-width: 480px) {
+  .kpis         { grid-template-columns: 1fr; gap: 10px; }
+  .skeleton-kpis { grid-template-columns: 1fr; }
+  .chart-card   { padding: 14px; }
+  .chart-card h3 { font-size: 14px; }
+  .rank-bar-wrap { width: 60px; }
+  .skeleton-chart { height: 220px; }
+}

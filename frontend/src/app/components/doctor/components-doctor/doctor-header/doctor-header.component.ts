@@ -18,10 +18,20 @@ export class DoctorHeaderComponent {
   @Output() exportEvent = new EventEmitter<void>();
 
   userMenuOpen = false;
+  sidebarOpen = false;
 
   constructor(public themeService: ThemeService) {}
 
   toggleUserMenu(): void { this.userMenuOpen = !this.userMenuOpen; }
+
+  toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
+
+  closeSidebar(): void { this.sidebarOpen = false; }
+
+  onNavigate(section: string): void {
+    this.sectionChange.emit(section);
+    this.sidebarOpen = false;
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(e: MouseEvent): void {
