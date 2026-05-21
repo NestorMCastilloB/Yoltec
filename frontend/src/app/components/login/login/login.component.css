@@ -355,3 +355,14 @@
     font-size: var(--yol-fs-sm);
   }
 }
+
+@media (max-width: 480px) {
+  .login-panel { padding: 1.75rem 1rem; }
+  .login-header { margin-bottom: var(--yol-s-4); }
+  .login-header h2 { font-size: 1.4rem; }
+  .login-header p { font-size: var(--yol-fs-cap); }
+  .roles-menu { gap: var(--yol-s-2); margin-bottom: var(--yol-s-4); }
+  .role-btn { padding: 7px 14px; font-size: var(--yol-fs-cap); }
+  .form-group input,
+  .password-wrapper input { padding: 12px 14px; font-size: 16px; }
+}

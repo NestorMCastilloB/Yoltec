@@ -81,3 +81,12 @@ h2 { color: var(--yol-ia); margin: 0 0 8px; font-size: 22px; }
 .btn-link:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .hint { color: var(--yol-text-subtle); font-size: 12px; margin-top: 20px; }
+
+@media (max-width: 480px) {
+  .verify-card { padding: 28px 20px; }
+  .icon { font-size: 40px; }
+  h2 { font-size: 18px; }
+  .subtitle { font-size: 13px; margin-bottom: 18px; }
+  .code-input { font-size: 22px; letter-spacing: 8px; padding: 12px; }
+  .actions { flex-direction: column; gap: 8px; align-items: center; }
+}

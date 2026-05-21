@@ -31,6 +31,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   studentName = '';
   saludoBienvenida = 'Bienvenido';
   userMenuOpen = false;
+  sidebarOpen = false;
 
   private destroy$ = new Subject<void>();
 
@@ -54,9 +55,16 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   get studentInitial(): string { return this.studentName.charAt(0).toUpperCase(); }
 
-  setActiveSection(section: string): void { this.activeSection = section; }
+  setActiveSection(section: string): void {
+    this.activeSection = section;
+    this.sidebarOpen = false;
+  }
 
   toggleUserMenu(): void { this.userMenuOpen = !this.userMenuOpen; }
+
+  toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
+
+  closeSidebar(): void { this.sidebarOpen = false; }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(e: MouseEvent): void {
