@@ -992,6 +992,22 @@
   .search-input { width: 100%; }
   .users-toolbar { flex-direction: column; align-items: stretch; }
   .toolbar-actions { flex-wrap: wrap; }
+  .admin-topbar { padding: 14px 20px; }
+  .admin-title { font-size: 18px; }
+}
+
+@media (max-width: 600px) {
+  /* Espacio para hamburguesa fija */
+  .admin-topbar { padding-left: 60px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .admin-main { padding: 14px; }
+  .admin-user-name { display: none; }
+}
+
+@media (max-width: 480px) {
+  .admin-topbar { padding: 14px 12px 14px 56px; }
+  .admin-title { font-size: 16px; }
+  .admin-crumb { font-size: 11px; }
 }
 
 /* Dark mode: calendario de días especiales */

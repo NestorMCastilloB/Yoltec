@@ -12,6 +12,16 @@ export class AdminSidebarComponent {
   @Input() adminName = 'Administrador';
   @Output() sectionChange = new EventEmitter<string>();
 
+  isOpen = false;
+
+  toggle(): void { this.isOpen = !this.isOpen; }
+  close(): void { this.isOpen = false; }
+
+  onNavigate(section: string): void {
+    this.sectionChange.emit(section);
+    this.isOpen = false;
+  }
+
   get initials(): string {
     return this.adminName.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
   }
