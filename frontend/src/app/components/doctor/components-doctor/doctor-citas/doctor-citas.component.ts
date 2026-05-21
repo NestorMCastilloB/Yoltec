@@ -6,6 +6,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { Cita, CitaService, CreateCitaPayload, AvailabilityStatus, CitaAvailabilityDay } from '../../../../services/cita.service';
 import { ConsultaService } from '../../../../services/consulta.service';
 import { PerfilMedicoService, PerfilMedico, ConsultaHistorial } from '../../../../services/perfil-medico.service';
+import { PollingService } from '../../../../services/polling.service';
 
 type CalendarAvailability = 'none' | AvailabilityStatus;
 
@@ -112,13 +113,19 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
   constructor(
     private citaService: CitaService,
     private consultaService: ConsultaService,
-    private perfilMedicoService: PerfilMedicoService
+    private perfilMedicoService: PerfilMedicoService,
+    private polling: PollingService,
   ) { }
 
   ngOnInit(): void {
     this.buildCalendar();
     this.loadAvailability();
     this.loadCitas();
+    // Refresca cada 20s mientras la pestana este visible — citas nuevas/canceladas aparecen sin recargar
+    this.polling.poll(20).pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.loadCitas();
+      this.loadAvailability();
+    });
   }
 
   ngOnDestroy(): void {
