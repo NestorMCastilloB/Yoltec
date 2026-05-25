@@ -3,6 +3,8 @@ IA/venv/
 IA/.env
 IA/data/
 IA/*.pkl
+!IA/model.pkl
+!IA/label_encoder.pkl
 archive/
 *.csv
 
