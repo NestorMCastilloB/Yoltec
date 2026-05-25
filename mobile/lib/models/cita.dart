@@ -7,6 +7,8 @@ class Cita {
   final String estatus;
   final int? alumnoId;
   final Map<String, dynamic>? alumno;
+  // Diagnóstico extraído de la consulta asociada (solo en citas atendidas)
+  final String? diagnostico;
 
   const Cita({
     required this.id,
@@ -17,6 +19,7 @@ class Cita {
     required this.estatus,
     this.alumnoId,
     this.alumno,
+    this.diagnostico,
   });
 
   bool get isProgramada => estatus == 'programada';
@@ -64,6 +67,7 @@ class Cita {
   }
 
   factory Cita.fromJson(Map<String, dynamic> json) {
+    final consulta = json['consulta'] as Map<String, dynamic>?;
     return Cita(
       id: json['id'] as int,
       claveCita: json['clave_cita'] as String? ?? '',
@@ -73,6 +77,7 @@ class Cita {
       estatus: json['estatus'] as String? ?? 'programada',
       alumnoId: json['alumno_id'] as int?,
       alumno: json['alumno'] as Map<String, dynamic>?,
+      diagnostico: consulta?['diagnostico'] as String?,
     );
   }
 
@@ -86,6 +91,7 @@ class Cita {
       'estatus': estatus,
       'alumno_id': alumnoId,
       'alumno': alumno,
+      if (diagnostico != null) 'consulta': {'diagnostico': diagnostico},
     };
   }
 }

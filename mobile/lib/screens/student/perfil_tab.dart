@@ -119,12 +119,25 @@ class _PerfilTabState extends State<PerfilTab> {
       imageQuality: 80,
     );
     if (picked == null || !mounted) return;
+    final file = File(picked.path);
+    // Backend valida max:2048; cortamos antes para dar feedback amigable y no gastar red.
+    final sizeBytes = await file.length();
+    if (!mounted) return;
+    if (sizeBytes > 2 * 1024 * 1024) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La foto supera 2 MB. Elige otra o reduce la calidad.'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
     try {
       final token =
           Provider.of<AuthService>(context, listen: false).token ?? '';
       final result = await ApiService.postMultipart(
         '/perfil/foto',
-        File(picked.path),
+        file,
         'foto',
         token: token,
       );
