@@ -43,6 +43,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'fecha_nacimiento' => 'date',
         'es_admin' => 'boolean',
+        'fcm_token' => 'encrypted',
     ];
 
     // Relaciones
