@@ -19,6 +19,9 @@ dependencies:
   # Almacenamiento local
   shared_preferences: ^2.2.2
 
+  # Almacenamiento seguro (Keychain iOS / EncryptedSharedPreferences Android) para el auth_token
+  flutter_secure_storage: ^9.2.2
+
   # Internacionalizacion (para DatePicker en espanol)
   flutter_localizations:
     sdk: flutter

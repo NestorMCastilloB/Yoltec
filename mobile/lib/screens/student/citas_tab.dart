@@ -394,7 +394,9 @@ class _CitaCard extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: 'Disponible en consulta',
+                      text: (cita.diagnostico?.trim().isNotEmpty ?? false)
+                          ? cita.diagnostico!
+                          : 'Pendiente de registrar',
                       style: TextStyle(
                         fontSize: 12.5,
                         color: textSubtle,

@@ -21,7 +21,10 @@ class CitaController extends Controller
 
         $citas = $user->esAlumno()
             ? Cita::where('alumno_id', $user->id)
-                ->with(['doctor:id,nombre,apellido,username'])
+                ->with([
+                    'doctor:id,nombre,apellido,username',
+                    'consulta:id,cita_id,diagnostico',
+                ])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get()
             : Cita::with(['alumno:id,nombre,apellido,numero_control'])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get();

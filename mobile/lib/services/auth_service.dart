@@ -1,11 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yoltec_mobile/models/user.dart';
 import 'package:yoltec_mobile/services/api_service.dart';
 import 'package:yoltec_mobile/services/notification_service.dart';
 
 class AuthService extends ChangeNotifier {
+  // Secure storage (Keychain iOS / EncryptedSharedPreferences Android) para el token.
+  // user_data se sigue guardando en SharedPreferences porque no es secreto.
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+  static const _kTokenKey = 'auth_token';
+  static const _kUserKey = 'user_data';
+
   String? _token;
   User? _currentUser;
   bool _isLoading = false;
@@ -25,14 +34,13 @@ class AuthService extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userJson = prefs.getString('user_data');
-      final storedToken = prefs.getString('auth_token');
+      final userJson = prefs.getString(_kUserKey);
+      final storedToken = await _readTokenWithMigration(prefs);
 
       if (storedToken != null && userJson != null) {
         final tokenValid = await _verifyToken(storedToken);
         if (!tokenValid) {
-          await prefs.remove('user_data');
-          await prefs.remove('auth_token');
+          await _clearStoredAuth(prefs);
         } else {
           _token = storedToken;
           _currentUser = User.fromJson(
@@ -46,6 +54,27 @@ class AuthService extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // Lee el token desde secure storage. Si existe uno legacy en SharedPreferences
+  // (instalaciones previas a la migración), lo mueve y limpia.
+  Future<String?> _readTokenWithMigration(SharedPreferences prefs) async {
+    final secureToken = await _secureStorage.read(key: _kTokenKey);
+    if (secureToken != null) return secureToken;
+
+    final legacyToken = prefs.getString(_kTokenKey);
+    if (legacyToken != null) {
+      await _secureStorage.write(key: _kTokenKey, value: legacyToken);
+      await prefs.remove(_kTokenKey);
+      return legacyToken;
+    }
+    return null;
+  }
+
+  Future<void> _clearStoredAuth(SharedPreferences prefs) async {
+    await prefs.remove(_kUserKey);
+    await prefs.remove(_kTokenKey); // por si quedó residuo del esquema viejo
+    await _secureStorage.delete(key: _kTokenKey);
   }
 
   /// Login con credenciales (usuario + contraseña).
@@ -71,8 +100,8 @@ class AuthService extends ChangeNotifier {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(
-            'user_data', json.encode(_currentUser!.toJson()));
-        await prefs.setString('auth_token', _token!);
+            _kUserKey, json.encode(_currentUser!.toJson()));
+        await _secureStorage.write(key: _kTokenKey, value: _token!);
 
         // Registrar token FCM en el backend
         final fcmToken = await NotificationService.getToken();
@@ -125,8 +154,7 @@ class AuthService extends ChangeNotifier {
     _currentUser = null;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user_data');
-    await prefs.remove('auth_token');
+    await _clearStoredAuth(prefs);
 
     notifyListeners();
   }
