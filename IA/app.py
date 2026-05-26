@@ -23,6 +23,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger("yoltec-ia")
 
 limiter = Limiter(key_func=get_remote_address)
@@ -57,12 +62,18 @@ app.add_middleware(
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ─── Configuración Groq LLM ──────────────────────────────────────────────────
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
+
+if not GROQ_API_KEY:
+    raise RuntimeError(
+        "GROQ_API_KEY no está definida. Configúrala en .env (local) o como variable "
+        "de entorno en Render antes de iniciar el servicio."
+    )
 
 groq_client = Groq(api_key=GROQ_API_KEY)
 
-print(f"LLM Provider: GROQ (modelo: {GROQ_MODEL})")
+logger.info("LLM Provider: GROQ (modelo: %s)", GROQ_MODEL)
 
 SYSTEM_PROMPT = """Eres un asistente médico de pre-evaluación en una clínica universitaria en Ciudad Valles, San Luis Potosí, México (región Huasteca Potosina). Entrevistas al estudiante sobre sus síntomas antes de su consulta con el médico.
 
@@ -149,7 +160,7 @@ def load_model():
     feat_path = os.path.join(BASE_DIR, 'feature_names.json')
 
     if not os.path.exists(model_path) or not os.path.exists(le_path):
-        print("AVISO: model.pkl no encontrado. Ejecuta train_model.py para habilitar el endpoint /predict.")
+        logger.warning("model.pkl no encontrado. Ejecuta train_model_full.py para habilitar /predict.")
         return
 
     with open(model_path, 'rb') as f:
@@ -160,7 +171,7 @@ def load_model():
         with open(feat_path) as f:
             feature_names = json.load(f)
 
-    print(f"Modelo sklearn cargado. Enfermedades: {list(le.classes_)}")
+    logger.info("Modelo sklearn cargado. Enfermedades: %s", list(le.classes_))
 
 
 # ─── Constantes (sklearn) ────────────────────────────────────────────────────
@@ -264,7 +275,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage] = Field(..., max_length=50)
+    messages: list[ChatMessage] = Field(..., min_length=1, max_length=10)
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
