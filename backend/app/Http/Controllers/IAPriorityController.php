@@ -7,6 +7,7 @@ use App\IA\Services\IAService;
 use App\Models\Cita;
 use App\Models\PreEvaluacionIA;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controlador para la IA 1: Clasificador de Prioridad
@@ -109,7 +110,11 @@ class IAPriorityController extends Controller
                     'factores' => $resultado['factores'] ?? [],
                 ];
             } catch (\Exception $e) {
-                // Si falla la clasificación de una, continuar con las demás
+                // Loguear el fallo individual pero continuar con el resto del listado
+                Log::error('Fallo clasificacion IA en cita', [
+                    'cita_id' => $cita->id,
+                    'error'   => $e->getMessage(),
+                ]);
                 continue;
             }
         }
