@@ -32,13 +32,16 @@ export class AuthService implements OnDestroy {
   private userKey = 'user_data';
   private lastActivityKey = 'last_activity';
   private idleTimeoutMs = 30 * 60 * 1000; // 30 minutos
+  private idleWarningMs = 5 * 60 * 1000;  // mostrar aviso 5 min antes de cerrar sesión
   private idleCheckInterval: ReturnType<typeof setInterval> | null = null;
   private userSubject = new BehaviorSubject<User | null>(null);
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  private idleWarningSubject = new BehaviorSubject<number>(0); // minutos restantes (0 = sin aviso)
 
   // Exponer observables
   public currentUser$ = this.userSubject.asObservable();
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  public idleWarning$ = this.idleWarningSubject.asObservable();
 
   private activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
   private boundOnActivity = this.onActivity.bind(this);
@@ -79,12 +82,32 @@ export class AuthService implements OnDestroy {
       this.idleCheckInterval = setInterval(() => {
         if (this.isSessionExpiredByIdle()) {
           this.ngZone.run(() => {
+            this.idleWarningSubject.next(0);
             this.logout();
             this.router.navigate(['/login']);
           });
+          return;
         }
-      }, 60_000);
+        const remainingMs = this.remainingIdleMs();
+        const shouldWarn = remainingMs > 0 && remainingMs <= this.idleWarningMs;
+        const minutes = shouldWarn ? Math.max(1, Math.ceil(remainingMs / 60_000)) : 0;
+        if (minutes !== this.idleWarningSubject.value) {
+          this.ngZone.run(() => this.idleWarningSubject.next(minutes));
+        }
+      }, 30_000);
     });
+  }
+
+  private remainingIdleMs(): number {
+    const last = localStorage.getItem(this.lastActivityKey);
+    if (!last) return this.idleTimeoutMs;
+    return this.idleTimeoutMs - (Date.now() - parseInt(last, 10));
+  }
+
+  // Llamado desde el modal de aviso para extender la sesión sin esperar otra actividad real.
+  extendSession(): void {
+    this.onActivity();
+    this.idleWarningSubject.next(0);
   }
 
   private stopIdleTracking(): void {
@@ -95,6 +118,7 @@ export class AuthService implements OnDestroy {
       clearInterval(this.idleCheckInterval);
       this.idleCheckInterval = null;
     }
+    this.idleWarningSubject.next(0);
   }
 
   login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {

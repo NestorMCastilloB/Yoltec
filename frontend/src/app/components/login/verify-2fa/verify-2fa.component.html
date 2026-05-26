@@ -20,15 +20,16 @@
         placeholder="000000"
         inputmode="numeric"
         autocomplete="one-time-code"
+        [disabled]="isLocked"
       />
 
-      <button type="submit" class="btn-primary" [disabled]="isLoading">
+      <button type="submit" class="btn-primary" [disabled]="isLoading || isLocked">
         {{ isLoading ? 'Verificando...' : 'Verificar' }}
       </button>
     </form>
 
     <div class="actions">
-      <button class="btn-link" (click)="onResend()" [disabled]="isResending">
+      <button class="btn-link" (click)="onResend()" [disabled]="isResending || isLocked">
         {{ isResending ? 'Enviando...' : 'Reenviar código' }}
       </button>
       <button class="btn-link secondary" (click)="goBack()">Volver al login</button>

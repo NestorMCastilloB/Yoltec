@@ -16,6 +16,11 @@
 </div>
 
 <div class="dash-content">
+  <div *ngIf="loadError && !loading" class="alert-error-banner">
+    <span>No se pudo cargar tu información. Verifica tu conexión.</span>
+    <button class="btn primary" (click)="cargarDashboard()">Reintentar</button>
+  </div>
+
   <!-- Skeleton loader -->
   <ng-container *ngIf="loading">
     <div class="kpis">

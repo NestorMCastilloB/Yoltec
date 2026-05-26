@@ -28,6 +28,7 @@ export class StudentDashboardInicioComponent implements OnInit, OnDestroy {
   @Output() navegarARecetas = new EventEmitter<void>();
 
   loading = true;
+  loadError = false;
   nombre = '';
   fechaHoy = '';
 
@@ -71,15 +72,20 @@ export class StudentDashboardInicioComponent implements OnInit, OnDestroy {
 
   cargarDashboard(): void {
     this.loading = true;
+    this.loadError = false;
     this.dashboardService.getDashboard()
       .pipe(
         takeUntil(this.destroy$),
-        catchError(() => of({
-          proximas_citas: [],
-          ultima_visita: null,
-          recetas_activas: [],
-          recordatorio: null,
-        } as DashboardAlumno)),
+        catchError(() => {
+          // Marcar el error y dejar vacíos los datos; la UI muestra banner con botón reintentar.
+          this.loadError = true;
+          return of({
+            proximas_citas: [],
+            ultima_visita: null,
+            recetas_activas: [],
+            recordatorio: null,
+          } as DashboardAlumno);
+        }),
         finalize(() => this.loading = false),
       )
       .subscribe(data => this.procesarDashboard(data));
