@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { API_BASE_URL } from './api-config';
 
 export interface Receta {
@@ -52,11 +52,13 @@ export class RecetaService {
 
   constructor(private http: HttpClient) {}
 
+  // Backend devuelve array plano para alumno y paginado {data:[...]} para doctor — normalizar aqui
   getRecetas(): Observable<Receta[]> {
     if (this.recetasCache && Date.now() < this.recetasCacheExpiry) {
       return of(this.recetasCache);
     }
-    return this.http.get<Receta[]>(this.baseUrl).pipe(
+    return this.http.get<Receta[] | { data: Receta[] }>(this.baseUrl).pipe(
+      map(res => Array.isArray(res) ? res : (res?.data ?? [])),
       tap(recetas => {
         this.recetasCache = recetas;
         this.recetasCacheExpiry = Date.now() + this.CACHE_TTL_MS;

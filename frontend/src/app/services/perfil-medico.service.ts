@@ -26,7 +26,7 @@ export interface ConsultaHistorial {
   motivo: string;
   doctor: { nombre: string; apellido: string } | null;
   consulta: { diagnostico: string; tratamiento: string; observaciones: string | null } | null;
-  receta: { medicamento: string; dosis: string; indicaciones: string } | null;
+  receta: { medicamentos: string; indicaciones: string } | null;
 }
 
 @Injectable({ providedIn: 'root' })
