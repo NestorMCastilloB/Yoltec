@@ -1,0 +1,29 @@
+<div class="citas-search-bar">
+  <span class="search-ic">⌕</span>
+  <input placeholder="Buscar por alumno, No. control o motivo…"
+         [ngModel]="filtro.search"
+         (ngModelChange)="update('search', $event)" />
+  <div class="filtros-inline">
+    <select [ngModel]="filtro.estatus"
+            (ngModelChange)="update('estatus', $event)"
+            class="filtro-select-sm">
+      <option value="">Todos los estados</option>
+      <option value="programada">Programada</option>
+      <option value="atendida">Atendida</option>
+      <option value="cancelada">Cancelada</option>
+      <option value="no_asistio">No asistió</option>
+    </select>
+    <input type="date"
+           [ngModel]="filtro.fechaDesde"
+           (ngModelChange)="update('fechaDesde', $event)"
+           class="filtro-fecha-sm">
+    <input type="date"
+           [ngModel]="filtro.fechaHasta"
+           (ngModelChange)="update('fechaHasta', $event)"
+           class="filtro-fecha-sm">
+    <button type="button"
+            class="btn-limpiar-sm"
+            *ngIf="hayFiltro"
+            (click)="limpiar.emit()">Limpiar</button>
+  </div>
+</div>
