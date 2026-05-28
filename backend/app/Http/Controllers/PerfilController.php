@@ -60,21 +60,26 @@ class PerfilController extends Controller
         ]);
     }
 
-    // Listar sesiones activas (tokens Sanctum)
+    // Listar sesiones activas (tokens Sanctum) — filtra tokens vencidos segun sanctum.expiration
     public function sesiones(Request $request)
     {
         $user = $request->user();
         $currentTokenId = $user->currentAccessToken()->id;
+        $cutoff = now()->subMinutes((int) config('sanctum.expiration', 1440));
 
-        $sesiones = $user->tokens()->orderByDesc('last_used_at')->get()->map(function ($token) use ($currentTokenId) {
-            return [
-                'id'           => $token->id,
-                'nombre'       => $token->name,
-                'ultimo_uso'   => $token->last_used_at,
-                'creada_en'    => $token->created_at,
-                'es_actual'    => $token->id === $currentTokenId,
-            ];
-        });
+        $sesiones = $user->tokens()
+            ->where('created_at', '>=', $cutoff)
+            ->orderByDesc('last_used_at')
+            ->get()
+            ->map(function ($token) use ($currentTokenId) {
+                return [
+                    'id'           => $token->id,
+                    'nombre'       => $token->name,
+                    'ultimo_uso'   => $token->last_used_at,
+                    'creada_en'    => $token->created_at,
+                    'es_actual'    => $token->id === $currentTokenId,
+                ];
+            });
 
         return response()->json(['sesiones' => $sesiones]);
     }

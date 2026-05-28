@@ -35,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Marcar como "no asistió" las citas programadas que ya pasaron — cada 5 min
         $schedule->command('citas:auto-cancelar-pasadas')->everyFiveMinutes();
+
+        // Eliminar tokens Sanctum vencidos (>24h) — diario a las 03:00
+        $schedule->command('tokens:purge')->dailyAt('03:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Para rutas API, retornar siempre JSON en lugar de páginas HTML
