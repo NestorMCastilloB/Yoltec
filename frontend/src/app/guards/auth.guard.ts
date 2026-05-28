@@ -1,68 +1,42 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router) {}
+  private router = inject(Router);
+  private auth = inject(AuthService);
 
   canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    state: RouterStateSnapshot,
   ): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
-    // Obtener el token del almacenamiento local
-    const token = localStorage.getItem('auth_token');
-    
-    // Si no hay token, redirigir al login
+    const token = this.auth.getToken();
     if (!token) {
-      return this.router.createUrlTree(['/login'], {
-        queryParams: { returnUrl: state.url }
-      });
+      return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
     }
-    
-    // Obtener los roles permitidos de la ruta
+
     const allowedRoles = route.data['roles'] as Array<string>;
-    
-    // Si no hay roles específicos requeridos, permitir el acceso
     if (!allowedRoles || allowedRoles.length === 0) {
       return true;
     }
-    
-    // Obtener el usuario del almacenamiento local
-    const userJson = localStorage.getItem('user_data');
-    
-    if (!userJson) {
-      // Si no hay información del usuario, redirigir al login
-      return this.router.createUrlTree(['/login'], {
-        queryParams: { returnUrl: state.url }
-      });
+
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
     }
-    
-    try {
-      const user = JSON.parse(userJson);
-      
-      // Verificar si el usuario tiene alguno de los roles permitidos
-      if (user && user.tipo && allowedRoles.includes(user.tipo)) {
-        return true;
-      }
-      
-      // Si el usuario no tiene los permisos necesarios, redirigir a una página de acceso denegado
-      // o de vuelta al dashboard correspondiente
-      if (user.tipo === 'alumno') {
-        return this.router.createUrlTree(['/student-dashboard']);
-      } else if (user.tipo === 'doctor') {
-        return this.router.createUrlTree(['/doctor-dashboard']);
-      } else if (user.tipo === 'admin') {
-        return this.router.createUrlTree(['/admin-dashboard']);
-      }
-      
-      // Por defecto, redirigir al login
-      return this.router.createUrlTree(['/login']);
-      
-    } catch (error) {
-      return this.router.createUrlTree(['/login']);
+
+    if (user.tipo && allowedRoles.includes(user.tipo)) {
+      return true;
     }
+
+    if (user.tipo === 'alumno') return this.router.createUrlTree(['/student-dashboard']);
+    if (user.tipo === 'doctor') return this.router.createUrlTree(['/doctor-dashboard']);
+    if (user.tipo === 'admin') return this.router.createUrlTree(['/admin-dashboard']);
+
+    return this.router.createUrlTree(['/login']);
   }
 }

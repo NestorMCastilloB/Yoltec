@@ -162,6 +162,16 @@ export class AuthService implements OnDestroy {
     return userJson ? JSON.parse(userJson) : null;
   }
 
+  // Llamado desde flujos especiales (admin-login, verify-2fa) que ya hicieron auth fuera
+  // del flujo normal login() y solo necesitan persistir + activar idle tracking.
+  setAuthData(token: string, user: User): void {
+    this.setToken(token);
+    this.setUser(user);
+    this.isAuthenticatedSubject.next(true);
+    this.userSubject.next(user);
+    this.idle.start(() => this.logout());
+  }
+
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
     return !!user && user.tipo === role;

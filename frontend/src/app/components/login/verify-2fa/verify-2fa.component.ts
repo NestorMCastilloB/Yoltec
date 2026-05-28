@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { API_BASE_URL } from '../../../services/api-config';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-verify-2fa',
@@ -36,7 +37,7 @@ export class Verify2faComponent implements OnInit, OnDestroy {
   userId: number | null = null;
   emailMasked = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
     const pending = sessionStorage.getItem('pending_2fa');
@@ -73,9 +74,7 @@ export class Verify2faComponent implements OnInit, OnDestroy {
         if (response.device_token) {
           localStorage.setItem(`${response.tipo}_device_token`, response.device_token);
         }
-        // Guardar token y usuario
-        localStorage.setItem('auth_token', response.token);
-        localStorage.setItem('user_data', JSON.stringify(response.user));
+        this.authService.setAuthData(response.token, response.user);
         sessionStorage.removeItem('pending_2fa');
 
         // Redirigir según rol
