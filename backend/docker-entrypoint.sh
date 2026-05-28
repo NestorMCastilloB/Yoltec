@@ -37,7 +37,7 @@ MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-onboarding@resend.dev}
 MAIL_FROM_NAME=${MAIL_FROM_NAME:-Yoltec}
 RESEND_API_KEY=${RESEND_API_KEY}
 
-IA_SERVICE_URL=${IA_SERVICE_URL:-https://yoltec-production.up.railway.app}
+IA_SERVICE_URL=${IA_SERVICE_URL:-https://yoltec-ia.onrender.com}
 
 SEED_DEMO_ENABLED=${SEED_DEMO_ENABLED:-false}
 SEED_DEMO_TOKEN=${SEED_DEMO_TOKEN}

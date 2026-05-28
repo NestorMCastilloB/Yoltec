@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Receta, RecetaService } from '../../../../../services/receta.service';
+import { formatFecha } from '../../../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-sd-recetas',
@@ -59,9 +60,5 @@ export class SdRecetasComponent implements OnInit, OnDestroy {
   abrirDetalle(r: Receta): void { this.recetaDetalle = r; }
   cerrarDetalle(): void { this.recetaDetalle = null; }
 
-  formatFecha(fecha: string): string {
-    const d = new Date(fecha);
-    const mes = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][d.getMonth()];
-    return `${d.getDate()} ${mes} ${d.getFullYear()}`;
-  }
+  formatFecha = formatFecha;
 }

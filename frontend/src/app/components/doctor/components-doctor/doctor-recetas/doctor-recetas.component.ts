@@ -5,6 +5,7 @@ import { Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs/operators';
 import { DoctorRecetasService, RecetaItem, RecetaPayload } from './doctor-recetas.service';
 import { Cita, CitaService } from '../../../../services/cita.service';
+import { formatFecha, iniciales } from '../../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-doctor-recetas',
@@ -148,9 +149,7 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
     return r.alumno ?? r.cita?.alumno ?? null;
   }
 
-  iniciales(nombre?: string, apellido?: string): string {
-    return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || '?';
-  }
+  iniciales = iniciales;
 
   medsMostrados(meds: string | null | undefined): string[] {
     if (!meds?.trim()) return [];
@@ -168,13 +167,7 @@ export class DoctorRecetasComponent implements OnInit, OnDestroy {
     return meds.split('\n').map(m => m.trim()).filter(Boolean);
   }
 
-  formatFecha(fecha: string): string {
-    if (!fecha) return '—';
-    const datePart = fecha.split('T')[0] ?? fecha;
-    const [y, m, d] = datePart.split('-').map(Number);
-    return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
-      .format(new Date(y, (m ?? 1) - 1, d ?? 1)).toUpperCase();
-  }
+  formatFecha = formatFecha;
 
   private cargarRecetas(): void {
     this.cargando = true;
