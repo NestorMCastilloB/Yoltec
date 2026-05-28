@@ -83,11 +83,13 @@ class _RecetasTabState extends State<RecetasTab> {
                       ],
                     );
                   }
-                  return ListView.separated(
+                  return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     itemCount: filtradas.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _RecetaCard(receta: filtradas[i]),
+                    itemBuilder: (_, i) => Padding(
+                      padding: EdgeInsets.only(bottom: i < filtradas.length - 1 ? 12 : 0),
+                      child: _RecetaCard(receta: filtradas[i]),
+                    ),
                   );
                 },
               ),

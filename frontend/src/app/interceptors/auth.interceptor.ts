@@ -6,8 +6,8 @@ import {
   HttpInterceptor,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, timer } from 'rxjs';
+import { catchError, switchMap, retry } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -27,23 +27,20 @@ export class AuthInterceptor implements HttpInterceptor {
 
     // Manejar la respuesta
     return next.handle(request).pipe(
+      // Retry 1 vez en cold start Render (502/503) o error de red (status 0)
+      retry({ count: 1, delay: (err: HttpErrorResponse) =>
+        (err.status === 0 || err.status === 502 || err.status === 503)
+          ? timer(2000)
+          : throwError(() => err)
+      }),
       catchError((error: HttpErrorResponse) => {
-        // Manejar errores de autenticación (401 Unauthorized)
         if (error.status === 401) {
-          // Si el token expiró o no es válido, redirigir al login
           if (this.router.url !== '/login') {
             this.authService.logout();
             this.router.navigate(['/login']);
           }
           return throwError(() => error);
         }
-        
-        // Manejar errores de acceso prohibido (403 Forbidden)
-        if (error.status === 403) {
-          // Redirigir a una página de acceso denegado o mostrar un mensaje
-        }
-        
-        // Pasar el error al manejador de errores
         return throwError(() => error);
       })
     );

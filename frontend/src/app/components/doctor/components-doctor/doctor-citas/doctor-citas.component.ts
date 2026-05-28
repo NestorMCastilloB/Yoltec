@@ -811,4 +811,6 @@ export class DoctorCitasComponent implements OnInit, OnDestroy {
     const horaActual = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     return this.timeSlots.filter(s => s > horaActual);
   }
+
+  trackByCita(_: number, c: Cita): number { return c.id; }
 }

@@ -24,9 +24,14 @@ class CitaController extends Controller
                 ->with([
                     'doctor:id,nombre,apellido,username',
                     'consulta:id,cita_id,diagnostico',
+                    'receta:id,cita_id,medicamento,dosis,indicaciones',
                 ])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get()
-            : Cita::with(['alumno:id,nombre,apellido,numero_control'])
+            : Cita::with([
+                    'alumno:id,nombre,apellido,numero_control',
+                    'consulta:id,cita_id,diagnostico',
+                    'receta:id,cita_id,medicamento',
+                ])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get();
 
         return response()->json(['citas' => $citas]);

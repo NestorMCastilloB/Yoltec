@@ -197,11 +197,13 @@ class _ListaCitas extends StatelessWidget {
             )
           : agruparPorMes
               ? _ListaAgrupada(citas: citas)
-              : ListView.separated(
+              : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                   itemCount: citas.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => _CitaCard(cita: citas[i]),
+                  itemBuilder: (_, i) => Padding(
+                    padding: EdgeInsets.only(bottom: i < citas.length - 1 ? 12 : 0),
+                    child: _CitaCard(cita: citas[i]),
+                  ),
                 ),
     );
   }
