@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/screens/student/citas/citas_tab.dart';
-import 'package:yoltec_mobile/screens/student/inicio_tab.dart';
+import 'package:yoltec_mobile/screens/student/inicio/inicio_tab.dart';
 import 'package:yoltec_mobile/screens/student/perfil/perfil_tab.dart';
 import 'package:yoltec_mobile/screens/student/recetas_tab.dart';
 import 'package:yoltec_mobile/screens/student/widgets/student_widgets.dart';
