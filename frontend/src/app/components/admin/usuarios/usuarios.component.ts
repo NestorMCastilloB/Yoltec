@@ -255,7 +255,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/acceso-gestion']);
+    this.authService.logout('/acceso-gestion');
   }
 }
