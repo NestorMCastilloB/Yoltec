@@ -167,6 +167,8 @@ export class MisCitasComponent implements OnInit, OnDestroy {
     return classes[estatus] ?? '';
   }
 
+  trackByCita(_: number, c: any): number { return c.id; }
+
   private mostrarMensaje(msg: string): void {
     this.mensaje = msg;
     setTimeout(() => this.mensaje = null, 4000);

@@ -280,14 +280,27 @@ class ChatRequest(BaseModel):
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
+_groq_cache: dict = {"ok": False, "ts": 0.0}
+
 @app.get("/health")
 def health():
-    llm_ok = False
-    try:
-        groq_client.models.list()
-        llm_ok = True
-    except Exception:
-        pass
+    import time, sklearn
+    now = time.time()
+
+    # Cachear resultado de groq_client.models.list() por 30s
+    if now - _groq_cache["ts"] > 30:
+        try:
+            groq_client.models.list()
+            _groq_cache["ok"] = True
+        except Exception:
+            _groq_cache["ok"] = False
+        _groq_cache["ts"] = now
+
+    model_size = None
+    if model is not None:
+        model_path = os.path.join(BASE_DIR, "model.pkl")
+        if os.path.exists(model_path):
+            model_size = f"{os.path.getsize(model_path) / 1_048_576:.1f}MB"
 
     status = "ok" if model is not None else "degraded"
     code = 200 if model is not None else 503
@@ -298,9 +311,11 @@ def health():
         content={
             "status": status,
             "model_sklearn_loaded": model is not None,
+            "model_sklearn_version": sklearn.__version__,
+            "model_size": model_size,
             "llm_provider": "groq",
             "llm_model": GROQ_MODEL,
-            "llm_available": llm_ok,
+            "llm_available": _groq_cache["ok"],
         }
     )
 

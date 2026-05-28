@@ -68,48 +68,34 @@
 
 ---
 
-## Fase 2 — Quick wins: auditoría + hallazgos del grafo (1 sesión, ~1.5h)
+## Fase 2 — Quick wins: auditoría + hallazgos del grafo ✅ COMPLETADA
 
-> Hallazgos nuevos del grafo marcados con 📊
+> PR #68 — mergeado 2026-05-27
 
-| # | Tarea | Origen | Archivos | Esfuerzo |
-|---|-------|--------|----------|----------|
-| 1 | 📊 Reemplazar iconos web Flutter (favicon + Icon-192/512 + maskable) con logo Yoltec | Grafo | `mobile/web/favicon.png`, `mobile/web/icons/*` | 15 min |
-| 2 | 📊 Extraer `formatFecha()` a pipe/util compartido (duplicado 8 veces en 7 componentes) | Grafo | `frontend/src/app/shared/` + 7 componentes | 30 min |
-| 3 | 📊 Extraer `iniciales()` a util compartido (duplicado 6 veces en 6 componentes) | Grafo | `frontend/src/app/shared/` + 6 componentes | 20 min |
-| 4 | Humanizar SYSTEM_PROMPT IA | Auditoría | `IA/app.py` | 30 min |
-| 5 | Fix regex `/^\d{6}$/` en input 2FA | Auditoría | `verify-2fa.component.ts` | 5 min |
-| 6 | Fix `IA_SERVICE_URL` en Render → `https://yoltec-ia.onrender.com` | Auditoría | Render env vars | 5 min |
-
-**PR:** `feat: quick wins auditoria + grafo (2026-05-27)`
+| # | Tarea | Estado |
+|---|-------|--------|
+| 1 | 📊 Iconos web Flutter → logo Yoltec | ✅ |
+| 2 | 📊 Extraer `formatFecha()` a shared util (6 componentes) | ✅ |
+| 3 | 📊 Extraer `iniciales()` a shared util (2 componentes) | ✅ |
+| 4 | Humanizar SYSTEM_PROMPT IA | ✅ |
+| 5 | Fix regex 2FA | ✅ Ya estaba (PR #67) |
+| 6 | Fix `IA_SERVICE_URL` Railway → Render | ✅ |
 
 ---
 
-## Fase 3 — Pulido opcional (si queda tiempo, 1-2 sesiones)
+## Fase 3 — Pulido y rendimiento ✅ COMPLETADA
 
-### Backend
-- Paginar `historial()` con `paginate(15)`
-- Agregar índices: `citas.fecha_cita`, `citas.alumno_id`, `pre_evaluaciones_ia.estatus_validacion`
-- Eager loading completo en `CitaController::index()` (`consulta`, `receta`)
-- `Cache::forget()` en `CalendarioAdminController::update()`
+> PR #69 — mergeado 2026-05-27
 
-### Frontend
-- `trackBy` en `*ngFor` de `doctor-citas` y `mis-citas`
-- Recarga automática de `mis-citas` tras cancelar
-- Confirmación modal antes de cancelar cita
-- Estados vacíos (icono + mensaje) en listas
-- Filtros persistentes en URL query params
-- 📊 Retry/fallback en `api-config.ts` para cold starts Render (betweenness 0.037)
-
-### Mobile
-- `ListView.builder` en lugar de `.separated`
-- Throttle 2s en `RefreshIndicator`
-- Cleanup automático de caché offline expirado
-
-### IA
-- `/health` expandido con versión, tamaño, estado LLM
-- Cachear `groq_client.models.list()` 30s
-- Mover `respuesta_a_binario` y `generar_recomendacion` a `utils.py`
+| # | Tarea | Estado |
+|---|-------|--------|
+| 1 | Índice `pre_evaluaciones_ia.estatus_validacion` | ✅ |
+| 2 | Paginar `historial()` con `paginate(15)` | ✅ |
+| 3 | Eager loading en `CitaController::index()` | ✅ |
+| 4 | `trackBy` en `doctor-citas` y `mis-citas` | ✅ |
+| 5 | Retry cold start Render en interceptor | ✅ |
+| 6 | `ListView.builder` en citas_tab y recetas_tab | ✅ |
+| 7 | `/health` expandido + caché Groq 30s | ✅ |
 
 ---
 

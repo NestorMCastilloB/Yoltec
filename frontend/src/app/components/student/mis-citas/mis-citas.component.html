@@ -73,7 +73,7 @@
 
     <!-- Cards (próximas / pasadas) -->
     <div class="mc-citas-list" *ngIf="!isLoading && !error && activeTab !== 'canceladas' && citasActivas.length > 0">
-      <div class="mc-cita-card" *ngFor="let cita of citasActivas">
+      <div class="mc-cita-card" *ngFor="let cita of citasActivas; trackBy: trackByCita">
         <ng-container *ngTemplateOutlet="citaCard; context: { $implicit: cita }"></ng-container>
       </div>
     </div>
@@ -82,7 +82,7 @@
     <div class="mc-citas-list" *ngIf="!isLoading && !error && activeTab === 'canceladas' && canceladas.length > 0">
       <ng-container *ngFor="let grupo of canceladasAgrupadas">
         <div class="mc-month-header">{{ grupo.mes }}</div>
-        <div class="mc-cita-card" *ngFor="let cita of grupo.citas">
+        <div class="mc-cita-card" *ngFor="let cita of grupo.citas; trackBy: trackByCita">
           <ng-container *ngTemplateOutlet="citaCard; context: { $implicit: cita }"></ng-container>
         </div>
       </ng-container>

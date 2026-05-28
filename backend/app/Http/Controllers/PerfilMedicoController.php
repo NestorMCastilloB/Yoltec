@@ -72,33 +72,39 @@ class PerfilMedicoController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        $citas = Cita::with(['doctor', 'consulta', 'receta'])
+        $paginated = Cita::with(['doctor', 'consulta', 'receta'])
             ->where('alumno_id', $id)
             ->where('estatus', 'atendida')
             ->orderByDesc('fecha_cita')
-            ->get()
-            ->map(fn($c) => [
-                'id'           => $c->id,
-                'clave_cita'   => $c->clave_cita,
-                'fecha_cita'   => $c->fecha_cita,
-                'hora_cita'    => $c->hora_cita,
-                'motivo'       => $c->motivo,
-                'doctor'       => $c->doctor ? [
-                    'nombre'   => $c->doctor->nombre,
-                    'apellido' => $c->doctor->apellido,
-                ] : null,
-                'consulta'     => $c->consulta ? [
-                    'diagnostico'    => $c->consulta->diagnostico,
-                    'tratamiento'    => $c->consulta->tratamiento,
-                    'observaciones'  => $c->consulta->observaciones,
-                ] : null,
-                'receta'       => $c->receta ? [
-                    'medicamento'  => $c->receta->medicamento,
-                    'dosis'        => $c->receta->dosis,
-                    'indicaciones' => $c->receta->indicaciones,
-                ] : null,
-            ]);
+            ->paginate(15);
 
-        return response()->json(['historial' => $citas, 'total' => $citas->count()]);
+        $citas = $paginated->getCollection()->map(fn($c) => [
+            'id'           => $c->id,
+            'clave_cita'   => $c->clave_cita,
+            'fecha_cita'   => $c->fecha_cita,
+            'hora_cita'    => $c->hora_cita,
+            'motivo'       => $c->motivo,
+            'doctor'       => $c->doctor ? [
+                'nombre'   => $c->doctor->nombre,
+                'apellido' => $c->doctor->apellido,
+            ] : null,
+            'consulta'     => $c->consulta ? [
+                'diagnostico'    => $c->consulta->diagnostico,
+                'tratamiento'    => $c->consulta->tratamiento,
+                'observaciones'  => $c->consulta->observaciones,
+            ] : null,
+            'receta'       => $c->receta ? [
+                'medicamento'  => $c->receta->medicamento,
+                'dosis'        => $c->receta->dosis,
+                'indicaciones' => $c->receta->indicaciones,
+            ] : null,
+        ]);
+
+        return response()->json([
+            'historial'    => $citas,
+            'total'        => $paginated->total(),
+            'current_page' => $paginated->currentPage(),
+            'last_page'    => $paginated->lastPage(),
+        ]);
     }
 }
