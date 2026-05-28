@@ -50,7 +50,7 @@
     </div>
 
     <div *ngIf="citasFiltradas.length === 0" class="empty-state">
-      No hay citas {{ filtroActivo !== 'todas' ? 'de prioridad ' + filtroActivo : 'pendientes para clasificar' }}.
+      {{ filtroActivo !== 'todas' ? 'No hay citas con prioridad ' + filtroActivo + ' en este momento.' : 'No hay citas pendientes por clasificar.' }}
     </div>
 
     <div class="citas-prioridad-lista" *ngIf="citasFiltradas.length > 0">

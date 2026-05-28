@@ -99,6 +99,24 @@
 
 ---
 
+## Fase 4 — Entrega final: APK + humanizar + bug IA ✅ COMPLETADA
+
+> PR #70 — 2026-05-28
+
+| # | Tarea | Estado |
+|---|-------|--------|
+| 1 | APK release Flutter (53 MB, apunta a Render prod) | ✅ |
+| 2 | Humanizar textos login web (subtitulos, placeholders) | ✅ |
+| 3 | Humanizar empty states frontend + mobile (~20 textos) | ✅ |
+| 4 | Humanizar mensajes de error (IA, perfil, citas) | ✅ |
+| 5 | Bug: Prioridad IA — errores diferenciados (cold start / 500 / red) + reintentar | ✅ |
+
+**Nota:** Resend (emails solo llegan a `nespiolin05@gmail.com`) queda como feature futuro — requiere dominio verificado propio.
+
+**PR:** `feat: fase 4 entrega final (APK + humanizar + bug IA)`
+
+---
+
 ## Post-semestre (no bloquea entrega)
 
 ### Refactors estructurales (detectados por grafo)
@@ -128,14 +146,15 @@
 
 ## Resumen ejecutivo
 
-| Fase | Estado | Duración |
-|------|--------|----------|
-| **1 — Críticos bloqueantes** | ✅ Completada (PRs #64-#67) | ~6h |
-| **2 — Quick wins auditoría + grafo** | ⏳ Pendiente | ~1.5h |
-| **3 — Pulido opcional** | Pendiente | ~3h |
-| **Post-semestre** | Backlog | Semanas |
+| Fase | Estado | PRs |
+|------|--------|-----|
+| **1 — Criticos bloqueantes** | ✅ Completada | #64, #65, #66, #67 |
+| **2 — Quick wins auditoria + grafo** | ✅ Completada | #68 |
+| **3 — Pulido y rendimiento** | ✅ Completada | #69 |
+| **4 — Entrega final (APK + humanizar + bug)** | ✅ Completada | #70 |
+| **Post-semestre** | Backlog | — |
 
 ---
 
-**Actualizado:** 2026-05-27
+**Actualizado:** 2026-05-28
 **Insumos:** [auditoria-tecnica-20260525.md](auditoria-tecnica-20260525.md) + knowledge graph (graphify, 1784 nodos, 2181 aristas)

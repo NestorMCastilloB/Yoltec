@@ -49,17 +49,17 @@ class CitasTab extends StatelessWidget {
                     children: [
                       _ListaCitas(
                         citas: proximas,
-                        vacioMensaje: 'No tienes citas próximas',
+                        vacioMensaje: 'Sin citas proximas',
                         onRefresh: () => _recargar(context),
                       ),
                       _ListaCitas(
                         citas: pasadas,
-                        vacioMensaje: 'Aún no tienes citas atendidas',
+                        vacioMensaje: 'Todavia sin historial',
                         onRefresh: () => _recargar(context),
                       ),
                       _ListaCitas(
                         citas: canceladas,
-                        vacioMensaje: 'No tienes citas canceladas',
+                        vacioMensaje: 'Nada por aqui',
                         onRefresh: () => _recargar(context),
                         agruparPorMes: true,
                       ),

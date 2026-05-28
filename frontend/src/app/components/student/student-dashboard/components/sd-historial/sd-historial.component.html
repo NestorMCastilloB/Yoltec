@@ -4,7 +4,7 @@
   <div *ngIf="isLoading" class="loading">Cargando historial...</div>
 
   <div *ngIf="!isLoading && historial.length === 0" class="empty-state">
-    No tienes consultas registradas aún.
+    Todavia no hay consultas en tu historial.
   </div>
 
   <div class="historial-lista" *ngIf="!isLoading && historial.length > 0">

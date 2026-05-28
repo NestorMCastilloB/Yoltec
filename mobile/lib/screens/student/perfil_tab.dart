@@ -83,7 +83,7 @@ class _PerfilTabState extends State<PerfilTab> {
     } catch (_) {
       if (mounted) {
         setState(() {
-          _error = 'Error al cargar perfil';
+          _error = 'No pudimos cargar tu perfil. Verifica tu conexion.';
           _cargando = false;
         });
       }

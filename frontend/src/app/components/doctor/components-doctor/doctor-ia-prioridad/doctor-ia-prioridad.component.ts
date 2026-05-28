@@ -51,9 +51,15 @@ export class DoctorIaPrioridadComponent implements OnDestroy, OnInit {
     this.iaPriorityService.getPendientesPorPrioridad()
       .pipe(
         takeUntil(this.destroy$),
-        catchError(() => {
+        catchError((err) => {
           this.hasError = true;
-          this.errorMessage = 'No se pudo conectar con el servicio de prioridad. Intenta de nuevo.';
+          if (err?.status === 0 || err?.status === 502 || err?.status === 503) {
+            this.errorMessage = 'El servidor esta iniciando. Espera unos segundos y reintenta.';
+          } else if (err?.status >= 500) {
+            this.errorMessage = 'Ocurrio un problema al clasificar las citas. Reintenta en un momento.';
+          } else {
+            this.errorMessage = 'No se pudo conectar con el servicio de prioridad. Verifica tu conexion.';
+          }
           return of(null);
         }),
         finalize(() => { this.isLoadingPrioridad = false; })

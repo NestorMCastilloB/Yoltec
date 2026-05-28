@@ -76,8 +76,8 @@ class _RecetasTabState extends State<RecetasTab> {
                         Center(
                           child: _Vacio(
                             mensaje: service.recetas.isEmpty
-                                ? 'No tienes recetas registradas'
-                                : 'Sin resultados',
+                                ? 'Sin recetas todavia'
+                                : 'Sin coincidencias',
                           ),
                         ),
                       ],

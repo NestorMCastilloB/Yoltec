@@ -62,13 +62,13 @@
         </svg>
       </div>
       <ng-container [ngSwitch]="activeTab">
-        <h3 *ngSwitchCase="'proximas'">No tienes citas próximas</h3>
-        <h3 *ngSwitchCase="'pasadas'">No tienes citas pasadas</h3>
-        <h3 *ngSwitchCase="'canceladas'">No tienes citas canceladas</h3>
+        <h3 *ngSwitchCase="'proximas'">Sin citas proximas</h3>
+        <h3 *ngSwitchCase="'pasadas'">Todavia sin historial</h3>
+        <h3 *ngSwitchCase="'canceladas'">Nada por aqui</h3>
       </ng-container>
       <p>{{ activeTab === 'proximas'
-        ? 'Cuando agendes una consulta aparecerá aquí con su fecha, hora y motivo.'
-        : 'No se encontraron citas en esta categoría.' }}</p>
+        ? 'Agenda una consulta y aqui veras la fecha, hora y motivo.'
+        : 'No hay citas en esta categoria.' }}</p>
     </div>
 
     <!-- Cards (próximas / pasadas) -->

@@ -189,7 +189,7 @@ export class PreEvaluacionIaComponent implements OnInit, OnDestroy, AfterViewChe
           }
         },
         error: () => {
-          this.error = 'No se pudo conectar con el servicio de IA. Intenta de nuevo.';
+          this.error = 'El asistente no responde en este momento. Vuelve a intentarlo en unos segundos.';
           this.shouldScroll = true;
         }
       });

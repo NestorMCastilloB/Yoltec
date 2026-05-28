@@ -164,7 +164,7 @@ class PreEvaluacionService extends ChangeNotifier {
     } on ApiException catch (e) {
       throw Exception(e.message);
     } catch (e) {
-      throw Exception('Error al conectar con la IA.');
+      throw Exception('El asistente no responde. Intentalo en unos segundos.');
     }
   }
 
