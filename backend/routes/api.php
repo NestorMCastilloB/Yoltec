@@ -18,6 +18,7 @@ use App\Http\Controllers\CalendarioAdminController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\PerfilMedicoController;
 use App\Http\Controllers\SeedDemoController;
+use App\Http\Controllers\SesionAdminController;
 
 // Health check (Y20I-93)
 Route::get('/health', function () {
@@ -122,6 +123,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/doctores',         [AdminController::class, 'storeDoctor']);
         Route::put('/doctores/{id}',     [AdminController::class, 'updateDoctor']);
         Route::delete('/doctores/{id}',  [AdminController::class, 'destroyDoctor']);
+
+        Route::get('/sesiones',          [SesionAdminController::class, 'index']);
+        Route::delete('/sesiones/{id}',  [SesionAdminController::class, 'destroy']);
+        Route::post('/sesiones/purgar',  [SesionAdminController::class, 'purgar']);
     });
 
     // ===== IA 1: Clasificador de Prioridad — solo doctor =====
