@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { API_BASE_URL } from '../../../services/api-config';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -23,7 +24,7 @@ export class AdminLoginComponent implements OnDestroy {
   toast: string | null = null;
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient, private authService: AuthService) {
     this.form = this.fb.group({
       usuario: ['', Validators.required],
       password: ['', Validators.required]
@@ -46,7 +47,7 @@ export class AdminLoginComponent implements OnDestroy {
       tipo_usuario: 'admin'
     };
 
-    this.http.post<{ token?: string; user?: { tipo: string }; requires_2fa?: boolean; user_id?: number; email_masked?: string }>(`${API_BASE_URL}/login`, body)
+    this.http.post<{ token?: string; user?: { id: number; nombre: string; apellido: string; email: string; tipo: string }; requires_2fa?: boolean; user_id?: number; email_masked?: string }>(`${API_BASE_URL}/login`, body)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => { this.isLoading = false; })
@@ -62,8 +63,7 @@ export class AdminLoginComponent implements OnDestroy {
             return;
           }
           if (res.token && res.user) {
-            localStorage.setItem('auth_token', res.token);
-            localStorage.setItem('user_data', JSON.stringify(res.user));
+            this.authService.setAuthData(res.token, res.user);
             this.router.navigate(['/admin-dashboard']);
           } else {
             this.mostrarToast('Respuesta inesperada del servidor');

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -31,38 +31,29 @@ export class UsuariosService {
 
   constructor(private http: HttpClient) {}
 
-  private headers(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('auth_token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
-  // GET /api/admin/usuarios — lista paginada con filtros
+  // AuthInterceptor agrega Bearer a todas las peticiones — no se requieren headers manuales.
   getUsuarios(params: { rol?: string; suspendido?: boolean; page?: number; search?: string }): Observable<UsuariosPaginados> {
     let p = new HttpParams();
     if (params.rol) p = p.set('rol', params.rol);
     if (params.suspendido !== undefined) p = p.set('suspendido', String(params.suspendido));
     if (params.page) p = p.set('page', String(params.page));
     if (params.search) p = p.set('search', params.search);
-    return this.http.get<UsuariosPaginados>(`${this.base}/usuarios`, { ...this.headers(), params: p });
+    return this.http.get<UsuariosPaginados>(`${this.base}/usuarios`, { params: p });
   }
 
-  // PUT /api/admin/usuarios/{id}/suspender
   suspender(id: number): Observable<any> {
-    return this.http.put(`${this.base}/usuarios/${id}/suspender`, {}, this.headers());
+    return this.http.put(`${this.base}/usuarios/${id}/suspender`, {});
   }
 
-  // PUT /api/admin/usuarios/{id}/reactivar
   reactivar(id: number): Observable<any> {
-    return this.http.put(`${this.base}/usuarios/${id}/reactivar`, {}, this.headers());
+    return this.http.put(`${this.base}/usuarios/${id}/reactivar`, {});
   }
 
-  // POST /api/admin/usuarios
   crearUsuario(payload: any): Observable<any> {
-    return this.http.post(`${this.base}/usuarios`, payload, this.headers());
+    return this.http.post(`${this.base}/usuarios`, payload);
   }
 
-  // PUT /api/admin/usuarios/{id}
   actualizarUsuario(id: number, payload: any): Observable<any> {
-    return this.http.put(`${this.base}/usuarios/${id}`, payload, this.headers());
+    return this.http.put(`${this.base}/usuarios/${id}`, payload);
   }
 }

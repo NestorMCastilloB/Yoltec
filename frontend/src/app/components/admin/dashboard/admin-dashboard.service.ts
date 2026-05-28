@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -21,10 +21,8 @@ export class AdminDashboardService {
 
   constructor(private http: HttpClient) {}
 
-  // GET /api/admin/stats — métricas generales del sistema
+  // GET /api/admin/stats — métricas generales del sistema. AuthInterceptor agrega Bearer.
   getStats(): Observable<AdminStats> {
-    const token = localStorage.getItem('auth_token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.get<AdminStats>(`${this.base}/admin/stats`, { headers });
+    return this.http.get<AdminStats>(`${this.base}/admin/stats`);
   }
 }
