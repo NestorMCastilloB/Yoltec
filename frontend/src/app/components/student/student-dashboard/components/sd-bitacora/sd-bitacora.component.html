@@ -6,8 +6,8 @@
       <div *ngIf="error" class="alert error">{{ error }}</div>
 
       <div *ngIf="!error && bitacoras.length === 0" class="placeholder-card">
-        <h3>Aún no tienes registros médicos</h3>
-        <p>Cuando el doctor registre una consulta, verás aquí el resumen de tu atención.</p>
+        <h3>Sin registros medicos</h3>
+        <p>Despues de tu primera consulta, aqui veras el resumen de tu atencion.</p>
       </div>
 
       <div *ngIf="bitacoras.length > 0" class="cards-grid">

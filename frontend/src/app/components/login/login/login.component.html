@@ -4,8 +4,8 @@
     <div class="welcome-content">
       <img src="./logo.jpeg" alt="Yoltec" class="welcome-logo">
       <h1>YOLTEC</h1>
-      <p class="welcome-subtitle">Sistema clínico académico</p>
-      <p>Inicia sesión con tu cuenta y accede a todos los servicios médicos.</p>
+      <p class="welcome-subtitle">Consultorio Medico Universitario</p>
+      <p>Tu salud es lo primero. Accede a tus citas, recetas y evaluaciones.</p>
       <div class="decorative-line"></div>
     </div>
   </div>
@@ -13,8 +13,8 @@
   <!-- Lado derecho: formulario -->
   <div class="login-panel">
     <div class="login-header">
-      <h2>Acceder</h2>
-      <p>Selecciona tu rol y completa tus credenciales</p>
+      <h2>Bienvenido</h2>
+      <p>Elige tu tipo de cuenta para continuar</p>
     </div>
 
     <!-- Selector de roles -->
@@ -42,7 +42,7 @@
           <label>NIP</label>
           <div class="password-wrapper">
             <input [type]="showPasswordStudent ? 'text' : 'password'"
-              [(ngModel)]="studentData.password" name="password" placeholder="Tu NIP de 6 dígitos" required>
+              [(ngModel)]="studentData.password" name="password" placeholder="6 digitos" required>
             <button type="button" class="toggle-password" (click)="togglePassword('student')">&#9919;</button>
           </div>
         </div>

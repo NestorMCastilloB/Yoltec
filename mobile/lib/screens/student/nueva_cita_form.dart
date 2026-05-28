@@ -76,7 +76,7 @@ class _NuevaCitaFormState extends State<NuevaCitaForm> {
         );
       }
     } catch (e) {
-      _errorCarga = 'No se pudo cargar la disponibilidad';
+      _errorCarga = 'No pudimos cargar los horarios. Verifica tu conexion.';
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
@@ -177,7 +177,7 @@ class _NuevaCitaFormState extends State<NuevaCitaForm> {
       horaCita: _horaSel!,
       motivo: motivo,
     );
-    if (cita == null) return servicio.error ?? 'No se pudo agendar. Intenta de nuevo.';
+    if (cita == null) return servicio.error ?? 'No se pudo agendar la cita. Intentalo de nuevo.';
     await servicio.cargarCitas(token);
     if (mounted) Navigator.of(context).pop(true);
     return null;

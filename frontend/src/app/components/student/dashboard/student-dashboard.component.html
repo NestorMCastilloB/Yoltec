@@ -127,8 +127,8 @@
       <div class="card" *ngIf="citas.length === 0">
         <div class="empty-state">
           <div class="empty-icon">&#8862;</div>
-          <h3>No tienes citas agendadas</h3>
-          <p>Cuando agendes una consulta en el servicio médico aparecerá aquí con su fecha, hora y motivo.</p>
+          <h3>Sin citas por ahora</h3>
+          <p>Agenda tu primera consulta y aqui veras la fecha, hora y motivo.</p>
           <button class="btn primary" (click)="navegarAAgendar.emit()">
             <span class="plus">+</span> Agendar cita
           </button>
@@ -164,7 +164,7 @@
             <div class="tip-icon">&#10003;</div>
             <div>
               <h4>Todo en orden</h4>
-              <p>No tienes recordatorios pendientes esta semana.</p>
+              <p>No hay pendientes de salud esta semana. ¡Sigue asi!</p>
             </div>
           </div>
         </div>

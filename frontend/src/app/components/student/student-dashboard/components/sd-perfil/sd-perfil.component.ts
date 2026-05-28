@@ -134,7 +134,7 @@ export class SdPerfilComponent implements OnInit, OnDestroy {
     this.isUploadingFoto = true;
     this.fotoMsg = null;
     this.perfilMedicoService.subirFoto(file)
-      .pipe(takeUntil(this.destroy$), catchError(err => { this.fotoMsg = 'Error al subir foto.'; return of(null); }), finalize(() => this.isUploadingFoto = false))
+      .pipe(takeUntil(this.destroy$), catchError(err => { this.fotoMsg = 'No se pudo subir la foto. Verifica que sea menor a 2 MB.'; return of(null); }), finalize(() => this.isUploadingFoto = false))
       .subscribe((res: any) => { if (res) { this.fotoMsg = 'Foto actualizada.'; this.loadPerfil(); } });
   }
 
