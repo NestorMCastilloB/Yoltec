@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Bitacora, BitacoraService } from '../../../../../services/bitacora.service';
+import { formatFechaHora } from '../../../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-sd-bitacora',
@@ -31,9 +32,7 @@ export class SdBitacoraComponent implements OnInit, OnDestroy {
       .subscribe((data: Bitacora[]) => this.bitacoras = data);
   }
 
-  formatFecha(fecha: string): string {
-    return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fecha));
-  }
+  formatFecha = formatFechaHora;
 
   formatFechaCita(fecha: string): string {
     return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' }).format(new Date(fecha));

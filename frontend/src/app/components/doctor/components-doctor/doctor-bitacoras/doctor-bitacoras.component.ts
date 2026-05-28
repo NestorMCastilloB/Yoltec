@@ -5,6 +5,7 @@ import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { Cita, CitaService } from '../../../../services/cita.service';
 import { Bitacora, BitacoraService, CreateBitacoraPayload } from '../../../../services/bitacora.service';
+import { formatFecha } from '../../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-doctor-bitacoras',
@@ -195,12 +196,7 @@ export class DoctorBitacorasComponent implements OnInit, OnDestroy {
     return (n + a).toUpperCase() || '?';
   }
 
-  formatFecha(fecha: string): string {
-    if (!fecha) return '—';
-    const [y, m, d] = fecha.split('-').map(Number);
-    return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
-      .format(new Date(y, (m ?? 1) - 1, d ?? 1)).toUpperCase();
-  }
+  formatFecha = formatFecha;
 
   formatDatetime(iso: string): string {
     if (!iso) return '—';

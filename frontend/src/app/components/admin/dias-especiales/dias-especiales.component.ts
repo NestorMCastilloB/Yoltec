@@ -7,6 +7,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 import { AdminSidebarComponent } from '../shared/admin-sidebar.component';
 import { DiasEspecialesService, DiaEspecialItem, TipoDiaEspecial } from './dias-especiales.service';
+import { formatFecha } from '../../shared/utils/format.utils';
 
 interface CalDay {
   date: string;
@@ -198,13 +199,7 @@ export class DiasEspecialesComponent implements OnInit, OnDestroy {
 
   // ===== HELPERS =====
 
-  // Convierte YYYY-MM-DD (o ISO) a formato legible en español
-  formatFecha(fecha: string): string {
-    if (!fecha) return '';
-    const [y, m, d] = fecha.split('T')[0].split('-').map(Number);
-    if (!y || !m || !d) return fecha;
-    return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(y, m - 1, d));
-  }
+  formatFecha = formatFecha;
 
   onSectionChange(section: string): void {
     if (section === 'panel') this.router.navigate(['/admin-dashboard']);

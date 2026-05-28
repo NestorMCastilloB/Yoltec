@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AgendarCitaComponent } from '../../shared/agendar-cita/agendar-cita.component';
 import { AgendarCitaService, AlumnoBusqueda, Cita } from '../../shared/agendar-cita/agendar-cita.service';
+import { iniciales } from '../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-nueva-cita-doctor',
@@ -77,9 +78,7 @@ export class NuevaCitaDoctorComponent {
     this.router.navigate(['/doctor/citas']);
   }
 
-  iniciales(nombre: string): string {
-    return nombre.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase();
-  }
+  iniciales = iniciales;
 
   // Convierte ISO a "Miércoles, 13 de mayo 2026"
   formatFecha(iso: string): string {

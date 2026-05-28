@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { PreEvaluacionIAService, PreEvaluacion } from '../../../../services/pre-evaluacion-ia.service';
+import { formatFecha } from '../../../shared/utils/format.utils';
 
 @Component({
   selector: 'app-doctor-pre-evaluaciones',
@@ -214,13 +215,7 @@ export class DoctorPreEvaluacionesComponent implements OnInit, OnDestroy {
     return !!(pe.cita?.alumno?.nombre || pe.cita?.alumno?.apellido);
   }
 
-  formatFecha(iso: string | null | undefined): string {
-    if (!iso) return '—';
-    const [y, m, d] = iso.split('T')[0].split('-').map(Number);
-    if (!y || !m || !d || isNaN(y) || isNaN(m) || isNaN(d)) return '—';
-    return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
-      .format(new Date(y, m - 1, d));
-  }
+  formatFecha = formatFecha;
 
   private mostrarToast(mensaje: string, tipo: 'ok' | 'error'): void {
     clearTimeout(this.toastTimer);
