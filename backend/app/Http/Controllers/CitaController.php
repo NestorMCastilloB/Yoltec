@@ -23,14 +23,14 @@ class CitaController extends Controller
             ? Cita::where('alumno_id', $user->id)
                 ->with([
                     'doctor:id,nombre,apellido,username',
-                    'consulta:id,cita_id,diagnostico',
-                    'receta:id,cita_id,medicamento,dosis,indicaciones',
+                    'consulta:id,cita_id,diagnostico,tratamiento,observaciones',
+                    'receta:id,cita_id,medicamentos,indicaciones',
                 ])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get()
             : Cita::with([
                     'alumno:id,nombre,apellido,numero_control',
                     'consulta:id,cita_id,diagnostico',
-                    'receta:id,cita_id,medicamento',
+                    'receta:id,cita_id,medicamentos',
                 ])
                 ->orderBy('fecha_cita', 'desc')->orderBy('hora_cita', 'desc')->get();
 

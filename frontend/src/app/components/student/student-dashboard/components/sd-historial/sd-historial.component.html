@@ -25,7 +25,7 @@
         </div>
         <ng-template #sinConsulta><p class="sin-datos">Sin registro de consulta.</p></ng-template>
         <div *ngIf="item.receta" class="historial-receta">
-          <strong>Receta:</strong> {{ item.receta.medicamento }} — {{ item.receta.dosis }}
+          <strong>Receta:</strong> {{ item.receta.medicamentos }}
           <p *ngIf="item.receta.indicaciones">{{ item.receta.indicaciones }}</p>
         </div>
       </div>
