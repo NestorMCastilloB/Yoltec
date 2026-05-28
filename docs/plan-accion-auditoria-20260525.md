@@ -1,8 +1,9 @@
-# Plan de acción — Auditoría 2026-05-25 + Análisis de grafo 2026-05-27
+# Plan de accion — Auditoria 2026-05-25 + Analisis de grafo 2026-05-27
 
 **Insumo:** [auditoria-tecnica-20260525.md](auditoria-tecnica-20260525.md) + knowledge graph (graphify)
-**Deadline académico:** mediados de junio 2026 (~2.5 semanas)
-**Estrategia:** Resolver críticos bloqueantes + ya planificado, dejar resto para post-semestre
+**Deadline academico:** mediados de junio 2026
+**Estado:** Fases 1-4 completadas (PRs #64-#70). Release v1.5.0 publicada con APK.
+**Siguiente:** Fase 5 — refactors estructurales + deuda tecnica
 
 ---
 
@@ -117,30 +118,46 @@
 
 ---
 
-## Post-semestre (no bloquea entrega)
+## Fase 5 — Refactors estructurales + deuda tecnica
 
-### Refactors estructurales (detectados por grafo)
+> Archivos que superan el limite de 700 lineas y duplicacion de logica detectada por el grafo de conocimiento.
 
-| Archivo | Líneas | Métodos | Límite | Origen |
-|---------|--------|---------|--------|--------|
-| `doctor-citas.component.ts` | 814 | 77 | +700 🔴 | Auditoría + Grafo |
-| `nueva_cita_form.dart` | 914 | ~30 | +700 🔴 | 📊 Solo grafo |
-| `perfil_tab.dart` | 927 | ~30 | +700 🔴 | Auditoría |
-| `admin-dashboard.component.ts` | 558 | 41 | Tolerable | Auditoría |
-| `citas_tab.dart` | 550 | ~20 | Tolerable | 📊 Solo grafo |
-| `inicio_tab.dart` | 516 | ~20 | Tolerable | 📊 Solo grafo |
+### 5A — Partir archivos criticos (+700 lineas)
 
-### Deuda técnica
-- 📊 Centralizar `loadCitas()` (duplicado 4 veces en 4 comunidades)
-- 📊 Centralizar `logout()` (duplicado 7 veces en 7 comunidades)
-- Tests unitarios servicios Angular (cobertura 0%)
-- `applicationId` Flutter: cambiar de `com.example.yoltec_mobile`
-- Tipado fuerte: eliminar `any` en servicios/componentes
-- AuthService centralizado en frontend (eliminar `localStorage` directo)
-- 📊 Separar idle tracking de AuthService (6 métodos → `IdleService`)
-- Migrar fotos perfil de base64 en BD a `storage/` (backend)
-- Filtros avanzados pacientes (IMC, tipo sangre, etc.)
-- Endpoint `/predict-batch` en IA para evitar N requests
+| # | Archivo | Lineas | Plan | Prioridad |
+|---|---------|--------|------|-----------|
+| 1 | `nueva_cita_form.dart` | 914 | Extraer widgets: calendario, selector slots, confirm sheet | Alta |
+| 2 | `perfil_tab.dart` | 927 | Extraer secciones: info medica, contacto emergencia, foto, seguridad | Alta |
+| 3 | `doctor-citas.component.ts` | 814 | Extraer: grid semanal, panel detalle, modal agendar, filtros | Alta |
+
+### 5B — Partir archivos tolerables (400-700 lineas)
+
+| # | Archivo | Lineas | Plan | Prioridad |
+|---|---------|--------|------|-----------|
+| 4 | `admin-dashboard.component.ts` | 558 | Extraer: tabla usuarios, modal CRUD, dias especiales | Media |
+| 5 | `citas_tab.dart` | 550 | Extraer: lista citas, card cita, modal cancelar | Media |
+| 6 | `inicio_tab.dart` | 516 | Extraer: card proxima cita, grid acceso rapido, stats | Media |
+
+### 5C — Centralizar logica duplicada
+
+| # | Tarea | Duplicaciones | Archivos afectados |
+|---|-------|--------------|-------------------|
+| 7 | Centralizar `loadCitas()` | 4 veces en 4 comunidades | Servicios citas web + mobile |
+| 8 | Centralizar `logout()` | 7 veces en 7 comunidades | AuthService + componentes |
+| 9 | Separar idle tracking de AuthService | 6 metodos | `auth.service.ts` → `idle.service.ts` |
+
+### 5D — Deuda tecnica general
+
+| # | Tarea | Prioridad |
+|---|-------|-----------|
+| 10 | `applicationId` Flutter: `com.example.yoltec_mobile` → `com.yoltec.mobile` | Alta |
+| 11 | Tipado fuerte: eliminar `any` en servicios/componentes Angular | Media |
+| 12 | AuthService centralizado (eliminar `localStorage` directo) | Media |
+| 13 | Migrar fotos perfil de base64 en BD a `storage/` (backend) | Baja |
+| 14 | Filtros avanzados pacientes (IMC, tipo sangre, etc.) | Baja |
+| 15 | Endpoint `/predict-batch` en IA para evitar N requests | Baja |
+| 16 | Tests unitarios servicios Angular (cobertura 0%) | Baja |
+| 17 | Dominio propio para Resend (emails funcionales para todos) | Baja |
 
 ---
 
@@ -152,7 +169,7 @@
 | **2 — Quick wins auditoria + grafo** | ✅ Completada | #68 |
 | **3 — Pulido y rendimiento** | ✅ Completada | #69 |
 | **4 — Entrega final (APK + humanizar + bug)** | ✅ Completada | #70 |
-| **Post-semestre** | Backlog | — |
+| **5 — Refactors + deuda tecnica** | ⏳ En progreso | — |
 
 ---
 

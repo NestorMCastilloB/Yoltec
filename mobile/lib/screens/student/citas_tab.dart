@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:yoltec_mobile/models/cita.dart';
-import 'package:yoltec_mobile/screens/student/nueva_cita_form.dart';
+import 'package:yoltec_mobile/screens/student/nueva_cita/nueva_cita_form.dart';
 import 'package:yoltec_mobile/services/auth_service.dart';
 import 'package:yoltec_mobile/services/cita_service.dart';
 import 'package:yoltec_mobile/utils/app_theme.dart';
