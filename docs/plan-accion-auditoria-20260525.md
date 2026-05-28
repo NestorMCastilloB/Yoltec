@@ -2,8 +2,8 @@
 
 **Insumo:** [auditoria-tecnica-20260525.md](auditoria-tecnica-20260525.md) + knowledge graph (graphify)
 **Deadline academico:** mediados de junio 2026
-**Estado:** Fases 1-4 completadas (PRs #64-#70). Release v1.5.0 publicada con APK.
-**Siguiente:** Fase 5 — refactors estructurales + deuda tecnica
+**Estado:** Fases 1-5 completadas (PRs #64-#78). Release v1.5.0 publicada con APK.
+**Siguiente:** Cerrado — pendientes son features baja prioridad post-deadline.
 
 ---
 
@@ -118,46 +118,42 @@
 
 ---
 
-## Fase 5 — Refactors estructurales + deuda tecnica
+## Fase 5 — Refactors estructurales + deuda tecnica ✅ COMPLETADA
 
-> Archivos que superan el limite de 700 lineas y duplicacion de logica detectada por el grafo de conocimiento.
+> PRs #71-#78 — mergeados 2026-05-28
 
-### 5A — Partir archivos criticos (+700 lineas)
+### 5A — Partir archivos criticos (+700 lineas) ✅
 
-| # | Archivo | Lineas | Plan | Prioridad |
-|---|---------|--------|------|-----------|
-| 1 | `nueva_cita_form.dart` | 914 | Extraer widgets: calendario, selector slots, confirm sheet | Alta |
-| 2 | `perfil_tab.dart` | 927 | Extraer secciones: info medica, contacto emergencia, foto, seguridad | Alta |
-| 3 | `doctor-citas.component.ts` | 814 | Extraer: grid semanal, panel detalle, modal agendar, filtros | Alta |
+| # | Archivo | Antes | Despues | PR |
+|---|---------|-------|---------|----|
+| 1 | `nueva_cita_form.dart` | 914 | 320 (4 modulos) | #71 |
+| 2 | `perfil_tab.dart` | 927 | 328 (4 modulos) | #72 |
+| 3 | `doctor-citas.component.ts` | 816 | 379 (4 sub-componentes Angular) | #73 |
 
-### 5B — Partir archivos tolerables (400-700 lineas)
+### 5B — Partir archivos tolerables (400-700 lineas) ✅
 
-| # | Archivo | Lineas | Plan | Prioridad |
-|---|---------|--------|------|-----------|
-| 4 | `admin-dashboard.component.ts` | 558 | Extraer: tabla usuarios, modal CRUD, dias especiales | Media |
-| 5 | `citas_tab.dart` | 550 | Extraer: lista citas, card cita, modal cancelar | Media |
-| 6 | `inicio_tab.dart` | 516 | Extraer: card proxima cita, grid acceso rapido, stats | Media |
+| # | Archivo | Antes | Despues | PR |
+|---|---------|-------|---------|----|
+| 4 | `admin-dashboard.component.ts` | 558 | 174 (3 sub-componentes: panel/usuarios/calendario) | #74 |
+| 5 | `citas_tab.dart` | 552 | 169 (3 modulos: tab/lista/card) | #75 |
+| 6 | `inicio_tab.dart` | 516 | 202 (3 modulos: tab/card/widgets) | #76 |
 
-### 5C — Centralizar logica duplicada
+### 5C — Centralizar logica duplicada ✅
 
-| # | Tarea | Duplicaciones | Archivos afectados |
-|---|-------|--------------|-------------------|
-| 7 | Centralizar `loadCitas()` | 4 veces en 4 comunidades | Servicios citas web + mobile |
-| 8 | Centralizar `logout()` | 7 veces en 7 comunidades | AuthService + componentes |
-| 9 | Separar idle tracking de AuthService | 6 metodos | `auth.service.ts` → `idle.service.ts` |
+| # | Tarea | Estado | PR |
+|---|-------|--------|----|
+| 7 | Centralizar `loadCitas()` | Skip — no era duplicacion real (cada componente llama al service propio) | — |
+| 8 | Centralizar `logout()` | Hecho — `logout(redirectTo?)` elimino race condition con admin | #77 |
+| 9 | Separar idle tracking de AuthService | Hecho — nuevo `idle.service.ts` (90 lineas) | #77 |
 
-### 5D — Deuda tecnica general
+### 5D — Deuda tecnica general (alta+media completadas)
 
-| # | Tarea | Prioridad |
-|---|-------|-----------|
-| 10 | `applicationId` Flutter: `com.example.yoltec_mobile` → `com.yoltec.mobile` | Alta |
-| 11 | Tipado fuerte: eliminar `any` en servicios/componentes Angular | Media |
-| 12 | AuthService centralizado (eliminar `localStorage` directo) | Media |
-| 13 | Migrar fotos perfil de base64 en BD a `storage/` (backend) | Baja |
-| 14 | Filtros avanzados pacientes (IMC, tipo sangre, etc.) | Baja |
-| 15 | Endpoint `/predict-batch` en IA para evitar N requests | Baja |
-| 16 | Tests unitarios servicios Angular (cobertura 0%) | Baja |
-| 17 | Dominio propio para Resend (emails funcionales para todos) | Baja |
+| # | Tarea | Estado | PR |
+|---|-------|--------|----|
+| 10 | `applicationId` Flutter | Ya estaba como `com.yoltec.app` (plan desactualizado) | — |
+| 11 | Tipado fuerte: eliminar `any` en Angular | Skip — alcance enorme, bajo impacto | — |
+| 12 | AuthService centralizado (eliminar `localStorage` directo) | Hecho — `setAuthData()` + AuthInterceptor global | #78 |
+| 13-17 | Fotos base64, filtros, /predict-batch, tests, dominio Resend | Features / requieren infra externa — post-deadline | — |
 
 ---
 
@@ -169,9 +165,9 @@
 | **2 — Quick wins auditoria + grafo** | ✅ Completada | #68 |
 | **3 — Pulido y rendimiento** | ✅ Completada | #69 |
 | **4 — Entrega final (APK + humanizar + bug)** | ✅ Completada | #70 |
-| **5 — Refactors + deuda tecnica** | ⏳ En progreso | — |
+| **5 — Refactors + deuda tecnica** | ✅ Completada | #71, #72, #73, #74, #75, #76, #77, #78 |
 
 ---
 
-**Actualizado:** 2026-05-28
+**Actualizado:** 2026-05-28 (cierre fase 5)
 **Insumos:** [auditoria-tecnica-20260525.md](auditoria-tecnica-20260525.md) + knowledge graph (graphify, 1784 nodos, 2181 aristas)
