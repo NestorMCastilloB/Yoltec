@@ -1,0 +1,71 @@
+<div class="overlay" *ngIf="abierto" (click)="close.emit()"></div>
+
+<aside class="drawer" [class.open]="abierto">
+  <ng-container *ngIf="cita">
+
+    <div class="drawer-head">
+      <div>
+        <h2><span class="drawer-ic">▦</span>Detalle de cita</h2>
+        <div class="drawer-sub">{{ formatDateDisplay(cita.fecha_cita) }}</div>
+      </div>
+      <button class="btn-x" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="d-patient">
+        <div class="av av-md">{{ getCitaInitials(cita) }}</div>
+        <div class="d-patient-info">
+          <b>{{ getCitaName(cita) }}</b>
+          <span class="d-patient-sub">No. <b>{{ cita.alumno?.numero_control ?? '—' }}</b></span>
+        </div>
+      </div>
+
+      <div class="d-grid">
+        <div class="d-cell">
+          <div class="d-label">Fecha</div>
+          <b>{{ formatFechaCorta(cita.fecha_cita) }}</b>
+        </div>
+        <div class="d-cell">
+          <div class="d-label">Hora</div>
+          <b>{{ formatTime(cita.hora_cita) }}</b>
+        </div>
+        <div class="d-cell d-cell-full">
+          <div class="d-label">Estado</div>
+          <span class="estatus-chip"
+            [ngClass]="{
+              'chip-programada': cita.estatus === 'programada',
+              'chip-atendida':   cita.estatus === 'atendida',
+              'chip-cancelada':  cita.estatus === 'cancelada',
+              'chip-no-asistio': cita.estatus === 'no_asistio'
+            }">
+            {{ estatusLabel(cita) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="d-section" *ngIf="cita.motivo">
+        <div class="d-section-head">Motivo</div>
+        <div class="d-text">{{ cita.motivo }}</div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="cita.estatus === 'programada'">
+      <div class="drawer-foot-top">
+        <button *ngIf="cita.alumno" class="btn-sm btn-outline flex1" (click)="verExpediente.emit(cita.alumno.id)">Ver expediente</button>
+        <button class="btn-sm btn-gray flex1" (click)="reprogramar.emit(cita)">Reprogramar</button>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn-sm btn-danger flex1" (click)="cancelar.emit(cita)">Cancelar</button>
+        <button class="btn-sm btn-warn flex1" (click)="noAsistio.emit(cita)">No asistió</button>
+        <button class="btn-sm btn-primary-full flex1" (click)="atender.emit(cita)">Consulta</button>
+      </div>
+    </ng-container>
+
+    <div class="drawer-foot" *ngIf="cita.estatus !== 'programada'">
+      <button class="btn-sm btn-gray flex1" (click)="close.emit()">Cerrar</button>
+      <button class="btn-sm btn-outline flex1" *ngIf="cita.alumno"
+        (click)="verExpediente.emit(cita.alumno.id)">Ver expediente</button>
+    </div>
+
+  </ng-container>
+</aside>

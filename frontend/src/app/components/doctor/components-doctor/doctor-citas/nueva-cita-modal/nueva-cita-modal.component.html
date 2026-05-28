@@ -1,0 +1,145 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-3step" (click)="$event.stopPropagation()">
+
+    <div class="modal-3step-head">
+      <div>
+        <h3>Nueva cita</h3>
+        <div class="step-indicator">
+          <span class="step-dot" [class.active]="createStep >= 1" [class.done]="createStep > 1">1</span>
+          <span class="step-line"></span>
+          <span class="step-dot" [class.active]="createStep >= 2" [class.done]="createStep > 2">2</span>
+          <span class="step-line"></span>
+          <span class="step-dot" [class.active]="createStep >= 3">3</span>
+        </div>
+      </div>
+      <button class="modal-close" (click)="onClose()">✕</button>
+    </div>
+
+    <div *ngIf="submitMessage" class="form-msg">{{ submitMessage }}</div>
+
+    <form #createCitaForm="ngForm" (ngSubmit)="onCreateCita(createCitaForm)">
+
+      <div *ngIf="createStep === 1" class="step-body">
+        <div class="step-title">¿Para quién es la cita?</div>
+        <div class="form-group">
+          <label>Número de control del alumno</label>
+          <input type="text" name="numero_control" [(ngModel)]="formData.numero_control"
+            placeholder="Ej. 22690495" autocomplete="off" />
+        </div>
+      </div>
+
+      <div *ngIf="createStep === 2" class="step-body">
+        <div class="step-title">¿Cuándo?</div>
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <button type="button" class="calendar-nav" (click)="changeMonth(-1)" [disabled]="isCurrentMonth">‹</button>
+            <h4>{{ calendarLabel | titlecase }}</h4>
+            <button type="button" class="calendar-nav" (click)="changeMonth(1)">›</button>
+          </div>
+          <div class="calendar-legend">
+            <span><span class="dot available"></span> Disponible</span>
+            <span><span class="dot partial"></span> Parcial</span>
+            <span><span class="dot full"></span> Sin lugares</span>
+          </div>
+          <div class="calendar-weekdays">
+            <span *ngFor="let day of weekDays">{{ day }}</span>
+          </div>
+          <div class="calendar-grid">
+            <ng-container *ngFor="let week of calendarWeeks">
+              <button type="button" *ngFor="let day of week" class="calendar-day" [ngClass]="{
+                outside: !day.isCurrentMonth,
+                today: day.isToday,
+                selected: isSelectedDate(day.date),
+                unavailable: isDayUnavailable(day),
+                'status-available': day.availability === 'available',
+                'status-partial': day.availability === 'partial',
+                'status-full': day.availability === 'full',
+                'status-none': day.availability === 'none'
+              }" [ngStyle]="getDayStyle(day)" [attr.aria-pressed]="isSelectedDate(day.date)"
+                (click)="selectCalendarDay(day)">
+                <span class="day-number">{{ day.label }}</span>
+                <span class="day-badge" *ngIf="day.labelText">{{ day.labelText }}</span>
+              </button>
+            </ng-container>
+          </div>
+        </div>
+        <div class="selected-date-info" *ngIf="formData.fecha_cita">
+          <strong>Seleccionaste:</strong> {{ formatDateDisplay(formData.fecha_cita) }}
+        </div>
+        <div class="warning-banner" *ngIf="selectedDayWarning">⚠ {{ selectedDayWarning }}</div>
+        <div class="slots-wrapper" *ngIf="formData.fecha_cita"
+             [class.disabled]="!hasAvailableSlotsForSelectedDate">
+          <div class="slots-legend">
+            <span class="leg-dot free"></span> Libre
+            <span class="leg-dot selected-dot"></span> Seleccionado
+            <span class="leg-dot booked-dot"></span> Ocupado
+          </div>
+          <div class="slots-group">
+            <span class="slots-period">Mañana</span>
+            <div class="time-slots">
+              <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(0, 16)"
+                [class.selected]="formData.hora_cita === normalizeTime(slot)"
+                [class.booked]="isSlotUnavailable(slot)"
+                [disabled]="isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
+                {{ formatTime(slot) }}
+              </button>
+            </div>
+          </div>
+          <div class="slots-group">
+            <span class="slots-period">Tarde</span>
+            <div class="time-slots">
+              <button type="button" class="slot-button" *ngFor="let slot of timeSlots.slice(16)"
+                [class.selected]="formData.hora_cita === normalizeTime(slot)"
+                [class.booked]="isSlotUnavailable(slot)"
+                [disabled]="isSlotUnavailable(slot)" (click)="selectTimeSlot(slot)">
+                {{ formatTime(slot) }}
+              </button>
+            </div>
+          </div>
+          <small class="helper-text warning" *ngIf="!hasAvailableSlotsForSelectedDate">
+            Este día ya no tiene espacios disponibles.
+          </small>
+        </div>
+        <small class="helper-text" *ngIf="!formData.fecha_cita">
+          Selecciona un día disponible para ver las horas libres.
+        </small>
+      </div>
+
+      <div *ngIf="createStep === 3" class="step-body">
+        <div class="step-title">Confirmar cita</div>
+        <div class="confirm-summary">
+          <div class="confirm-row">
+            <span>Alumno</span>
+            <b>No. {{ formData.numero_control }}</b>
+          </div>
+          <div class="confirm-row">
+            <span>Fecha</span>
+            <b>{{ formatDateDisplay(formData.fecha_cita ?? '') }}</b>
+          </div>
+          <div class="confirm-row">
+            <span>Hora</span>
+            <b>{{ formatTime(formData.hora_cita ?? '') }}</b>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Motivo (opcional)</label>
+          <textarea name="motivo" [(ngModel)]="formData.motivo" rows="3"
+            placeholder="Describe el motivo de la consulta…"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-3step-foot">
+        <button type="button" class="btn-secondary"
+          (click)="createStep > 1 ? stepBack() : onClose()">
+          {{ createStep > 1 ? 'Atrás' : 'Cancelar' }}
+        </button>
+        <button type="button" class="btn-primary" *ngIf="createStep < 3" (click)="stepNext()">
+          Siguiente
+        </button>
+        <button type="submit" class="btn-primary" *ngIf="createStep === 3" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Agendando…' : 'Agendar cita' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
