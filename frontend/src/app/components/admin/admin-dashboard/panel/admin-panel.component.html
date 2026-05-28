@@ -1,0 +1,112 @@
+<section class="section">
+  <div class="section-head">
+    <span></span>
+    <span class="fecha-hoy">{{ fechaHoy | titlecase }}</span>
+  </div>
+
+  @if (isLoadingStats) {
+    <div class="stats-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="stat-card skeleton">
+          <div class="sk-line sk-sm"></div>
+          <div class="sk-line sk-lg"></div>
+          <div class="sk-line sk-sm"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoadingStats) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total usuarios</div>
+        <div class="stat-value">{{ stats?.total_usuarios ?? '—' }}</div>
+        <div class="stat-sub">{{ stats?.total_alumnos ?? 0 }} alumnos · {{ stats?.total_doctores ?? 0 }} doctores</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Citas hoy</div>
+        <div class="stat-value">{{ stats?.citas_hoy ?? '—' }}</div>
+        <div class="stat-sub">{{ stats?.citas_completadas_hoy ?? 0 }} completadas · {{ stats?.citas_pendientes_hoy ?? 0 }} pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Alumnos activos</div>
+        <div class="stat-value">{{ stats?.alumnos_activos ?? '—' }}</div>
+        <div class="stat-sub">Últimos 30 días</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Último acceso</div>
+        <div class="stat-value stat-value-sm">{{ stats?.ultimo_acceso_hora ?? '—' }}</div>
+        <div class="stat-sub">{{ stats?.ultimo_acceso_email ?? '' }}</div>
+      </div>
+    </div>
+  }
+
+  <div class="quick-actions">
+    <button class="quick-btn" (click)="navigateToUsuarios.emit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="8" r="3"/><path d="M16 14c2.7.2 5 2.5 5 5.5"/></svg>
+      Gestionar usuarios
+    </button>
+    <button class="quick-btn" (click)="navigateToCalendario.emit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>
+      Días especiales
+    </button>
+  </div>
+
+  <div class="panel-previews">
+    <div class="preview-card">
+      <div class="preview-head">
+        <span class="preview-title">Usuarios recientes</span>
+        <button class="preview-link" (click)="navigateToUsuarios.emit()">Ver todos →</button>
+      </div>
+      @if (isLoadingPanel) {
+        <div class="loading">Cargando...</div>
+      } @else if (panelUsuarios.length === 0) {
+        <div class="preview-empty">Sin usuarios registrados.</div>
+      } @else {
+        <table class="preview-table">
+          <thead>
+            <tr><th>Usuario</th><th>Rol</th><th>Email</th></tr>
+          </thead>
+          <tbody>
+            @for (u of panelUsuarios; track u.key) {
+              <tr>
+                <td>
+                  <div class="u-cell">
+                    <div class="u-avatar">{{ u.initials }}</div>
+                    <div>
+                      <div class="u-name">{{ u.nombre }}</div>
+                      <div class="u-sub">{{ u.sub }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="rol-badge" [class]="u.rol">{{ u.rol === 'alumno' ? 'Alumno' : 'Doctor' }}</span></td>
+                <td class="text-muted">{{ u.email }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-head">
+        <span class="preview-title">Días especiales próximos</span>
+        <button class="preview-link" (click)="navigateToCalendario.emit()">Gestionar →</button>
+      </div>
+      @if (isLoadingPanel) {
+        <div class="loading">Cargando...</div>
+      } @else if (diasProximos.length === 0) {
+        <div class="preview-empty">Sin días especiales próximos.</div>
+      } @else {
+        @for (dia of diasProximos; track dia.id) {
+          <div class="dia-preview-item">
+            <div class="dia-preview-fecha">{{ formatFechaDia(dia.fecha) }}</div>
+            <span class="dia-preview-tipo" [class]="dia.tipo">{{ tipoLabels[dia.tipo].label }}</span>
+            <span class="dia-preview-etiqueta">{{ dia.etiqueta || '—' }}</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+</section>
