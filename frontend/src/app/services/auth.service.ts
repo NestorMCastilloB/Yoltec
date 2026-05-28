@@ -1,9 +1,10 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { API_BASE_URL } from './api-config';
+import { IdleService } from './idle.service';
 
 interface User {
   id: number;
@@ -24,101 +25,40 @@ interface LoginResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
   private apiUrl = API_BASE_URL;
   private tokenKey = 'auth_token';
   private userKey = 'user_data';
-  private lastActivityKey = 'last_activity';
-  private idleTimeoutMs = 30 * 60 * 1000; // 30 minutos
-  private idleWarningMs = 5 * 60 * 1000;  // mostrar aviso 5 min antes de cerrar sesión
-  private idleCheckInterval: ReturnType<typeof setInterval> | null = null;
   private userSubject = new BehaviorSubject<User | null>(null);
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  private idleWarningSubject = new BehaviorSubject<number>(0); // minutos restantes (0 = sin aviso)
 
-  // Exponer observables
   public currentUser$ = this.userSubject.asObservable();
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  public idleWarning$ = this.idleWarningSubject.asObservable();
+  public idleWarning$: Observable<number>;
 
-  private activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
-  private boundOnActivity = this.onActivity.bind(this);
-
-  constructor(private http: HttpClient, private router: Router, private ngZone: NgZone) {
+  constructor(private http: HttpClient, private router: Router, private idle: IdleService) {
+    this.idleWarning$ = this.idle.warning$;
     const user = this.getStoredUser();
     if (user) {
-      if (this.isSessionExpiredByIdle()) {
+      if (this.idle.isExpired()) {
         this.clearAuthData();
       } else {
         this.userSubject.next(user);
         this.isAuthenticatedSubject.next(true);
-        this.startIdleTracking();
+        this.idle.start(() => this.logout());
       }
     }
   }
 
   ngOnDestroy(): void {
-    this.stopIdleTracking();
-  }
-
-  private onActivity(): void {
-    localStorage.setItem(this.lastActivityKey, Date.now().toString());
-  }
-
-  private isSessionExpiredByIdle(): boolean {
-    const last = localStorage.getItem(this.lastActivityKey);
-    if (!last) return false;
-    return (Date.now() - parseInt(last, 10)) > this.idleTimeoutMs;
-  }
-
-  private startIdleTracking(): void {
-    this.onActivity();
-    this.activityEvents.forEach(evt =>
-      document.addEventListener(evt, this.boundOnActivity, { passive: true })
-    );
-    this.ngZone.runOutsideAngular(() => {
-      this.idleCheckInterval = setInterval(() => {
-        if (this.isSessionExpiredByIdle()) {
-          this.ngZone.run(() => {
-            this.idleWarningSubject.next(0);
-            this.logout();
-            this.router.navigate(['/login']);
-          });
-          return;
-        }
-        const remainingMs = this.remainingIdleMs();
-        const shouldWarn = remainingMs > 0 && remainingMs <= this.idleWarningMs;
-        const minutes = shouldWarn ? Math.max(1, Math.ceil(remainingMs / 60_000)) : 0;
-        if (minutes !== this.idleWarningSubject.value) {
-          this.ngZone.run(() => this.idleWarningSubject.next(minutes));
-        }
-      }, 30_000);
-    });
-  }
-
-  private remainingIdleMs(): number {
-    const last = localStorage.getItem(this.lastActivityKey);
-    if (!last) return this.idleTimeoutMs;
-    return this.idleTimeoutMs - (Date.now() - parseInt(last, 10));
+    this.idle.stop();
   }
 
   // Llamado desde el modal de aviso para extender la sesión sin esperar otra actividad real.
   extendSession(): void {
-    this.onActivity();
-    this.idleWarningSubject.next(0);
-  }
-
-  private stopIdleTracking(): void {
-    this.activityEvents.forEach(evt =>
-      document.removeEventListener(evt, this.boundOnActivity)
-    );
-    if (this.idleCheckInterval) {
-      clearInterval(this.idleCheckInterval);
-      this.idleCheckInterval = null;
-    }
-    this.idleWarningSubject.next(0);
+    this.idle.extend();
   }
 
   login(identificador: string, password: string, tipoUsuario: 'alumno' | 'doctor' | 'admin'): Observable<LoginResponse> {
@@ -135,12 +75,12 @@ export class AuthService implements OnDestroy {
             this.setUser(response.user);
             this.isAuthenticatedSubject.next(true);
             this.userSubject.next(response.user);
-            this.startIdleTracking();
+            this.idle.start(() => this.logout());
             this.redirectUser(response.user.tipo);
           } else if (response && response.requires_2fa) {
             sessionStorage.setItem('pending_2fa', JSON.stringify({
               user_id: response.user_id,
-              email_masked: response.email_masked
+              email_masked: response.email_masked,
             }));
             this.router.navigate(['/verify-2fa']);
           }
@@ -148,8 +88,7 @@ export class AuthService implements OnDestroy {
         catchError(error => this.handleError(error))
       );
   }
-  
-  // Método privado para manejar errores
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error al procesar la solicitud.';
 
@@ -188,64 +127,55 @@ export class AuthService implements OnDestroy {
     return null;
   }
 
-  logout(): void {
-    // Realizar la petición de cierre de sesión
+  // redirectTo permite que admin vaya a /acceso-gestion en lugar de /login
+  logout(redirectTo: string = '/login'): void {
     this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
       next: () => {
         this.clearAuthData();
-        this.router.navigate(['/login']);
+        this.router.navigate([redirectTo]);
       },
-      error: (error) => {
-        // Limpiar datos de autenticación incluso si hay error
+      error: () => {
         this.clearAuthData();
-        this.router.navigate(['/login']);
-      }
+        this.router.navigate([redirectTo]);
+      },
     });
   }
-  
+
   private clearAuthData(): void {
-    this.stopIdleTracking();
+    this.idle.stop();
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
-    localStorage.removeItem(this.lastActivityKey);
     this.isAuthenticatedSubject.next(false);
     this.userSubject.next(null);
   }
 
-  // Obtener el estado de autenticación actual
   isAuthenticated(): boolean {
     return this.isAuthenticatedSubject.value;
   }
 
-  // Obtener el token del almacenamiento local
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
-  
-  // Obtener la información del usuario actual
+
   getCurrentUser(): any {
     const userJson = localStorage.getItem(this.userKey);
     return userJson ? JSON.parse(userJson) : null;
   }
-  
-  // Verificar si el usuario actual tiene un rol específico
+
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
     return !!user && user.tipo === role;
   }
 
-  // Obtener el tipo de usuario actual (alumno/doctor)
   getUserType(): string | null {
     const user = this.getCurrentUser();
     return user ? user.tipo : null;
   }
 
-  // Guardar el token en el almacenamiento local
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
-  
-  // Guardar la información del usuario en el almacenamiento local
+
   private setUser(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
@@ -258,8 +188,7 @@ export class AuthService implements OnDestroy {
     this.setUser(updated);
     this.userSubject.next(updated);
   }
-  
-  // Obtener el usuario almacenado en el almacenamiento local
+
   private getStoredUser(): User | null {
     const userJson = localStorage.getItem(this.userKey);
     if (!userJson) return null;
@@ -270,8 +199,7 @@ export class AuthService implements OnDestroy {
       return null;
     }
   }
-  
-  // Redirigir al usuario según su tipo
+
   private redirectUser(userType: string): void {
     switch (userType) {
       case 'alumno':

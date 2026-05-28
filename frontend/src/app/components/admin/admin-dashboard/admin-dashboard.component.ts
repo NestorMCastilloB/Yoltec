@@ -120,8 +120,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.logout('/acceso-gestion');
   }
 
   private loadStats(): void {
