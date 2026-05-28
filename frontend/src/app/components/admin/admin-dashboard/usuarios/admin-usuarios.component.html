@@ -1,0 +1,183 @@
+<section class="section">
+  <div class="users-toolbar">
+    <input
+      type="text"
+      [(ngModel)]="usuariosBusqueda"
+      placeholder="Buscar por nombre, N° control, usuario o email..."
+      class="search-input" />
+    <div class="toolbar-actions">
+      @if (usersTab !== 'doctores') {
+        <button class="btn-pri" (click)="openAlumnoForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo alumno
+        </button>
+      }
+      @if (usersTab !== 'alumnos') {
+        <button class="btn-pri" (click)="openDoctorForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo doctor
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="sub-tabs">
+    <button class="sub-tab" [class.active]="usersTab === 'todos'" (click)="setUsersTab('todos')">
+      Todos <span class="tab-count">{{ todosRows.length }}</span>
+    </button>
+    <button class="sub-tab" [class.active]="usersTab === 'alumnos'" (click)="setUsersTab('alumnos')">
+      Alumnos <span class="tab-count">{{ alumnosRows.length }}</span>
+    </button>
+    <button class="sub-tab" [class.active]="usersTab === 'doctores'" (click)="setUsersTab('doctores')">
+      Doctores <span class="tab-count">{{ doctoresRows.length }}</span>
+    </button>
+  </div>
+
+  @if (isLoadingAlumnos || isLoadingDoctores) {
+    <div class="loading">Cargando usuarios...</div>
+  } @else if (alumnosError || doctoresError) {
+    <div class="alert-error">{{ alumnosError || doctoresError }}</div>
+  } @else if (filteredRows.length === 0) {
+    <div class="empty-state">
+      {{ usuariosBusqueda ? 'Sin resultados para "' + usuariosBusqueda + '".' : 'Sin usuarios en esta categoría.' }}
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Identificador</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of filteredRows; track u.key) {
+            <tr>
+              <td>
+                <div class="u-cell">
+                  <div class="u-avatar u-avatar-sm">{{ u.initials }}</div>
+                  <span class="u-name">{{ u.nombre }}</span>
+                </div>
+              </td>
+              <td class="monospace text-muted">{{ u.sub }}</td>
+              <td class="text-muted">{{ u.email }}</td>
+              <td><span class="rol-badge" [class]="u.rol">{{ u.rol === 'alumno' ? 'Alumno' : 'Doctor' }}</span></td>
+              <td>
+                <div class="row-actions">
+                  <a class="action-link" (click)="editUsuario(u)">Editar</a>
+                  <a class="action-link warn" (click)="confirmDelete(u.id, u.rol)">Eliminar</a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (showAlumnoForm) {
+  <div class="modal-overlay" (click)="closeAlumnoForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editingAlumnoId ? 'Editar alumno' : 'Nuevo alumno' }}</h3>
+      @if (alumnoMsg) {
+        <div class="form-msg" [class.success]="alumnoMsg.includes('actualizado') || alumnoMsg.includes('creado')">{{ alumnoMsg }}</div>
+      }
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Número de control *</label>
+          <input type="text" [(ngModel)]="alumnoForm.numero_control" placeholder="Ej: 22690495">
+        </div>
+        <div class="form-group">
+          <label>NIP {{ editingAlumnoId ? '(vacío = sin cambio)' : '*' }}</label>
+          <input type="text" [(ngModel)]="alumnoForm.nip" placeholder="6 dígitos" maxlength="6">
+        </div>
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="alumnoForm.nombre">
+        </div>
+        <div class="form-group">
+          <label>Apellido *</label>
+          <input type="text" [(ngModel)]="alumnoForm.apellido">
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="alumnoForm.email">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="alumnoForm.telefono">
+        </div>
+        <div class="form-group">
+          <label>Fecha de nacimiento</label>
+          <input type="date" [(ngModel)]="alumnoForm.fecha_nacimiento">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-sec" (click)="closeAlumnoForm()">Cancelar</button>
+        <button class="btn-pri" (click)="submitAlumno()" [disabled]="isSubmittingAlumno">
+          {{ isSubmittingAlumno ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDoctorForm) {
+  <div class="modal-overlay" (click)="closeDoctorForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editingDoctorId ? 'Editar doctor' : 'Nuevo doctor' }}</h3>
+      @if (doctorMsg) {
+        <div class="form-msg" [class.success]="doctorMsg.includes('actualizado') || doctorMsg.includes('creado')">{{ doctorMsg }}</div>
+      }
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Usuario *</label>
+          <input type="text" [(ngModel)]="doctorForm.username" placeholder="Ej: doctorGarcia">
+        </div>
+        <div class="form-group">
+          <label>Contraseña {{ editingDoctorId ? '(vacío = sin cambio)' : '*' }}</label>
+          <input type="password" [(ngModel)]="doctorForm.password">
+        </div>
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="doctorForm.nombre">
+        </div>
+        <div class="form-group">
+          <label>Apellido *</label>
+          <input type="text" [(ngModel)]="doctorForm.apellido">
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" [(ngModel)]="doctorForm.email">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="doctorForm.telefono">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-sec" (click)="closeDoctorForm()">Cancelar</button>
+        <button class="btn-pri" (click)="submitDoctor()" [disabled]="isSubmittingDoctor">
+          {{ isSubmittingDoctor ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmDeleteId !== null) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+      <h3>¿Confirmar eliminación?</h3>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn-sec" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-danger" (click)="executeDelete()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+}
