@@ -23,7 +23,7 @@ class PreEvaluacionService
     public function callIAPredict(array $respuestas): array
     {
         try {
-            $iaUrl    = env('IA_SERVICE_URL', 'https://yoltec-ia.onrender.com');
+            $iaUrl    = config('yoltec.ia_service_url');
             $response = Http::timeout(15)->post("{$iaUrl}/predict", ['respuestas' => $respuestas]);
 
             if ($response->successful()) {
@@ -41,7 +41,7 @@ class PreEvaluacionService
     // Llama al microservicio IA /chat. Lanza excepción si falla.
     public function callIAChat(array $messages): array
     {
-        $iaUrl    = env('IA_SERVICE_URL', 'https://yoltec-ia.onrender.com');
+        $iaUrl    = config('yoltec.ia_service_url');
         $response = Http::timeout(20)->post("{$iaUrl}/chat", ['messages' => $messages]);
 
         if (!$response->successful()) {
