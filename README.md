@@ -35,7 +35,7 @@ Plataforma integral (web + móvil) para la gestión de citas, recetas y pre-eval
 Yoltec digitaliza el flujo completo del consultorio médico universitario: agendado, atención, recetas, historial y reportes. Integra **dos modelos de inteligencia artificial** que asisten al doctor sin sustituirlo:
 
 - **Clasificador de prioridad** (`scikit-learn`, `HistGradientBoostingClassifier`): predice riesgo de inasistencia a partir del historial del alumno. Reentrenado con dataset de 87 000 registros, precisión 86%.
-- **Pre-evaluación conversacional** (`Groq` + `Llama 3.1 8B`): orienta al alumno antes de la consulta, sugiere diagnóstico preliminar con porcentaje de confianza y aviso explícito de que **no sustituye al médico**.
+- **Pre-evaluación conversacional** (`scikit-learn` + `Groq`/`Llama 3.1 8B` opcional): orienta al alumno antes de la consulta, sugiere diagnóstico preliminar con porcentaje de confianza y aviso explícito de que **no sustituye al médico**. El diagnóstico lo da siempre el modelo propio; el LLM solo conduce la charla, y si no está disponible el chat sigue funcionando con un guion de preguntas y extracción de síntomas por reglas.
 
 El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y una app móvil exclusiva para estudiantes.
 
@@ -209,8 +209,8 @@ conecta a Neon. La primera construcción descarga las dependencias.
 | Correo de prueba | http://localhost:8025 |
 | IA | http://localhost:5000/health |
 
-La IA arranca sin Groq con estado degradado; las conversaciones requieren una
-clave. Consulta las cuentas ficticias y los pasos de 2FA en la guía.
+La IA funciona sin clave de Groq: el chat pasa a modo guiado y sigue
+entregando diagnóstico. Consulta las cuentas ficticias y los pasos de 2FA en la guía.
 
 Pruebas: `./local.sh test`. Detener conservando datos: `./local.sh down`.
 
