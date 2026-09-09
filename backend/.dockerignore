@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+auth.json
+vendor
+node_modules
+storage/**
+!storage/**/.gitignore
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+database/*.sqlite*
+*.log
+**/*.pem
+**/*.key
+**/*firebase*.json
+**/*service-account*.json

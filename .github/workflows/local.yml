@@ -1,0 +1,30 @@
+name: Verificar entorno local
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar scripts de arranque
+        run: |
+          bash -n local.sh start.sh
+          sh -n backend/docker-entrypoint.sh
+          python3 -m unittest discover -s tests -v
+      - name: Construir web, backend e IA y migrar PostgreSQL local
+        run: ./local.sh up
+      - name: Crear cuentas ficticias
+        run: ./local.sh seed
+      - name: Probar backend e IA
+        run: ./local.sh test
+      - name: Detener contenedores
+        if: always()
+        run: ./local.sh down

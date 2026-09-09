@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+.npmrc
+node_modules
+.angular
+dist
+coverage
+design-reference
+design-reference-dark
+*.log
+**/*.pem
+**/*.key

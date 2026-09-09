@@ -51,8 +51,8 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 - Autenticación con **Laravel Sanctum** + **2FA** por correo para doctores y admin
 - Modo oscuro nativo en web y móvil
 - 100% responsivo (mobile-first en web)
-- Rate limiting, headers de seguridad (HSTS, CSP), CORS con allowlist
-- Despliegue en producción con CI/CD por Pull Request
+- Rate limiting, headers de seguridad y CORS con allowlist
+- Workflow de compilación y pruebas del entorno local en cada Pull Request
 
 ---
 
@@ -66,7 +66,7 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 | IA            | Python 3.12 · FastAPI · scikit-learn · Groq (Llama 3.1 8B)  |
 | Base de datos | PostgreSQL (Neon, SSL)                                      |
 | Notificaciones| Firebase Cloud Messaging                                    |
-| Email         | Resend (producción) · Gmail SMTP (desarrollo)               |
+| Email         | Resend/SMTP (despliegues) · Mailpit (local)               |
 | Infraestructura | Docker · Docker Compose · Render · Vercel                 |
 
 ---
@@ -183,63 +183,52 @@ Gestión del calendario administrativo: días no laborables, festivos y horarios
 - CRUD de alumnos y doctores.
 - Gestión del calendario (días especiales, cierres).
 - Acceso vía `/acceso-gestion` (no enlazado desde el login público).
-- 2FA obligatorio en producción.
+- 2FA obligatorio también en el entorno local.
 
 ---
 
 ## Instalación
 
-### Opción A — Docker (recomendado)
+Para desarrollar sin las credenciales antiguas, sigue la
+[guía de desarrollo local](docs/desarrollo-local.md). Requiere Docker Engine,
+Compose, Bash y OpenSSL.
 
 ```bash
-git clone https://github.com/NestorMCastilloB/Yoltec.git
-cd Yoltec
-
-cp backend/.env.docker.example backend/.env.docker
-cp IA/.env.example IA/.env
-# Editar credenciales (ver sección "Configuración de entorno")
-
-docker compose up -d --build
+./local.sh up
+./local.sh seed
 ```
 
-| Servicio  | URL local              |
-| --------- | ---------------------- |
-| Frontend  | http://localhost:4200  |
-| Backend   | http://localhost:8000  |
-| IA        | http://localhost:5000  |
+Esto crea PostgreSQL local, construye Laravel y Angular, inicia la IA y prepara
+un buzón Mailpit para probar correo y 2FA. No utiliza los `.env` heredados ni
+conecta a Neon. La primera construcción descarga las dependencias.
 
-Detener: `docker compose down`
+| Servicio | URL local |
+| --- | --- |
+| Aplicación | http://localhost:4200 |
+| Backend | http://localhost:8000/api/health |
+| Correo de prueba | http://localhost:8025 |
+| IA | http://localhost:5000/health |
 
-### Opción B — Sin Docker (4 terminales)
+La IA arranca sin Groq con estado degradado; las conversaciones requieren una
+clave. Consulta las cuentas ficticias y los pasos de 2FA en la guía.
 
-```bash
-# Terminal 1 — Backend
-cd backend && cp .env.example .env
-composer install && php artisan key:generate && php artisan migrate
-php artisan serve --host=127.0.0.1 --port=8000
+Pruebas: `./local.sh test`. Detener conservando datos: `./local.sh down`.
 
-# Terminal 2 — Frontend
-cd frontend && npm install
-npx ng serve --host=0.0.0.0 --port=4200
+El arranque nativo `./start.sh` necesita PHP 8.4 con sus extensiones, Composer,
+Node compatible con Angular 20, Python 3.12 y una base PostgreSQL aislada,
+configurados por separado. No ejecutes ese camino con los `.env` antiguos sin
+revisar primero el destino de la conexión.
 
-# Terminal 3 — Microservicio IA
-cd IA && cp .env.example .env
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-python train_model_light.py            # genera model.pkl (~30s, una sola vez)
-uvicorn app:app --host=0.0.0.0 --port=5000
-
-# Terminal 4 — App móvil (opcional)
-cd mobile && flutter pub get && flutter run
-```
-
-> Para usar la app móvil contra el backend local, cambia `baseUrl` en `mobile/lib/services/api_service.dart` a `http://TU_IP_LAN:8000`.
+La configuración de Flutter se abordará por separado; este entorno levanta la
+aplicación web, el backend y el microservicio de IA.
 
 ---
 
 ## Configuración de entorno
 
-Cada subproyecto trae un archivo `*.example` con la lista completa de variables. **Ninguna credencial real está versionada.**
+Cada subproyecto trae una plantilla de variables. El entorno Docker local genera
+`.env.local`, ignorado por Git. Hubo credenciales expuestas en el historial:
+retirarlas del árbol actual no sustituye su revocación en los proveedores.
 
 | Variable                          | Dónde se usa | Cómo obtenerla                          |
 | --------------------------------- | ------------ | --------------------------------------- |
@@ -258,7 +247,7 @@ Cada subproyecto trae un archivo `*.example` con la lista completa de variables.
 - **2FA por correo** obligatorio para doctores y administradores en producción.
 - Rate limiting (`throttle:5,1`) en endpoints sensibles (login, 2FA, reset).
 - CORS con allowlist explícita, sin wildcards en producción.
-- Headers de seguridad (`SecurityHeaders` middleware): HSTS, X-Frame-Options, CSP base.
+- Headers de seguridad (`SecurityHeaders` middleware): HSTS y X-Frame-Options. CSP pendiente de implementar.
 - Para reportar vulnerabilidades: [`SECURITY.md`](SECURITY.md).
 
 > Si necesitas credenciales de prueba (usuarios demo para reviewers), solicítalas al líder del proyecto. **No se publican en este README** porque la instancia desplegada es real y compartida.
