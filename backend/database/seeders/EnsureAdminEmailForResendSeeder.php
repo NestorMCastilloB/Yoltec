@@ -14,12 +14,19 @@ class EnsureAdminEmailForResendSeeder extends Seeder
     public function run(): void
     {
         $mailer = config('mail.default');
-        $target = env('RESEND_VERIFIED_EMAIL', 'nespiolin05@gmail.com');
+        $target = config('yoltec.resend_verified_email');
 
         Log::info("EnsureAdminEmailForResendSeeder: mailer={$mailer}, target={$target}");
 
         if ($mailer !== 'resend') {
             Log::info('EnsureAdminEmailForResendSeeder: skip (mailer no es resend)');
+            return;
+        }
+
+        // Sin correo verificado no hay nada que forzar: abortar en vez de escribir
+        // el correo de otra persona en las cuentas de admin y doctores.
+        if (! $target) {
+            Log::error('EnsureAdminEmailForResendSeeder: RESEND_VERIFIED_EMAIL no está definido — abortando');
             return;
         }
 
