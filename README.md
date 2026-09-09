@@ -32,9 +32,9 @@ Plataforma integral (web + móvil) para la gestión de citas, recetas y pre-eval
 
 ## Sobre el proyecto
 
-Yoltec digitaliza el flujo completo del consultorio médico universitario: agendado, atención, recetas, historial y reportes. Integra **dos modelos de inteligencia artificial** que asisten al doctor sin sustituirlo:
+Yoltec digitaliza el flujo completo del consultorio médico universitario: agendado, atención, recetas, historial y reportes. Integra **dos componentes de IA** que asisten al doctor sin sustituirlo:
 
-- **Clasificador de prioridad** (`scikit-learn`, `HistGradientBoostingClassifier`): predice riesgo de inasistencia a partir del historial del alumno. Reentrenado con dataset de 87 000 registros, precisión 86%.
+- **Prioridad de atención** (heurística ponderada, PHP): ordena las citas pendientes según el historial del alumno — visitas recientes, inasistencias, cancelaciones y condiciones crónicas detectadas en su bitácora. No es un modelo entrenado con datos reales: son factores con pesos ajustables sobre un dataset sintético.
 - **Pre-evaluación conversacional** (`scikit-learn` + `Groq`/`Llama 3.1 8B` opcional): orienta al alumno antes de la consulta, sugiere diagnóstico preliminar con porcentaje de confianza y aviso explícito de que **no sustituye al médico**. El diagnóstico lo da siempre el modelo propio; el LLM solo conduce la charla, y si no está disponible el chat sigue funcionando con un guion de preguntas y extracción de síntomas por reglas.
 
 El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y una app móvil exclusiva para estudiantes.
@@ -44,15 +44,15 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 ## Características destacadas
 
 - Tres roles con interfaz adaptada: alumno, doctor y administrador
-- **Dos modelos de IA** integrados con validación humana obligatoria
+- **Dos componentes de IA**, con revisión posterior del doctor sobre cada pre-evaluación
 - Calendario con disponibilidad real (slots de 15 min, días especiales, festivos)
 - Recetas digitales sin generación de PDF (visualización directa)
 - Bitácora del consultorio exportable a CSV
 - Autenticación con **Laravel Sanctum** + **2FA** por correo para doctores y admin
-- Modo oscuro nativo en web y móvil
-- 100% responsivo (mobile-first en web)
+- Modo oscuro en web y móvil
+- Diseño responsivo, mobile-first en web
 - Rate limiting, headers de seguridad y CORS con allowlist
-- Workflow de compilación y pruebas del entorno local en cada Pull Request
+- Pruebas automatizadas del backend y del microservicio de IA, ejecutadas junto con la compilación en cada Pull Request
 
 ---
 
@@ -63,7 +63,7 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 | Backend       | Laravel 12 · PHP 8.4 · Sanctum                              |
 | Frontend web  | Angular 20 · TypeScript · RxJS · Chart.js                   |
 | App móvil     | Flutter 3.x · Dart 3 · Material 3                           |
-| IA            | Python 3.12 · FastAPI · scikit-learn · Groq (Llama 3.1 8B)  |
+| IA            | Python 3.12 · FastAPI · scikit-learn · Groq opcional (Llama 3.1 8B) |
 | Base de datos | PostgreSQL (Neon, SSL)                                      |
 | Notificaciones| Firebase Cloud Messaging                                    |
 | Email         | Resend/SMTP (despliegues) · Mailpit (local)               |
@@ -92,7 +92,7 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
               ▼                     ▼
    ┌────────────────────┐   ┌────────────────────┐
    │  PostgreSQL Neon   │   │  Microservicio IA  │
-   │  (cloud)           │   │  FastAPI + Groq    │
+   │  (cloud)           │   │  FastAPI + sklearn │
    └────────────────────┘   └────────────────────┘
 ```
 
@@ -104,7 +104,7 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 
 ![Login dual](docs/capturas/web/00-login.png)
 
-Login dual con selector de rol estudiante o doctor. El alumno ingresa con número de control y NIP de 6 dígitos; el doctor con usuario y contraseña. El acceso administrativo está oculto en `/acceso-gestion` y exige 2FA en producción.
+Login dual con selector de rol estudiante o doctor. El alumno ingresa con número de control y NIP de 6 dígitos; el doctor con usuario y contraseña. El acceso administrativo está oculto en `/acceso-gestion` y exige 2FA.
 
 ### Web — Alumno
 
@@ -171,19 +171,19 @@ Gestión del calendario administrativo: días no laborables, festivos y horarios
 - Perfil médico editable (alergias, crónicas, contacto de emergencia).
 
 ### Doctor (web)
-- Login con usuario + contraseña + 2FA por correo en producción.
+- Login con usuario + contraseña + 2FA por correo.
 - Dashboard con KPIs en tiempo real (citas, atendidas, asistencia).
 - Validación de diagnósticos de pre-evaluación generados por IA.
 - Creación de consultas, bitácoras y recetas.
 - Agendar y cancelar citas a nombre de alumnos.
-- Clasificador de prioridad por paciente.
+- Citas pendientes ordenadas por prioridad estimada.
 - Exportación de bitácora a CSV.
 
 ### Administrador (web, ruta oculta)
 - CRUD de alumnos y doctores.
 - Gestión del calendario (días especiales, cierres).
 - Acceso vía `/acceso-gestion` (no enlazado desde el login público).
-- 2FA obligatorio también en el entorno local.
+- 2FA obligatorio, sin excepción por entorno.
 
 ---
 
@@ -244,13 +244,13 @@ retirarlas del árbol actual no sustituye su revocación en los proveedores.
 
 - Contraseñas y NIPs almacenados con **bcrypt**.
 - Tokens Sanctum con expiración de 24 h y purga automática diaria.
-- **2FA por correo** obligatorio para doctores y administradores en producción.
+- **2FA por correo** obligatorio para doctores y administradores, en todos los entornos.
 - Rate limiting (`throttle:5,1`) en endpoints sensibles (login, 2FA, reset).
 - CORS con allowlist explícita, sin wildcards en producción.
 - Headers de seguridad (`SecurityHeaders` middleware): HSTS y X-Frame-Options. CSP pendiente de implementar.
 - Para reportar vulnerabilidades: [`SECURITY.md`](SECURITY.md).
 
-> Si necesitas credenciales de prueba (usuarios demo para reviewers), solicítalas al líder del proyecto. **No se publican en este README** porque la instancia desplegada es real y compartida.
+> Los datos que se ven en la instancia desplegada son de **demostración**: no hay expedientes de personas reales. Aun así, es una instancia compartida, así que las credenciales de acceso **no se publican en este README** — solicítalas si necesitas revisarla.
 
 ---
 
@@ -274,7 +274,7 @@ Yoltec/
 ├── backend/          Laravel 12 — API REST + IA de priorización
 ├── frontend/         Angular 20 — SPA web (alumno + doctor + admin)
 ├── mobile/           Flutter — App estudiante (Android)
-├── IA/               Python + FastAPI — sklearn + Groq
+├── IA/               Python + FastAPI — sklearn + LLM opcional
 ├── docs/             Documentación técnica, capturas y entregables
 ├── docker-compose.yml
 ├── README.md
@@ -282,22 +282,6 @@ Yoltec/
 ├── SECURITY.md
 └── CONTRIBUTING.md
 ```
-
----
-
-## Equipo
-
-Proyecto desarrollado por estudiantes de **Ingeniería en Sistemas Computacionales** del Instituto Tecnológico Superior de Ciudad Valles (ITSV).
-
-| Integrante                          | N.º de control | Rol                                  |
-| ----------------------------------- | -------------- | ------------------------------------ |
-| **Nestor Moisés Castillo Bautista** | 22694095       | **Líder del proyecto**               |
-| Axel de Jesús Martínez Salazar      | 22690057       | Equipo de desarrollo                 |
-| Mario Alberto Martínez Cruz         | 22690239       | Equipo de desarrollo                 |
-| Erick Iván García Ortega            | 22690195       | Equipo de desarrollo                 |
-| Julián García Villedas              | 22690208       | Equipo de desarrollo                 |
-
-**Asesor académico:** Profesor Gómez Rodríguez Ismael — *Desarrollo de Aplicaciones Multiplataforma*.
 
 ---
 
