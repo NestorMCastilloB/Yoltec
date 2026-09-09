@@ -6,7 +6,7 @@ use App\IA\Services\IAService;
 use Illuminate\Console\Command;
 
 /**
- * Comando para entrenar y evaluar los modelos de IA
+ * Comando para entrenar y evaluar el clasificador de prioridad
  */
 class EntrenarIA extends Command
 {
@@ -14,27 +14,27 @@ class EntrenarIA extends Command
                             {--evaluar : Solo evaluar sin reentrenar}
                             {--dataset-size=1000 : Cantidad de muestras para entrenar}';
 
-    protected $description = 'Entrena o evalúa los modelos de IA del sistema médico';
+    protected $description = 'Entrena o evalúa el clasificador de prioridad de citas';
 
     public function handle()
     {
-        $this->info('🤖 Iniciando sistema de IA médica...');
+        $this->info('🤖 Clasificador de prioridad de citas...');
         $this->newLine();
 
         $iaService = new IAService();
 
         // Solo evaluar
         if ($this->option('evaluar')) {
-            $this->info('📊 Evaluando modelos existentes...');
+            $this->info('📊 Evaluando el modelo actual...');
             $info = $iaService->getInfoModelos();
             
             $this->table(
-                ['Modelo', 'Valor'],
+                ['Parámetro', 'Valor'],
                 [
-                    ['Clasificador de Síntomas', 'Naive Bayes'],
                     ['Enfermedades conocidas', $info['dataset_enfermedades']],
-                    ['Síntomas en vocabulario', $info['symptom_classifier']['sintomas_conocidos'] ?? 'N/A'],
-                    ['Clases entrenadas', $info['symptom_classifier']['clases_entrenadas'] ?? 'N/A'],
+                    ['Umbral prioridad alta', $info['priority_classifier']['umbrales']['alta'] ?? 'N/A'],
+                    ['Umbral prioridad media', $info['priority_classifier']['umbrales']['media'] ?? 'N/A'],
+                    ['Factores ponderados', count($info['priority_classifier']['pesos'] ?? [])],
                 ]
             );
             
@@ -43,7 +43,7 @@ class EntrenarIA extends Command
 
         // Reentrenar
         $size = $this->option('dataset-size');
-        $this->info("🎯 Reentrenando modelos con {$size} muestras...");
+        $this->info("🎯 Reentrenando con {$size} muestras...");
         $this->warn('⏳ Esto puede tomar unos segundos...');
         $this->newLine();
 
@@ -53,19 +53,6 @@ class EntrenarIA extends Command
 
         // Mostrar resultados
         $this->info('✅ Entrenamiento completado en ' . $tiempo . ' segundos');
-        $this->newLine();
-
-        // Resultados del clasificador de síntomas
-        $this->info('📈 Resultados del Clasificador de Síntomas (Naive Bayes):');
-        $symptom = $resultados['symptom_classifier'];
-        $this->table(
-            ['Métrica', 'Valor'],
-            [
-                ['Precisión Global', round($symptom['precision'] * 100, 2) . '%'],
-                ['Correctos', $symptom['correctos'] . '/' . $symptom['total']],
-            ]
-        );
-
         $this->newLine();
 
         // Resultados del clasificador de prioridad
@@ -82,7 +69,7 @@ class EntrenarIA extends Command
         );
 
         $this->newLine();
-        $this->info('💾 Modelos guardados en: storage/app/ia_models/');
+        $this->warn('⚠️  Los pesos viven en memoria: no se guardan entre peticiones.');
         $this->info('🕐 Timestamp: ' . $resultados['timestamp']);
 
         return 0;

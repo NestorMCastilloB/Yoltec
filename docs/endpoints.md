@@ -120,20 +120,15 @@ Roles: `alumno`, `doctor`, `admin`.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/ia/priority/info` | Info de los modelos cargados |
+| GET | `/ia/priority/info` | Configuración del clasificador |
 | GET | `/ia/priority/pendientes` | Citas pendientes ordenadas por prioridad |
 | POST | `/ia/priority/clasificar/{citaId}` | Clasifica una cita |
 
 ## IA 2 — Pre-evaluación de Síntomas
 
-| Método | Ruta | Rol | Descripción |
-|--------|------|-----|-------------|
-| POST | `/ia/symptoms/iniciar/{citaId}` | alumno+doctor | Inicia evaluación |
-| POST | `/ia/symptoms/evaluar/{citaId}` | alumno+doctor | Siguiente paso |
-| GET | `/ia/symptoms/resultado/{citaId}` | alumno+doctor | Resultado final |
-| DELETE | `/ia/symptoms/{citaId}` | alumno+doctor | Cancela evaluación |
-| GET | `/ia/symptoms/listado` | doctor | Listado de evaluaciones |
-| POST | `/ia/symptoms/validar/{preEvaluacionId}` | doctor | Valida evaluación |
+La atiende el microservicio Python; en el backend son las rutas
+`/pre-evaluacion/*` de la sección anterior. El motor equivalente escrito en PHP
+(`ia/symptoms/*`) se eliminó: ningún cliente lo usaba.
 
 ---
 
