@@ -250,7 +250,7 @@ retirarlas del árbol actual no sustituye su revocación en los proveedores.
 - Headers de seguridad (`SecurityHeaders` middleware): HSTS y X-Frame-Options. CSP pendiente de implementar.
 - Para reportar vulnerabilidades: [`SECURITY.md`](SECURITY.md).
 
-> Si necesitas credenciales de prueba (usuarios demo para reviewers), solicítalas al líder del proyecto. **No se publican en este README** porque la instancia desplegada es real y compartida.
+> Los datos que se ven en la instancia desplegada son de **demostración**: no hay expedientes de personas reales. Aun así, es una instancia compartida, así que las credenciales de acceso **no se publican en este README** — solicítalas si necesitas revisarla.
 
 ---
 
@@ -282,22 +282,6 @@ Yoltec/
 ├── SECURITY.md
 └── CONTRIBUTING.md
 ```
-
----
-
-## Equipo
-
-Proyecto desarrollado por estudiantes de **Ingeniería en Sistemas Computacionales** del Instituto Tecnológico Superior de Ciudad Valles (ITSV).
-
-| Integrante                          | N.º de control | Rol                                  |
-| ----------------------------------- | -------------- | ------------------------------------ |
-| **Nestor Moisés Castillo Bautista** | 22694095       | **Líder del proyecto**               |
-| Axel de Jesús Martínez Salazar      | 22690057       | Equipo de desarrollo                 |
-| Mario Alberto Martínez Cruz         | 22690239       | Equipo de desarrollo                 |
-| Erick Iván García Ortega            | 22690195       | Equipo de desarrollo                 |
-| Julián García Villedas              | 22690208       | Equipo de desarrollo                 |
-
-**Asesor académico:** Profesor Gómez Rodríguez Ismael — *Desarrollo de Aplicaciones Multiplataforma*.
 
 ---
 
