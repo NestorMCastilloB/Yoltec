@@ -1,87 +1,84 @@
-#!/bin/bash
-# ============================================================
-#  Yoltec — Arranque rapido de los 3 servicios
-#  Uso: ./start.sh  (desde la raiz del proyecto)
-# ============================================================
-
-set -e
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+#!/usr/bin/env bash
+# Arranque local; instala dependencias sin modificar la base de datos ni los .env.
+set -Eeuo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
+PYTHON_BIN="${PYTHON_BIN:-python3.12}"
+PIDS=()
 
-echo ""
-echo -e "${BLUE}============================================${NC}"
-echo -e "${BLUE}  Yoltec — Arrancando servicios${NC}"
-echo -e "${BLUE}============================================${NC}"
-echo ""
-
-# ── Verificar dependencias ───────────────────────────────
-for cmd in php composer npm python3; do
-    if ! command -v $cmd &> /dev/null; then
-        echo -e "${RED}  $cmd no esta instalado. Instalalo primero.${NC}"
-        exit 1
-    fi
-done
-
-# ── Backend ──────────────────────────────────────────────
-echo -e "${BLUE}[1/3] Backend (Laravel :8000)...${NC}"
-cd "$PROJECT_ROOT/backend"
-if [ ! -d "vendor" ]; then
-    composer install --no-interaction --quiet
-fi
-php artisan serve --host=127.0.0.1 --port=8000 &
-BACKEND_PID=$!
-sleep 1
-
-# ── IA ───────────────────────────────────────────────────
-echo -e "${BLUE}[2/3] IA (FastAPI :5000)...${NC}"
-cd "$PROJECT_ROOT/IA"
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
-fi
-source venv/bin/activate
-if [ ! -f "model.pkl" ]; then
-    echo -e "${YELLOW}  Entrenando modelo (~30s)...${NC}"
-    python train_model_light.py
-fi
-uvicorn app:app --host=0.0.0.0 --port=5000 &
-IA_PID=$!
-deactivate
-sleep 1
-
-# ── Frontend ─────────────────────────────────────────────
-echo -e "${BLUE}[3/3] Frontend (Angular :4200)...${NC}"
-cd "$PROJECT_ROOT/frontend"
-if [ ! -d "node_modules" ]; then
-    npm install --silent 2>/dev/null
-fi
-npx ng serve --host=0.0.0.0 --port=4200 &
-FRONTEND_PID=$!
-
-echo ""
-echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  Los 3 servicios estan corriendo${NC}"
-echo -e "${GREEN}============================================${NC}"
-echo -e "  Backend:  ${BLUE}http://localhost:8000${NC}"
-echo -e "  Frontend: ${BLUE}http://localhost:4200${NC}"
-echo -e "  IA:       ${BLUE}http://localhost:5000${NC}"
-echo ""
-echo -e "  ${RED}Ctrl+C${NC} para detener todo."
-echo ""
-
-cleanup() {
-    echo ""
-    echo -e "${YELLOW}Deteniendo servicios...${NC}"
-    kill $BACKEND_PID $IA_PID $FRONTEND_PID 2>/dev/null
-    wait $BACKEND_PID $IA_PID $FRONTEND_PID 2>/dev/null
-    echo -e "${GREEN}Listo.${NC}"
-    exit 0
+fail() {
+    echo "ERROR: $*" >&2
+    exit 1
 }
 
-trap cleanup SIGINT SIGTERM
-wait
+cleanup() {
+    local pid
+    for pid in "${PIDS[@]}"; do
+        kill -- "-$pid" 2>/dev/null || true
+    done
+    for pid in "${PIDS[@]}"; do
+        wait "$pid" 2>/dev/null || true
+    done
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+for cmd in php composer npm "$PYTHON_BIN" setsid; do
+    command -v "$cmd" >/dev/null || fail "Falta $cmd. Consulta docs/recuperacion.md."
+done
+
+for file in backend/.env IA/.env; do
+    [ -f "$PROJECT_ROOT/$file" ] || fail "Falta $file. Configúralo a partir de su .example."
+done
+
+php -r 'exit(extension_loaded("pdo_pgsql") ? 0 : 1);' || fail "PHP requiere pdo_pgsql para PostgreSQL."
+"$PYTHON_BIN" -c 'import sys; sys.exit(0 if sys.version_info[:2] == (3, 12) else 1)' || fail "Las dependencias de IA requieren el entorno Python 3.12 del proyecto."
+
+cd "$PROJECT_ROOT/backend"
+composer check-platform-reqs --lock --no-dev
+if [ ! -f vendor/autoload.php ]; then
+    composer install --no-interaction --prefer-dist
+fi
+
+cd "$PROJECT_ROOT/IA"
+if [ ! -d venv ]; then
+    "$PYTHON_BIN" -m venv venv
+fi
+venv/bin/python -c 'import sys; sys.exit(0 if sys.version_info[:2] == (3, 12) else 1)' || fail "IA/venv debe usar Python 3.12. Crea un entorno compatible."
+venv/bin/python -m pip install -r requirements.txt
+# Detecta errores de configuración antes de iniciar procesos en segundo plano.
+venv/bin/python -c 'import app'
+for file in model.pkl label_encoder.pkl feature_names.json; do
+    [ -f "$file" ] || fail "Falta IA/$file. Consulta docs/recuperacion.md para recuperar el modelo."
+done
+
+cd "$PROJECT_ROOT/frontend"
+if [ ! -d node_modules ]; then
+    npm ci
+fi
+
+cd "$PROJECT_ROOT/backend"
+setsid php artisan serve --host=127.0.0.1 --port=8000 &
+PIDS+=("$!")
+
+cd "$PROJECT_ROOT/IA"
+setsid venv/bin/python -m uvicorn app:app --host=127.0.0.1 --port=5000 &
+PIDS+=("$!")
+
+cd "$PROJECT_ROOT/frontend"
+setsid npm start -- --host=127.0.0.1 --port=4200 &
+PIDS+=("$!")
+
+echo "Iniciando backend :8000, IA :5000 y frontend :4200. Revisa los mensajes de cada servicio."
+echo "Ctrl+C detiene los tres servicios."
+
+# Si un servicio termina, detiene los demás y conserva el error de salida.
+status=0
+wait -n "${PIDS[@]}" || status=$?
+echo "Un servicio terminó; deteniendo los demás." >&2
+if [ "$status" -eq 0 ]; then
+    status=1
+fi
+exit "$status"

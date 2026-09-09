@@ -65,15 +65,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 
-if not GROQ_API_KEY:
-    raise RuntimeError(
-        "GROQ_API_KEY no está definida. Configúrala en .env (local) o como variable "
-        "de entorno en Render antes de iniciar el servicio."
-    )
+groq_client = Groq(api_key=GROQ_API_KEY, timeout=10.0, max_retries=0) if GROQ_API_KEY else None
 
-groq_client = Groq(api_key=GROQ_API_KEY)
-
-logger.info("LLM Provider: GROQ (modelo: %s)", GROQ_MODEL)
+if groq_client is None:
+    logger.warning("Groq no configurado: chat no disponible; el clasificador sigue habilitado.")
+else:
+    logger.info("LLM Provider: GROQ (modelo: %s)", GROQ_MODEL)
 
 SYSTEM_PROMPT = """Eres parte del equipo médico del consultorio universitario Yoltec, en Ciudad Valles, San Luis Potosí. Tu trabajo es platicar con el estudiante antes de su consulta para entender cómo se siente y qué síntomas tiene.
 
@@ -282,13 +279,21 @@ class ChatRequest(BaseModel):
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 _groq_cache: dict = {"ok": False, "ts": 0.0}
 
+@app.get("/live")
+def live():
+    """Comprueba el proceso sin depender de proveedores externos."""
+    return {"status": "ok"}
+
+
 @app.get("/health")
 def health():
     import time, sklearn
     now = time.time()
 
     # Cachear resultado de groq_client.models.list() por 30s
-    if now - _groq_cache["ts"] > 30:
+    if groq_client is None:
+        _groq_cache["ok"] = False
+    elif now - _groq_cache["ts"] > 30:
         try:
             groq_client.models.list()
             _groq_cache["ok"] = True
@@ -302,8 +307,9 @@ def health():
         if os.path.exists(model_path):
             model_size = f"{os.path.getsize(model_path) / 1_048_576:.1f}MB"
 
-    status = "ok" if model is not None else "degraded"
-    code = 200 if model is not None else 503
+    available = model is not None and _groq_cache["ok"]
+    status = "ok" if available else "degraded"
+    code = 200 if available else 503
 
     from fastapi.responses import JSONResponse
     return JSONResponse(
@@ -344,6 +350,9 @@ def chat(request: Request, req: ChatRequest):
                     "recomendacion": "Atención médica presencial urgente. Llama al 911 si hay peligro inmediato.",
                 }
             }
+
+        if groq_client is None:
+            raise HTTPException(status_code=503, detail="Chat no disponible: falta configurar Groq.")
 
         messages_payload = [
             {"role": m.role, "content": m.content}
@@ -459,6 +468,8 @@ def chat(request: Request, req: ChatRequest):
             "diagnostico": None
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error Groq API: {e}")
         raise HTTPException(status_code=502, detail="Error al procesar la solicitud con el servicio de IA. Intenta de nuevo.")

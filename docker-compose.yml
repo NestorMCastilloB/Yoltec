@@ -1,58 +1,80 @@
-﻿# Yoltec - Sistema de Consultorio Medico
-# backend (Laravel) + frontend (Angular) + ia (FastAPI)
-
+# Entorno local aislado. ./local.sh genera sus claves y ejecuta Compose.
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: yoltec_local
+      POSTGRES_USER: yoltec
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:?Ejecuta ./local.sh up}
+    volumes:
+      - postgres-local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yoltec -d yoltec_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: yoltec-backend
-    restart: unless-stopped
+      target: development
     ports:
-      - "8000:8080"
-    env_file:
-      - ./backend/.env.docker
+      - "127.0.0.1:8000:8080"
     environment:
-      - IA_SERVICE_URL=http://ia:5000
-    networks:
-      - yoltec-net
+      APP_NAME: Yoltec
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: ${LOCAL_APP_KEY:?Ejecuta ./local.sh up}
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:4200
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: yoltec_local
+      DB_USERNAME: yoltec
+      DB_PASSWORD: ${LOCAL_DB_PASSWORD:?Ejecuta ./local.sh up}
+      DB_SSLMODE: disable
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+      LOG_CHANNEL: stderr
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: noreply@yoltec.test
+      MAIL_FROM_NAME: Yoltec local
+      IA_SERVICE_URL: http://ia:5000
     depends_on:
-      ia:
+      postgres:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: yoltec-frontend
-    restart: unless-stopped
+    build: ./frontend
     ports:
-      - "4200:80"
+      - "127.0.0.1:4200:80"
     depends_on:
       - backend
-    networks:
-      - yoltec-net
 
   ia:
-    build:
-      context: ./IA
-      dockerfile: Dockerfile
-    container_name: yoltec-ia
-    restart: unless-stopped
+    build: ./IA
     ports:
-      - "5000:5000"
-    env_file:
-      - ./IA/.env
-    networks:
-      - yoltec-net
+      - "127.0.0.1:5000:5000"
+    environment:
+      GROQ_API_KEY: ${LOCAL_GROQ_API_KEY:-}
+      GROQ_MODEL: ${LOCAL_GROQ_MODEL:-llama-3.1-8b-instant}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/live')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
-networks:
-  yoltec-net:
-    driver: bridge
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"
 
+volumes:
+  postgres-local:

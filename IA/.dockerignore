@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+venv
+.venv
+__pycache__
+**/__pycache__
+data
+*.csv
+*.log
+**/*.pem
+**/*.key
