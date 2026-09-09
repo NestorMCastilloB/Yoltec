@@ -1,4 +1,4 @@
-"""Verifica disponibilidad parcial sin enviar solicitudes a Groq."""
+"""Verifica la disponibilidad del servicio sin enviar solicitudes a Groq."""
 
 import os
 import unittest
@@ -20,30 +20,24 @@ class AvailabilityTest(unittest.TestCase):
         with patch.object(service, 'groq_client', None), self.client:
             self.client.get('/live').raise_for_status()
             response = self.client.get('/health')
-            self.assertEqual(response.status_code, 503)
-            self.assertEqual(response.json()['status'], 'degraded')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['status'], 'ok')
             self.assertTrue(response.json()['model_sklearn_loaded'])
             self.assertFalse(response.json()['llm_available'])
             prediction = self.client.post('/predict', json={'respuestas': {'fiebre': 'Sí'}})
             self.assertEqual(prediction.status_code, 200)
             self.assertTrue(prediction.json()['success'])
 
-    def test_chat_sin_configurar_devuelve_503(self):
-        with patch.object(service, 'groq_client', None):
-            response = self.client.post('/chat', json={
-                'messages': [{'role': 'user', 'content': 'Tengo tos desde ayer'}],
-            })
-            self.assertEqual(response.status_code, 503)
-
-    def test_fallo_del_proveedor_se_refleja_en_health(self):
+    def test_fallo_del_proveedor_no_tumba_el_servicio(self):
         provider = Mock()
         provider.models.list.side_effect = RuntimeError('Proveedor no disponible')
         with patch.object(service, 'groq_client', provider), patch.object(service, 'model', Mock()):
             response = self.client.get('/health')
-            self.assertEqual(response.status_code, 503)
+            self.assertEqual(response.status_code, 200)
             self.assertFalse(response.json()['llm_available'])
+            self.assertEqual(response.json()['modo_chat'], 'guiado')
 
-    def test_health_sano_requiere_ambos_servicios_y_cachea_la_consulta(self):
+    def test_health_cachea_la_consulta_al_proveedor(self):
         provider = Mock()
         with patch.object(service, 'groq_client', provider), patch.object(service, 'model', Mock()):
             for _ in range(2):

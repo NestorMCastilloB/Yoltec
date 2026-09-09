@@ -21,6 +21,14 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 
+from extractor import (
+    CIERRE,
+    CIERRE_SIN_SINTOMAS,
+    conversacion_terminada,
+    extraer_de_conversacion,
+    siguiente_pregunta,
+)
+
 load_dotenv()
 
 logging.basicConfig(
@@ -68,7 +76,7 @@ GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
 groq_client = Groq(api_key=GROQ_API_KEY, timeout=10.0, max_retries=0) if GROQ_API_KEY else None
 
 if groq_client is None:
-    logger.warning("Groq no configurado: chat no disponible; el clasificador sigue habilitado.")
+    logger.warning("Groq no configurado: el chat usa el modo guiado por reglas.")
 else:
     logger.info("LLM Provider: GROQ (modelo: %s)", GROQ_MODEL)
 
@@ -208,6 +216,7 @@ FEATURE_LABELS = {
 
 # Confianza mínima por clase con ~50 clases (la prob top suele ser <0.4 incluso en casos claros)
 CONFIANZA_MIN_DIAGNOSTICO = 0.18
+CONFIANZA_MAX = 0.95  # una pre-evaluación no se presenta nunca como certeza
 PROB_MIN_INCLUIR_POSIBLE = 0.04
 
 PALABRAS_POSITIVAS = ['sí', 'si', 'leve', 'moderado', 'severo', 'alta', 'intenso', 'frecuente', 'yes']
@@ -253,6 +262,101 @@ def generar_recomendacion(diagnostico: str, confianza: float) -> str:
     if confianza >= 0.35:
         return f"Los síntomas son compatibles con {diagnostico}. Se recomienda consulta médica para confirmar."
     return f"Los síntomas podrían estar relacionados con {diagnostico}. Consulta al médico si persisten."
+
+
+# ─── Diagnóstico a partir de síntomas ────────────────────────────────────────
+def construir_diagnostico(sintomas_identificados: list, recomendacion_alterna: str) -> dict:
+    """
+    Clasifica con sklearn la lista de síntomas, venga del LLM o del extractor
+    por reglas. `recomendacion_alterna` se usa cuando no hay diagnóstico que dar.
+    """
+    if not (model is not None and feature_names and sintomas_identificados):
+        return {
+            "diagnostico_principal": "Evaluación preliminar",
+            "confianza": 0.5,
+            "sintomas_detectados": sintomas_identificados,
+            "posibles_enfermedades": [],
+            "recomendacion": recomendacion_alterna,
+        }
+
+    X = np.array([
+        1 if feat in sintomas_identificados else 0
+        for feat in feature_names
+    ]).reshape(1, -1)
+
+    probs = model.predict_proba(X)[0]
+    top_indices = np.argsort(probs)[::-1][:3]
+
+    # Mismo tope que /predict: una pre-evaluación nunca se presenta como certeza.
+    posibles = [
+        {"enfermedad": le.classes_[i], "confianza": min(round(float(probs[i]), 3), CONFIANZA_MAX)}
+        for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
+    ]
+
+    if not posibles:
+        return {
+            "diagnostico_principal": "Sin diagnóstico claro",
+            "confianza": 0.0,
+            "sintomas_detectados": sintomas_identificados,
+            "posibles_enfermedades": [],
+            "recomendacion": recomendacion_alterna,
+        }
+
+    nombre = posibles[0]["enfermedad"]
+    conf = posibles[0]["confianza"]
+
+    # Degradar a "Sin diagnóstico claro" si confianza < umbral y no es clase especial
+    if conf < CONFIANZA_MIN_DIAGNOSTICO and nombre not in ('Trauma o Lesión Física', 'Sin Patrón Claro'):
+        nombre = "Sin diagnóstico claro"
+        recomendacion = generar_recomendacion("Sin diagnóstico", conf)
+    else:
+        recomendacion = generar_recomendacion(nombre, conf)
+
+    return {
+        "diagnostico_principal": nombre,
+        "confianza": conf,
+        "sintomas_detectados": sintomas_identificados,
+        "posibles_enfermedades": posibles,
+        "recomendacion": recomendacion,
+    }
+
+
+# ─── Chat en modo guiado (sin LLM) ───────────────────────────────────────────
+def responder_guiado(messages: list) -> dict:
+    """
+    Conduce la pre-evaluación con un guion fijo de preguntas y extrae los
+    síntomas por reglas. Devuelve el mismo contrato que el chat con LLM.
+    """
+    respuestas = sum(1 for m in messages if m.role == 'user')
+
+    if not conversacion_terminada(respuestas):
+        return {
+            "message": siguiente_pregunta(respuestas),
+            "finished": False,
+            "diagnostico": None,
+        }
+
+    sintomas = extraer_de_conversacion(messages)
+    if not sintomas:
+        return {
+            "message": CIERRE_SIN_SINTOMAS,
+            "finished": True,
+            "diagnostico": {
+                "diagnostico_principal": "Sin diagnóstico claro",
+                "confianza": 0.0,
+                "sintomas_detectados": [],
+                "posibles_enfermedades": [],
+                "recomendacion": "No se identificaron síntomas concretos. Se recomienda valoración médica presencial.",
+            },
+        }
+
+    return {
+        "message": CIERRE,
+        "finished": True,
+        "diagnostico": construir_diagnostico(
+            sintomas, "Se recomienda consultar al médico para confirmar."
+        ),
+    }
 
 
 # ─── Schemas ─────────────────────────────────────────────────────────────────
@@ -307,7 +411,9 @@ def health():
         if os.path.exists(model_path):
             model_size = f"{os.path.getsize(model_path) / 1_048_576:.1f}MB"
 
-    available = model is not None and _groq_cache["ok"]
+    # El servicio está sano si puede diagnosticar. Sin LLM el chat sigue vivo en
+    # modo guiado, así que la falta de Groq ya no degrada el servicio.
+    available = model is not None
     status = "ok" if available else "degraded"
     code = 200 if available else 503
 
@@ -322,6 +428,7 @@ def health():
             "llm_provider": "groq",
             "llm_model": GROQ_MODEL,
             "llm_available": _groq_cache["ok"],
+            "modo_chat": "llm" if _groq_cache["ok"] else "guiado",
         }
     )
 
@@ -330,9 +437,9 @@ def health():
 @limiter.limit("10/minute")
 def chat(request: Request, req: ChatRequest):
     """
-    Chat conversacional con Groq para pre-evaluación de síntomas.
-    Devuelve la respuesta del asistente y, cuando hay suficiente info,
-    un diagnóstico preliminar estructurado.
+    Chat de pre-evaluación de síntomas. Usa Groq si está configurado y responde;
+    si no, cae al modo guiado por reglas. Devuelve la respuesta del asistente y,
+    cuando hay suficiente info, un diagnóstico preliminar estructurado.
     """
     try:
         # Sanity check: si el último mensaje del usuario sugiere emergencia/trauma,
@@ -352,7 +459,7 @@ def chat(request: Request, req: ChatRequest):
             }
 
         if groq_client is None:
-            raise HTTPException(status_code=503, detail="Chat no disponible: falta configurar Groq.")
+            return responder_guiado(req.messages)
 
         messages_payload = [
             {"role": m.role, "content": m.content}
@@ -399,62 +506,7 @@ def chat(request: Request, req: ChatRequest):
             sintomas_identificados = datos_llm.get("sintomas_identificados", [])
             recomendacion_llm = datos_llm.get("recomendacion", "Se recomienda consultar al médico para confirmar.")
 
-            # ── Clasificar con sklearn usando los síntomas que extrajo el LLM ──
-            if model is not None and feature_names and sintomas_identificados:
-                X = np.array([
-                    1 if feat in sintomas_identificados else 0
-                    for feat in feature_names
-                ]).reshape(1, -1)
-
-                probs = model.predict_proba(X)[0]
-                top_indices = np.argsort(probs)[::-1][:3]
-
-                posibles = [
-                    {
-                        "enfermedad": le.classes_[i],
-                        "confianza": round(float(probs[i]), 3)
-                    }
-                    for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
-                ]
-
-                if posibles:
-                    principal = posibles[0]
-                    nombre = principal["enfermedad"]
-                    conf = principal["confianza"]
-                    # Degradar a "Sin diagnóstico claro" si confianza < umbral y no es clase especial
-                    if conf < CONFIANZA_MIN_DIAGNOSTICO and nombre not in ('Trauma o Lesión Física', 'Sin Patrón Claro'):
-                        diagnostico = {
-                            "diagnostico_principal": "Sin diagnóstico claro",
-                            "confianza": conf,
-                            "sintomas_detectados": sintomas_identificados,
-                            "posibles_enfermedades": posibles,
-                            "recomendacion": generar_recomendacion("Sin diagnóstico", conf)
-                        }
-                    else:
-                        diagnostico = {
-                            "diagnostico_principal": nombre,
-                            "confianza": conf,
-                            "sintomas_detectados": sintomas_identificados,
-                            "posibles_enfermedades": posibles,
-                            "recomendacion": generar_recomendacion(nombre, conf)
-                        }
-                else:
-                    diagnostico = {
-                        "diagnostico_principal": "Sin diagnóstico claro",
-                        "confianza": 0.0,
-                        "sintomas_detectados": sintomas_identificados,
-                        "posibles_enfermedades": [],
-                        "recomendacion": recomendacion_llm
-                    }
-            else:
-                # Fallback: sklearn no disponible, usar lo que dijo el LLM
-                diagnostico = {
-                    "diagnostico_principal": "Evaluación preliminar",
-                    "confianza": 0.5,
-                    "sintomas_detectados": sintomas_identificados,
-                    "posibles_enfermedades": [],
-                    "recomendacion": recomendacion_llm
-                }
+            diagnostico = construir_diagnostico(sintomas_identificados, recomendacion_llm)
 
             return {
                 "message": mensaje_limpio or "He recopilado suficiente información. Aquí está tu pre-evaluación:",
@@ -471,8 +523,8 @@ def chat(request: Request, req: ChatRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error Groq API: {e}")
-        raise HTTPException(status_code=502, detail="Error al procesar la solicitud con el servicio de IA. Intenta de nuevo.")
+        logger.warning("Groq no respondió (%s); se continúa en modo guiado.", e)
+        return responder_guiado(req.messages)
 
 
 @app.post("/predict")
@@ -489,7 +541,7 @@ def predict(request: Request, req: PredictRequest):
     top_indices = np.argsort(probs)[::-1][:3]
 
     posibles = [
-        {'enfermedad': le.classes_[i], 'confianza': min(round(float(probs[i]), 3), 0.95)}
+        {'enfermedad': le.classes_[i], 'confianza': min(round(float(probs[i]), 3), CONFIANZA_MAX)}
         for i in top_indices if probs[i] > PROB_MIN_INCLUIR_POSIBLE
     ]
 

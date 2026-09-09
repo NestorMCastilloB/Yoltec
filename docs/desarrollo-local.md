@@ -63,15 +63,30 @@ este Compose como versión normal o demo pública.
 
 ## IA sin Groq
 
-El clasificador puede arrancar sin una clave de Groq. En ese caso `/health`
-devuelve HTTP 503, `status: degraded` y `llm_available: false`; `/live` devuelve
-200 y el proceso sigue disponible. `/chat` devuelve un error claro si requiere
-Groq y no está configurado. La respuesta estática ante emergencias se conserva.
+El servicio no depende de Groq para dar un diagnóstico. Quien clasifica es
+siempre `model.pkl`; el LLM solo traduce lenguaje natural a la lista de síntomas
+que entiende el clasificador. Cuando no hay clave —o cuando Groq falla, agota su
+cuota o tarda demasiado— `/chat` pasa a **modo guiado**: hace un guion fijo de
+preguntas (`extractor.py`) y extrae los síntomas por reglas, con negación
+(«no tengo fiebre») y sinónimos coloquiales. La respuesta estática ante
+emergencias se conserva y tiene prioridad sobre ambos modos.
 
-Para habilitar conversaciones, escribe tu clave en `LOCAL_GROQ_API_KEY` dentro
-de `.env.local` y ejecuta `./local.sh up`. No compartas ese archivo. El healthcheck
-consulta la lista de modelos y no garantiza que una conversación funcione:
-también hay que probar `/chat` con el modelo configurado.
+Por eso `/health` devuelve 200 y `status: ok` mientras el clasificador esté
+cargado, e informa del modo activo:
+
+| Campo | Sin Groq | Con Groq |
+| --- | --- | --- |
+| `status` | `ok` | `ok` |
+| `llm_available` | `false` | `true` |
+| `modo_chat` | `guiado` | `llm` |
+
+`status: degraded` (HTTP 503) queda reservado para lo que sí impide diagnosticar:
+que `model.pkl` no cargue. `/live` sigue respondiendo 200 sin comprobar terceros.
+
+Para habilitar la conversación libre, escribe tu clave en `LOCAL_GROQ_API_KEY`
+dentro de `.env.local` y ejecuta `./local.sh up`. No compartas ese archivo. El
+healthcheck consulta la lista de modelos y no garantiza que una conversación
+funcione: también hay que probar `/chat` con el modelo configurado.
 
 ## Comprobaciones
 
@@ -84,7 +99,8 @@ Las pruebas Laravel utilizan una base separada, `yoltec_test`, que puede vaciars
 durante su ejecución. Nunca se deben apuntar las pruebas a una base que quieras
 conservar. Incluyen cuentas locales, login de alumno, acceso por rol, 2FA de un
 solo uso y ausencia de la ruta pública de siembra. Las pruebas de IA cargan el
-modelo versionado y simulan Groq, sin consumir la API.
+modelo versionado y simulan Groq, sin consumir la API; el extractor por reglas
+se prueba aparte, sin dependencias.
 
 ## Detener y volver a iniciar
 

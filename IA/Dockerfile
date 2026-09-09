@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Modelo pre-entrenado (sintético 53k + CSV real 34k) — ya no se entrena en build
-COPY app.py feature_names.json model.pkl label_encoder.pkl ./
+COPY app.py extractor.py feature_names.json model.pkl label_encoder.pkl ./
 
 EXPOSE 5000
 
