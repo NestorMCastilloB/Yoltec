@@ -57,7 +57,7 @@ class AuthController extends Controller
         Cache::forget($attemptsKey);
         $recordarPor = $request->input('recordar_por', 1440);
 
-        if ($tipo === 'alumno' || config('app.env') === 'local') {
+        if ($tipo === 'alumno') {
             return $this->successResponse($user, $recordarPor);
         }
 
