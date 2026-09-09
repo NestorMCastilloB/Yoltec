@@ -38,7 +38,7 @@ class PasswordResetController extends Controller
             'used'       => false,
         ]);
 
-        $frontendUrl = config('app.frontend_url', 'http://localhost:4200');
+        $frontendUrl = config('yoltec.frontend_url');
         $resetUrl = "{$frontendUrl}/reset-password?token={$token}";
 
         try {
