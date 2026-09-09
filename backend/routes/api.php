@@ -10,7 +10,6 @@ use App\Http\Controllers\RecetaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PreEvaluacionIAController;
 use App\Http\Controllers\IAPriorityController;
-use App\Http\Controllers\IASymptomController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PasswordResetController;
@@ -130,18 +129,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/info', [IAPriorityController::class, 'infoModelos']);
         Route::get('/pendientes', [IAPriorityController::class, 'listarPendientesPorPrioridad']);
         Route::post('/clasificar/{citaId}', [IAPriorityController::class, 'clasificar']);
-    });
-
-    // ===== IA 2: Pre-evaluación de Síntomas — alumno y doctor =====
-    Route::prefix('ia/symptoms')->group(function () {
-        Route::post('/iniciar/{citaId}', [IASymptomController::class, 'iniciar']);
-        Route::post('/evaluar/{citaId}', [IASymptomController::class, 'evaluar']);
-        Route::get('/resultado/{citaId}', [IASymptomController::class, 'obtenerResultado']);
-        Route::delete('/{citaId}', [IASymptomController::class, 'cancelar']);
-        // Solo doctor
-        Route::middleware('role:doctor')->group(function () {
-            Route::get('/listado', [IASymptomController::class, 'listado']);
-            Route::post('/validar/{preEvaluacionId}', [IASymptomController::class, 'validar']);
-        });
     });
 });
