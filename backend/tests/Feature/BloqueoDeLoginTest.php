@@ -159,4 +159,35 @@ class BloqueoDeLoginTest extends TestCase
             'tipo_usuario'  => 'doctor',
         ])->assertOk()->assertJsonPath('requires_2fa', true);
     }
+
+    public function test_el_bloqueo_desde_una_ip_no_bloquea_a_la_victima_desde_otra_ip(): void
+    {
+        $alumno = $this->alumno();
+
+        // Un atacante desde su IP falla 5 veces contra la cuenta de la víctima.
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1']);
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/login', [
+                'identificador' => $alumno->numero_control,
+                'password'      => '000000',
+                'tipo_usuario'  => 'alumno',
+            ]);
+        }
+
+        // Desde esa misma IP la cuenta figura bloqueada.
+        $this->postJson('/api/login', [
+            'identificador' => $alumno->numero_control,
+            'password'      => '123456',
+            'tipo_usuario'  => 'alumno',
+        ])->assertStatus(429)->assertJson(['locked' => true]);
+
+        // Pero la víctima, desde su propia IP, entra sin problema: el candado se
+        // ató al atacante, no a la cuenta. Esta es la garantía contra la DoS.
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.7']);
+        $this->postJson('/api/login', [
+            'identificador' => $alumno->numero_control,
+            'password'      => '123456',
+            'tipo_usuario'  => 'alumno',
+        ])->assertOk();
+    }
 }
