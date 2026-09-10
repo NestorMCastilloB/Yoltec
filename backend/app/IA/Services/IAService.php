@@ -6,6 +6,9 @@ use App\IA\Data\MedicalDataset;
 use App\IA\Models\PriorityClassifier;
 use App\Models\Cita;
 use App\Models\Bitacora;
+use App\Models\Receta;
+use App\Models\PreEvaluacionIA;
+use Illuminate\Support\Collection;
 
 /**
  * Clasificador de prioridad de atención (IA 1).
@@ -16,6 +19,12 @@ use App\Models\Bitacora;
 class IAService
 {
     private PriorityClassifier $priorityClassifier;
+
+    /** Historiales ya calculados, indexados por alumno_id (ver precargar()). */
+    private array $historialCache = [];
+
+    /** Síntomas de pre-evaluación ya cargados, indexados por cita_id. */
+    private array $preEvalCache = [];
 
     public function __construct()
     {
@@ -37,6 +46,16 @@ class IAService
     public function clasificarPrioridad(int $citaId): array
     {
         $cita = Cita::with(['alumno', 'bitacora'])->findOrFail($citaId);
+        return $this->clasificarPrioridadDeCita($cita);
+    }
+
+    /**
+     * Igual que clasificarPrioridad() pero partiendo de una Cita ya cargada.
+     * Lo usa el listado por prioridad, que precarga las citas y sus datos en
+     * bloque (ver precargar()) para no repetir consultas por cada cita.
+     */
+    public function clasificarPrioridadDeCita(Cita $cita): array
+    {
         $alumno = $cita->alumno;
 
         // Obtener historial del alumno
@@ -59,7 +78,7 @@ class IAService
         );
 
         return [
-            'cita_id' => $citaId,
+            'cita_id' => $cita->id,
             'alumno_id' => $alumno->id,
             'alumno_nombre' => trim(($alumno->nombre ?? '') . ' ' . ($alumno->apellido ?? '')) ?: 'Sin nombre',
             'prioridad' => $resultado['prioridad'],
@@ -78,73 +97,129 @@ class IAService
     }
 
     /**
-     * Obtiene el historial médico completo de un alumno
+     * Precarga en pocas consultas agrupadas el historial y las pre-evaluaciones
+     * de todas las citas de un listado. Sin esto, clasificar N citas disparaba
+     * ~7 consultas por cada una (N+1); con esto son un puñado en total.
+     */
+    public function precargar(Collection $citas): void
+    {
+        $alumnoIds = $citas->pluck('alumno_id')->filter()->unique()->values()->all();
+        $citaIds   = $citas->pluck('id')->filter()->unique()->values()->all();
+
+        if (!empty($alumnoIds)) {
+            $mesAtras       = now()->subMonth();
+            $tresMesesAtras = now()->subMonths(3);
+
+            $visitas = Cita::whereIn('alumno_id', $alumnoIds)
+                ->where('created_at', '>=', $mesAtras)
+                ->groupBy('alumno_id')->selectRaw('alumno_id, count(*) as total')
+                ->pluck('total', 'alumno_id');
+
+            $inasistencias = Cita::whereIn('alumno_id', $alumnoIds)
+                ->where('estatus', 'no_asistio')->where('updated_at', '>=', $tresMesesAtras)
+                ->groupBy('alumno_id')->selectRaw('alumno_id, count(*) as total')
+                ->pluck('total', 'alumno_id');
+
+            $cancelaciones = Cita::whereIn('alumno_id', $alumnoIds)
+                ->where('estatus', 'cancelada')->where('updated_at', '>=', $tresMesesAtras)
+                ->groupBy('alumno_id')->selectRaw('alumno_id, count(*) as total')
+                ->pluck('total', 'alumno_id');
+
+            // Todas las bitácoras de estos alumnos en una consulta; se agrupan y
+            // se recortan a las 5 recientes por alumno en memoria.
+            $bitacorasPorAlumno = Bitacora::whereIn('alumno_id', $alumnoIds)
+                ->orderBy('created_at', 'desc')->get()->groupBy('alumno_id');
+
+            $totalBitacoras = Bitacora::whereIn('alumno_id', $alumnoIds)
+                ->groupBy('alumno_id')->selectRaw('alumno_id, count(*) as total')
+                ->pluck('total', 'alumno_id');
+
+            $recetasPorAlumno = Receta::whereIn('alumno_id', $alumnoIds)
+                ->where('created_at', '>=', $mesAtras)->get()->groupBy('alumno_id');
+
+            foreach ($alumnoIds as $id) {
+                $this->historialCache[$id] = $this->armarHistorial(
+                    (int) ($visitas[$id] ?? 0),
+                    ($bitacorasPorAlumno[$id] ?? collect())->take(5),
+                    $recetasPorAlumno[$id] ?? collect(),
+                    (int) ($totalBitacoras[$id] ?? 0),
+                    (int) ($inasistencias[$id] ?? 0),
+                    (int) ($cancelaciones[$id] ?? 0),
+                );
+            }
+        }
+
+        if (!empty($citaIds)) {
+            foreach (PreEvaluacionIA::whereIn('cita_id', $citaIds)->get() as $pe) {
+                $this->preEvalCache[$pe->cita_id] = $pe->sintomas_detectados ?: [];
+            }
+        }
+    }
+
+    /**
+     * Historial médico de un alumno. Si se precargó en bloque, sale de la caché;
+     * si no, se calcula con sus consultas (camino de una sola cita).
      */
     private function obtenerHistorialAlumno(int $alumnoId): array
     {
-        $mesAtras = now()->subMonth();
-        
-        // Contar visitas del último mes
-        $visitasMes = Cita::where('alumno_id', $alumnoId)
-            ->where('created_at', '>=', $mesAtras)
-            ->count();
+        if (isset($this->historialCache[$alumnoId])) {
+            return $this->historialCache[$alumnoId];
+        }
 
-        // Obtener bitácoras recientes
-        $bitacorasRecientes = Bitacora::where('alumno_id', $alumnoId)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+        $mesAtras       = now()->subMonth();
+        $tresMesesAtras = now()->subMonths(3);
 
+        return $this->historialCache[$alumnoId] = $this->armarHistorial(
+            Cita::where('alumno_id', $alumnoId)->where('created_at', '>=', $mesAtras)->count(),
+            Bitacora::where('alumno_id', $alumnoId)->orderBy('created_at', 'desc')->limit(5)->get(),
+            Receta::where('alumno_id', $alumnoId)->where('created_at', '>=', $mesAtras)->get(),
+            Bitacora::where('alumno_id', $alumnoId)->count(),
+            Cita::where('alumno_id', $alumnoId)->where('estatus', 'no_asistio')->where('updated_at', '>=', $tresMesesAtras)->count(),
+            Cita::where('alumno_id', $alumnoId)->where('estatus', 'cancelada')->where('updated_at', '>=', $tresMesesAtras)->count(),
+        );
+    }
+
+    /**
+     * Arma el arreglo de historial a partir de datos ya cargados. Lo comparten
+     * el camino de una sola cita y el precargado en bloque, para que el cálculo
+     * sea idéntico en ambos.
+     */
+    private function armarHistorial(
+        int $visitasMes,
+        Collection $bitacorasRecientes,
+        Collection $recetasRecientes,
+        int $totalBitacoras,
+        int $inasistencias,
+        int $cancelaciones
+    ): array {
         $condicionesCronicas = [];
-        $medicamentosActivos = [];
-        $ultimoDiagnostico = null;
+        $ultimoDiagnostico   = null;
 
         foreach ($bitacorasRecientes as $bitacora) {
-            // Extraer condiciones del diagnóstico (simulado)
-            $diagnosticoLower = strtolower($bitacora->diagnostico);
-            
-            $condiciones = ['diabetes', 'hipertension', 'asma', 'alergias', 'depresion', 'ansiedad'];
-            foreach ($condiciones as $condicion) {
+            $diagnosticoLower = strtolower((string) $bitacora->diagnostico);
+            foreach (['diabetes', 'hipertension', 'asma', 'alergias', 'depresion', 'ansiedad'] as $condicion) {
                 if (strpos($diagnosticoLower, $condicion) !== false) {
                     $condicionesCronicas[] = $condicion;
                 }
             }
-
             if (!$ultimoDiagnostico) {
                 $ultimoDiagnostico = $bitacora->diagnostico;
             }
         }
 
-        // Obtener recetas activas (últimas 30 días)
-        $recetasRecientes = \App\Models\Receta::where('alumno_id', $alumnoId)
-            ->where('created_at', '>=', $mesAtras)
-            ->get();
-
+        $medicamentosActivos = [];
         foreach ($recetasRecientes as $receta) {
-            $medicamentos = explode(',', $receta->medicamentos);
-            foreach ($medicamentos as $med) {
+            foreach (explode(',', (string) $receta->medicamentos) as $med) {
                 $medicamentosActivos[] = trim($med);
             }
         }
-
-        // Inasistencias y cancelaciones (últimos 3 meses)
-        $tresMesesAtras = now()->subMonths(3);
-        $inasistencias = Cita::where('alumno_id', $alumnoId)
-            ->where('estatus', 'no_asistio')
-            ->where('updated_at', '>=', $tresMesesAtras)
-            ->count();
-
-        $cancelaciones = Cita::where('alumno_id', $alumnoId)
-            ->where('estatus', 'cancelada')
-            ->where('updated_at', '>=', $tresMesesAtras)
-            ->count();
 
         return [
             'visitas_ultimo_mes'      => $visitasMes,
             'condiciones_cronicas'    => array_unique($condicionesCronicas),
             'medicamentos_activos'    => array_unique($medicamentosActivos),
             'ultimo_diagnostico'      => $ultimoDiagnostico,
-            'total_historial'         => Bitacora::where('alumno_id', $alumnoId)->count(),
+            'total_historial'         => $totalBitacoras,
             'inasistencias_recientes' => $inasistencias,
             'cancelaciones_recientes' => $cancelaciones,
         ];
@@ -161,10 +236,14 @@ class IAService
             $sintomas = array_merge($sintomas, $this->parsearSintomasDeTexto($cita->motivo));
         }
 
-        // Buscar pre-evaluación previa
-        $preEvaluacion = \App\Models\PreEvaluacionIA::where('cita_id', $cita->id)->first();
-        if ($preEvaluacion && $preEvaluacion->sintomas_detectados) {
-            $sintomas = array_merge($sintomas, $preEvaluacion->sintomas_detectados);
+        // Síntomas de la pre-evaluación previa (de la caché si se precargó en
+        // bloque; si no, se consulta la de esta cita).
+        $detectados = array_key_exists($cita->id, $this->preEvalCache)
+            ? $this->preEvalCache[$cita->id]
+            : (PreEvaluacionIA::where('cita_id', $cita->id)->first()?->sintomas_detectados ?? []);
+
+        if (!empty($detectados)) {
+            $sintomas = array_merge($sintomas, $detectados);
         }
 
         return array_unique($sintomas);
