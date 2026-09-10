@@ -13,5 +13,9 @@ return [
     'allowed_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     'exposed_headers' => [],
     'max_age' => 3600,
-    'supports_credentials' => true,
+
+    // La autenticación es por Bearer token (Sanctum sin modo stateful): el
+    // navegador no manda cookies ni el frontend usa withCredentials. Habilitar
+    // credenciales en CORS era superficie innecesaria (M-5 de la auditoría).
+    'supports_credentials' => false,
 ];

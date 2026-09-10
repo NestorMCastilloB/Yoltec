@@ -85,11 +85,15 @@ class IAPriorityController extends Controller
             ->orderBy('hora_cita')
             ->get();
 
+        // Precarga en bloque el historial y las pre-evaluaciones de todas las
+        // citas: evita el N+1 de ~7 consultas por cita dentro del bucle.
+        $this->iaService->precargar($citas);
+
         // Clasificar cada una
         $clasificadas = [];
         foreach ($citas as $cita) {
             try {
-                $resultado = $this->iaService->clasificarPrioridad($cita->id);
+                $resultado = $this->iaService->clasificarPrioridadDeCita($cita);
                 $clasificadas[] = [
                     'cita' => [
                         'id' => $cita->id,
