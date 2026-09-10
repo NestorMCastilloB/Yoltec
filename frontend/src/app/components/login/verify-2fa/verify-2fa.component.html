@@ -2,10 +2,19 @@
   <div class="verify-card">
     <div class="icon">🔐</div>
     <h2>Verificación en dos pasos</h2>
-    <p class="subtitle">
+    <p class="subtitle" *ngIf="!modoDemostracion">
       Ingresa el código de 6 dígitos enviado a<br>
       <strong>{{ emailMasked }}</strong>
     </p>
+
+    <div *ngIf="modoDemostracion" class="demo-aviso">
+      <p class="demo-titulo">Modo demostración</p>
+      <p class="demo-texto">
+        Esta cuenta no tiene buzón de correo, así que el código se muestra aquí.
+        La verificación es real: caduca a los 10 minutos y solo sirve una vez.
+      </p>
+      <p class="demo-codigo" *ngIf="codigoDemo">{{ codigoDemo }}</p>
+    </div>
 
     <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
     <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>

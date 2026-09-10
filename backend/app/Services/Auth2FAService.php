@@ -19,6 +19,40 @@ class Auth2FAService
     // Genera código 2FA, lo guarda y envía por email. Retorna email enmascarado.
     public function sendCode(User $user): string
     {
+        $code = $this->crearCodigo($user);
+
+        try {
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
+        } catch (\Exception $e) {
+            \Log::error('SMTP ERROR 2FA: ' . $e->getMessage());
+        }
+
+        return $this->maskEmail($user->email);
+    }
+
+    // Indica si la cuenta es de demostración · el plan gratuito de Resend no
+    // entrega a un visitante, así que estas cuentas reciben el código en la
+    // respuesta · retorna true solo con DEMO_MODE activo y el username listado.
+    public function esCuentaDemo(User $user): bool
+    {
+        return config('yoltec.demo_mode')
+            && $user->username !== null
+            && in_array($user->username, config('yoltec.demo_usuarios'), true);
+    }
+
+    // Genera el código de 2FA sin enviarlo por correo · solo para cuentas de
+    // demostración, donde viaja en la respuesta porque no hay buzón que consultar
+    // · retorna el código en claro, así que quien lo llama lo está exponiendo.
+    public function generarCodigoDemo(User $user): string
+    {
+        return $this->crearCodigo($user);
+    }
+
+    // Genera el código y lo guarda cifrado con su caducidad · centraliza lo que
+    // comparten el envío por correo y el de demostración · retorna el código en
+    // claro para que quien lo pidió decida cómo entregarlo.
+    private function crearCodigo(User $user): string
+    {
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         TwoFactorCode::create([
@@ -28,13 +62,7 @@ class Auth2FAService
             'used'       => false,
         ]);
 
-        try {
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code, $user->nombre));
-        } catch (\Exception $e) {
-            \Log::error('SMTP ERROR 2FA: ' . $e->getMessage());
-        }
-
-        return $this->maskEmail($user->email);
+        return $code;
     }
 
     // Busca código válido y no usado. Retorna el registro si coincide, null si no.

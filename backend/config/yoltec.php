@@ -18,4 +18,22 @@ return [
     // de desarrollo y el enlace no le sirve a nadie.
     'frontend_url' => rtrim(env('FRONTEND_URL', 'http://localhost:4200'), '/'),
 
+    // Modo demostración. El plan gratuito de Resend solo entrega al correo
+    // verificado de la cuenta, así que un visitante nunca recibe el código de 2FA
+    // y se queda atrapado en la pantalla del segundo factor. Con esto encendido,
+    // las cuentas listadas reciben el código en la propia respuesta del login y no
+    // se les envía correo.
+    //
+    // No desactiva el segundo factor: el código se sigue guardando cifrado, sigue
+    // caducando a los 10 minutos y sigue siendo de un solo uso. Lo único que
+    // cambia es por dónde llega, y solo para las cuentas nombradas abajo.
+    'demo_mode' => filter_var(env('DEMO_MODE', false), FILTER_VALIDATE_BOOLEAN),
+
+    // Usernames de las cuentas de demostración, separados por comas. Vacío por
+    // defecto: sin lista, DEMO_MODE no afecta a nadie.
+    'demo_usuarios' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('DEMO_USUARIOS', ''))
+    ))),
+
 ];

@@ -66,6 +66,21 @@ class AuthController extends Controller
         }
 
         Cache::put("pending_recordar_{$user->id}", $recordarPor, 600);
+
+        // En una cuenta de demostración el código viaja en la respuesta: no hay
+        // buzón que un visitante pueda consultar. El segundo factor sigue vivo
+        // —el código caduca y es de un solo uso—, solo cambia por dónde llega.
+        if ($this->twoFA->esCuentaDemo($user)) {
+            return response()->json([
+                'message'           => 'Modo demostración: el código se muestra en pantalla',
+                'requires_2fa'      => true,
+                'user_id'           => $user->id,
+                'email_masked'      => $this->twoFA->maskEmail($user->email),
+                'modo_demostracion' => true,
+                'codigo_demo'       => $this->twoFA->generarCodigoDemo($user),
+            ]);
+        }
+
         $emailEnmascarado = $this->twoFA->sendCode($user);
 
         return response()->json([
@@ -121,6 +136,18 @@ class AuthController extends Controller
         }
 
         Cache::put($cacheKey, $resendCount + 1, 600);
+
+        // Mismo criterio que en el login: sin buzón que consultar, reenviar solo
+        // tiene sentido si el código nuevo vuelve en la respuesta.
+        if ($this->twoFA->esCuentaDemo($user)) {
+            return response()->json([
+                'message'           => 'Modo demostración: el código se muestra en pantalla',
+                'email_masked'      => $this->twoFA->maskEmail($user->email),
+                'modo_demostracion' => true,
+                'codigo_demo'       => $this->twoFA->generarCodigoDemo($user),
+            ]);
+        }
+
         $emailEnmascarado = $this->twoFA->sendCode($user);
 
         return response()->json([
