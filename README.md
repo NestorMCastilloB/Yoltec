@@ -287,18 +287,20 @@ Yoltec/
 
 ## Contribuir
 
-Lee primero [`CONTRIBUTING.md`](CONTRIBUTING.md) para conocer el flujo de ramas, convenciones y proceso de revisión.
+Lee primero [`CONTRIBUTING.md`](CONTRIBUTING.md): flujo de ramas, convenciones de commit y qué se comprueba antes de fusionar.
+
+`main` está protegida — solo se actualiza por Pull Request y con el CI en verde, sin excepciones para nadie.
 
 ```bash
 git checkout main && git pull
 git checkout -b feat/descripcion-corta
-git add archivos_modificados
-git commit -m "feat: descripción breve"
-git push origin feat/descripcion-corta
-# abrir PR hacia main
+git commit -m "feat(ambito): descripción breve"
+git fetch origin && git rebase origin/main
+git push -u origin feat/descripcion-corta
+gh pr create --base main
 ```
 
-Convención de commits: `feat` · `fix` · `refactor` · `docs` · `chore` · `test`.
+Convención de commits: `feat` · `fix` · `docs` · `refactor` · `perf` · `test` · `chore` · `ci` · `build` · `style`.
 
 ---
 
