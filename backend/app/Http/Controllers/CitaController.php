@@ -58,6 +58,7 @@ class CitaController extends Controller
             'hora_cita'       => 'required|date_format:H:i',
             'motivo'          => 'nullable|string|max:500',
             'numero_control'  => 'nullable|string|exists:users,numero_control',
+            'alumno_id'       => 'nullable|integer',
         ], [
             'fecha_cita.required'       => 'La fecha de la cita es obligatoria.',
             'fecha_cita.date'           => 'Ingresa una fecha de cita válida.',
@@ -75,10 +76,26 @@ class CitaController extends Controller
 
         if ($user->esAlumno()) {
             $alumnoId = $user->id;
-        } elseif ($request->filled('numero_control')) {
-            $alumnoId = User::where('numero_control', $request->numero_control)->firstOrFail()->id;
         } else {
-            $alumnoId = $request->alumno_id;
+            // Un doctor agenda a nombre de un alumno: hay que identificarlo y
+            // confirmar que existe y que es alumno. Antes se tomaba
+            // $request->alumno_id sin validar, así que se podía crear una cita
+            // colgada de un id cualquiera (M-2 de la auditoría).
+            $alumno = null;
+            if ($request->filled('numero_control')) {
+                $alumno = User::where('numero_control', $request->numero_control)
+                    ->where('tipo', 'alumno')->first();
+            } elseif ($request->filled('alumno_id')) {
+                $alumno = User::where('id', $request->alumno_id)
+                    ->where('tipo', 'alumno')->first();
+            }
+
+            if (!$alumno) {
+                return response()->json([
+                    'message' => 'Debes indicar un alumno válido por su número de control o id.',
+                ], 422);
+            }
+            $alumnoId = $alumno->id;
         }
 
         $cita = $this->citaService->reservarSlot(
