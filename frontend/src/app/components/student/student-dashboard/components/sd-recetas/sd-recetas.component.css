@@ -132,7 +132,7 @@
 /* Divider */
 .divider {
   border: none;
-  border-top: 1px solid var(--yol-bg);
+  border-top: 1px solid var(--yol-border);
   margin: 0;
 }
 
@@ -181,17 +181,6 @@
 }
 
 .ver-detalle:hover { text-decoration: underline; }
-
-/* Dark */
-:host-context(.dark) .receta-card { background: #1a2e25; }
-:host-context(.dark) .fecha-chip { background: #0f1a15; color: #7b9e8c; }
-:host-context(.dark) .med-nombre { color: #e8f5ee; }
-:host-context(.dark) .doctor-nombre,
-:host-context(.dark) .med-dosis { color: #a8c4b4; }
-:host-context(.dark) .notas,
-:host-context(.dark) .pill-icon { color: #5a7a6a; }
-:host-context(.dark) .divider { border-top-color: #2a4030; }
-:host-context(.dark) .state-card { background: #1a2e25; }
 
 /* ── Modal detalle ──────────────────────────────── */
 .modal-overlay {
@@ -342,7 +331,7 @@
 
 .modal-btn-close {
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border: none;
   padding: 8px 20px;
   border-radius: var(--yol-r-pill);
@@ -351,16 +340,6 @@
   transition: background var(--yol-duration-normal);
 }
 .modal-btn-close:hover { background: var(--yol-primary-600); }
-
-/* Dark modal */
-:host-context(.dark) .modal-card { background: #1a2e25; }
-:host-context(.dark) .modal-header { border-color: #2a4030; }
-:host-context(.dark) .modal-doctor { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .modal-med-item,
-:host-context(.dark) .modal-indicaciones,
-:host-context(.dark) .modal-diagnostico { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .modal-nota { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .modal-footer { border-color: #2a4030; }
 
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 768px) {

@@ -131,7 +131,7 @@
 .sp-btn-out:hover { border-color: var(--yol-primary); color: var(--yol-primary); }
 .sp-btn-out svg { width: 14px; height: 14px; stroke-width: 1.8; }
 
-.sp-btn-out.danger { color: var(--yol-danger); border-color: #fee2e2; }
+.sp-btn-out.danger { color: var(--yol-danger); border-color: var(--yol-cancel-border); }
 .sp-btn-out.danger:hover { border-color: var(--yol-danger); background: var(--yol-cancel-surface); }
 
 /* ── Tabs card ─────────────────────────────────── */
@@ -161,7 +161,7 @@
 
 /* Sections dentro del tab */
 .sp-section { padding: var(--yol-s-1) var(--yol-s-5) var(--yol-s-5); }
-.sp-section + .sp-section { border-top: 1px solid var(--yol-bg); }
+.sp-section + .sp-section { border-top: 1px solid var(--yol-border); }
 
 .sp-section-title {
   margin: var(--yol-s-4) 0 var(--yol-s-3);
@@ -179,7 +179,7 @@
   gap: var(--yol-s-4);
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid var(--yol-bg);
+  border-bottom: 1px solid var(--yol-border);
 }
 
 .sp-row:last-child { border-bottom: none; }
@@ -241,7 +241,7 @@
 .sp-btn-primary {
   padding: 9px 18px;
   background: var(--yol-primary);
-  color: var(--yol-surface);
+  color: var(--yol-text-on-primary);
   border: none;
   border-radius: var(--yol-r-md);
   font: 600 var(--yol-fs-sm) var(--yol-font);
@@ -271,24 +271,6 @@
 .sp-sesion-meta { font-size: var(--yol-fs-label); color: var(--yol-text-muted); margin-top: 2px; }
 .sp-btn-danger-sm { font-size: var(--yol-fs-label); font-weight: 600; color: var(--yol-danger); background: transparent; border: none; cursor: pointer; padding: 2px 6px; }
 .sp-btn-danger-sm:hover { text-decoration: underline; }
-
-/* Dark mode */
-:host-context(.dark) .sp-card { background: #1a2e25; }
-:host-context(.dark) .sp-name { color: #e8f5ee; }
-:host-context(.dark) .sp-ctrl { color: #a8c4b4; }
-:host-context(.dark) .sp-btn-out { background: #1a2e25; border-color: #2a4030; color: #e8f5ee; }
-:host-context(.dark) .sp-btn-out:hover { border-color: var(--yol-primary); color: #86efac; }
-:host-context(.dark) .sp-tabs { border-bottom-color: #2a4030; }
-:host-context(.dark) .sp-tab { color: #7b9e8c; }
-:host-context(.dark) .sp-tab.active { color: #86efac; border-bottom-color: #86efac; }
-:host-context(.dark) .sp-section + .sp-section { border-top-color: #2a4030; }
-:host-context(.dark) .sp-row { border-bottom-color: #2a4030; }
-:host-context(.dark) .sp-lab { color: #7b9e8c; }
-:host-context(.dark) .sp-val { color: #e8f5ee; }
-:host-context(.dark) .sp-input,
-:host-context(.dark) .sp-select,
-:host-context(.dark) .sp-textarea { background: #0f1a15; border-color: #2a4030; color: #e8f5ee; }
-:host-context(.dark) .sp-sesion-item { background: #0f1a15; }
 
 @media (max-width: 900px) {
   .sp-grid { grid-template-columns: 1fr; }
@@ -362,7 +344,7 @@
 .sp-notice-warn {
   background: var(--yol-warn-surface);
   color: var(--yol-warn);
-  border-color: #fde68a;
+  border-color: var(--yol-warn-border);
 }
 
 /* ── Password strength ──────────────────────────── */
@@ -389,7 +371,7 @@
 
 .sp-strength-fill.weak   { background: var(--yol-danger); }
 .sp-strength-fill.fair   { background: var(--yol-warn); }
-.sp-strength-fill.good   { background: #22c55e; }
+.sp-strength-fill.good   { background: var(--yol-accent); }
 .sp-strength-fill.strong { background: var(--yol-primary); }
 
 .sp-strength-label {
@@ -399,7 +381,7 @@
 }
 .sp-strength-label.weak   { color: var(--yol-danger); }
 .sp-strength-label.fair   { color: var(--yol-warn); }
-.sp-strength-label.good   { color: #22c55e; }
+.sp-strength-label.good   { color: var(--yol-accent); }
 .sp-strength-label.strong { color: var(--yol-primary); }
 
 .sp-strength-hints {
@@ -475,20 +457,12 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--yol-surface);
   transition: transform var(--yol-duration-normal);
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
 }
 
 .sp-toggle.on .sp-toggle-thumb { transform: translateX(20px); }
-
-/* ── Dark mode additions ────────────────────────── */
-:host-context(.dark) .sp-locked-field { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .sp-notice-info  { background: #0f2d1a; border-color: #166534; color: #86efac; }
-:host-context(.dark) .sp-notice-warn  { background: #2d2310; border-color: #92400e; color: #fcd34d; }
-:host-context(.dark) .sp-strength-bar { background: #2a4030; }
-:host-context(.dark) .sp-toggle       { background: #2a4030; }
-:host-context(.dark) .sp-toggle-row   { border-color: #2a4030; }
 
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 768px) {

@@ -15,16 +15,16 @@
   border-radius: var(--yol-r, 6px);
   font-size: 13px;
   font-weight: 500;
-  border: 1px solid var(--yol-border, #DDE8E3);
-  background: var(--yol-surface, #fff);
-  color: var(--yol-text-muted, #4A6859);
+  border: 1px solid var(--yol-border);
+  background: var(--yol-surface);
+  color: var(--yol-text-muted);
   cursor: pointer;
   font-family: inherit;
   transition: all .15s;
 }
 .btn-back:hover {
-  background: var(--yol-bg, #F7F9F8);
-  color: var(--yol-primary, #1B6B45);
+  background: var(--yol-bg);
+  color: var(--yol-primary);
 }
 
 /* Layout 2 columnas */
@@ -36,24 +36,24 @@
 
 /* Card izquierda */
 .ficha-card-left {
-  background: var(--yol-surface, #fff);
-  border: 1px solid var(--yol-border, #DDE8E3);
+  background: var(--yol-surface);
+  border: 1px solid var(--yol-border);
   border-radius: var(--yol-r-md, 8px);
   padding: 18px;
-  box-shadow: var(--yol-shadow-sm, 0 2px 8px rgba(27,107,69,.08));
+  box-shadow: var(--yol-shadow-sm);
 }
 .ficha-head {
   text-align: center;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-bottom: 1px solid var(--yol-border);
   margin-bottom: 14px;
 }
 .ficha-avatar {
   width: 64px;
   height: 64px;
   border-radius: var(--yol-r-md, 8px);
-  background: var(--yol-primary-50, #E8F5EE);
-  color: var(--yol-primary, #1B6B45);
+  background: var(--yol-primary-50);
+  color: var(--yol-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,11 +71,11 @@
   margin: 0 0 2px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
 }
 .ficha-sub {
   font-size: 12px;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
 }
 .ficha-datos {
   display: flex;
@@ -86,16 +86,16 @@
   justify-content: space-between;
   font-size: 12.5px;
   padding: 6px 0;
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-bottom: 1px solid var(--yol-border);
 }
 .dato-row:last-child {
   border-bottom: none;
 }
 .dato-label {
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
 }
 .dato-value {
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
   font-weight: 500;
   text-align: right;
   max-width: 60%;
@@ -114,35 +114,35 @@
   font-weight: 600;
 }
 .badge.ok {
-  background: var(--yol-ok-surface, #E8F5EE);
-  color: var(--yol-ok-text, #1B6B45);
+  background: var(--yol-ok-surface);
+  color: var(--yol-ok-text);
 }
 .badge.cancel {
-  background: var(--yol-cancel-surface, #FFEBEE);
-  color: var(--yol-cancel-text, #C62828);
+  background: var(--yol-cancel-surface);
+  color: var(--yol-cancel-text);
 }
 
 /* Card derecha */
 .ficha-card-right {
-  background: var(--yol-surface, #fff);
-  border: 1px solid var(--yol-border, #DDE8E3);
+  background: var(--yol-surface);
+  border: 1px solid var(--yol-border);
   border-radius: var(--yol-r-md, 8px);
-  box-shadow: var(--yol-shadow-sm, 0 2px 8px rgba(27,107,69,.08));
+  box-shadow: var(--yol-shadow-sm);
   overflow: hidden;
 }
 
 /* Tabs */
 .ficha-tabs {
   display: flex;
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
-  background: var(--yol-surface, #fff);
+  border-bottom: 1px solid var(--yol-border);
+  background: var(--yol-surface);
   padding: 0 18px;
 }
 .ficha-tabs button {
   padding: 11px 16px;
   font-size: 13.5px;
   font-weight: 500;
-  color: var(--yol-text-muted, #4A6859);
+  color: var(--yol-text-muted);
   border: none;
   background: none;
   border-bottom: 2px solid transparent;
@@ -151,12 +151,12 @@
   transition: all .15s;
 }
 .ficha-tabs button.active {
-  color: var(--yol-primary, #1B6B45);
-  border-bottom-color: var(--yol-primary, #1B6B45);
+  color: var(--yol-primary);
+  border-bottom-color: var(--yol-primary);
   font-weight: 600;
 }
 .ficha-tabs button:hover:not(.active) {
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
 }
 
 /* Tab content */
@@ -165,7 +165,7 @@
 }
 .tab-empty {
   text-align: center;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
   font-size: 13px;
   padding: 24px 0;
 }
@@ -187,13 +187,13 @@
 .info-field label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--yol-text-muted, #4A6859);
+  color: var(--yol-text-muted);
   letter-spacing: .4px;
   text-transform: uppercase;
 }
 .info-field span {
   font-size: 13.5px;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
 }
 .info-field span.mono {
   font-family: ui-monospace, 'Cascadia Code', monospace;
@@ -202,7 +202,7 @@
 
 /* Historial */
 .historial-row {
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-bottom: 1px solid var(--yol-border);
 }
 .historial-row:last-child {
   border-bottom: none;
@@ -216,35 +216,35 @@
   font-size: 13px;
 }
 .historial-header:hover {
-  background: var(--yol-bg, #F7F9F8);
+  background: var(--yol-bg);
   margin: 0 -18px;
   padding: 10px 18px;
 }
 .historial-fecha {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
   min-width: 80px;
 }
 .historial-motivo {
   flex: 1;
-  color: var(--yol-text-muted, #4A6859);
+  color: var(--yol-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .historial-doctor {
   font-size: 12px;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
 }
 .expand-icon {
   font-size: 11px;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
 }
 .historial-detail {
   padding: 0 0 12px 0;
   font-size: 13px;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
   line-height: 1.5;
 }
 .historial-detail p {
@@ -253,7 +253,7 @@
 .historial-receta {
   margin-top: 8px;
   padding: 8px 12px;
-  background: var(--yol-bg, #F7F9F8);
+  background: var(--yol-bg);
   border-radius: var(--yol-r, 6px);
   font-size: 12.5px;
 }
@@ -261,7 +261,7 @@
 /* Recetas */
 .receta-row {
   padding: 12px 0;
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-bottom: 1px solid var(--yol-border);
 }
 .receta-row:last-child {
   border-bottom: none;
@@ -274,28 +274,28 @@
 }
 .receta-header strong {
   font-size: 13px;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
 }
 .receta-fecha {
   font-size: 12px;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
   font-variant-numeric: tabular-nums;
 }
 .receta-dosis {
   font-size: 12.5px;
-  color: var(--yol-text-muted, #4A6859);
+  color: var(--yol-text-muted);
   margin: 2px 0;
 }
 .receta-indicaciones {
   font-size: 12.5px;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
   margin: 2px 0;
 }
 
 /* Bitácoras */
 .bitacora-row {
   padding: 10px 0;
-  border-bottom: 1px solid var(--yol-border, #DDE8E3);
+  border-bottom: 1px solid var(--yol-border);
 }
 .bitacora-row:last-child {
   border-bottom: none;
@@ -309,18 +309,18 @@
   font-size: 13px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--yol-text, #1A2E25);
+  color: var(--yol-text);
 }
 .bitacora-motivo {
   font-size: 12.5px;
-  color: var(--yol-text-muted, #4A6859);
+  color: var(--yol-text-muted);
   margin: 4px 0 0;
 }
 
 /* Loading */
 .ficha-loading {
   text-align: center;
-  color: var(--yol-text-subtle, #7B8F86);
+  color: var(--yol-text-subtle);
   font-size: 14px;
   padding: 48px 0;
 }

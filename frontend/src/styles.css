@@ -26,24 +26,45 @@
   --yol-text:         #1A2E25;
   --yol-text-muted:   #4A6859;
   --yol-text-subtle:  #7B8F86;
+  --yol-text-on-primary: #FFFFFF;
+  --yol-text-on-danger:  #FFFFFF;
+  --yol-text-on-warn:    #FFFFFF;
+  --yol-text-on-info:    #FFFFFF;
 
   /* Status — semantic */
   --yol-ok-surface:      #E8F5EE;
   --yol-ok-text:         #1B6B45;
+  --yol-ok-border:       #BBF7D0;
+
   --yol-warn:            #F57C00;
   --yol-warn-surface:    #FFF3E0;
   --yol-warn-text:       #F57C00;
+  --yol-warn-border:     #FDE68A;
+
   --yol-danger:          #C62828;
   --yol-cancel-surface:  #FFEBEE;
   --yol-cancel-text:     #C62828;
+  --yol-cancel-border:   #FECACA;
+
   --yol-pending-surface: #F7F9F8;
   --yol-pending-text:    #4A6859;
+  --yol-pending-border:  #DDE8E3;
+
+  /* Info — azul/cielo */
+  --yol-info:            #0EA5E9;
+  --yol-info-surface:    #EFF6FF;
+  --yol-info-text:       #0284C7;
+  --yol-info-border:     #BFDBFE;
 
   /* IA — azul clínico */
   --yol-ia:              #2563EB;
   --yol-ia-600:          #1D4ED8;
   --yol-ia-soft:         #EFF6FF;
   --yol-ia-text:         #1E40AF;
+
+  /* Rings & Focus */
+  --yol-ring-primary:    rgba(27, 107, 69, 0.2);
+  --yol-ring-ia:         rgba(37, 99, 235, 0.2);
 
   /* Type */
   --yol-font: 'Inter', system-ui, -apple-system, sans-serif;
@@ -87,7 +108,8 @@
 }
 
 /* Dark mode — token overrides globales */
-html.dark {
+html.dark,
+[data-theme="dark"] {
   --yol-bg:              #0a1a10;
   --yol-surface:         #111d14;
   --yol-border:          #2a4030;
@@ -95,20 +117,82 @@ html.dark {
   --yol-text:            #e8f5ee;
   --yol-text-muted:      #5a7a6a;
   --yol-text-subtle:     #3d5c4a;
+  --yol-text-on-primary: #ffffff;
+  --yol-text-on-danger:  #ffffff;
+  --yol-text-on-warn:    #ffffff;
+  --yol-text-on-info:    #ffffff;
 
   --yol-primary-50:      #0f2d1a;
 
   --yol-ok-surface:      #0f2d1a;
   --yol-ok-text:         #86efac;
+  --yol-ok-border:       #166534;
+
   --yol-warn-surface:    #2d1800;
   --yol-warn-text:       #f9a825;
+  --yol-warn-border:     #5a3a10;
+
   --yol-cancel-surface:  #2d0a0a;
   --yol-cancel-text:     #ef9a9a;
+  --yol-cancel-border:   #5a1818;
+
   --yol-pending-surface: #1a2e25;
   --yol-pending-text:    #86efac;
+  --yol-pending-border:  #2a4030;
+
+  --yol-info-surface:    #0d1b3e;
+  --yol-info-text:       #7dd3fc;
+  --yol-info-border:     #1e3a6e;
 
   --yol-ia-soft:         #0d1b3e;
   --yol-ia-text:         #93c5fd;
+
+  --yol-ring-primary:    rgba(134, 239, 172, 0.25);
+  --yol-ring-ia:         rgba(147, 197, 253, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) {
+    --yol-bg:              #0a1a10;
+    --yol-surface:         #111d14;
+    --yol-border:          #2a4030;
+
+    --yol-text:            #e8f5ee;
+    --yol-text-muted:      #5a7a6a;
+    --yol-text-subtle:     #3d5c4a;
+    --yol-text-on-primary: #ffffff;
+    --yol-text-on-danger:  #ffffff;
+    --yol-text-on-warn:    #ffffff;
+    --yol-text-on-info:    #ffffff;
+
+    --yol-primary-50:      #0f2d1a;
+
+    --yol-ok-surface:      #0f2d1a;
+    --yol-ok-text:         #86efac;
+    --yol-ok-border:       #166534;
+
+    --yol-warn-surface:    #2d1800;
+    --yol-warn-text:       #f9a825;
+    --yol-warn-border:     #5a3a10;
+
+    --yol-cancel-surface:  #2d0a0a;
+    --yol-cancel-text:     #ef9a9a;
+    --yol-cancel-border:   #5a1818;
+
+    --yol-pending-surface: #1a2e25;
+    --yol-pending-text:    #86efac;
+    --yol-pending-border:  #2a4030;
+
+    --yol-info-surface:    #0d1b3e;
+    --yol-info-text:       #7dd3fc;
+    --yol-info-border:     #1e3a6e;
+
+    --yol-ia-soft:         #0d1b3e;
+    --yol-ia-text:         #93c5fd;
+
+    --yol-ring-primary:    rgba(134, 239, 172, 0.25);
+    --yol-ring-ia:         rgba(147, 197, 253, 0.25);
+  }
 }
 
 html, body {

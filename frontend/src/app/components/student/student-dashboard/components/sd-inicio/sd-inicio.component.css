@@ -262,7 +262,7 @@
 
 .btn-agendar {
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border: none;
   border-radius: 7px;
   padding: 10px 18px;

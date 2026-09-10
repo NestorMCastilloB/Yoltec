@@ -52,7 +52,7 @@ h2 { color: var(--yol-ia); margin: 0 0 8px; font-size: 22px; }
   width: 100%;
   padding: 14px;
   background: var(--yol-ia);
-  color: #fff;
+  color: var(--yol-text-on-ia);
   border: none;
   border-radius: 10px;
   font-size: 16px;

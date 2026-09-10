@@ -2,7 +2,7 @@
 .sidebar {
   width: 220px;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -28,7 +28,7 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: #fff;
+  background: var(--yol-text-on-primary);
   color: var(--yol-primary);
   display: flex;
   align-items: center;
@@ -62,7 +62,7 @@ nav a:hover {
 }
 nav a.active {
   background: rgba(255,255,255,.08);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border-left-color: var(--yol-accent);
   font-weight: 600;
 }
@@ -75,7 +75,7 @@ nav a.active {
 
 .badge {
   background: var(--yol-cancel-text);
-  color: #fff;
+  color: var(--yol-text-on-danger);
   border-radius: var(--yol-r-pill);
   min-width: 18px;
   height: 18px;
@@ -242,7 +242,7 @@ nav a.active {
 }
 .btn-action.primary {
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
 }
 .btn-action.primary:hover {
   background: var(--yol-primary-600);
@@ -283,7 +283,7 @@ nav a.active {
   height: 26px;
   border-radius: 50%;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -370,10 +370,6 @@ nav a.active {
 .theme-dot.dark {
   background: var(--yol-text-subtle);
 }
-
-/* Dark mode adicional */
-:host-context(.dark) .hamburger { color: var(--yol-text); }
-:host-context(.dark) .hamburger:hover { background: #1a2e1a; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
