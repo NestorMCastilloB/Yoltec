@@ -16,7 +16,7 @@ class LiberacionDeSlotTest extends TestCase
 {
     use RefreshDatabase;
 
-    private string $fecha = '2028-10-15';
+    private string $fecha = '2028-10-16'; // Lunes
     private string $hora  = '10:00';
 
     private function alumno(): User
