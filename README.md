@@ -65,7 +65,7 @@ El sistema cubre tres roles (alumno, doctor, administrador) en web responsiva y 
 | App móvil     | Flutter 3.x · Dart 3 · Material 3                           |
 | IA            | Python 3.12 · FastAPI · scikit-learn · Groq opcional (Llama 3.1 8B) |
 | Base de datos | PostgreSQL (Neon, SSL)                                      |
-| Notificaciones| Firebase Cloud Messaging                                    |
+| Notificaciones| Firebase Cloud Messaging — implementado, sin configurar en la instancia desplegada ([por qué](#notificaciones-push)) |
 | Email         | Resend/SMTP (despliegues) · Mailpit (local)               |
 | Infraestructura | Docker · Docker Compose · Render · Vercel                 |
 
@@ -265,6 +265,19 @@ retirarlas del árbol actual no sustituye su revocación en los proveedores.
 | BD       | Neon       | privada                                       |
 
 Los releases del APK móvil se publican en [GitHub Releases](https://github.com/NestorMCastilloB/Yoltec/releases).
+
+### Notificaciones push
+
+El envío por Firebase Cloud Messaging está implementado en `FcmService` y la app
+móvil registra su token al iniciar sesión, pero **la instancia desplegada no tiene
+configuradas `FIREBASE_CREDENTIALS` ni `FIREBASE_PROJECT_ID`**, así que no envía
+notificaciones.
+
+Es una decisión, no un olvido. Configurarlo exige custodiar en producción la clave
+privada de un service account de Google, y hoy eso no compra nada: no hay
+dispositivos registrados y el APK no está distribuido. La funcionalidad se activa
+poniendo esas dos variables y montando el JSON del service account en la ruta que
+indique `FIREBASE_CREDENTIALS`; el código no necesita ningún cambio.
 
 ---
 
