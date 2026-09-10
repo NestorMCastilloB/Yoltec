@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -12,33 +11,46 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * La contraseña se hashea una sola vez para todas las instancias.
      */
-    protected static ?string $password;
+    protected static ?string $password = null;
 
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Alumno por defecto: entra con número de control y NIP de 6 dígitos.
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'nombre'         => fake()->firstName(),
+            'apellido'       => fake()->lastName(),
+            'email'          => fake()->unique()->safeEmail(),
+            'password'       => static::$password ??= Hash::make('password'),
+            'tipo'           => 'alumno',
+            'numero_control' => fake()->unique()->numerify('22######'),
+            'nip'            => Hash::make('123456'),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    /** Doctor: entra con usuario y contraseña, sin número de control ni NIP. */
+    public function doctor(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'tipo'           => 'doctor',
+            'username'       => fake()->unique()->userName(),
+            'numero_control' => null,
+            'nip'            => null,
+        ]);
+    }
+
+    /** Administrador: el sistema lo marca por partida doble (ver M-04 de la auditoría). */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo'           => 'admin',
+            'es_admin'       => true,
+            'username'       => fake()->unique()->userName(),
+            'numero_control' => null,
+            'nip'            => null,
         ]);
     }
 }

@@ -33,13 +33,11 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token',
         'nip',        // NIP hasheado — nunca debe exponerse en respuestas JSON
         'fcm_token',  // Token interno de Firebase — no relevante para el cliente
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'fecha_nacimiento' => 'date',
         'es_admin' => 'boolean',
