@@ -30,15 +30,18 @@ flutter build apk --release
 
 ## Configuración de red
 
-En `lib/services/api_service.dart`:
+La URL base de la API se sobreescribe al ejecutar o compilar la app con el flag
+`--dart-define=API_BASE_URL=...`, sin tocar el código fuente:
 
-```dart
-// Emulador Android
-static const String baseUrl = 'http://10.0.2.2:8000/api';
+```bash
+# Emulador Android
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api
 
-// Celular físico (WiFi) — cambiar por IP local de la PC
-static const String baseUrl = 'http://192.168.x.x:8000/api';
+# Celular físico (WiFi) — usar la IP local de la PC
+flutter run --dart-define=API_BASE_URL=http://192.168.x.x:8000/api
 ```
+
+Sin el flag, por defecto apunta a producción (`https://yoltec-backend.onrender.com/api`).
 
 ## Estructura
 
