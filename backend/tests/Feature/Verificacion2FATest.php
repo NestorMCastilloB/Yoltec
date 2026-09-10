@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\Auth2FAService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -24,6 +25,7 @@ class Verificacion2FATest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->withoutMiddleware(ThrottleRequests::class);
         $this->servicio2FA = new Auth2FAService();
     }
 
