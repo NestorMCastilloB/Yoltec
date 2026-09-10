@@ -4,7 +4,7 @@
   top: 20px;
   right: 20px;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 14px;
@@ -41,7 +41,7 @@
   font-family: inherit;
 }
 
-.ac-input:focus { border-color: var(--yol-primary); box-shadow: 0 0 0 3px rgba(26, 92, 58, .1); }
+.ac-input:focus { border-color: var(--yol-primary); box-shadow: 0 0 0 3px var(--yol-ring-primary); }
 
 .ac-results {
   margin-top: 12px;
@@ -106,7 +106,7 @@
   font-family: inherit;
 }
 
-.ac-chip-change:hover { background: var(--yol-primary); color: #fff; }
+.ac-chip-change:hover { background: var(--yol-primary); color: var(--yol-text-on-primary); }
 
 /* ── Columna calendario ─────────────────────────────────── */
 .ac-cal-col {
@@ -205,7 +205,7 @@
 .ac-day.mid .ac-day-d { color: var(--yol-warn); }
 
 /* Estado: sin disponibilidad */
-.ac-day.none { background: var(--yol-cancel-surface); border-color: #fecaca; }
+.ac-day.none { background: var(--yol-cancel-surface); border-color: var(--yol-cancel-border); }
 .ac-day.none .ac-day-n,
 .ac-day.none .ac-day-d { color: var(--yol-danger); }
 
@@ -319,7 +319,7 @@
 
 .ac-slot.selected { background: var(--yol-primary); border-color: var(--yol-primary); }
 .ac-slot.selected b,
-.ac-slot.selected span { color: #fff; }
+.ac-slot.selected span { color: var(--yol-text-on-primary); }
 
 .ac-help {
   margin-top: 18px;
@@ -384,7 +384,7 @@
   height: 30px;
   border-radius: 7px;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -392,7 +392,7 @@
   flex-shrink: 0;
 }
 
-.ac-resume-alumno .ac-resume-icon { background: #cdd9d3; color: var(--yol-text); }
+.ac-resume-alumno .ac-resume-icon { background: var(--yol-border); color: var(--yol-text); }
 
 .ac-resume small {
   display: block;
@@ -427,7 +427,7 @@
   font-family: inherit;
 }
 
-.ac-textarea:focus { border-color: var(--yol-primary); box-shadow: 0 0 0 3px rgba(26, 92, 58, .12); }
+.ac-textarea:focus { border-color: var(--yol-primary); box-shadow: 0 0 0 3px var(--yol-ring-primary); }
 
 .ac-error { font-size: 12px; color: var(--yol-danger); margin-top: 6px; }
 
@@ -445,7 +445,7 @@
   font-size: 13.5px;
   font-weight: 600;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border: 1px solid transparent;
   cursor: pointer;
   font-family: inherit;
@@ -463,7 +463,7 @@
   font-weight: 600;
   background: var(--yol-surface);
   color: var(--yol-text-muted);
-  border: 1px solid #cdd9d3;
+  border: 1px solid var(--yol-border);
   cursor: pointer;
   font-family: inherit;
   transition: background .15s;
@@ -521,23 +521,3 @@
   .ac-alumno-chip { flex-wrap: wrap; font-size: 12.5px; }
   .ac-chip-change { margin-left: 0; }
 }
-
-/* ── Dark mode ──────────────────────────────────── */
-:host-context(.dark) .ac-input,
-:host-context(.dark) .ac-textarea    { background: #1a2e25; border-color: #2a4030; color: #e8f5ee; }
-:host-context(.dark) .ac-result-item { background: #1a2e25; border-color: #2a4030; }
-:host-context(.dark) .ac-result-item:hover { background: #0f2d1a; }
-:host-context(.dark) .ac-results     { border-color: #2a4030; }
-:host-context(.dark) .ac-month-nav   { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .ac-nav-btn     { background: #1a2e25; border-color: #2a4030; color: #86efac; }
-:host-context(.dark) .ac-day         { background: #1a2e25; border-color: #2a4030; }
-:host-context(.dark) .ac-day.past    { background: #0f1a15; }
-:host-context(.dark) .ac-legend      { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .ac-slot        { background: #1a2e25; border-color: #2a4030; }
-:host-context(.dark) .ac-slot:hover  { background: #0f2d1a; }
-:host-context(.dark) .ac-help        { background: #0f1a15; border-color: #2a4030; }
-:host-context(.dark) .ac-modal       { background: #1a2e25; }
-:host-context(.dark) .ac-btn-cancel  { background: #1a2e25; border-color: #2a4030; color: var(--yol-text-muted); }
-:host-context(.dark) .ac-btn-cancel:hover { background: #0f1a15; }
-:host-context(.dark) .ac-alumno-chip { background: #0f2d1a; border-color: #166534; }
-:host-context(.dark) .ac-resume-alumno { background: #1a2e25; border-color: #2a4030; }

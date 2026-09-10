@@ -71,7 +71,7 @@
   font-size: var(--yol-fs-label);
   font-weight: 700;
 }
-.ct.red  { background: var(--yol-danger); color: #fff; }
+.ct.red  { background: var(--yol-danger); color: var(--yol-text-on-danger); }
 .ct.gray { background: var(--yol-bg); color: var(--yol-text-muted); }
 .tabs button.active .ct.gray { background: var(--yol-primary-50); color: var(--yol-primary); }
 
@@ -284,7 +284,7 @@
   transition: background var(--yol-duration-fast);
 }
 
-.btn-primary { background: var(--yol-primary); color: #fff; }
+.btn-primary { background: var(--yol-primary); color: var(--yol-text-on-primary); }
 .btn-primary:hover { background: var(--yol-primary-600); }
 .btn-primary:disabled { opacity: .65; cursor: not-allowed; }
 
@@ -464,8 +464,8 @@
   animation: toast-in .2s ease;
 }
 
-.toast-ok    { background: var(--yol-primary); color: #fff; }
-.toast-error { background: var(--yol-danger);  color: #fff; }
+.toast-ok    { background: var(--yol-primary); color: var(--yol-text-on-primary); }
+.toast-error { background: var(--yol-danger);  color: var(--yol-text-on-danger); }
 
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(8px); }

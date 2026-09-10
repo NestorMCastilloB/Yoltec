@@ -78,7 +78,7 @@
 
 .kpi.warn .accent   { background: var(--yol-warn); }
 .kpi.danger .accent { background: var(--yol-danger); }
-.kpi.info .accent   { background: #3b82f6; }
+.kpi.info .accent   { background: var(--yol-info); }
 
 .kpi-lbl {
   font-size: 11px;

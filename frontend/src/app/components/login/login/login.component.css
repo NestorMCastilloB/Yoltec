@@ -16,13 +16,13 @@
 
 /* ===== PANEL IZQUIERDO (oscuro) ===== */
 .welcome-panel {
-  background: #1A2E25;
+  background: var(--yol-text);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: #e2e8f0;
+  color: var(--yol-bg);
   overflow: hidden;
 }
 
@@ -83,7 +83,7 @@
 .welcome-content h1 {
   font-size: 2.4rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--yol-text-on-primary);
   margin-bottom: var(--yol-s-2);
   letter-spacing: 1px;
 }
@@ -99,7 +99,7 @@
   font-size: var(--yol-fs-body);
   line-height: 1.5;
   margin-bottom: var(--yol-s-3);
-  color: #cbd5e1;
+  color: var(--yol-text-subtle);
 }
 
 .decorative-line {
@@ -170,7 +170,7 @@
 
 .role-btn.active {
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border-color: transparent;
   box-shadow: 0 6px 16px rgba(27, 107, 69, .25);
   transform: scale(1.04);
@@ -221,7 +221,7 @@
 .form-group input:focus,
 .password-wrapper input:focus {
   border-color: var(--yol-primary);
-  box-shadow: 0 0 0 3px rgba(27, 107, 69, .12);
+  box-shadow: 0 0 0 3px var(--yol-ring-primary);
 }
 
 .form-group input::placeholder,
@@ -261,7 +261,7 @@
   width: 100%;
   padding: 12px;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   border: none;
   border-radius: var(--yol-r-pill);
   font-size: var(--yol-fs-body);

@@ -114,7 +114,7 @@
   cursor: pointer;
   border: none;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   white-space: nowrap;
   font-family: var(--yol-font);
 }
@@ -164,7 +164,7 @@
   height: 42px;
   border-radius: 50%;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,7 +230,7 @@
 .btn-gray { background: var(--yol-surface); color: var(--yol-text-muted); border-color: var(--yol-border); }
 .btn-gray:hover { border-color: var(--yol-text-muted); color: var(--yol-text); }
 
-.btn-primary-full { background: var(--yol-primary); color: #fff; border-color: var(--yol-primary); }
+.btn-primary-full { background: var(--yol-primary); color: var(--yol-text-on-primary); border-color: var(--yol-primary); }
 .btn-primary-full:hover { background: var(--yol-primary-600); }
 .btn-primary-full:disabled { opacity: .6; cursor: not-allowed; }
 

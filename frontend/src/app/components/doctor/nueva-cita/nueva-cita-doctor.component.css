@@ -71,7 +71,7 @@
 .nc-step.active .nc-step-n {
   background: var(--yol-primary);
   border-color: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
 }
 
 .nc-step.done {
@@ -187,7 +187,7 @@
 
 .nc-student.sel {
   background: var(--yol-primary-50);
-  border-color: #d1e3d8;
+  border-color: var(--yol-border);
 }
 
 /* Avatar iniciales */
@@ -196,7 +196,7 @@
   height: 38px;
   border-radius: 50%;
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,7 +242,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--yol-text-on-primary);
 }
 
 .nc-ck.checked {
@@ -383,7 +383,7 @@
 
 .nc-btn.primary {
   background: var(--yol-primary);
-  color: #fff;
+  color: var(--yol-text-on-primary);
 }
 
 .nc-btn.primary:hover:not(:disabled) {

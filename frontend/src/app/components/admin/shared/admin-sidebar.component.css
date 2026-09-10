@@ -1,8 +1,8 @@
 .sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: #1a5c3a;
-  color: #fff;
+  background: var(--yol-primary);
+  color: var(--yol-text-on-primary);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -27,8 +27,8 @@
   width: 28px;
   height: 28px;
   border-radius: 7px;
-  background: #fff;
-  color: #1a5c3a;
+  background: var(--yol-text-on-primary);
+  color: var(--yol-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,12 +70,12 @@ nav {
 
 .nav-item:hover:not(.disabled) {
   background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  color: var(--yol-text-on-primary);
 }
 
 .nav-item.active {
-  background: #3a7d5c;
-  color: #fff;
+  background: var(--yol-primary-mid);
+  color: var(--yol-text-on-primary);
   font-weight: 600;
 }
 
@@ -124,7 +124,7 @@ nav {
 .user-name {
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--yol-text-on-primary);
   line-height: 1.2;
   font-family: var(--yol-font);
 }
@@ -195,7 +195,3 @@ nav {
     transform: translateX(0);
   }
 }
-
-:host-context(.dark) .admin-hamburger { color: var(--yol-text); border-color: #2a4030; }
-:host-context(.dark) .admin-hamburger:hover { background: #1a2e1a; }
-
