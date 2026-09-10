@@ -99,7 +99,7 @@ class IAPriorityController extends Controller
                         'motivo' => $cita->motivo,
                         'alumno' => [
                             'id' => $cita->alumno->id,
-                            'nombre' => trim(($cita->alumno->nombre ?? '') . ' ' . ($cita->alumno->apellido ?? '')) ?: ($cita->alumno->name ?? 'Sin nombre'),
+                            'nombre' => trim(($cita->alumno->nombre ?? '') . ' ' . ($cita->alumno->apellido ?? '')) ?: 'Sin nombre',
                             'numero_control' => $cita->alumno->numero_control,
                         ],
                     ],

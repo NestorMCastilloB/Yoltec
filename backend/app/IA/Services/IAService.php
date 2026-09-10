@@ -19,8 +19,15 @@ class IAService
 
     public function __construct()
     {
+        // El clasificador usa pesos y umbrales fijos basados en conocimiento
+        // médico. A propósito NO se llama a entrenar() aquí: entrenaba sobre un
+        // dataset generado con rand() en cada petición, lo que (a) montaba 500
+        // muestras sintéticas por request —CPU desperdiciada en el plan gratuito—
+        // y (b) movía el umbral de prioridad 'alta' según el % de "altas" de ese
+        // sorteo aleatorio, de modo que una misma cita podía clasificarse distinto
+        // de una llamada a otra. Con los umbrales fijos la clasificación es
+        // reproducible, que es lo que se espera de una herramienta de apoyo médico.
         $this->priorityClassifier = new PriorityClassifier();
-        $this->priorityClassifier->entrenar(MedicalDataset::generarDatasetEntrenamiento(500));
     }
 
     /**
@@ -54,7 +61,7 @@ class IAService
         return [
             'cita_id' => $citaId,
             'alumno_id' => $alumno->id,
-            'alumno_nombre' => $alumno->name,
+            'alumno_nombre' => trim(($alumno->nombre ?? '') . ' ' . ($alumno->apellido ?? '')) ?: 'Sin nombre',
             'prioridad' => $resultado['prioridad'],
             'puntuacion' => $resultado['puntuacion'],
             'justificacion' => $resultado['justificacion'],

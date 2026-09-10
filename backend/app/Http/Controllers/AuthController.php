@@ -30,8 +30,15 @@ class AuthController extends Controller
 
         $tipo          = $request->tipo_usuario;
         $identificador = $request->identificador;
-        $lockKey       = "login_lockout_{$tipo}_{$identificador}";
-        $attemptsKey   = "login_attempts_{$tipo}_{$identificador}";
+
+        // El candado se ata a la IP que falla, no solo a la cuenta. Si la llave
+        // fuera "login_lockout_{tipo}_{identificador}" a secas, cualquiera podría
+        // bloquear la cuenta de un tercero fallando 5 veces —y los números de
+        // control de los alumnos son predecibles (22######)—. Con la IP dentro,
+        // el atacante solo se bloquea a sí mismo: la víctima entra desde otra IP.
+        $ipHash        = sha1($request->ip());
+        $lockKey       = "login_lockout_{$tipo}_{$identificador}_{$ipHash}";
+        $attemptsKey   = "login_attempts_{$tipo}_{$identificador}_{$ipHash}";
 
         if (Cache::has($lockKey)) {
             $minutos = (int) ceil(Cache::get($lockKey, 0) / 60);

@@ -17,7 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/*',
         ]);
         
-        $middleware->trustProxies(at: '*');
+        // En quién confiar para leer la IP real del cliente (X-Forwarded-For).
+        // Se define en config/yoltec.php: '*' por defecto, o los rangos de
+        // Cloudflare cuando TRUSTED_PROXIES=cloudflare. Ver el comentario allí.
+        $middleware->trustProxies(at: config('yoltec.trusted_proxies', '*'));
         
         $middleware->web(\Illuminate\Http\Middleware\HandleCors::class);
         
