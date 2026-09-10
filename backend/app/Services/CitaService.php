@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\Cita;
 use App\Models\DiaEspecial;
 use Carbon\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class CitaService
 {
@@ -83,19 +83,27 @@ class CitaService
     }
 
     // Reserva slot en transacción con lockForUpdate. Retorna Cita o null si ocupado.
+    /**
+     * Reserva un horario · devuelve null si ya estaba ocupado · Cita si se creó.
+     *
+     * Quien garantiza la exclusividad es el índice único parcial
+     * citas_slot_programado_unico, no esta comprobación: en PostgreSQL
+     * lockForUpdate() no puede bloquear una fila que todavía no existe, así que
+     * dos reservas simultáneas del mismo hueco veían "libre" las dos.
+     * La consulta previa solo evita el viaje a la base en el caso corriente.
+     */
     public function reservarSlot(string $fecha, string $hora, ?string $motivo, int $alumnoId): ?Cita
     {
-        return DB::transaction(function () use ($fecha, $hora, $motivo, $alumnoId) {
-            $ocupado = Cita::where('fecha_cita', $fecha)
-                ->where('hora_cita', $hora)
-                ->where('estatus', 'programada')
-                ->lockForUpdate()
-                ->exists();
+        $ocupado = Cita::where('fecha_cita', $fecha)
+            ->where('hora_cita', $hora)
+            ->where('estatus', 'programada')
+            ->exists();
 
-            if ($ocupado) {
-                return null;
-            }
+        if ($ocupado) {
+            return null;
+        }
 
+        try {
             return Cita::create([
                 'fecha_cita' => $fecha,
                 'hora_cita'  => $hora,
@@ -104,7 +112,10 @@ class CitaService
                 'clave_cita' => Cita::generarClaveCita(),
                 'estatus'    => 'programada',
             ]);
-        });
+        } catch (UniqueConstraintViolationException $e) {
+            // Otra reserva ganó la carrera entre la comprobación y el insert.
+            return null;
+        }
     }
 
     // Comprueba si un slot está disponible, excluyendo opcionalmente una cita (reprogramar).
