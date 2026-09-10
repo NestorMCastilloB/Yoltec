@@ -81,6 +81,10 @@ export class AuthService implements OnDestroy {
             sessionStorage.setItem('pending_2fa', JSON.stringify({
               user_id: response.user_id,
               email_masked: response.email_masked,
+              // En una cuenta de demostración no hay buzón que consultar: el
+              // backend devuelve el código para mostrarlo en pantalla.
+              modo_demostracion: response.modo_demostracion === true,
+              codigo_demo: response.codigo_demo ?? null,
             }));
             this.router.navigate(['/verify-2fa']);
           }

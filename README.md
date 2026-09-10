@@ -237,6 +237,7 @@ retirarlas del árbol actual no sustituye su revocación en los proveedores.
 | `GROQ_API_KEY`                    | IA           | https://console.groq.com                |
 | `MAIL_USERNAME`, `MAIL_PASSWORD`  | Laravel      | Gmail App Password o Resend             |
 | `FIREBASE_CREDENTIALS`            | Laravel      | Service account JSON desde Firebase     |
+| `DEMO_MODE`, `DEMO_USUARIOS`      | Laravel      | Ver el bloque «Modo demostración» de `.env.example` |
 
 ---
 
@@ -244,7 +245,7 @@ retirarlas del árbol actual no sustituye su revocación en los proveedores.
 
 - Contraseñas y NIPs almacenados con **bcrypt**.
 - Tokens Sanctum con expiración de 24 h y purga automática diaria.
-- **2FA por correo** obligatorio para doctores y administradores, en todos los entornos.
+- **2FA obligatorio** para doctores y administradores, en todos los entornos. El código llega por correo, salvo en las cuentas de demostración: ahí se muestra en pantalla, porque el plan gratuito de Resend solo entrega al correo verificado de la cuenta y un visitante no podría recibirlo. El segundo factor no se desactiva —el código sigue caducando a los 10 minutos y sigue siendo de un solo uso—, solo cambia por dónde llega, y únicamente en las cuentas nombradas en `DEMO_USUARIOS`.
 - Rate limiting (`throttle:5,1`) en endpoints sensibles (login, 2FA, reset).
 - CORS con allowlist explícita, sin wildcards en producción.
 - Headers de seguridad (`SecurityHeaders` middleware): HSTS y X-Frame-Options. CSP pendiente de implementar.

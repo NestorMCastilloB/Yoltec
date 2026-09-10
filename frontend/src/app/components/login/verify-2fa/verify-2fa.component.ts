@@ -37,6 +37,11 @@ export class Verify2faComponent implements OnInit, OnDestroy {
   userId: number | null = null;
   emailMasked = '';
 
+  // Cuenta de demostración: sin buzón que consultar, el código llega en la
+  // respuesta y se muestra en pantalla con su aviso.
+  modoDemostracion = false;
+  codigoDemo: string | null = null;
+
   constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
@@ -48,6 +53,8 @@ export class Verify2faComponent implements OnInit, OnDestroy {
     const data = JSON.parse(pending);
     this.userId = data.user_id;
     this.emailMasked = data.email_masked;
+    this.modoDemostracion = data.modo_demostracion === true;
+    this.codigoDemo = data.codigo_demo ?? null;
     this.checkLockout();
   }
 
@@ -145,7 +152,14 @@ export class Verify2faComponent implements OnInit, OnDestroy {
     this.http.post<any>(`${API_BASE_URL}/resend-2fa`, { user_id: this.userId })
       .pipe(takeUntil(this.destroy$), finalize(() => this.isResending = false))
       .subscribe({
-        next: () => this.successMessage = 'Nuevo código enviado a tu correo.',
+        next: (res) => {
+          if (res?.modo_demostracion) {
+            this.codigoDemo = res.codigo_demo ?? null;
+            this.successMessage = 'Código nuevo generado.';
+            return;
+          }
+          this.successMessage = 'Nuevo código enviado a tu correo.';
+        },
         error: (err) => this.errorMessage = err.error?.message || 'No se pudo reenviar el código.'
       });
   }

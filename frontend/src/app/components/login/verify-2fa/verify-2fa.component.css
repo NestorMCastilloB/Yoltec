@@ -82,6 +82,37 @@ h2 { color: var(--yol-ia); margin: 0 0 8px; font-size: 22px; }
 
 .hint { color: var(--yol-text-subtle); font-size: 12px; margin-top: 20px; }
 
+/* Aviso de cuenta de demostración: se distingue del resto a propósito, para que
+   nadie confunda este código con uno que llegó por correo. */
+.demo-aviso {
+  background: var(--yol-warn-surface);
+  border: 1px solid var(--yol-warn);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  text-align: left;
+}
+.demo-titulo {
+  color: var(--yol-warn-text);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.demo-texto {
+  color: var(--yol-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+}
+.demo-codigo {
+  color: var(--yol-text);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .verify-card { padding: 28px 20px; }
   .icon { font-size: 40px; }
