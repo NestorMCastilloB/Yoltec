@@ -179,7 +179,7 @@ La regla real: **si un archivo hace más de una cosa, es demasiado grande**.
 
 ## Migraciones
 
-Toda modificación del esquema se hace con una **migración versionada**. Nunca se edita la base a mano en producción, ni desde un panel.
+Toda modificación del esquema se hace con una **migración versionada**. La base de producción no se edita a mano: lo único que se ejecuta contra ella es el `up()` de una migración que ya existe en el repositorio.
 
 - **Una migración ya fusionada no se edita jamás.** Si salió mal, se corrige con una migración nueva. Editarla rompe el historial y desincroniza los entornos.
 - **Deben ser idempotentes**: comprobar antes de crear (`Schema::hasTable`, `Schema::hasColumn`, `hasIndex`), de modo que reconstruir el esquema desde cero dé siempre el mismo resultado.
@@ -187,6 +187,72 @@ Toda modificación del esquema se hace con una **migración versionada**. Nunca 
 - Las migraciones **destructivas** (borrar columnas o tablas) van en su propio PR y se revisan con más cuidado que el resto.
 
 Cuidado con el reverso de la idempotencia: comprobar antes de crear evita que la migración falle, pero también puede **esconder** que la base real dejó de coincidir con lo que describen tus archivos. Protege el pipeline; no te avisa del desajuste.
+
+---
+
+## Despliegue y drift de esquema
+
+El despliegue publica código, pero **no aplica migraciones**. No es un descuido: un
+arranque que migra convierte cada reinicio del contenedor —incluidos los que hace la
+plataforma por su cuenta— en una escritura sobre el esquema de producción. El esquema
+se toca cuando tú lo decides, no cuando un proceso se reinicia.
+
+De ahí sale la regla que ordena todo lo demás: **una migración se aplica antes de
+fusionar su PR**, nunca después. Si se fusiona sin aplicarla, el código nuevo queda
+corriendo contra un esquema viejo.
+
+### Drift de esquema
+
+Drift es que la base real deje de coincidir con lo que describen tus migraciones. Casi
+siempre nace igual: alguien resolvió una urgencia tocando un panel y nunca escribió la
+migración correspondiente.
+
+Hay dos tipos y conviene revisar los dos:
+
+- **Drift de historial**: hay migraciones en el repositorio sin aplicar, o filas en la
+  tabla `migrations` sin archivo que las respalde.
+- **Drift de esquema**: la base tiene objetos que ninguna migración describe, o le
+  faltan objetos que sí describen.
+
+Laravel no trae una herramienta de diff, así que la verificación es manual. Para el
+**historial**, compara la tabla contra los archivos:
+
+```sql
+SELECT migration FROM migrations ORDER BY id;
+```
+
+```bash
+ls backend/database/migrations/ | sed 's/\.php$//'
+```
+
+Para el **esquema**, compara un volcado de la base desplegada contra uno de una base
+local recién migrada desde cero:
+
+```bash
+pg_dump --schema-only --no-owner --no-privileges "$URL_DESPLEGADA" > /tmp/desplegada.sql
+pg_dump --schema-only --no-owner --no-privileges "$URL_LOCAL"      > /tmp/local.sql
+diff /tmp/desplegada.sql /tmp/local.sql
+```
+
+Cuidado con la contracara de la idempotencia, que ya se explica en la sección de
+migraciones: `IF NOT EXISTS` evita que la migración falle, pero **también esconde el
+desajuste**. Protege el pipeline; no te avisa. Por eso esta comparación es manual y
+deliberada.
+
+### Reglas de operación
+
+- **Una migración se aplica antes de fusionar su PR**, nunca después.
+- **Contra la base desplegada solo se ejecuta el `up()` de una migración que ya existe
+  en el repositorio**, tal cual está escrito en el archivo. Si el SQL que corre difiere
+  del que describe la migración, el drift lo creas tú mismo. Si alguna vez hay que
+  salirse de ahí por una urgencia, el mismo día se escribe la migración que refleja ese
+  cambio y se abre su PR.
+- **Si detectas drift, no fusiones nada más hasta resolverlo.** Acumular drift sobre
+  drift lo vuelve mucho más difícil de desenredar.
+- Un PR con migración lo dice **de forma destacada** en su descripción, no en una línea
+  perdida del diff.
+
+El procedimiento concreto de cada entorno desplegado no vive en el repositorio.
 
 ---
 
