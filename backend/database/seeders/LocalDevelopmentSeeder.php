@@ -27,7 +27,6 @@ class LocalDevelopmentSeeder extends Seeder
                     'password' => Hash::make('SoloLocal123!'),
                     'nip' => $tipo === 'alumno' ? Hash::make('123456') : null,
                     'tipo' => $tipo,
-                    'es_admin' => $tipo === 'admin',
                 ]);
             }
         });

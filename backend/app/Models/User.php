@@ -20,7 +20,6 @@ class User extends Authenticatable
         'email',
         'password',
         'tipo',
-        'es_admin',        // Nuevo campo para rol administrador
         'telefono',
         'fecha_nacimiento',
         'genero',
@@ -40,7 +39,6 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
         'fecha_nacimiento' => 'date',
-        'es_admin' => 'boolean',
         'fcm_token' => 'encrypted',
     ];
 
@@ -86,19 +84,13 @@ class User extends Authenticatable
         return $this->tipo === 'doctor';
     }
 
+    // Fuente única de verdad del rol: la columna `tipo`. Antes existía además un
+    // booleano `es_admin` que podía discrepar de `tipo` (M-3 de la auditoría);
+    // se eliminó del modelo para no tener dos verdades. La columna queda inerte
+    // en la base hasta que se dé de baja con una migración.
     public function esAdmin()
     {
-        return $this->es_admin === true;
-    }
-
-    public function tieneAccesoAdmin()
-    {
-        return $this->esAdmin() || $this->esDoctor();
-    }
-
-    public function puedeValidarDiagnosticos()
-    {
-        return $this->esAdmin() || $this->esDoctor();
+        return $this->tipo === 'admin';
     }
 
     public function getRolLegibleAttribute()

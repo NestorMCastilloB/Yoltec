@@ -18,7 +18,6 @@ class AdminUserSeeder extends Seeder
                 'email'    => 'admin@consultorio.com',
                 'password' => Hash::make('admin123'),
                 'tipo'     => 'admin',
-                'es_admin' => true,
             ]
         );
     }

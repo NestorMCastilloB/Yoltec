@@ -42,12 +42,11 @@ class UserFactory extends Factory
         ]);
     }
 
-    /** Administrador: el sistema lo marca por partida doble (ver M-04 de la auditoría). */
+    /** Administrador: el rol lo determina únicamente `tipo` (M-3 resuelto). */
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
             'tipo'           => 'admin',
-            'es_admin'       => true,
             'username'       => fake()->unique()->userName(),
             'numero_control' => null,
             'nip'            => null,
